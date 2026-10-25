@@ -1,0 +1,81 @@
+{
+  "fill": {
+    "linear-gradient": [
+      "srgb:1.00000,0.60392,0.30196,1.00000",
+      "srgb:0.90980,0.21176,0.30980,1.00000"
+    ],
+    "orientation": {
+      "start": {
+        "x": 0.5,
+        "y": 0
+      },
+      "stop": {
+        "x": 0.5,
+        "y": 1
+      }
+    }
+  },
+  "groups": [
+    {
+      "name": "Pico",
+      "layers": [
+        {
+          "name": "pico",
+          "image-name": "pico.svg",
+          "glass": true
+        }
+      ],
+      "shadow": {
+        "kind": "layer-color",
+        "opacity": 0.55
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      },
+      "specular": true
+    },
+    {
+      "name": "Commits",
+      "layers": [
+        {
+          "name": "commits",
+          "image-name": "commits.svg",
+          "glass": true
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      },
+      "specular": true
+    },
+    {
+      "name": "Rails",
+      "layers": [
+        {
+          "name": "rails",
+          "image-name": "rails.svg",
+          "glass": true,
+          "opacity": 0.9
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.4
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.45
+      },
+      "specular": true
+    }
+  ],
+  "supported-platforms": {
+    "squares": "shared"
+  }
+}

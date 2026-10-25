@@ -1,0 +1,37 @@
+Building for debugging...
+[1 / 12] GitCore
+[2 / 14] GitCore
+[6 / 18] GitCore
+[19 / 32] GitCore
+[21 / 32] GitCore
+[25 / 38] GitPico-product
+[27 / 38] GitCore
+[27 / 38] GitPico-product
+[27 / 38] GitCore
+[30 / 37] GitCoreTests-product
+[34 / 41] GitPico-product
+[37 / 43] GitPico-product
+[40 / 43] GitCoreTests-product
+[42 / 46] GitPico-product
+[45 / 46] GitPico-product
+Build complete! (3.47 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test branchFromStashUsesOriginalBaseAndRestoresIndex() started.
+◇ Test stashSnapshotAndKeepIndexPreserveStagingSemantics() started.
+◇ Test stashApplyRestoresExactIndexAndPopKeepsOtherEntries() started.
+◇ Test stashSelectedChunksAndBinaryFilesPreserveUnselectedChanges() started.
+◇ Test stashPopConflictRetainsOriginalAndCanBeResolved() started.
+◇ Test selectedFileStashingUsesLiteralPathsAndRetainsOtherWork() started.
+◇ Test duplicateStashHashesHaveUniqueRowsAndRejectStaleAmbiguity() started.
+◇ Test stashRenameDeleteClearAndRecoveryPreserveStoredContent() started.
+✔ Test stashSnapshotAndKeepIndexPreserveStagingSemantics() passed after 4.550 seconds.
+✔ Test selectedFileStashingUsesLiteralPathsAndRetainsOtherWork() passed after 5.055 seconds.
+✔ Test duplicateStashHashesHaveUniqueRowsAndRejectStaleAmbiguity() passed after 5.611 seconds.
+✔ Test branchFromStashUsesOriginalBaseAndRestoresIndex() passed after 5.889 seconds.
+✔ Test stashApplyRestoresExactIndexAndPopKeepsOtherEntries() passed after 6.939 seconds.
+✔ Test stashSelectedChunksAndBinaryFilesPreserveUnselectedChanges() passed after 9.641 seconds.
+✔ Test stashPopConflictRetainsOriginalAndCanBeResolved() passed after 9.671 seconds.
+✔ Test stashRenameDeleteClearAndRecoveryPreserveStoredContent() passed after 12.420 seconds.
+✔ Test run with 8 tests in 0 suites passed after 12.420 seconds.

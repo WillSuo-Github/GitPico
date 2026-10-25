@@ -1,0 +1,14 @@
+{
+  "version": "0.01",
+  "build": "20261024213716",
+  "minimumMacOS": "26.0",
+  "compiledBinarySHA256": "68e1fec91174137de6319e8e7567c36c0aff5e19178d350fa44172534a6a70c0",
+  "bundledBinarySHA256": "43fc187105a17f25e88b94740d3254d47017ffc1fbbad98850045100ece42b39",
+  "unsignedCopiesSHA256": "42f6cee0fc67b5b21a6e31b562bea0b5f161928c49091ce9d9784503d2fe2f09",
+  "unsignedCopiesMatch": true,
+  "host": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0.1\nBuildVersion:\t\t26A434",
+  "git": "git version 2.54.0 (Apple Git-157)",
+  "lfs": "git-lfs/3.8.1 (GitHub; darwin arm64; go 1.27.3)",
+  "gitFlowCLI": null,
+  "gitFlowImplementation": "Native Git commands"
+}

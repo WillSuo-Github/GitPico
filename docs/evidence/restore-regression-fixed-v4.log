@@ -1,0 +1,20 @@
+Building for debugging...
+[1 / 1]
+[2 / 12] GitCore
+[6 / 16] GitCore
+[11 / 21] GitCore
+[17 / 27] GitCore
+[17 / 27] GitPico-product
+[20 / 27] GitCoreTests-product
+[22 / 29] GitCoreTests-product
+[24 / 30] GitPico-product
+[27 / 30] GitCoreTests-product
+[29 / 33] GitCoreTests-product
+[33 / 33] GitPico-product
+Build complete! (3.31 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test restoringHistoryNeverOverwritesIgnoredFiles() started.
+✔ Test restoringHistoryNeverOverwritesIgnoredFiles() passed after 6.819 seconds.
+✔ Test run with 1 test in 0 suites passed after 6.819 seconds.

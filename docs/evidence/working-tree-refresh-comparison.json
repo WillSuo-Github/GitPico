@@ -1,0 +1,26 @@
+[
+  {
+    "action": "checkout",
+    "fullSeconds": 2.3683910835,
+    "incrementalSeconds": 1.9769797395,
+    "reductionPercent": 16.526465866506047
+  },
+  {
+    "action": "stash-save",
+    "fullSeconds": 2.4023644170000003,
+    "incrementalSeconds": 1.318508854,
+    "reductionPercent": 45.116201161249556
+  },
+  {
+    "action": "stash-pop",
+    "fullSeconds": 3.0713751875,
+    "incrementalSeconds": 1.977027729,
+    "reductionPercent": 35.630536541215065
+  },
+  {
+    "action": "merge",
+    "fullSeconds": 3.470671167,
+    "incrementalSeconds": 3.0518458749999997,
+    "reductionPercent": 12.06755903533284
+  }
+]

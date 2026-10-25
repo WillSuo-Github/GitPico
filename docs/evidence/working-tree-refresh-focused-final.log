@@ -1,0 +1,35 @@
+Building for debugging...
+[Computing dependencies]
+[1 / 1]
+[2 / 13] GitPicoTests-product
+[4 / 15] GitPicoTests-product
+[7 / 13] GitPicoTests-product
+[9 / 13] GitPicoTests-product
+[11 / 13] GitPicoTests-product
+Build complete! (15.17 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test stashSaveRenamePopAndDeleteRefreshStackAndKeepStableHistory() started.
+◇ Test checkoutRefusalRetainsLocalDiffAndUsesProtectedRequestPolicy() started.
+◇ Test fastForwardAndNoOpMergeUpdateHistoryOnlyWhenHeadMoves() started.
+◇ Test automaticStashCarriesRefreshScopeAndRestoresStagingAfterCheckout() started.
+◇ Test automaticStashRestorationConflictRefreshesReviewBannerAndSavedWork() started.
+◇ Test stashBranchAndPartialFileApplyUseIncrementalState() started.
+◇ Test refreshFailureKeepsOriginalWriteErrorAndDoesNotRetryFullReload() started.
+◇ Test failedStashPopPublishesConflictsAndRetainsSavedEntry() started.
+◇ Test mergeConflictAbortAndContinueRefreshOperationAndUndo() started.
+◇ Test checkoutUpdatesHeadHistoryAndBrowserWithoutManagementReload() started.
+◇ Test automaticStashWaitingBannerSurvivesMergeConflictAndAbortRestoresWork() started.
+✔ Test refreshFailureKeepsOriginalWriteErrorAndDoesNotRetryFullReload() passed after 6.048 seconds.
+✔ Test checkoutRefusalRetainsLocalDiffAndUsesProtectedRequestPolicy() passed after 9.209 seconds.
+✔ Test failedStashPopPublishesConflictsAndRetainsSavedEntry() passed after 11.659 seconds.
+✔ Test automaticStashRestorationConflictRefreshesReviewBannerAndSavedWork() passed after 12.563 seconds.
+✔ Test checkoutUpdatesHeadHistoryAndBrowserWithoutManagementReload() passed after 13.374 seconds.
+✔ Test automaticStashCarriesRefreshScopeAndRestoresStagingAfterCheckout() passed after 14.009 seconds.
+✔ Test fastForwardAndNoOpMergeUpdateHistoryOnlyWhenHeadMoves() passed after 14.458 seconds.
+✔ Test automaticStashWaitingBannerSurvivesMergeConflictAndAbortRestoresWork() passed after 15.956 seconds.
+✔ Test stashBranchAndPartialFileApplyUseIncrementalState() passed after 16.354 seconds.
+✔ Test mergeConflictAbortAndContinueRefreshOperationAndUndo() passed after 18.355 seconds.
+✔ Test stashSaveRenamePopAndDeleteRefreshStackAndKeepStableHistory() passed after 19.294 seconds.
+✔ Test run with 11 tests in 0 suites passed after 19.295 seconds.

@@ -1,0 +1,42 @@
+Building for debugging...
+[1 / 1]
+[3 / 14] GitPico-product
+[7 / 18] GitPico
+[7 / 18] GitPico-product
+[15 / 24] GitPico-product
+[18 / 19] GitPicoTests-product
+Build complete! (3.37 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test quickActionCanSelectCleanFileWithAllFilesEnabled() started.
+◇ Test quickActionsExposeContextSearchAndKeepDangerousActionsReviewed() started.
+◇ Test toolPreferencesPersistAndRejectStaleInvalidAndCorruptEdits() started.
+◇ Test browseStoreSeparatesCleanIgnoredAndChangedFilesWithoutFakeStaging() started.
+✔ Test toolPreferencesPersistAndRejectStaleInvalidAndCorruptEdits() passed after 0.007 seconds.
+✔ Test quickActionCanSelectCleanFileWithAllFilesEnabled() passed after 1.978 seconds.
+✔ Test quickActionsExposeContextSearchAndKeepDangerousActionsReviewed() passed after 2.817 seconds.
+✔ Test browseStoreSeparatesCleanIgnoredAndChangedFilesWithoutFakeStaging() passed after 3.200 seconds.
+✔ Test run with 4 tests in 0 suites passed after 3.200 seconds.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test externalCommitComparisonSupportsRootAndBinaryCopies() started.
+◇ Test externalHeadlessMergeProcessWritesOnlyReviewedResultBeforeApplying() started.
+◇ Test workingFileBrowserIncludesCleanDeletedIgnoredLiteralAndIndexFlags() started.
+◇ Test ignoredForceAddUsesReviewedIndexBackupAndRejectsNewContent() started.
+◇ Test externalMergeResultRequiresExplicitApplyAndSurvivesReopen() started.
+◇ Test externalMergeRejectsMarkersNewEditsChangedOperationAndLinks() started.
+◇ Test externalToolArgumentsAreLiteralAndHeadlessRunnerNeverUsesAShell() started.
+◇ Test externalDiffSnapshotsPreserveIndexWorkingBytesAndRenameSources() started.
+◇ Test workingFilePreviewDoesNotFollowLinksOrReadDirectories() started.
+✔ Test workingFilePreviewDoesNotFollowLinksOrReadDirectories() passed after 0.871 seconds.
+✔ Test workingFileBrowserIncludesCleanDeletedIgnoredLiteralAndIndexFlags() passed after 1.787 seconds.
+✔ Test externalToolArgumentsAreLiteralAndHeadlessRunnerNeverUsesAShell() passed after 2.891 seconds.
+✔ Test externalCommitComparisonSupportsRootAndBinaryCopies() passed after 3.719 seconds.
+✔ Test externalMergeResultRequiresExplicitApplyAndSurvivesReopen() passed after 7.244 seconds.
+✔ Test externalDiffSnapshotsPreserveIndexWorkingBytesAndRenameSources() passed after 7.449 seconds.
+✔ Test externalHeadlessMergeProcessWritesOnlyReviewedResultBeforeApplying() passed after 7.858 seconds.
+✔ Test externalMergeRejectsMarkersNewEditsChangedOperationAndLinks() passed after 8.774 seconds.
+✔ Test ignoredForceAddUsesReviewedIndexBackupAndRejectsNewContent() passed after 11.298 seconds.
+✔ Test run with 9 tests in 0 suites passed after 11.299 seconds.

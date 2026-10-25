@@ -1,0 +1,18 @@
+{
+  "Sources/GitCore/WorkingFileBrowser.swift": "cef26b46ced9fd306f255ae34694511aefcd75c5db67e9976fb74689cc49e95f",
+  "Sources/GitCore/Models.swift": "bdd77ddd9085def85ea8c43607f5836818204fc2caf4979ade2a8716b8270ee3",
+  "Sources/GitCore/GitRepository.swift": "e0785e431d677085f7d76724fa2beb6151e7a8f0b2e289dd57ff93965dc253e4",
+  "Sources/GitPico/Stores/WorkingCopyState.swift": "8f3a6fc2d065d3d0d4caa45976373be354bc57e7bdb25bd908c16117578059c2",
+  "Sources/GitPico/Stores/PreparedPatch.swift": "cf108687c59bea01fefd9d84962d43b298f005f9418b88468320318da2163bc5",
+  "Sources/GitPico/Stores/RepositoryStore.swift": "31dc2c17a2493d928a675a863c0e6cd840bb26478b9403a941c226d710f4035b",
+  "Sources/GitPico/Stores/RepositoryActions.swift": "e5028b534ae8bd0b7491620e48e6dd294c9022c2856d0ada6490d451e8e30b90",
+  "Sources/GitPico/Stores/ExternalToolActions.swift": "812060e96d563644bd4fd90dd5f14c033dc16d0f75b97634a262394bb92d38fe",
+  "Sources/GitPico/Stores/HistoryPreview.swift": "387b68de8ebe4fc5b4bf5e0a8584f74090a7a27cf4ddd0899a5cd42bd9d85e1f",
+  "Sources/GitPico/Views/WorkingCopyView.swift": "4a10ee9bf2dfbdbcfddf78ece291da1338d65725fb45b6700dacf16431b5a44a",
+  "Sources/GitPico/Views/ChunkDiffView.swift": "8f6e7b0b178087ebadafe2536d12f4a9bdf3a200e7f685b0ccc506bd0e7fdd8e",
+  "Sources/GitPico/Views/SplitDiffView.swift": "0075f2e7ea02d39b7bcd81cefd76148206d25f8425cab8a368e808d9484cd8e0",
+  "Sources/GitPico/App/RepositoryCommands.swift": "4d5638d7aa378fa871ecbdeea2c77d76763adf0429ffd8010d3c4bf215521575",
+  "Tests/GitPicoTests/WorkingCopyExperienceTests.swift": "f1d7583c49d656b76f80b7ca2bfd3f3e30170a267116be928d6160de3edd0175",
+  "Tests/GitPicoTests/WorkingComponentRenderTests.swift": "29fe0bfd60b9ade62ed1814bbcb0dbb20de9f0c29837dd0a42200eb227ef1a73",
+  "Tests/GitCoreTests/CommitOutcomeTests.swift": "078e6b6e0188d0b76ac6298fc657702ee6160aa03e48095619aca8513de62740"
+}

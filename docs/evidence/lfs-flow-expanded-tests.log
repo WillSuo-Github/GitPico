@@ -1,0 +1,116 @@
+Building for debugging...
+[Constructing description]
+[Planning deferred tasks]
+[1 / 6] GitPico-product
+[5 / 27] GitCore
+[8 / 30] GitCore
+[16 / 40] GitCore
+[17 / 40] GitCore
+[19 / 38] GitCore
+[24 / 42] GitPico
+[24 / 42] GitCore
+[24 / 43] GitPico-product
+[27 / 53] GitPico-product
+[28 / 53] GitPico-product
+[28 / 64] GitCore
+[30 / 64] GitPico-product
+[31 / 64] GitPico-product
+[32 / 64] GitPico-product
+[34 / 64] GitPico-product
+[36 / 64] GitPico-product
+[37 / 64] GitPico-product
+[39 / 64] GitPico
+[40 / 64] GitPico
+[41 / 64] GitPico-product
+[43 / 64] GitPico-product
+[45 / 66] GitPico-product
+[48 / 66] GitPico
+[49 / 67] GitPico
+[51 / 67] GitPico-product
+[54 / 69] GitCore
+[57 / 69] GitCoreTests-product
+[60 / 80] GitCoreTests-product
+[60 / 80] GitPico
+[62 / 80] GitCoreTests-product
+[64 / 80] GitCoreTests-product
+[64 / 80] GitPico
+[66 / 80] GitCoreTests-product
+[67 / 80] GitCoreTests-product
+[67 / 80] GitPico
+[70 / 80] GitPico
+[74 / 82] GitPicoTests-product
+/Users/willsuo/files/Github/GitPico/Tests/GitCoreTests/ManagementEdgeTests.swift:52:26: warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:lfsEnvironment:)' is unused [#NoUsage]
+50 |     try await f.repo.fetchRemote(remote, tags: true)
+51 |     #expect(try await f.repo.references().contains { $0.fullName == "refs/tags/v1" })
+52 |     try await GitProcess.run(["update-ref", "-d", "refs/heads/temporary"], at: server)
+   |                          `- warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:lfsEnvironment:)' is unused [#NoUsage]
+53 |     try await f.repo.fetchRemote(remote, prune: true)
+54 |     #expect(!(try await f.repo.references().contains { $0.fullName == "refs/remotes/origin/temporary" }))
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[74 / 82] GitCoreTests-product
+[74 / 82] GitPicoTests-product
+[81 / 91] GitPicoTests-product
+[82 / 91] GitPicoTests-product
+[83 / 91] GitPicoTests-product
+[89 / 95] GitPicoTests-product
+[91 / 96] GitPicoTests-product
+[91 / 96] GitCoreTests-product
+[93 / 96] GitPicoTests-product
+[95 / 99] GitPicoTests-product
+Build complete! (28.74 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test lfsStoreEnableRefreshesNativeSettingsStateWithoutOpeningWindows() started.
+◇ Test extensionMutationRequestsRejectStaleRepositorySessions() started.
+◇ Test extensionQuickActionsOpenSettingsAndRequireConfigurationBeforeStartingTopics() started.
+✔ Test extensionMutationRequestsRejectStaleRepositorySessions() passed after 7.452 seconds.
+✔ Test lfsStoreEnableRefreshesNativeSettingsStateWithoutOpeningWindows() passed after 10.189 seconds.
+✔ Test extensionQuickActionsOpenSettingsAndRequireConfigurationBeforeStartingTopics() passed after 16.319 seconds.
+✔ Test run with 3 tests in 0 suites passed after 16.320 seconds.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test gitFlowFeatureStartFinishMergesAndPinsBeforeDeletingTopic() started.
+◇ Test gitFlowCanAcceptManualMergeCompletionAndProtectsExternalBranchChanges() started.
+◇ Test gitFlowSupportAndRemoteTrackingPreserveClassicBranchBases() started.
+◇ Test gitFlowStopAbortsOnlyCurrentMergeAndKeepsEarlierProductionAndTag() started.
+◇ Test lfsSettingRecoveryProtectsNewEditsLocksAndChangedHeads() started.
+◇ Test lfsPatternRemovalNestedAttributesAndStaleChangesAreGuarded() started.
+◇ Test gitFlowSigningFailureKeepsTopicAndProductionAndAllowsExplicitStop() started.
+◇ Test lfsTransferRejectsChangedEndpointsAndReportsActualErrors() started.
+◇ Test gitFlowConflictPersistsAcrossReopenAndCanContinueAfterStaging() started.
+◇ Test lfsHooksAreLocalExecutableAndCustomScriptsAreNeverReplaced() started.
+◇ Test lfsConversionRejectsNewFileContentsAttributesAndConcurrentStaging() started.
+◇ Test lfsRealLocalObjectPushCloneFetchPullAndCheckoutKeepModifiedFiles() started.
+◇ Test lfsExistingTrackedFilesConvertThroughReviewedIndexAndRecoverOriginalStaging() started.
+◇ Test gitFlowStaleDirtyOccupiedBaseAndVersionCollisionsAreProtected() started.
+◇ Test gitFlowIgnoredDestinationCannotOverwriteLocalData() started.
+◇ Test gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:) started.
+◇ Test gitFlowConfigurationAdoptsClassicKeysAndCreatesDevelopmentWithoutSwitching() started.
+◇ Test lfsLocalActivationTrackingLiteralNamesAndRecoveryPreserveStaging() started.
+◇ Test case passing 1 argument kind → .release to gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:) started.
+◇ Test case passing 1 argument kind → .hotfix to gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:) started.
+✔ Test lfsLocalActivationTrackingLiteralNamesAndRecoveryPreserveStaging() passed after 14.365 seconds.
+✔ Test gitFlowConfigurationAdoptsClassicKeysAndCreatesDevelopmentWithoutSwitching() passed after 17.064 seconds.
+✔ Test lfsTransferRejectsChangedEndpointsAndReportsActualErrors() passed after 18.709 seconds.
+✔ Test lfsPatternRemovalNestedAttributesAndStaleChangesAreGuarded() passed after 19.175 seconds.
+✘ Test lfsExistingTrackedFilesConvertThroughReviewedIndexAndRecoverOriginalStaging() recorded an issue at LFSManagementTests.swift:146:2: Caught error: GitFailure(message: "Invalid LFS recovery path.")
+✘ Test lfsExistingTrackedFilesConvertThroughReviewedIndexAndRecoverOriginalStaging() failed after 19.278 seconds with 1 issue.
+✔ Test lfsHooksAreLocalExecutableAndCustomScriptsAreNeverReplaced() passed after 19.365 seconds.
+✔ Test lfsSettingRecoveryProtectsNewEditsLocksAndChangedHeads() passed after 19.549 seconds.
+✔ Test gitFlowIgnoredDestinationCannotOverwriteLocalData() passed after 19.556 seconds.
+✔ Test lfsConversionRejectsNewFileContentsAttributesAndConcurrentStaging() passed after 23.791 seconds.
+✔ Test gitFlowSupportAndRemoteTrackingPreserveClassicBranchBases() passed after 25.828 seconds.
+✔ Test gitFlowFeatureStartFinishMergesAndPinsBeforeDeletingTopic() passed after 36.248 seconds.
+✔ Test gitFlowSigningFailureKeepsTopicAndProductionAndAllowsExplicitStop() passed after 38.171 seconds.
+✔ Test gitFlowStaleDirtyOccupiedBaseAndVersionCollisionsAreProtected() passed after 39.378 seconds.
+✔ Test gitFlowCanAcceptManualMergeCompletionAndProtectsExternalBranchChanges() passed after 39.959 seconds.
+✔ Test gitFlowConflictPersistsAcrossReopenAndCanContinueAfterStaging() passed after 41.833 seconds.
+✔ Test gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:) with 2 test cases passed after 42.334 seconds.
+✔ Test gitFlowStopAbortsOnlyCurrentMergeAndKeepsEarlierProductionAndTag() passed after 43.780 seconds.
+✔ Test lfsRealLocalObjectPushCloneFetchPullAndCheckoutKeepModifiedFiles() passed after 51.951 seconds.
+✘ Test run with 18 tests in 0 suites failed after 51.951 seconds with 1 issue.
+Note: Some test targets reported failures:
+  - GitCoreTests (Swift Testing)

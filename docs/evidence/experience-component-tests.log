@@ -1,0 +1,33 @@
+Building for debugging...
+[Planning deferred tasks]
+[7 / 29] GitCoreTests-product
+[8 / 29] GitPico-product
+[19 / 43] GitPico-product
+[20 / 44] GitPico
+[22 / 51] GitPico-product
+[23 / 51] GitPico-product
+[25 / 51] GitPico-product
+[27 / 51] GitPico
+[28 / 51] GitPico
+[29 / 51] GitPico
+[30 / 51] GitPico
+[30 / 51] GitPico-product
+[30 / 51] GitPico
+[30 / 51] GitPico-product
+[39 / 52] GitPico
+[39 / 54] GitPico-product
+[43 / 54] GitPicoTests-product
+[47 / 58] GitPicoTests-product
+[51 / 57] GitPicoTests-product
+[53 / 57] GitPicoTests-product
+Build complete! (8.17 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test backForwardRestoresQueryPageOptionsAndSelectedCommit() started.
+◇ Test renderHistoryRowsWithoutWindows() started.
+◇ Test toolbarSearchBridgeUpdatesQueryAndCancelsObsoleteFocus() started.
+✔ Test renderHistoryRowsWithoutWindows() passed after 0.106 seconds.
+✔ Test toolbarSearchBridgeUpdatesQueryAndCancelsObsoleteFocus() passed after 0.116 seconds.
+✔ Test backForwardRestoresQueryPageOptionsAndSelectedCommit() passed after 9.601 seconds.
+✔ Test run with 3 tests in 0 suites passed after 9.601 seconds.

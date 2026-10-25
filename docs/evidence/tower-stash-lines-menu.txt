@@ -1,0 +1,156 @@
+Window: "TowerReference", App: Tower.
+0 standard window TowerReference – Stashes (1 Stashes), URL: file:///Users/willsuo/files/Github/GitPico/dist/InteractionReview-8ih3fag0/TowerReference/, ID: GTMainWindowIdentifier, Secondary Actions: Raise
+	1 split group
+		2 scroll area
+			3 outline
+				4 row (selectable, expanded) Value: Workspace, Secondary Actions: Collapse
+				5 row (selectable) Description: Working Copy, Value: Working Copy
+2
+				6 row (selectable) History
+				7 row (selected) Stashes
+				8 row (selectable) Pull Requests
+				9 row (selectable) Branches Review
+				10 row (selectable) Reflog
+				11 row (selectable) Settings
+				12 row (selectable, expanded) Value: Branches, Secondary Actions: Collapse
+				13 row (selectable) main
+HEAD
+				14 row (selectable, expanded) Description: Ref Group, Value: feature, Secondary Actions: Collapse
+					15 disclosure triangle 1
+				16 row (selectable) sidebar
+				17 row (selectable, expanded) Value: Archived Branches, Secondary Actions: Collapse
+				18 row (selectable, collapsed) Value: Tags, Secondary Actions: Expand
+				19 row (selectable, expanded) Value: Remotes, Secondary Actions: Collapse
+				20 row (selectable, expanded) Value: Submodules, Secondary Actions: Collapse
+				21 row (selectable, expanded) Value: Worktrees, Secondary Actions: Collapse
+		22 scroll area
+			23 table
+		24 container
+			25 image Description: Sparkle, ID: sparkles
+			26 text What's New in Tower
+			27 button Close
+			28 text Tower 18 lets you jump from the terminal to any view, and more!
+			29 link Learn More…
+		30 button
+		31 menu button
+		32 menu button
+		33 splitter (disabled, settable, float) 359
+		34 scroll area
+			35 table
+				36 row (selected)
+					37 cell (selected)
+						38 text Line and drag review 10/24/26 Based on
+				39 column (selectable) AutomaticTableColumnIdentifier.0
+		40 text Stashes
+		41 splitter (disabled, settable, float) 320
+		42 scroll area
+			43 outline
+				44 row (selectable) Author
+Pico Team <hello@example.invalid>
+Author Date
+October 24, 2026 at 12:29:24 PM GMT+8
+Committer
+Pico Team <hello@example.invalid>
+Committer Date
+October 24, 2026 at 12:29:24 PM GMT+8
+Refs
+Commit Hash
+c8265c5c50100facb8877e90f3bc8a268d73e28c
+Parent Hash
+b6c8d71a369f3ed994f075cc9f020bf44c653f3d
+Parent Hash
+949d832d3d279ffa128c2166cab7a4d56b7eb0b8
+Parent Hash
+6daea119f2204bbaa8cbbcb1fbea10b8154a4fd1
+Tree Hash
+ca899f6da605ea543a003d8ccab5b4ab39f7a4ac
+					45 disclosure triangle 1
+				46 row (selectable) APPLY
+DELETE
+DIFFTOOL
+				47 row (selectable) On main: Line and drag review
+				48 row (selectable) Expand All, Value: Showing 3 changed files with 4 additions and 3 deletions
+				49 row (selectable, collapsed) Secondary Actions: Expand, Value: added
+Draft.txt
+					50 disclosure triangle 0
+				51 row (selectable, expanded) Secondary Actions: Collapse, Value: modified
+Layout.swift
+					52 disclosure triangle 1
+				53 row (selectable) 1 chunk, 2 insertions, 2 deletions
+				54 row (selectable) @@ -1,3 +1,3 @@
+				55 row (selectable) Cut
+Copy
+Paste
+Paste and Match Style
+Spelling and Grammar
+Show Spelling and Grammar
+Check Document Now
+Check Spelling While Typing
+Check Grammar with Spelling
+Correct Spelling Automatically
+Substitutions
+Show Substitutions
+Smart Copy/Paste
+Smart Quotes
+Smart Dashes
+Smart Links
+Data Detectors
+Text Replacement
+Speech
+Start Speaking
+Stop Speaking, Value: let spacing = 12
+let spacing = 14
+let radius = 8
+let title = "Welcome"
+let title = "Hello"
+				56 row (selectable, collapsed) Secondary Actions: Expand, Value: modified
+Notes.txt
+					57 disclosure triangle 0
+		58 radio button Description: Changeset, Value: 1
+		59 radio button Description: Tree, Value: 0
+		60 text c8265c5c
+	61 toolbar
+		62 Secondary Actions: Move next
+			63 radio button Description: Services, Help: Services: Navigates to Services view, Value: 0, Secondary Actions: Move next
+			64 radio button Description: Bookmarks, Help: Bookmarks: Navigates to Bookmarks view, Value: 0, Secondary Actions: Move next
+		65 button Description: Workflow, Help: Workflow: Workflow
+		66 button Description: Quick Open, Help: Quick Open: Shows Quick Open, Secondary Actions: Move previous, Move next, Remove from toolbar
+		67 container Secondary Actions: Move previous, Move next, Remove from toolbar
+			68 button Description: Prev, Help: Prev: Navigates to the previous view, Secondary Actions: Move previous, Move next, Remove from toolbar
+			69 button (disabled) Description: Next, Help: Next: Navigates to the next view, Secondary Actions: Move previous, Move next, Remove from toolbar
+		70 button Description: Quick Actions, Help: Quick Actions: Shows Quick Actions, Secondary Actions: Move previous, Move next, Remove from toolbar
+		71 container Secondary Actions: Move previous, Move next, Remove from toolbar
+			72 button (disabled) Description: Fetch, Help: Fetch: Fetches remotes, Secondary Actions: Move previous, Move next, Remove from toolbar
+			73 button (disabled) Description: Pull, Help: Pull: Pulls remote branches, Secondary Actions: Move previous, Move next, Remove from toolbar
+			74 button (disabled) Description: Push, Help: Push: Pushes local branches to remotes, Secondary Actions: Move previous, Move next, Remove from toolbar
+		75 button (disabled) Description: Sync, Help: Sync HEAD with a remote branch, Secondary Actions: Move previous, Move next, Remove from toolbar
+		76 container Secondary Actions: Move previous, Move next, Remove from toolbar
+			77 button Description: Merge, Help: Merge: Merges another branch into the HEAD branch, Secondary Actions: Move previous, Move next, Remove from toolbar
+			78 button Description: Rebase, Help: Rebase: Rebases the current HEAD branch onto another branch, Secondary Actions: Move previous, Move next, Remove from toolbar
+		79 container Secondary Actions: Move previous, Move next, Remove from toolbar
+			80 button Description: Apply, Help: Apply Stash: Reapplies changes to your working copy, Secondary Actions: Move previous, Move next, Remove from toolbar
+			81 button Description: Save, Help: Save Stash: Stores your local changes on the Stash, Secondary Actions: Move previous, Move next, Remove from toolbar
+		82 button Description: Refresh, Secondary Actions: Move previous, Move next, Remove from toolbar
+		83 search text field (settable) Search for File
+			84 button Magnifying glass with a downward chevron
+	85 close button
+	86 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	87 minimize button
+	88 text TowerReference Stashes (1 Stashes)
+89 menu bar
+	90 Tower
+	91 File
+	92 Edit
+	93 View
+	94 Repository
+	95 Working Copy
+	96 Workflow
+	97 Window
+	98 Help
+
+Selected text: ```
+
+
+```
+
+Note: Pay special attention to the content selected by the user. If the user asks a question or refers to the content they are looking at on-screen, they might be referring to the selected content (but they might be referring to something else that's visible, too).

@@ -1,0 +1,8 @@
+Building for debugging...
+Build complete! (0.21 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test writeRefreshPerformanceBenchmark() started.
+✔ Test writeRefreshPerformanceBenchmark() passed after 13.690 seconds.
+✔ Test run with 1 test in 0 suites passed after 13.691 seconds.

@@ -1,0 +1,21 @@
+Window: "Unknown", App: Tower.
+0 sheet Secondary Actions: Raise
+	1 image
+	2 text Value: Configure Diff Tool Please select the external application you want to use for viewing diffs., ID: dialogueHeaderTitle
+	3 pop up button None selected
+	4 text Diff Tool:
+	5 image warning
+	6 button Cancel
+	7 button (disabled) Select
+8 menu bar
+	9 Tower
+	10 File
+	11 Edit
+	12 View
+	13 Repository
+	14 Working Copy
+	15 Workflow
+	16 Window
+	17 Help
+
+The focused UI element is 0 sheet Secondary Actions: Raise

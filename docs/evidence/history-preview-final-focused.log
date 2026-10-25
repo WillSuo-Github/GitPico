@@ -1,0 +1,40 @@
+Building for debugging...
+[1 / 1]
+[2 / 19] GitCore
+[4 / 21] GitCore
+[12 / 24] GitCoreTests-product
+[14 / 25] GitCoreTests-product
+[14 / 25] GitPico
+[20 / 31] GitPico-product
+[20 / 31] GitPico
+[28 / 35] GitPico
+[28 / 37] GitPico-product
+[31 / 36] GitPicoTests-product
+[33 / 38] GitPicoTests-product
+[37 / 40] GitPicoTests-product
+[39 / 43] GitPicoTests-product
+Build complete! (7.81 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test latePreviewFailureCannotOverwriteNewerBranchOrRepository() started.
+◇ Test cancelledDetailIsReloadedForPreservedHistorySelection() started.
+◇ Test previewCacheRevalidatesMovedTipAndExplicitRefresh() started.
+◇ Test previewCacheEvictsOldPagesWithinCountAndCommitBudget() started.
+◇ Test previewCacheIsImmediateAndDoesNotRescanWorkingCopy() started.
+◇ Test previewOptionsHaveSeparateCacheEntries() started.
+◇ Test rapidPreviewNavigationOnlyLoadsFinalSelection() started.
+✔ Test previewCacheEvictsOldPagesWithinCountAndCommitBudget() passed after 4.555 seconds.
+✔ Test cancelledDetailIsReloadedForPreservedHistorySelection() passed after 5.120 seconds.
+✔ Test rapidPreviewNavigationOnlyLoadsFinalSelection() passed after 5.379 seconds.
+✔ Test previewCacheIsImmediateAndDoesNotRescanWorkingCopy() passed after 5.851 seconds.
+✔ Test previewOptionsHaveSeparateCacheEntries() passed after 6.777 seconds.
+✔ Test latePreviewFailureCannotOverwriteNewerBranchOrRepository() passed after 8.560 seconds.
+✔ Test previewCacheRevalidatesMovedTipAndExplicitRefresh() passed after 8.764 seconds.
+✔ Test run with 7 tests in 0 suites passed after 8.765 seconds.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test historyReadHonorsCancellationBeforeLaunching() started.
+✔ Test historyReadHonorsCancellationBeforeLaunching() passed after 0.775 seconds.
+✔ Test run with 1 test in 0 suites passed after 0.775 seconds.

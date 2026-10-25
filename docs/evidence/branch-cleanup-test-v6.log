@@ -1,0 +1,16 @@
+Building for debugging...
+[1 / 13]
+[2 / 14] GitCore
+[4 / 16] GitCore
+[7 / 17] GitCore
+[11 / 16] GitCoreTests-product
+[13 / 18] GitPico-product
+[16 / 19] GitCoreTests-product
+[18 / 22] GitCoreTests-product
+Build complete! (2.00 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test branchDeletionIsGuardedAndRecoverable() started.
+✔ Test branchDeletionIsGuardedAndRecoverable() passed after 8.947 seconds.
+✔ Test run with 1 test in 0 suites passed after 8.947 seconds.

@@ -1,0 +1,18 @@
+Building for debugging...
+[1 / 1]
+[1 / 9] GitCoreTests-product
+[3 / 13] GitPico
+[7 / 17] GitPico-product
+[7 / 17] GitPico
+[15 / 22] GitPico
+[15 / 24] GitPico-product
+[18 / 19] GitPicoTests-product
+Build complete! (6.80 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test staleWorktreeIndicatorsDoNotBlockCheckoutButBackendStillRejectsOccupancy() started.
+◇ Test mergeConflictAbortAndContinueRefreshOperationAndUndo() started.
+✔ Test staleWorktreeIndicatorsDoNotBlockCheckoutButBackendStillRejectsOccupancy() passed after 8.225 seconds.
+✔ Test mergeConflictAbortAndContinueRefreshOperationAndUndo() passed after 14.916 seconds.
+✔ Test run with 2 tests in 0 suites passed after 14.916 seconds.

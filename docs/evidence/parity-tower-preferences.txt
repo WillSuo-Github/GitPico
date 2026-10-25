@@ -1,0 +1,50 @@
+The following is a diff from the previous accessibility tree for Window: "General" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 0-77
++88 standard window General, Secondary Actions: Raise
++	89 container
++		90 text Default directory for cloned repositories: Number of commits in history: Terminal application:
++		91 pop up button willsuo
++		92 pop up button 100 commits
++		93 pop up button Every 30 Minutes
++		94 pop up button Terminal
++		95 text Double-click on file in working copy:
++		96 pop up button Open with default application
++		97 text Date format for commits: Show diffs for merge commits:
++		98 pop up button 10/21/26
++		99 pop up button First parent
++		100 checkbox Always offer to stash local changes, Value: 1
++		101 checkbox Always update submodules automatically, Value: 0
++		102 checkbox Warn when discarding changes in a chunk, Value: 1
++		103 checkbox Automatically convert ref names into valid format while typing, Value: 1
++		104 checkbox Automatically archive stale and fully merged branches, Value: 0
++		105 text Automatically fetch remote repositories:
++		106 checkbox Always open submodules in Tower, Value: 1
++		107 pop up button Medium
++		108 pop up button Truncate beginning
++		109 text Spacebar for file in working copy:
++		110 pop up button Toggle staging
++		111 text Font size for working copy items: Truncate long file names in working copy:
++		112 combo box (settable) Value: 20, Secondary Actions: Confirm
++			113 button
++		114 text Show warning for diffs larger than (kB): Window Restoration:
++		115 pop up button Always
++		116 checkbox Show Quick Start Window on Launch, Value: 0
++	117 toolbar
++		118 button General, Secondary Actions: Move next, Remove from toolbar
++		119 button Appearance, Secondary Actions: Move previous, Move next, Remove from toolbar
++		120 button Git Config, Secondary Actions: Move previous, Move next, Remove from toolbar
++		121 button Text, Secondary Actions: Move previous, Move next, Remove from toolbar
++		122 button Editor, Secondary Actions: Move previous, Move next, Remove from toolbar
++		123 button AI, Secondary Actions: Move previous, Move next, Remove from toolbar
++		124 button Themes, Secondary Actions: Move previous, Move next, Remove from toolbar
++		125 button User Profiles, Secondary Actions: Move previous, Move next, Remove from toolbar
++		126 button Templates, Secondary Actions: Move previous, Move next, Remove from toolbar
++		127 button Integration, Secondary Actions: Move previous, Move next, Remove from toolbar
++		128 button Environment, Secondary Actions: Move previous, Move next, Remove from toolbar
++		129 button Updates, Secondary Actions: Move previous, Move next, Remove from toolbar
++		130 button Advanced, Secondary Actions: Move previous, Remove from toolbar
++	131 close button
++	132 zoom button (disabled)
++	133 minimize button
++	134 text General
+The focused UI element is 88 standard window General, Secondary Actions: Raise

@@ -1,0 +1,10 @@
+{
+  "version": "0.01",
+  "build": "20261024203417",
+  "minimumMacOS": "26.0",
+  "compiledBinarySHA256": "657db438833738ab3ccdda0ebad81cda1b842bfd99a054745c4dfbba45df8e23",
+  "bundledBinarySHA256": "7be8f1d38024abb1434a9510b0f96c9173c3d73a7df5bd4376f1fe2e5e8c575c",
+  "unsignedCopiesSHA256": "fce9d761b403fdb1a66503060ab3dc082f3fe6b7df2b63b1fbbd463e1ac9ee85",
+  "unsignedCopiesMatch": true,
+  "host": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0.1\nBuildVersion:\t\t26A434"
+}

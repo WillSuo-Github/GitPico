@@ -1,0 +1,35 @@
+Another instance of SwiftPM (PID: 76026) is already running using '/Users/willsuo/files/Github/GitPico/.build', waiting until that process has finished execution...Building for debugging...
+[1 / 1]
+[2 / 20] GitCore
+[4 / 22] GitCore
+[10 / 28] GitCore
+[15 / 31] GitCore
+[19 / 30] GitCoreTests-product
+[21 / 32] GitPico-product
+[22 / 34] GitCoreTests-product
+[22 / 34] GitPico
+[24 / 33] GitCoreTests-product
+[30 / 38] GitCoreTests-product
+[32 / 38] GitPico-product
+[36 / 41] GitPicoTests-product
+[39 / 42] GitPicoTests-product
+[41 / 45] GitPicoTests-product
+Build complete! (4.73 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test libraryMainMigrationRelocatesNestedEntriesAtomicallyAndPreservesMetadata() started.
+◇ Test infrastructureReviewsWorkFromWelcomeAndRejectStaleMigrationRequests() started.
+✔ Test libraryMainMigrationRelocatesNestedEntriesAtomicallyAndPreservesMetadata() passed after 0.009 seconds.
+✔ Test infrastructureReviewsWorkFromWelcomeAndRejectStaleMigrationRequests() passed after 5.223 seconds.
+✔ Test run with 2 tests in 0 suites passed after 5.223 seconds.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test forcedBatchCleanupAndPruneRejectReappearingDirectories() started.
+◇ Test retainedCleanupProtectsLinkedWorkingTreesOfNestedModules() started.
+◇ Test archivedUninitializedModuleRecoversSavedIndexFromEmptyWorkingFolder() started.
+✔ Test forcedBatchCleanupAndPruneRejectReappearingDirectories() passed after 12.219 seconds.
+✔ Test archivedUninitializedModuleRecoversSavedIndexFromEmptyWorkingFolder() passed after 35.488 seconds.
+✔ Test retainedCleanupProtectsLinkedWorkingTreesOfNestedModules() passed after 50.458 seconds.
+✔ Test run with 3 tests in 0 suites passed after 50.458 seconds.

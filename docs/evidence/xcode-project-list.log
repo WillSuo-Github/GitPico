@@ -1,0 +1,20 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -list -project GitPico.xcodeproj
+
+Information about project "GitPico":
+    Targets:
+        GitCore
+        GitPico
+        GitCoreTests
+        GitPicoTests
+
+    Build Configurations:
+        Debug
+        Release
+
+    If no build configuration is specified and -scheme is not passed then "Debug" is used.
+
+    Schemes:
+        GitCore
+        GitPico
+

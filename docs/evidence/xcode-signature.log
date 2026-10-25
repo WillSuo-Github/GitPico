@@ -1,0 +1,33 @@
+--prepared:/Users/willsuo/files/Github/GitPico/dist/GitPico.app/Contents/MacOS/__preview.dylib
+--validated:/Users/willsuo/files/Github/GitPico/dist/GitPico.app/Contents/MacOS/__preview.dylib
+--prepared:/Users/willsuo/files/Github/GitPico/dist/GitPico.app/Contents/Frameworks/GitCore.framework/Versions/Current/.
+--validated:/Users/willsuo/files/Github/GitPico/dist/GitPico.app/Contents/Frameworks/GitCore.framework/Versions/Current/.
+--prepared:/Users/willsuo/files/Github/GitPico/dist/GitPico.app/Contents/MacOS/GitPico.debug.dylib
+--validated:/Users/willsuo/files/Github/GitPico/dist/GitPico.app/Contents/MacOS/GitPico.debug.dylib
+dist/GitPico.app: valid on disk
+dist/GitPico.app: satisfies its Designated Requirement
+Executable=/Users/willsuo/files/Github/GitPico/dist/GitPico.app/Contents/MacOS/GitPico
+Identifier=com.willsuo.GitPico
+Format=app bundle with Mach-O thin (arm64)
+CodeDirectory v=20400 size=428 flags=0x2(adhoc) hashes=3+7 location=embedded
+VersionPlatform=1
+VersionMin=1703936
+VersionSDK=1769472
+Hash type=sha256 size=32
+CandidateCDHash sha256=35b3c67e6abb720ffa18648f12b65d029458d84e
+CandidateCDHashFull sha256=35b3c67e6abb720ffa18648f12b65d029458d84e46d8f99df0ffc0c99d55e903
+Hash choices=sha256
+CMSDigest=35b3c67e6abb720ffa18648f12b65d029458d84e46d8f99df0ffc0c99d55e903
+CMSDigestType=2
+Executable Segment base=0
+Executable Segment limit=16384
+Executable Segment flags=0x1
+Page size=16384
+CDHash=35b3c67e6abb720ffa18648f12b65d029458d84e
+Signature=adhoc
+Info.plist entries=22
+TeamIdentifier=not set
+Sealed Resources version=2 rules=13 files=3
+Internal requirements count=0 size=12
+Total signatures=1
+Chosen signature=1

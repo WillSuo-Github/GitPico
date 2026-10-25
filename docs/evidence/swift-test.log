@@ -1,0 +1,41 @@
+Building for debugging...
+[2 / 13] GitCore
+[4 / 15] GitCore
+[7 / 17] GitCore
+[11 / 17] GitCoreTests-product
+[13 / 19] GitCoreTests-product
+[16 / 20] GitPico-product
+[16 / 20] GitCoreTests-product
+[18 / 20] GitCoreTests-product
+Build complete! (2.89 sec)
+Test Suite 'All tests' started at 2026-10-23 20:46:48.775.
+Test Suite 'All tests' passed at 2026-10-23 20:46:48.776.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test linkedWorktreeAndNestedFolderResolveRoot() started.
+◇ Test stashRoundTripKeepsStashAndUntrackedFiles() started.
+◇ Test diffNumbersAndPreviewLimit() started.
+◇ Test unbornRepositoryAndUnstagePreserveLaterEdits() started.
+◇ Test partialStagingAndLiteralPathspecs() started.
+◇ Test conflictDetectionAndCommitGuard() started.
+◇ Test checkoutFailurePreservesDirtyWorktree() started.
+◇ Test porcelainPreservesUnusualNamesAndRenamePairs() started.
+◇ Test localRemoteFetchPullAndPush() started.
+◇ Test errorsAndEmptyCommitAreReported() started.
+◇ Test stageRenameUnstageAndDeletion() started.
+◇ Test branchesTagsScopeAndMergeGraph() started.
+✔ Test porcelainPreservesUnusualNamesAndRenamePairs() passed after 0.004 seconds.
+✔ Test diffNumbersAndPreviewLimit() passed after 0.004 seconds.
+✔ Test errorsAndEmptyCommitAreReported() passed after 1.174 seconds.
+✔ Test linkedWorktreeAndNestedFolderResolveRoot() passed after 1.839 seconds.
+✔ Test stashRoundTripKeepsStashAndUntrackedFiles() passed after 2.218 seconds.
+✔ Test checkoutFailurePreservesDirtyWorktree() passed after 2.793 seconds.
+✔ Test unbornRepositoryAndUnstagePreserveLaterEdits() passed after 2.886 seconds.
+✔ Test conflictDetectionAndCommitGuard() passed after 3.384 seconds.
+✔ Test partialStagingAndLiteralPathspecs() passed after 3.465 seconds.
+✔ Test branchesTagsScopeAndMergeGraph() passed after 3.705 seconds.
+✔ Test localRemoteFetchPullAndPush() passed after 3.706 seconds.
+✔ Test stageRenameUnstageAndDeletion() passed after 3.897 seconds.
+✔ Test run with 12 tests in 0 suites passed after 3.898 seconds.

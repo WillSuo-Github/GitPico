@@ -1,0 +1,13 @@
+Building for debugging...
+[1 / 1]
+[2 / 7] GitPicoTests-product
+[4 / 9] GitPicoTests-product
+[8 / 11] GitPicoTests-product
+[10 / 14] GitPicoTests-product
+Build complete! (2.59 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test workingSelectedLinesStageAndUnstageAcrossDiffSides() started.
+✔ Test workingSelectedLinesStageAndUnstageAcrossDiffSides() passed after 12.897 seconds.
+✔ Test run with 1 test in 0 suites passed after 12.897 seconds.

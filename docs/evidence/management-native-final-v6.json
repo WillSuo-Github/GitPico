@@ -1,0 +1,16 @@
+{
+  "repository": "/Users/willsuo/files/Github/GitPico/dist/ManagementReview-3k5yagqz/Client",
+  "branch": "main",
+  "head": "9e34fbc3fda66480ff422bc766d3147c73360e0c",
+  "status": "",
+  "branches": "refs/heads/cleanup/merged 9e34fbc3fda66480ff422bc766d3147c73360e0c \nrefs/heads/feature/sidebar 18ed48d104053da4a0ab96d1b75ad0ff722584f2 refs/remotes/origin/feature/sidebar\nrefs/heads/main 9e34fbc3fda66480ff422bc766d3147c73360e0c refs/remotes/origin/main\nrefs/heads/native-restored 9e34fbc3fda66480ff422bc766d3147c73360e0c",
+  "tags": "refs/tags/v0.1 commit 18ed48d104053da4a0ab96d1b75ad0ff722584f2\nrefs/tags/v0.2 tag dcbcb29954e24005860f1126a4f3181250fda9db\nrefs/tags/v0.6-native tag 87f0327b23020c64be8cb9736f958549420bf8b8",
+  "nativeTag": "object 9e34fbc3fda66480ff422bc766d3147c73360e0c\ntype commit\ntag v0.6-native\ntagger Pico Team <hello@example.invalid> 1792782947 +0800\n\nNative management review",
+  "remotes": "remote.origin.url /Users/willsuo/files/Github/GitPico/dist/ManagementReview-3k5yagqz/Origin.git\nremote.origin.fetch +refs/heads/*:refs/remotes/origin/*\nbranch.main.remote origin\nbranch.main.merge refs/heads/main\nbranch.feature/sidebar.remote origin\nbranch.feature/sidebar.merge refs/heads/feature/sidebar\nremote.review-mirror.fetch +refs/heads/*:refs/remotes/review-mirror/*\nremote.review-mirror.url /Users/willsuo/files/Github/GitPico/dist/ManagementReview-3k5yagqz/Mirror.git\nremote.review-mirror.pushurl /Users/willsuo/files/Github/GitPico/dist/ManagementReview-3k5yagqz/Mirror.git",
+  "stashes": "stash@{0} 96670b6bf682105dd3631d4f3d217767fef2400f Native management review\nstash@{1} df50f8931edf78164f13775b50ded8a6f2a3935c On main: Native snapshot verification\nstash@{2} 3ae25bee79504c24138d0f416f09f65d902243b2 On main: Review checklist",
+  "currentStashFiles": "M\tREADME.md\nM\tSources/Layout.swift",
+  "currentStashUntracked": "Draft.txt",
+  "currentStashIndex": "let spacing = 14\nlet radius = 8",
+  "bareMirrorBranch": "9e34fbc3fda66480ff422bc766d3147c73360e0c",
+  "recoveredBranch": "9e34fbc3fda66480ff422bc766d3147c73360e0c"
+}

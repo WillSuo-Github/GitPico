@@ -1,0 +1,57 @@
+Building for debugging...
+[Planning deferred tasks]
+[8 / 29] GitPico
+[14 / 35] GitPico
+[23 / 55] GitPico-product
+[24 / 55] GitPico-product
+[25 / 55] GitPico-product
+[26 / 55] GitPico-product
+[27 / 55] GitPico-product
+[29 / 55] GitPico-product
+[30 / 55] GitPico-product
+[32 / 55] GitPico-product
+[35 / 57] GitPico
+[37 / 57] GitPico
+[39 / 58] GitPico-product
+[39 / 56] GitPico-product
+[39 / 56] GitPico
+[39 / 56] GitPico-product
+[41 / 56] GitPico
+[44 / 58] GitPico-product
+[47 / 58] GitPicoTests-product
+[49 / 60] GitPicoTests-product
+[53 / 59] GitPicoTests-product
+[55 / 59] GitPicoTests-product
+Build complete! (10.10 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test browseStoreSeparatesCleanIgnoredAndChangedFilesWithoutFakeStaging() started.
+◇ Test quickActionsExposeContextSearchAndKeepDangerousActionsReviewed() started.
+◇ Test quickActionCanSelectCleanFileWithAllFilesEnabled() started.
+◇ Test toolPreferencesPersistAndRejectStaleInvalidAndCorruptEdits() started.
+✔ Test toolPreferencesPersistAndRejectStaleInvalidAndCorruptEdits() passed after 0.008 seconds.
+✔ Test quickActionCanSelectCleanFileWithAllFilesEnabled() passed after 1.972 seconds.
+✔ Test quickActionsExposeContextSearchAndKeepDangerousActionsReviewed() passed after 2.774 seconds.
+✔ Test browseStoreSeparatesCleanIgnoredAndChangedFilesWithoutFakeStaging() passed after 2.989 seconds.
+✔ Test run with 4 tests in 0 suites passed after 2.989 seconds.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test workingFilePreviewDoesNotFollowLinksOrReadDirectories() started.
+◇ Test externalDiffSnapshotsPreserveIndexWorkingBytesAndRenameSources() started.
+◇ Test externalToolArgumentsAreLiteralAndHeadlessRunnerNeverUsesAShell() started.
+◇ Test externalMergeResultRequiresExplicitApplyAndSurvivesReopen() started.
+◇ Test workingFileBrowserIncludesCleanDeletedIgnoredLiteralAndIndexFlags() started.
+◇ Test externalCommitComparisonSupportsRootAndBinaryCopies() started.
+◇ Test externalMergeRejectsMarkersNewEditsChangedOperationAndLinks() started.
+◇ Test ignoredForceAddUsesReviewedIndexBackupAndRejectsNewContent() started.
+✔ Test workingFilePreviewDoesNotFollowLinksOrReadDirectories() passed after 0.874 seconds.
+✔ Test workingFileBrowserIncludesCleanDeletedIgnoredLiteralAndIndexFlags() passed after 1.795 seconds.
+✔ Test externalToolArgumentsAreLiteralAndHeadlessRunnerNeverUsesAShell() passed after 2.329 seconds.
+✔ Test externalCommitComparisonSupportsRootAndBinaryCopies() passed after 3.724 seconds.
+✔ Test externalDiffSnapshotsPreserveIndexWorkingBytesAndRenameSources() passed after 4.943 seconds.
+✔ Test externalMergeResultRequiresExplicitApplyAndSurvivesReopen() passed after 7.203 seconds.
+✔ Test externalMergeRejectsMarkersNewEditsChangedOperationAndLinks() passed after 8.770 seconds.
+✔ Test ignoredForceAddUsesReviewedIndexBackupAndRejectsNewContent() passed after 11.289 seconds.
+✔ Test run with 8 tests in 0 suites passed after 11.289 seconds.

@@ -1,0 +1,8 @@
+--prepared:/Users/willsuo/files/Github/GitPico/dist/GitPico.app/Contents/MacOS/__preview.dylib
+--validated:/Users/willsuo/files/Github/GitPico/dist/GitPico.app/Contents/MacOS/__preview.dylib
+--prepared:/Users/willsuo/files/Github/GitPico/dist/GitPico.app/Contents/Frameworks/GitCore.framework/Versions/Current/.
+--validated:/Users/willsuo/files/Github/GitPico/dist/GitPico.app/Contents/Frameworks/GitCore.framework/Versions/Current/.
+--prepared:/Users/willsuo/files/Github/GitPico/dist/GitPico.app/Contents/MacOS/GitPico.debug.dylib
+--validated:/Users/willsuo/files/Github/GitPico/dist/GitPico.app/Contents/MacOS/GitPico.debug.dylib
+dist/GitPico.app: valid on disk
+dist/GitPico.app: satisfies its Designated Requirement

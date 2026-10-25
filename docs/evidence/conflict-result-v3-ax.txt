@@ -1,0 +1,115 @@
+Window: "ConflictReview", App: GitPico.
+0 standard window ConflictReview – Working Copy (main), ID: main, Secondary Actions: Raise
+	1 container
+		2 image Description: Divide, ID: arrow.triangle.branch
+		3 text main 1 changed files /Users/willsuo/files/Github/GitPico/dist/ReviewDemo-qlxlzojr/ConflictReview
+		4 split group main, SidebarNavigationSplitView
+			5 container
+				6 scroll area
+					7 list Sidebar
+						8 row (selectable) Workspace
+						9 row (selected) Working Copy
+1
+						10 row (selectable) History
+						11 row (selectable) Stashes
+						12 row (selectable) Pull Requests
+						13 row (selectable) Branches Review
+						14 row (selectable) Settings
+						15 row (selectable) Branches
+						16 row (selectable) main
+HEAD
+						17 row (selectable, collapsed) Description: feature, Secondary Actions: Expand
+							18 disclosure triangle 0
+						19 row (selectable) Tags
+						20 row (selectable) Remotes
+				21 image Description: Filter, ID: line.3.horizontal.decrease.circle
+				22 text field (settable) Filter
+				23 button Description: Add, Help: Create branch, ID: plus
+				24 button Description: Edit, Help: Repository settings, ID: slider.horizontal.3
+			25 splitter (disabled, settable, float) 359
+			26 container
+				27 image Description: Divide, ID: arrow.triangle.branch
+				28 text main
+				29 image Description: Forward, ID: chevron.right
+				30 text No Tracking
+				31 image Description: Merge, ID: arrow.triangle.merge
+				32 text Merge in progress 1 unresolved conflict Resolve each file to complete this operation.
+				33 checkbox Description: Show only conflicts, Value: 0
+				34 button Abort…
+				35 button (disabled) Continue
+				36 button Status
+				37 button Filename
+				38 menu button Filter
+				39 scroll area
+					40 list
+						41 row (selected) Description: Square
+Plain Text Document, Value: !
+Welcome.swift
+				42 unknown Description: Content list divider, Details: 310 points, Secondary Actions: Increment, Decrement
+				43 text Welcome.swift
+				44 toggle button Description: Show Base, Value: off
+				45 button Reload
+				46 text Current · stage 2 07c74db2 Incoming · stage 3 56dca4e9
+				47 scroll area
+					48 text import Foundation
+
+struct Welcome {
+    let title = "GitPico"
+    let subtitle = "A quieter Git workflow"
+}
+
+				49 scroll area
+					50 text import Foundation
+
+struct Welcome {
+    let title = "Welcome back"
+    let subtitle = "Your branches are ready"
+}
+
+				51 text Result Ready to mark resolved
+				52 scroll area Secondary Actions: Scroll Up, Scroll Down
+					53 text entry area (settable) Description: Conflict resolution result, Value: import Foundation
+
+struct Welcome {
+    let title = "GitPico"
+    let subtitle = "Your branches are ready"
+}
+
+// Resolved in GitPico.
+
+					54 scroll bar (disabled, settable, float) 0
+				55 menu button Accept Entire File
+				56 button Save & Mark Resolved
+				57 text Saving also stages this file. Draft edits stay available while switching files.
+	58 toolbar
+		59 button Description: Hide Sidebar, Secondary Actions: Increment, Decrement, Delete, Cancel
+		60 menu button chevron.pulldown, Help: Open a repository (⌘O), ID: folder
+		61 button Description: Previous, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		62 button (disabled) Description: Next, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		63 button (disabled) Description: Fetch, Help: Fetch remotes, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		64 button (disabled) Description: Pull, Help: Pull current branch (fast-forward only), Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		65 button (disabled) Description: Push, Help: Push current branch, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		66 button (disabled) Description: Sync, Help: Fetch, fast-forward pull, then push, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		67 button (disabled) Description: Merge, Help: Merge a branch into HEAD, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		68 button (disabled) Description: Rebase, Help: Rebase HEAD onto a branch, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		69 menu button (disabled) chevron.pulldown, Help: Apply a saved stash, ID: tray.and.arrow.down
+		70 button (disabled) Description: Save Stash, Help: Save local changes to a stash, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		71 button Description: Refresh, Help: Refresh (⌘R), Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		72 container Secondary Actions: Move previous, Remove from toolbar
+			73 image Description: Search, ID: magnifyingglass
+			74 text field (settable) Description: Search, Placeholder: Search for File
+	75 close button
+	76 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	77 minimize button
+	78 text ConflictReview Working Copy (main)
+79 menu bar
+	80 GitPico
+	81 File
+	82 Edit
+	83 View
+	84 Repository
+	85 Navigate
+	86 Window
+	87 Help
+
+The focused UI element is 0 standard window ConflictReview – Working Copy (main), ID: main, Secondary Actions: Raise

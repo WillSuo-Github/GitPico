@@ -1,0 +1,130 @@
+Window: "Client", App: GitPico.
+0 standard window Client – Stashes (main), ID: main, Secondary Actions: Raise
+	1 container
+		2 image Description: Divide, ID: arrow.triangle.branch
+		3 text main 0 changed files /Users/willsuo/files/Github/GitPico/dist/ManagementReview-3k5yagqz/Client
+		4 split group main, SidebarNavigationSplitView
+			5 container
+				6 scroll area
+					7 list Sidebar
+						8 row (selectable) Workspace
+						9 row (selectable) Working Copy
+						10 row (selectable) History
+						11 row (selected) Stashes
+						12 row (selectable) Pull Requests
+						13 row (selectable) Branches Review
+						14 row (selectable) Reflog
+						15 row (selectable) Settings
+						16 row (selectable) Branches
+						17 row (selectable) main
+HEAD
+						18 row (selectable) native-restored
+						19 row (selectable, collapsed) Description: cleanup, Secondary Actions: Expand
+							20 disclosure triangle 0
+						21 row (selectable, collapsed) Description: feature, Secondary Actions: Expand
+							22 disclosure triangle 0
+						23 row (selectable) Tags
+						24 row (selectable) v0.1
+						25 row (selectable) v0.2
+						26 row (selectable) v0.6-native
+						27 row (selectable) Remotes
+						28 row (selectable, collapsed) Description: origin, Secondary Actions: Expand
+							29 disclosure triangle 0
+						30 row (selectable, collapsed) Description: review-mirror, Secondary Actions: Expand
+							31 disclosure triangle 0
+				32 image Description: Filter, ID: line.3.horizontal.decrease.circle
+				33 text field (settable) Filter
+				34 menu button Add, Help: Add branch, tag or remote, ID: plus
+				35 button Description: Edit, Help: Repository settings, ID: slider.horizontal.3
+			36 splitter (disabled, settable, float) 359
+			37 container
+				38 text Stashes 3
+				39 menu button More, ID: ellipsis.circle
+				40 scroll area
+					41 list
+						42 row (selected) Native management review
+10/24/26
+stash@{0} · 96670b6b
+						43 row (selectable) Native snapshot verification
+10/24/26
+stash@{1} · df50f893
+						44 row (selectable) Review checklist
+10/24/26
+stash@{2} · 3ae25bee
+				45 unknown Description: Content list divider, Details: 320 points, Secondary Actions: Increment, Decrement
+				46 text 96670b6b
+				47 Description: Diff layout, Help: Unified / side-by-side diff
+					48 radio button Description: Unified, Value: 0, ID: rectangle
+					49 radio button Description: Side by Side, Value: 1, ID: rectangle.split.2x1
+				50 button Apply…
+				51 button Delete…
+				52 menu button More
+				53 scroll area
+					54 text Pico Team <hello@example.invalid>
+					55 button Description: Go Down, Help: Show or hide stash metadata, ID: chevron.down
+					56 text October 24, 2026 at 3:05:53 AM GMT+8 Based on 9e34fbc3fda6 PT 96670b6bf682105dd3631d4f3d217767fef2400f Native management review
+					57 button Collapse All
+					58 button (disabled) Apply Selected (0)…
+					59 text 3 changed files · +3 −2
+					60 disclosure triangle Description: A, Draft.txt, Untracked, +1 −0, Help: A, Value: on, Secondary Actions: Select Draft.txt, Apply File…
+						61 checkbox Description: Select Draft.txt, Value: 0
+						62 text Help: A, Value: A Draft.txt Untracked +1 −0
+						63 button Apply File…
+					64 text @@ -0,0 +1 @@
+					65 button Apply Chunk…
+					66 scroll area
+						67 text 1 An untracked idea.
+					68 disclosure triangle Description: M, README.md, +1 −1, Help: M, Value: on, Secondary Actions: Select README.md, Apply File…
+						69 checkbox Description: Select README.md, Value: 0
+						70 text Help: M, Value: M README.md +1 −1
+						71 button Apply File…
+					72 text @@ -1,3 +1,3 @@
+					73 button Apply Chunk…
+					74 scroll area
+						75 text 1 # Management Review 2 3 Native repository management.
+					76 scroll area
+						77 text 1 # Management Review 2 3 Draft welcome copy.
+					78 disclosure triangle Description: M, Sources/Layout.swift, +1 −1, Help: M, Value: on, Secondary Actions: Select Sources/Layout.swift, Apply File…
+						79 checkbox Description: Select Sources/Layout.swift, Value: 0
+						80 text Help: M, Value: M Sources/Layout.swift +1 −1
+						81 button Apply File…
+					82 text @@ -1,2 +1,2 @@
+					83 button Apply Chunk…
+					84 scroll area
+						85 text 1 let spacing = 12 2 let radius = 8
+					86 scroll area
+						87 text 1 let spacing = 14 2 let radius = 8
+	88 toolbar
+		89 button Description: Hide Sidebar, Secondary Actions: Increment, Decrement, Delete, Cancel
+		90 menu button chevron.pulldown, Help: Open a repository (⌘O), ID: folder
+		91 menu button chevron.pulldown, Help: Undo / redo Git history operations, ID: arrow.uturn.backward
+		92 button Description: Previous, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		93 button (disabled) Description: Next, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		94 button Description: Fetch, Help: Fetch remotes, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		95 button Description: Pull, Help: Pull current branch (fast-forward only), Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		96 button Description: Push, Help: Push current branch, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		97 button Description: Sync, Help: Fetch, fast-forward pull, then push, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		98 button Description: Merge, Help: Merge a branch into HEAD, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		99 button Description: Rebase, Help: Rebase HEAD onto a branch, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		100 menu button chevron.pulldown, Help: Apply a saved stash, ID: tray.and.arrow.down
+		101 button (disabled) Description: Save Stash, Help: Save local changes to a stash, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		102 button Description: Refresh, Help: Refresh (⌘R), Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		103 container Secondary Actions: Move previous, Remove from toolbar
+			104 image Description: Search, ID: magnifyingglass
+			105 text field (settable) Description: Search, Placeholder: Search for Stash
+	106 close button
+	107 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	108 minimize button
+	109 text Client Stashes (main)
+110 menu bar
+	111 GitPico
+	112 File
+	113 Edit
+	114 View
+	115 Repository
+	116 Working Copy
+	117 Navigate
+	118 Window
+	119 Help
+
+The focused UI element is 0 standard window Client – Stashes (main), ID: main, Secondary Actions: Raise

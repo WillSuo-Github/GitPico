@@ -1,0 +1,72 @@
+Building for debugging...
+[Planning deferred tasks]
+[1 / 1]
+[8 / 25] GitCore
+[12 / 29] GitCore
+[18 / 36] GitCore
+[18 / 36] GitPico
+[28 / 58] GitPico-product
+[29 / 68] GitPico-product
+[30 / 69] GitPico-product
+[31 / 69] GitPico-product
+[32 / 69] GitPico-product
+[33 / 69] GitPico-product
+[33 / 69] GitPico
+[36 / 69] GitPico
+[42 / 71] GitPico
+[43 / 72] GitPico-product
+[44 / 72] GitPico
+[47 / 73] GitPico-product
+[48 / 73] GitPico-product
+[50 / 75] GitCore
+[52 / 75] GitCore
+[54 / 75] GitCore
+[56 / 75] GitCore
+[57 / 75]
+[57 / 75] GitPico-product
+[57 / 75] GitCore
+[59 / 75] GitCore
+[61 / 75] GitCoreTests-product
+[68 / 86] GitCoreTests-product
+[70 / 86] GitCoreTests-product
+[71 / 86] GitCoreTests-product
+[72 / 86] GitPico
+[74 / 88] GitCoreTests-product
+[74 / 88] GitPico-product
+[76 / 88] GitCoreTests-product
+/Users/willsuo/files/Github/GitPico/Tests/GitCoreTests/ManagementEdgeTests.swift:52:26: warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:)' is unused [#NoUsage]
+50 |     try await f.repo.fetchRemote(remote, tags: true)
+51 |     #expect(try await f.repo.references().contains { $0.fullName == "refs/tags/v1" })
+52 |     try await GitProcess.run(["update-ref", "-d", "refs/heads/temporary"], at: server)
+   |                          `- warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:)' is unused [#NoUsage]
+53 |     try await f.repo.fetchRemote(remote, prune: true)
+54 |     #expect(!(try await f.repo.references().contains { $0.fullName == "refs/remotes/origin/temporary" }))
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[76 / 88] GitPico-product
+[81 / 88] GitCoreTests-product
+[82 / 88] GitPicoTests-product
+[94 / 99] GitPicoTests-product
+[96 / 99] GitPicoTests-product
+[98 / 102] GitPicoTests-product
+Build complete! (13.98 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test submoduleAddListDeinitializeAndInitializeKeepGitData() started.
+◇ Test worktreeCreationRejectsExistingDestinationsAndChangedBranchPreview() started.
+◇ Test worktreeMoveLockAndRepairRetainRegistrationIdentity() started.
+◇ Test submoduleFetchCheckoutAndPinnedUpdateDoNotCommitParent() started.
+◇ Test worktreeDirtyIgnoredCurrentAndStaleGuardsPreventRemoval() started.
+◇ Test submoduleDirtyAndChangedPreviewCannotOverwriteLocalFiles() started.
+◇ Test submoduleMoveURLSyncRepairAndRemoveStageMetadataSafely() started.
+◇ Test worktreeCreateModesPreserveMainAndEnforceBranchOccupancy() started.
+✔ Test worktreeCreationRejectsExistingDestinationsAndChangedBranchPreview() passed after 2.135 seconds.
+✔ Test worktreeCreateModesPreserveMainAndEnforceBranchOccupancy() passed after 5.020 seconds.
+✔ Test worktreeDirtyIgnoredCurrentAndStaleGuardsPreventRemoval() passed after 5.982 seconds.
+✔ Test worktreeMoveLockAndRepairRetainRegistrationIdentity() passed after 6.347 seconds.
+✔ Test submoduleDirtyAndChangedPreviewCannotOverwriteLocalFiles() passed after 10.602 seconds.
+✔ Test submoduleAddListDeinitializeAndInitializeKeepGitData() passed after 15.938 seconds.
+✔ Test submoduleFetchCheckoutAndPinnedUpdateDoNotCommitParent() passed after 31.744 seconds.
+✔ Test submoduleMoveURLSyncRepairAndRemoveStageMetadataSafely() passed after 37.994 seconds.
+✔ Test run with 8 tests in 0 suites passed after 37.994 seconds.

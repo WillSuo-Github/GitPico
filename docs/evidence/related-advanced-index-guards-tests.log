@@ -1,0 +1,26 @@
+Another instance of SwiftPM (PID: 37692) is already running using '/Users/willsuo/files/Github/GitPico/.build', waiting until that process has finished execution...Building for debugging...
+[1 / 1]
+[2 / 20] GitCore
+[4 / 22] GitCore
+[10 / 28] GitPico
+[16 / 34] GitCore
+[19 / 37] GitCore
+[22 / 36] GitCoreTests-product
+[24 / 38] GitPico-product
+[24 / 38] GitCoreTests-product
+[24 / 38] GitPico
+[31 / 43] GitPico-product
+[34 / 42] GitPicoTests-product
+[36 / 44] GitPicoTests-product
+[42 / 48] GitPicoTests-product
+[46 / 52] GitCoreTests-product
+[50 / 52] GitPicoTests-product
+Build complete! (5.08 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test recursiveManagementRestoreGuardsNewlyInitializedModuleIndexAndHead() started.
+◇ Test managementRestoreRejectsIntentToAddBecomingStagedEmptyFile() started.
+✔ Test managementRestoreRejectsIntentToAddBecomingStagedEmptyFile() passed after 25.686 seconds.
+✔ Test recursiveManagementRestoreGuardsNewlyInitializedModuleIndexAndHead() passed after 52.731 seconds.
+✔ Test run with 2 tests in 0 suites passed after 52.731 seconds.

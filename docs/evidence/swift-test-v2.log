@@ -1,0 +1,73 @@
+Building for debugging...
+[1 / 1]
+[2 / 14] GitCore
+[4 / 16] GitCore
+[13 / 24] GitCore
+[24 / 35] GitPico-product
+[26 / 35] GitCore
+[27 / 34] GitPico-product
+[30 / 37] GitCoreTests-product
+[34 / 39] GitPico-product
+[34 / 39] GitCoreTests-product
+[34 / 39] GitPico-product
+[36 / 39] GitPico-product
+[36 / 39] GitCoreTests-product
+[38 / 42] GitCoreTests-product
+Build complete! (4.17 sec)
+Test Suite 'All tests' started at 2026-10-23 21:55:52.834.
+Test Suite 'All tests' passed at 2026-10-23 21:55:52.835.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test diffNumbersAndPreviewLimit() started.
+◇ Test branchesTagsScopeAndMergeGraph() started.
+◇ Test porcelainPreservesUnusualNamesAndRenamePairs() started.
+◇ Test rebaseAndCherryPick() started.
+◇ Test numstatRenamesBinaryAndHistoricTree() started.
+◇ Test errorsAndEmptyCommitAreReported() started.
+◇ Test partialStagingAndLiteralPathspecs() started.
+◇ Test stashRoundTripKeepsStashAndUntrackedFiles() started.
+◇ Test amendSignOffAndFullMetadata() started.
+◇ Test replayConflictCanAbortAndContinue(_:) started.
+◇ Test createAndCloneNeverOverwriteExistingFolders() started.
+◇ Test branchComparisonUsesActualAncestry() started.
+◇ Test stageRenameUnstageAndDeletion() started.
+◇ Test linkedWorktreeAndNestedFolderResolveRoot() started.
+◇ Test repositorySettingsAndIgnoreFilesRejectStaleWrites() started.
+◇ Test mergeConflictCanAbortOrContinue() started.
+◇ Test conflictDetectionAndCommitGuard() started.
+◇ Test chunkStagingNewFileRoundTrip() started.
+◇ Test mergeAndDirtyGuard() started.
+◇ Test localRemoteFetchPullAndPush() started.
+◇ Test individualChunksStageAndUnstageWithoutLosingWork() started.
+◇ Test checkoutFailurePreservesDirtyWorktree() started.
+◇ Test historyPagingAndSearchBeyondLoadedPage() started.
+◇ Test unbornRepositoryAndUnstagePreserveLaterEdits() started.
+◇ Test case passing 1 argument action → .rebase to replayConflictCanAbortAndContinue(_:) started.
+◇ Test case passing 1 argument action → .cherryPick to replayConflictCanAbortAndContinue(_:) started.
+✔ Test diffNumbersAndPreviewLimit() passed after 0.003 seconds.
+✔ Test porcelainPreservesUnusualNamesAndRenamePairs() passed after 0.003 seconds.
+✔ Test errorsAndEmptyCommitAreReported() passed after 2.347 seconds.
+✔ Test linkedWorktreeAndNestedFolderResolveRoot() passed after 5.440 seconds.
+✔ Test createAndCloneNeverOverwriteExistingFolders() passed after 7.514 seconds.
+✔ Test numstatRenamesBinaryAndHistoricTree() passed after 7.703 seconds.
+✔ Test stashRoundTripKeepsStashAndUntrackedFiles() passed after 7.803 seconds.
+✔ Test amendSignOffAndFullMetadata() passed after 8.281 seconds.
+✔ Test checkoutFailurePreservesDirtyWorktree() passed after 9.160 seconds.
+✔ Test branchComparisonUsesActualAncestry() passed after 9.235 seconds.
+✔ Test chunkStagingNewFileRoundTrip() passed after 10.663 seconds.
+✔ Test conflictDetectionAndCommitGuard() passed after 11.284 seconds.
+✔ Test mergeAndDirtyGuard() passed after 11.448 seconds.
+✔ Test repositorySettingsAndIgnoreFilesRejectStaleWrites() passed after 12.297 seconds.
+✔ Test localRemoteFetchPullAndPush() passed after 12.385 seconds.
+✔ Test unbornRepositoryAndUnstagePreserveLaterEdits() passed after 12.670 seconds.
+✔ Test individualChunksStageAndUnstageWithoutLosingWork() passed after 12.674 seconds.
+✔ Test branchesTagsScopeAndMergeGraph() passed after 12.963 seconds.
+✔ Test partialStagingAndLiteralPathspecs() passed after 13.060 seconds.
+✔ Test stageRenameUnstageAndDeletion() passed after 13.736 seconds.
+✔ Test historyPagingAndSearchBeyondLoadedPage() passed after 14.123 seconds.
+✔ Test rebaseAndCherryPick() passed after 14.126 seconds.
+✔ Test mergeConflictCanAbortOrContinue() passed after 16.078 seconds.
+✔ Test replayConflictCanAbortAndContinue(_:) with 2 test cases passed after 16.177 seconds.
+✔ Test run with 24 tests in 0 suites passed after 16.177 seconds.

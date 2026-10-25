@@ -1,0 +1,293 @@
+Building for debugging...
+[1 / 1]
+[2 / 20] GitCore
+[5 / 23] GitCore
+[11 / 29] GitCore
+[17 / 35] GitCore
+[20 / 34] GitPico
+[23 / 37] GitPico
+[23 / 37] GitCoreTests-product
+[33 / 44] GitPico
+[39 / 48] GitPico-product
+[42 / 47] GitPicoTests-product
+[44 / 49] GitPicoTests-product
+[48 / 52] GitPicoTests-product
+Build complete! (3.42 sec)
+Test Suite 'All tests' started at 2026-10-24 14:03:01.372.
+Test Suite 'All tests' passed at 2026-10-24 14:03:01.373.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'All tests' started at 2026-10-24 14:03:01.478.
+Test Suite 'All tests' passed at 2026-10-24 14:03:01.478.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test nativeDropRejectsInvalidDataAndClearsTargetOnExitOrCancel() started.
+◇ Test nativeHeadDropPinsDestinationAndRejectsExternalBranchSwitch() started.
+◇ Test exportedPatchWriterPreservesBytesAndExistingFiles() started.
+◇ Test branchAndCommitDropsCreateReviewedOperations() started.
+◇ Test rebasePlanReloadRejectsTokensFromEarlierPlan() started.
+◇ Test nativeWholeStashDropNegotiatesMoveAndDeliversExactlyOneReview() started.
+◇ Test nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:) started.
+◇ Test nativeCommitDropRejectsBranchChangesBeforePlanPreparation() started.
+◇ Test stashDropRoutesWholeFilesChunksAndLinesWithoutMutatingGit() started.
+◇ Test nativeDropCombinesAllSelectedWorkingFilesAndRejectsMixedPayloads() started.
+◇ Test localChangeRoutesSelectionAndRejectsOldRepositoryRequests() started.
+◇ Test nativeDropRevalidatesBusyStatePayloadAndSourceOperation() started.
+◇ Test dragTokensRejectOtherRepositoriesUnsupportedTargetsAndBusyState() started.
+◇ Test case passing 1 argument variant → 0 to nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:) started.
+◇ Test case passing 1 argument variant → 2 to nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:) started.
+◇ Test case passing 1 argument variant → 1 to nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:) started.
+◇ Test case passing 1 argument variant → 3 to nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:) started.
+✔ Test exportedPatchWriterPreservesBytesAndExistingFiles() passed after 0.011 seconds.
+✔ Test rebasePlanReloadRejectsTokensFromEarlierPlan() passed after 3.209 seconds.
+✔ Test nativeDropRejectsInvalidDataAndClearsTargetOnExitOrCancel() passed after 3.316 seconds.
+✔ Test nativeDropRevalidatesBusyStatePayloadAndSourceOperation() passed after 3.502 seconds.
+✔ Test localChangeRoutesSelectionAndRejectsOldRepositoryRequests() passed after 4.290 seconds.
+✔ Test dragTokensRejectOtherRepositoriesUnsupportedTargetsAndBusyState() passed after 4.294 seconds.
+✔ Test branchAndCommitDropsCreateReviewedOperations() passed after 4.679 seconds.
+✔ Test nativeWholeStashDropNegotiatesMoveAndDeliversExactlyOneReview() passed after 5.847 seconds.
+✔ Test nativeDropCombinesAllSelectedWorkingFilesAndRejectsMixedPayloads() passed after 5.922 seconds.
+✔ Test stashDropRoutesWholeFilesChunksAndLinesWithoutMutatingGit() passed after 7.179 seconds.
+✔ Test nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:) with 4 test cases passed after 8.656 seconds.
+✔ Test nativeCommitDropRejectsBranchChangesBeforePlanPreparation() passed after 9.037 seconds.
+✔ Test nativeHeadDropPinsDestinationAndRejectsExternalBranchSwitch() passed after 10.245 seconds.
+✔ Test run with 13 tests in 0 suites passed after 10.245 seconds.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test mergeAndDirtyGuard() started.
+◇ Test stashSnapshotAndKeepIndexPreserveStagingSemantics() started.
+◇ Test publishBranchesTagsAndDeleteWithLeaseUsingLocalServer() started.
+◇ Test automaticStashFastForwardPullRetainsStagedAndUntrackedDrafts() started.
+◇ Test importedRenamePatchCapturesSourceAndDestination() started.
+◇ Test automaticStashRejectsUnbornOrConflictedSaveWithoutStartingOperation() started.
+◇ Test fileInspectionDeletionBinaryAndLiteralPathGuards() started.
+◇ Test stashPopConflictRetainsOriginalAndCanBeResolved() started.
+◇ Test unstageOneLinePreservesOtherStagedChangesAndRejectsStaleDiff() started.
+◇ Test historyPagingAndSearchBeyondLoadedPage() started.
+◇ Test automaticStashWaitsThroughInteractiveRebaseEditStop() started.
+◇ Test automaticStashCheckoutRestoresExactIndexAndPreservesExistingStack() started.
+◇ Test conflictResolutionPreservesExecutableModeAndRefusesSymlinkWrites() started.
+◇ Test discardUnstagedPreservesIndexAndRestoresAfterReopen() started.
+◇ Test completedConflictIntegrationCanBeUndoneAfterRestart() started.
+◇ Test amendSignOffAndFullMetadata() started.
+◇ Test revisionComparisonShowsRenameWithoutArtificialDeletion() started.
+◇ Test fileInspectionFollowsRenameAndPreservesUnusualPaths() started.
+◇ Test patchBinaryNewFilesAndDeletedFilesPreserveExactBytes() started.
+◇ Test stashLinesCanPartiallyCreateAndDeleteFiles() started.
+◇ Test lineStagingNewAndDeletedFilesPreservesWorktreeAndMissingNewline() started.
+◇ Test stashRenameDeleteClearAndRecoveryPreserveStoredContent() started.
+◇ Test duplicateStashHashesHaveUniqueRowsAndRejectStaleAmbiguity() started.
+◇ Test mergeConflictCanAbortOrContinue() started.
+◇ Test interactiveConflictCanAbortOrSkipAndUndo() started.
+◇ Test checkoutFailurePreservesDirtyWorktree() started.
+◇ Test rebaseAndCherryPick() started.
+◇ Test automaticStashRecoversInterruptedSaveAndProtectsNewLocalWork() started.
+◇ Test patchImportChecksAllFilesBeforeAnyWrite() started.
+◇ Test revertRejectsExternallyMovedPreviewHead() started.
+◇ Test discardAllRestoresStagedRenameBinaryUntrackedAndPermissions() started.
+◇ Test diffNumbersAndPreviewLimit() started.
+◇ Test interactiveEditStopAmendContinueSurvivesRepositoryReopen() started.
+◇ Test stashLinesAcrossChunksRejectInvalidOrConflictingSelection() started.
+◇ Test createAndCloneNeverOverwriteExistingFolders() started.
+◇ Test publishSelectsOnlyOneOfMultiplePushURLs() started.
+◇ Test patchConversionAttributesRequireIndexOnlyWithoutTouchingWorktree() started.
+◇ Test preparedRecoveryCanRestoreAnInterruptedMultiFileWrite() started.
+◇ Test errorsAndEmptyCommitAreReported() started.
+◇ Test selectedLinesApplyOnlyTheChosenChanges(_:) started.
+◇ Test replayConflictCanAbortAndContinue(_:) started.
+◇ Test branchComparisonUsesActualAncestry() started.
+◇ Test revertConflictCanAbortAndContinue() started.
+◇ Test branchDeletionIsGuardedAndRecoverable() started.
+◇ Test stashSelectedChunksAndBinaryFilesPreserveUnselectedChanges() started.
+◇ Test branchManagementRetainsTrackingAndRejectsStaleReferences() started.
+◇ Test conflictParserPreservesDiff3CRLFAndUnresolvedRegions() started.
+◇ Test automaticStashRestorationFailureIsPersistentAndNeverReplayed() started.
+◇ Test modifyDeleteConflictCanAcceptDeletion() started.
+◇ Test fetchOptionsPruneOnlyTrackingRefsAndFetchTags() started.
+◇ Test revertCreatesNewHistoryAndSupportsUndoRedo() started.
+◇ Test rebasePlanRowDropMovesBeforeOrAfterInBothDirections() started.
+◇ Test initialCommitUndoAndRedoAndExternalHeadGuard() started.
+◇ Test tagCreationRenameAndRecoveryPreserveAnnotatedObject() started.
+◇ Test selectedLinesAcrossHunksKeepCorrectOffsets() started.
+◇ Test splitRowsAlignReplacementsWithoutLosingLines() started.
+◇ Test linkedWorktreeAndNestedFolderResolveRoot() started.
+◇ Test selectedLinePatchAndReverseImportPreserveOtherChanges() started.
+◇ Test stashRoundTripKeepsStashAndUntrackedFiles() started.
+◇ Test remoteCRUDPreservesURLsRefspecsAndTracking() started.
+◇ Test stashFileApplyChecksAllPatchesBeforeChangingAnyFiles() started.
+◇ Test porcelainPreservesUnusualNamesAndRenamePairs() started.
+◇ Test partialStagingAndLiteralPathspecs() started.
+◇ Test conflictDetectionAndCommitGuard() started.
+◇ Test pushLeaseRejectsRemoteChangesAfterPreview() started.
+◇ Test patchRoundTripAndRecovery(destination:) started.
+◇ Test patchCRLFNoFinalNewlineAndExecutableModeRoundTrip() started.
+◇ Test discardDeletedFileAndUnbornStagedAddition() started.
+◇ Test unbornRepositoryAndUnstagePreserveLaterEdits() started.
+◇ Test chunkStagingNewFileRoundTrip() started.
+◇ Test renamingNewestStashChangesOnlyMetadataAndRemainsApplicable() started.
+◇ Test interactiveRebaseReordersRewordsSquashesFixesAndDrops() started.
+◇ Test stageRenameUnstageAndDeletion() started.
+◇ Test branchManagementProtectsOtherWorktreesAndSharesOrganization() started.
+◇ Test interactiveRebaseValidatesDirtyStaleAndInvalidPlans() started.
+◇ Test discardLinesAndChunkKeepOtherChanges() started.
+◇ Test lineStagingPreservesCRLFAndRejectsStructuralModeChanges() started.
+◇ Test revisionComparisonPinsSnapshotsAndUsesMergeBase() started.
+◇ Test repositorySettingsAndIgnoreFilesRejectStaleWrites() started.
+◇ Test stashApplyRestoresExactIndexAndPopKeepsOtherEntries() started.
+◇ Test reflogUsesEventDatesAndRecoversUnreachableCommits() started.
+◇ Test revertMergeRequiresExplicitMainlineAndGuardsDirtyWork() started.
+◇ Test branchFromStashUsesOriginalBaseAndRestoresIndex() started.
+◇ Test discardRecoveryBlocksBranchSwitchAndTracksPinnedIndexObjects() started.
+◇ Test selectedFileStashingUsesLiteralPathsAndRetainsOtherWork() started.
+◇ Test undoRedoCommitPreservesStagedUnstagedAndUntrackedContents() started.
+◇ Test discardRejectsGitlinksAndExternalParentSymlinks() started.
+◇ Test remoteConfigLockAndValidationDoNotOverwriteData() started.
+◇ Test mailboxCommitPatchIncludesRootMetadataAndBinaryChanges() started.
+◇ Test branchesTagsScopeAndMergeGraph() started.
+◇ Test localRemoteFetchPullAndPush() started.
+◇ Test binaryConflictAcceptsExactIncomingBytes() started.
+◇ Test restoringHistoryNeverOverwritesIgnoredFiles() started.
+◇ Test patchStalePreviewAndIgnoredDestinationAreProtected() started.
+◇ Test blameHandlesEmptyAndUnterminatedText() started.
+◇ Test conflictResolutionRejectsMarkersAndStaleWorktreeOrIndex() started.
+◇ Test resolveConflictThenContinueIntegration(_:) started.
+◇ Test localRecoveryRejectsSymlinksAndUnsafePaths() started.
+◇ Test stashSelectedLinesPreserveOtherLinesIndexAndLocalWork(newline:) started.
+◇ Test staleDiscardPreviewRecoveryAndIndexLockProtectNewEdits() started.
+◇ Test dragRebasePlansReorderAndFoldOnlyCurrentLinearCommits() started.
+◇ Test automaticStashCanRemainSavedWithoutReapplying() started.
+◇ Test automaticStashSurvivesConflictReopenAndOperationCompletion(abort:) started.
+◇ Test automaticStashFailedOperationRestoresDraftWithoutMaskingFailure() started.
+◇ Test repeatedSnapshotsPreserveWorkingAndIndexContent() started.
+◇ Test individualChunksStageAndUnstageWithoutLosingWork() started.
+◇ Test patchTraversalGitMetadataAndSymlinkAreRejected() started.
+◇ Test numstatRenamesBinaryAndHistoricTree() started.
+◇ Test case passing 1 argument chosen → ["-old"] to selectedLinesApplyOnlyTheChosenChanges(_:) started.
+◇ Test case passing 1 argument action → .rebase to replayConflictCanAbortAndContinue(_:) started.
+◇ Test case passing 1 argument chosen → ["+new"] to selectedLinesApplyOnlyTheChosenChanges(_:) started.
+◇ Test case passing 1 argument action → .cherryPick to replayConflictCanAbortAndContinue(_:) started.
+◇ Test case passing 1 argument chosen → ["-old", "+new"] to selectedLinesApplyOnlyTheChosenChanges(_:) started.
+◇ Test case passing 1 argument chosen → ["+new", "+extra"] to selectedLinesApplyOnlyTheChosenChanges(_:) started.
+◇ Test case passing 1 argument destination → .workingCopy to patchRoundTripAndRecovery(destination:) started.
+◇ Test case passing 1 argument destination → .both to patchRoundTripAndRecovery(destination:) started.
+◇ Test case passing 1 argument destination → .index to patchRoundTripAndRecovery(destination:) started.
+◇ Test case passing 1 argument action → .merge to resolveConflictThenContinueIntegration(_:) started.
+◇ Test case passing 1 argument action → .rebase to resolveConflictThenContinueIntegration(_:) started.
+◇ Test case passing 1 argument action → .cherryPick to resolveConflictThenContinueIntegration(_:) started.
+◇ Test case passing 1 argument newline → "
+" to stashSelectedLinesPreserveOtherLinesIndexAndLocalWork(newline:) started.
+◇ Test case passing 1 argument newline → "
+" to stashSelectedLinesPreserveOtherLinesIndexAndLocalWork(newline:) started.
+◇ Test case passing 1 argument abort → true to automaticStashSurvivesConflictReopenAndOperationCompletion(abort:) started.
+✔ Test diffNumbersAndPreviewLimit() passed after 0.008 seconds.
+✔ Test conflictParserPreservesDiff3CRLFAndUnresolvedRegions() passed after 0.008 seconds.
+✔ Test rebasePlanRowDropMovesBeforeOrAfterInBothDirections() passed after 0.008 seconds.
+✔ Test splitRowsAlignReplacementsWithoutLosingLines() passed after 0.008 seconds.
+✔ Test porcelainPreservesUnusualNamesAndRenamePairs() passed after 0.008 seconds.
+◇ Test case passing 1 argument abort → false to automaticStashSurvivesConflictReopenAndOperationCompletion(abort:) started.
+✔ Test errorsAndEmptyCommitAreReported() passed after 18.237 seconds.
+✔ Test remoteConfigLockAndValidationDoNotOverwriteData() passed after 21.477 seconds.
+✔ Test localRecoveryRejectsSymlinksAndUnsafePaths() passed after 23.878 seconds.
+✔ Test linkedWorktreeAndNestedFolderResolveRoot() passed after 24.457 seconds.
+✔ Test revisionComparisonShowsRenameWithoutArtificialDeletion() passed after 32.047 seconds.
+✔ Test createAndCloneNeverOverwriteExistingFolders() passed after 32.546 seconds.
+✔ Test discardRejectsGitlinksAndExternalParentSymlinks() passed after 32.823 seconds.
+✔ Test numstatRenamesBinaryAndHistoricTree() passed after 32.913 seconds.
+✔ Test automaticStashRejectsUnbornOrConflictedSaveWithoutStartingOperation() passed after 34.462 seconds.
+✔ Test blameHandlesEmptyAndUnterminatedText() passed after 44.568 seconds.
+✔ Test amendSignOffAndFullMetadata() passed after 46.477 seconds.
+✔ Test revertRejectsExternallyMovedPreviewHead() passed after 48.739 seconds.
+✔ Test checkoutFailurePreservesDirtyWorktree() passed after 49.821 seconds.
+✔ Test branchComparisonUsesActualAncestry() passed after 50.356 seconds.
+✔ Test lineStagingPreservesCRLFAndRejectsStructuralModeChanges() passed after 50.479 seconds.
+✔ Test chunkStagingNewFileRoundTrip() passed after 50.613 seconds.
+✔ Test automaticStashRecoversInterruptedSaveAndProtectsNewLocalWork() passed after 50.679 seconds.
+✔ Test repeatedSnapshotsPreserveWorkingAndIndexContent() passed after 50.677 seconds.
+✔ Test stashSnapshotAndKeepIndexPreserveStagingSemantics() passed after 50.829 seconds.
+✔ Test branchManagementProtectsOtherWorktreesAndSharesOrganization() passed after 54.384 seconds.
+✔ Test stashRoundTripKeepsStashAndUntrackedFiles() passed after 56.159 seconds.
+✔ Test selectedFileStashingUsesLiteralPathsAndRetainsOtherWork() passed after 56.772 seconds.
+✔ Test repositorySettingsAndIgnoreFilesRejectStaleWrites() passed after 57.673 seconds.
+✔ Test stashFileApplyChecksAllPatchesBeforeChangingAnyFiles() passed after 58.432 seconds.
+✔ Test patchImportChecksAllFilesBeforeAnyWrite() passed after 59.274 seconds.
+✔ Test duplicateStashHashesHaveUniqueRowsAndRejectStaleAmbiguity() passed after 61.287 seconds.
+✔ Test renamingNewestStashChangesOnlyMetadataAndRemainsApplicable() passed after 62.587 seconds.
+✔ Test preparedRecoveryCanRestoreAnInterruptedMultiFileWrite() passed after 62.968 seconds.
+✔ Test selectedLinesAcrossHunksKeepCorrectOffsets() passed after 63.366 seconds.
+✔ Test selectedLinesApplyOnlyTheChosenChanges(_:) with 4 test cases passed after 63.553 seconds.
+✔ Test branchFromStashUsesOriginalBaseAndRestoresIndex() passed after 63.771 seconds.
+✔ Test fetchOptionsPruneOnlyTrackingRefsAndFetchTags() passed after 63.959 seconds.
+✔ Test partialStagingAndLiteralPathspecs() passed after 65.270 seconds.
+✔ Test localRemoteFetchPullAndPush() passed after 67.020 seconds.
+✔ Test conflictDetectionAndCommitGuard() passed after 68.269 seconds.
+✔ Test patchTraversalGitMetadataAndSymlinkAreRejected() passed after 68.618 seconds.
+✔ Test unstageOneLinePreservesOtherStagedChangesAndRejectsStaleDiff() passed after 69.028 seconds.
+✔ Test unbornRepositoryAndUnstagePreserveLaterEdits() passed after 69.279 seconds.
+✔ Test individualChunksStageAndUnstageWithoutLosingWork() passed after 69.401 seconds.
+✔ Test patchStalePreviewAndIgnoredDestinationAreProtected() passed after 69.847 seconds.
+✔ Test publishSelectsOnlyOneOfMultiplePushURLs() passed after 70.266 seconds.
+✔ Test stashApplyRestoresExactIndexAndPopKeepsOtherEntries() passed after 72.913 seconds.
+✔ Test automaticStashCanRemainSavedWithoutReapplying() passed after 74.719 seconds.
+✔ Test mergeAndDirtyGuard() passed after 75.573 seconds.
+✔ Test tagCreationRenameAndRecoveryPreserveAnnotatedObject() passed after 76.205 seconds.
+✔ Test branchesTagsScopeAndMergeGraph() passed after 76.681 seconds.
+✔ Test fileInspectionDeletionBinaryAndLiteralPathGuards() passed after 77.449 seconds.
+✔ Test automaticStashFailedOperationRestoresDraftWithoutMaskingFailure() passed after 77.957 seconds.
+✔ Test restoringHistoryNeverOverwritesIgnoredFiles() passed after 78.415 seconds.
+✔ Test binaryConflictAcceptsExactIncomingBytes() passed after 79.205 seconds.
+✔ Test initialCommitUndoAndRedoAndExternalHeadGuard() passed after 79.414 seconds.
+✔ Test automaticStashFastForwardPullRetainsStagedAndUntrackedDrafts() passed after 79.414 seconds.
+✔ Test mailboxCommitPatchIncludesRootMetadataAndBinaryChanges() passed after 79.578 seconds.
+✔ Test stashSelectedLinesPreserveOtherLinesIndexAndLocalWork(newline:) with 2 test cases passed after 80.269 seconds.
+✔ Test fileInspectionFollowsRenameAndPreservesUnusualPaths() passed after 80.658 seconds.
+✔ Test stageRenameUnstageAndDeletion() passed after 82.222 seconds.
+✔ Test pushLeaseRejectsRemoteChangesAfterPreview() passed after 82.994 seconds.
+✔ Test discardUnstagedPreservesIndexAndRestoresAfterReopen() passed after 84.469 seconds.
+✔ Test revertMergeRequiresExplicitMainlineAndGuardsDirtyWork() passed after 84.950 seconds.
+✔ Test automaticStashCheckoutRestoresExactIndexAndPreservesExistingStack() passed after 86.128 seconds.
+✔ Test revisionComparisonPinsSnapshotsAndUsesMergeBase() passed after 86.224 seconds.
+✔ Test stashLinesAcrossChunksRejectInvalidOrConflictingSelection() passed after 86.716 seconds.
+✔ Test modifyDeleteConflictCanAcceptDeletion() passed after 87.205 seconds.
+✔ Test historyPagingAndSearchBeyondLoadedPage() passed after 87.404 seconds.
+✔ Test stashPopConflictRetainsOriginalAndCanBeResolved() passed after 87.814 seconds.
+✔ Test branchDeletionIsGuardedAndRecoverable() passed after 87.814 seconds.
+✔ Test stashSelectedChunksAndBinaryFilesPreserveUnselectedChanges() passed after 88.606 seconds.
+✔ Test patchCRLFNoFinalNewlineAndExecutableModeRoundTrip() passed after 88.606 seconds.
+✔ Test patchConversionAttributesRequireIndexOnlyWithoutTouchingWorktree() passed after 89.085 seconds.
+✔ Test undoRedoCommitPreservesStagedUnstagedAndUntrackedContents() passed after 90.234 seconds.
+✔ Test lineStagingNewAndDeletedFilesPreservesWorktreeAndMissingNewline() passed after 90.336 seconds.
+✔ Test importedRenamePatchCapturesSourceAndDestination() passed after 90.454 seconds.
+✔ Test automaticStashRestorationFailureIsPersistentAndNeverReplayed() passed after 90.649 seconds.
+✔ Test discardAllRestoresStagedRenameBinaryUntrackedAndPermissions() passed after 90.719 seconds.
+✔ Test patchRoundTripAndRecovery(destination:) with 3 test cases passed after 90.816 seconds.
+✔ Test patchBinaryNewFilesAndDeletedFilesPreserveExactBytes() passed after 90.911 seconds.
+✔ Test conflictResolutionRejectsMarkersAndStaleWorktreeOrIndex() passed after 91.026 seconds.
+✔ Test discardRecoveryBlocksBranchSwitchAndTracksPinnedIndexObjects() passed after 91.194 seconds.
+✔ Test branchManagementRetainsTrackingAndRejectsStaleReferences() passed after 91.576 seconds.
+✔ Test stashLinesCanPartiallyCreateAndDeleteFiles() passed after 91.756 seconds.
+✔ Test remoteCRUDPreservesURLsRefspecsAndTracking() passed after 94.158 seconds.
+✔ Test conflictResolutionPreservesExecutableModeAndRefusesSymlinkWrites() passed after 94.446 seconds.
+✔ Test publishBranchesTagsAndDeleteWithLeaseUsingLocalServer() passed after 96.350 seconds.
+✔ Test stashRenameDeleteClearAndRecoveryPreserveStoredContent() passed after 96.468 seconds.
+✔ Test rebaseAndCherryPick() passed after 96.910 seconds.
+✔ Test selectedLinePatchAndReverseImportPreserveOtherChanges() passed after 97.181 seconds.
+✔ Test revertCreatesNewHistoryAndSupportsUndoRedo() passed after 97.643 seconds.
+✔ Test resolveConflictThenContinueIntegration(_:) with 3 test cases passed after 98.742 seconds.
+✔ Test mergeConflictCanAbortOrContinue() passed after 99.672 seconds.
+✔ Test completedConflictIntegrationCanBeUndoneAfterRestart() passed after 99.836 seconds.
+✔ Test automaticStashSurvivesConflictReopenAndOperationCompletion(abort:) with 2 test cases passed after 99.956 seconds.
+✔ Test replayConflictCanAbortAndContinue(_:) with 2 test cases passed after 99.972 seconds.
+✔ Test reflogUsesEventDatesAndRecoversUnreachableCommits() passed after 100.021 seconds.
+✔ Test discardLinesAndChunkKeepOtherChanges() passed after 100.356 seconds.
+✔ Test staleDiscardPreviewRecoveryAndIndexLockProtectNewEdits() passed after 100.422 seconds.
+✔ Test automaticStashWaitsThroughInteractiveRebaseEditStop() passed after 100.522 seconds.
+✔ Test dragRebasePlansReorderAndFoldOnlyCurrentLinearCommits() passed after 101.776 seconds.
+✔ Test discardDeletedFileAndUnbornStagedAddition() passed after 102.158 seconds.
+✔ Test interactiveRebaseValidatesDirtyStaleAndInvalidPlans() passed after 104.585 seconds.
+✔ Test revertConflictCanAbortAndContinue() passed after 105.363 seconds.
+✔ Test interactiveEditStopAmendContinueSurvivesRepositoryReopen() passed after 107.498 seconds.
+✔ Test interactiveRebaseReordersRewordsSquashesFixesAndDrops() passed after 107.890 seconds.
+✔ Test interactiveConflictCanAbortOrSkipAndUndo() passed after 108.495 seconds.
+✔ Test run with 108 tests in 0 suites passed after 108.496 seconds.

@@ -1,0 +1,89 @@
+Building for debugging...
+[Planning deferred tasks]
+[1 / 1]
+[5 / 26] GitCore
+[10 / 31] GitCore
+[17 / 41] GitCore
+[24 / 43] GitCoreTests-product
+[26 / 44] GitCore
+[26 / 44] GitPico
+/Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RelatedAdministrationActions.swift:23:93: warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+19 |         guard !isBusy, let repository, request.repositoryToken == repositoryToken else { error = "The repository changed. Reopen this batch preview."; return }
+20 |         isBusy = true; activity = plan.report.title + "…"; relatedBatchProgress = plan.report
+21 |         relatedBatchTask = Task {
+   |                                 |- note: 'self' implicitly strongly captured here
+   |                                 `- note: add 'self' as a capture list item to silence
+22 |             do {
+23 |                 relatedBatchProgress = try await repository.applyRelatedBatch(plan) { [weak self] report in
+   |                                                                                             |- warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+   |                                                                                             `- note: explicitly assign the capture list item to silence
+24 |                     await MainActor.run { self?.relatedBatchProgress = report }
+25 |                 }
+
+[#ImplicitStrongCapture]: <https://docs.swift.org/compiler/documentation/diagnostics/implicit-strong-capture>
+[37 / 66] GitPico-product
+[37 / 66] GitPico
+[38 / 66] GitPico
+[40 / 66] GitPico-product
+[42 / 66] GitPico-product
+[44 / 66] GitPico-product
+[46 / 68] GitPico
+[49 / 68] GitPico
+/Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RelatedAdministrationActions.swift:23:93: warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+19 |         guard !isBusy, let repository, request.repositoryToken == repositoryToken else { error = "The repository changed. Reopen this batch preview."; return }
+20 |         isBusy = true; activity = plan.report.title + "…"; relatedBatchProgress = plan.report
+21 |         relatedBatchTask = Task {
+   |                                 |- note: 'self' implicitly strongly captured here
+   |                                 `- note: add 'self' as a capture list item to silence
+22 |             do {
+23 |                 relatedBatchProgress = try await repository.applyRelatedBatch(plan) { [weak self] report in
+   |                                                                                             |- warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+   |                                                                                             `- note: explicitly assign the capture list item to silence
+24 |                     await MainActor.run { self?.relatedBatchProgress = report }
+25 |                 }
+
+[#ImplicitStrongCapture]: <https://docs.swift.org/compiler/documentation/diagnostics/implicit-strong-capture>
+[50 / 68] GitPico-product
+[51 / 69] GitPico
+[53 / 69] GitPico-product
+[57 / 71] GitCoreTests-product
+[60 / 82] GitCoreTests-product
+[62 / 82] GitCoreTests-product
+[63 / 82] GitCoreTests-product
+[65 / 82] GitCoreTests-product
+[67 / 82] GitCoreTests-product
+[68 / 82] GitCoreTests-product
+/Users/willsuo/files/Github/GitPico/Tests/GitCoreTests/ManagementEdgeTests.swift:52:26: warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:)' is unused [#NoUsage]
+50 |     try await f.repo.fetchRemote(remote, tags: true)
+51 |     #expect(try await f.repo.references().contains { $0.fullName == "refs/tags/v1" })
+52 |     try await GitProcess.run(["update-ref", "-d", "refs/heads/temporary"], at: server)
+   |                          `- warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:)' is unused [#NoUsage]
+53 |     try await f.repo.fetchRemote(remote, prune: true)
+54 |     #expect(!(try await f.repo.references().contains { $0.fullName == "refs/remotes/origin/temporary" }))
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[68 / 82] GitPico-product
+[70 / 82] GitCoreTests-product
+[72 / 82] GitPico-product
+[76 / 85] GitCoreTests-product
+[76 / 85] GitPico
+[79 / 87] GitPico-product
+[82 / 87] GitPicoTests-product
+[91 / 96] GitPicoTests-product
+[93 / 96] GitPicoTests-product
+[95 / 99] GitPicoTests-product
+Build complete! (13.90 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test nestedSubmoduleMigrationAndManagementRestorePreserveRepositories() started.
+◇ Test nestedWorktreeMoveRemoveAndRestoreRetainModuleGitStorage() started.
+◇ Test submoduleBatchRemovalSupportsControlledMetadataChangesAndRestoreInReverse() started.
+◇ Test worktreeBatchStopsAtFailurePersistsAndResumesWithoutReplayingSuccesses() started.
+◇ Test managementRestoreGuardsNewFilesStagingAndChangedBackupAndCanResumeLocks() started.
+✔ Test worktreeBatchStopsAtFailurePersistsAndResumesWithoutReplayingSuccesses() passed after 22.152 seconds.
+✔ Test managementRestoreGuardsNewFilesStagingAndChangedBackupAndCanResumeLocks() passed after 32.059 seconds.
+✔ Test nestedSubmoduleMigrationAndManagementRestorePreserveRepositories() passed after 63.574 seconds.
+✔ Test submoduleBatchRemovalSupportsControlledMetadataChangesAndRestoreInReverse() passed after 64.340 seconds.
+✔ Test nestedWorktreeMoveRemoveAndRestoreRetainModuleGitStorage() passed after 83.612 seconds.
+✔ Test run with 5 tests in 0 suites passed after 83.612 seconds.

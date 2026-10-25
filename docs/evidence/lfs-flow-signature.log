@@ -1,0 +1,27 @@
+dist/GitPico.app: valid on disk
+dist/GitPico.app: satisfies its Designated Requirement
+Executable=/Users/willsuo/files/Github/GitPico/dist/GitPico.app/Contents/MacOS/GitPico
+Identifier=com.willsuo.GitPico
+Format=app bundle with Mach-O thin (arm64)
+CodeDirectory v=20400 size=55468 flags=0x2(adhoc) hashes=1727+3 location=embedded
+VersionPlatform=1
+VersionMin=1703936
+VersionSDK=1703936
+Hash type=sha256 size=32
+CandidateCDHash sha256=ff9f4885f4dc0ce5aa8193f89696ba8a094fd786
+CandidateCDHashFull sha256=ff9f4885f4dc0ce5aa8193f89696ba8a094fd7868b4593c88b1a9170bebfe89e
+Hash choices=sha256
+CMSDigest=ff9f4885f4dc0ce5aa8193f89696ba8a094fd7868b4593c88b1a9170bebfe89e
+CMSDigestType=2
+Executable Segment base=0
+Executable Segment limit=12992512
+Executable Segment flags=0x1
+Page size=16384
+CDHash=ff9f4885f4dc0ce5aa8193f89696ba8a094fd786
+Signature=adhoc
+Info.plist entries=10
+TeamIdentifier=not set
+Sealed Resources version=2 rules=13 files=0
+Internal requirements count=0 size=12
+Total signatures=1
+Chosen signature=1

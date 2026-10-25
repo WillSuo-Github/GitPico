@@ -1,0 +1,16 @@
+Building for debugging...
+[2 / 13] GitPicoTests-product
+[4 / 15] GitPicoTests-product
+[7 / 13] GitPicoTests-product
+[9 / 13] GitPicoTests-product
+Build complete! (1.47 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test branchAndCommitDropsCreateReviewedOperations() started.
+◇ Test dragTokensRejectOtherRepositoriesUnsupportedTargetsAndBusyState() started.
+◇ Test stashDropRoutesWholeFilesChunksAndLinesWithoutMutatingGit() started.
+✔ Test dragTokensRejectOtherRepositoriesUnsupportedTargetsAndBusyState() passed after 2.375 seconds.
+✔ Test branchAndCommitDropsCreateReviewedOperations() passed after 2.568 seconds.
+✔ Test stashDropRoutesWholeFilesChunksAndLinesWithoutMutatingGit() passed after 4.846 seconds.
+✔ Test run with 3 tests in 0 suites passed after 4.846 seconds.

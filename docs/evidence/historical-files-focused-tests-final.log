@@ -1,0 +1,47 @@
+Building for debugging...
+[1 / 15] GitPico
+[4 / 17] GitCoreTests-product
+[6 / 19] GitPico
+[10 / 23] GitCoreTests-product
+[10 / 23] GitPico
+[15 / 27] GitCoreTests-product
+[17 / 27] GitPico-product
+[25 / 34] GitPico-product
+[28 / 29] GitPicoTests-product
+Build complete! (2.77 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test historicalRequestsRetainSelectionRevisionAndRepositorySession() started.
+◇ Test historicalStoreExportsFrozenSnapshotInBackgroundWithoutWindows() started.
+✔ Test historicalStoreExportsFrozenSnapshotInBackgroundWithoutWindows() passed after 0.947 seconds.
+✔ Test historicalRequestsRetainSelectionRevisionAndRepositorySession() passed after 2.846 seconds.
+✔ Test run with 2 tests in 0 suites passed after 2.846 seconds.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test historicalExportRejectsEscapingSymlinksAndDeclaresSubmoduleBoundary() started.
+◇ Test historicalRawExportPreservesBinaryEmptyExecutableAndLiteralNames() started.
+◇ Test historicalEmptyProjectCanExportFolderAndValidEmptyZIP() started.
+◇ Test historicalBatchCanReadMoreThanDefaultProcessLimitAndBoundsOversizedFiles() started.
+◇ Test historicalFolderExportKeepsExactObjectsDespiteArchiveAttributes() started.
+◇ Test historicalZIPIsAcceptedByIndependentUnzipWithModesAndBytes() started.
+◇ Test historicalSnapshotStaysOnImmutableRevisionAndRejectsMissingSelection() started.
+◇ Test historicalRestorePreservesStagingAndCanRecoverAfterRestart() started.
+◇ Test historicalRestoreRejectsStalePreviewUntrackedIgnoredAndSymlinkTargets() started.
+◇ Test historicalRestoreRenamedDestinationBinaryModeAndBothTarget() started.
+◇ Test historicalRestoreDeletedFileAndNewTargetPath() started.
+◇ Test historicalRestoreUsesWorktreeConversionWhileRawExportDoesNot() started.
+✔ Test historicalEmptyProjectCanExportFolderAndValidEmptyZIP() passed after 1.513 seconds.
+✔ Test historicalRawExportPreservesBinaryEmptyExecutableAndLiteralNames() passed after 1.700 seconds.
+✔ Test historicalFolderExportKeepsExactObjectsDespiteArchiveAttributes() passed after 1.897 seconds.
+✔ Test historicalZIPIsAcceptedByIndependentUnzipWithModesAndBytes() passed after 1.900 seconds.
+✔ Test historicalSnapshotStaysOnImmutableRevisionAndRejectsMissingSelection() passed after 2.523 seconds.
+✔ Test historicalBatchCanReadMoreThanDefaultProcessLimitAndBoundsOversizedFiles() passed after 2.623 seconds.
+✔ Test historicalExportRejectsEscapingSymlinksAndDeclaresSubmoduleBoundary() passed after 2.800 seconds.
+✔ Test historicalRestoreUsesWorktreeConversionWhileRawExportDoesNot() passed after 6.492 seconds.
+✔ Test historicalRestoreDeletedFileAndNewTargetPath() passed after 7.517 seconds.
+✔ Test historicalRestoreRejectsStalePreviewUntrackedIgnoredAndSymlinkTargets() passed after 9.170 seconds.
+✔ Test historicalRestorePreservesStagingAndCanRecoverAfterRestart() passed after 9.582 seconds.
+✔ Test historicalRestoreRenamedDestinationBinaryModeAndBothTarget() passed after 10.343 seconds.
+✔ Test run with 12 tests in 0 suites passed after 10.344 seconds.

@@ -1,0 +1,20 @@
+Another instance of SwiftPM (PID: 10907) is already running using '/Users/willsuo/files/Github/GitPico/.build', waiting until that process has finished execution...Building for debugging...
+[Planning deferred tasks]
+[1 / 8]
+[2 / 9] GitCore
+[5 / 12] GitCore
+[10 / 15] GitCore
+[14 / 18] GitCore
+[17 / 18] GitPico-product
+[17 / 20] GitPico-product
+Build complete! (3.20 sec)
+Another instance of SwiftPM (PID: 28609) is already running using '/Users/willsuo/files/Github/GitPico/.build', waiting until that process has finished execution.../Users/willsuo/files/Github/GitPico/dist/GitPico.app: replacing existing signature
+82361
+{
+  "backgroundTesting": true,
+  "build": "20261024202803",
+  "frontmostBundle": "com.openai.codex",
+  "isActive": false,
+  "version": "0.01",
+  "visibleWindows": 0
+}

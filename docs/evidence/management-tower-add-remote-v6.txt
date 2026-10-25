@@ -1,0 +1,26 @@
+Window: "Unknown", App: Tower.
+1 sheet Secondary Actions: Raise
+	2 image
+	3 text Value: Add Remote Repository Enter the name and repository URL for the remote you want to connect., ID: dialogueHeaderTitle
+	4 text field (settable) Remote Name
+	5 text Name: Remote URL:
+	6 text field (settable) ssh://example.com/repo.git
+	7 container
+		8 text Account:
+		9 pop up button No Service Accounts Found
+	10 image warning
+	11 button Cancel
+	12 button (disabled) Add Remote
+	13 button Help
+14 menu bar
+	15 Tower
+	16 File
+	17 Edit
+	18 View
+	19 Repository
+	20 Working Copy
+	21 Workflow
+	22 Window
+	23 Help
+
+The focused UI element is 4 text field (settable) Remote Name

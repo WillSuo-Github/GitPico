@@ -1,0 +1,39 @@
+The following is a diff from the previous accessibility tree for Window: "HistoryReview-8zsc58q6" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
++				96 menu Secondary Actions: Cancel
++					97 Pin “main”, ID: pinBranch:
++					98 (disabled) Pull…, ID: pull:
++					99 (disabled) Push…, ID: push:
++					100 (disabled) Force Push with Lease…, ID: forcePushWithLease:
++					101 (disabled) Sync…, ID: sync:
++					102 (disabled) Publish “main”…, ID: publishBranch:
++					103 (disabled) Push “main” To…, ID: pushRevision:
++					104 Track Upstream Branch
++						105 menu Secondary Actions: Cancel
++							106 (disabled) Remote Branches
++							107 (disabled) Local Branches
++							108 main, ID: setUpstreamBranch:
++							109 recovered/before-native-rebase, ID: setUpstreamBranch:
++							110 (disabled) Remove Tracking, ID: unsetUpstreamBranch:
++					111 Track Parent Branch
++						112 menu Secondary Actions: Cancel
++							113 Track Other Parent Branch…, ID: setOtherParentBranch:
++					114 Merge With Revision…, ID: merge:
++					115 Rebase On Revision…, ID: rebase:
++					116 Rebase Onto Revision…, ID: rebaseOnto:
++					117 Archive “main”, ID: toggleIsArchivedBranch:
++					118 Skips Auto-Archiving, ID: toggleSkipsAutoArchivingBranch:
++					119 Hides Fully Merged Hint, ID: toggleIgnoreFullyMergedHintBranch:
++					120 Rename “main”…, ID: renameBranch:
++					121 (disabled) Delete “main”…, ID: deleteBranches:
++					122 Create New Branch from “main”…, ID: createNewBranchFromRevision:
++					123 Create New Stacked Branch from “main”…, ID: createNewStackedBranchFromBranch:
++					124 Create New Tag from “main”…, ID: createNewTagFromRevision:
++					125 (disabled) Create New Pull Request from “main”…, ID: createServicePullRequestFromRef:
++					126 Export Files from “main”…, ID: exportRevision:
++					127 Compare “main” with Revision…, ID: compareRevisions:
++					128 Reveal in History, ID: revealBranchInHistory:
++					129 Copy Branch Name to Clipboard, ID: copyBranchName:
+Selected:
+	24 row (selected)
+
+Note: Pay special attention to the content selected by the user. If the user asks a question or refers to the content they are looking at on-screen, they might be referring to the selected content (but they might be referring to something else that's visible, too).

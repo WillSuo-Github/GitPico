@@ -1,0 +1,65 @@
+Building for debugging...
+[Planning deferred tasks]
+[5 / 27] GitCore
+[7 / 29] GitCore
+[13 / 31] GitCore
+[22 / 41] GitCore
+[24 / 63] GitPico-product
+[27 / 63] GitPico-product
+[29 / 63] GitPico-product
+/Users/willsuo/files/Github/GitPico/Sources/GitCore/RelatedManagementRecovery.swift:79:102: warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 77 |         var refreshed: [RepositoryPointer] = []
+ 78 |         for pointer in pointers {
+ 79 |             if let child = try? await GitRepository.open(URL(fileURLWithPath: pointer.workingPath)), await child.root.path == pointer.workingPath {
+    |                                                                                                      `- warning: no 'async' operations occur within 'await' expression [#UnnecessaryEffectMarker]
+ 80 |                 refreshed.append(RepositoryPointer(workingPath: pointer.workingPath, gitDirectory: pointer.gitDirectory, gitFile: pointer.gitFile, head: try await child.headPosition()))
+ 81 |             }
+
+[#UnnecessaryEffectMarker]: <https://docs.swift.org/compiler/documentation/diagnostics/unnecessary-effect-marker>
+[33 / 63] GitPico-product
+[34 / 63] GitPico-product
+[35 / 63] GitPico-product
+[36 / 63] GitPico
+[38 / 63] GitPico
+[39 / 63] GitPico
+[41 / 63] GitPico
+[45 / 63] GitPico
+[46 / 63] GitPico
+[48 / 64] GitPico-product
+[53 / 66] GitCoreTests-product
+[54 / 66] GitCoreTests-product
+[57 / 77] GitPico
+[59 / 77] GitCoreTests-product
+[60 / 77] GitCoreTests-product
+[62 / 77] GitCoreTests-product
+[63 / 77] GitCoreTests-product
+/Users/willsuo/files/Github/GitPico/Tests/GitCoreTests/ManagementEdgeTests.swift:52:26: warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:)' is unused [#NoUsage]
+50 |     try await f.repo.fetchRemote(remote, tags: true)
+51 |     #expect(try await f.repo.references().contains { $0.fullName == "refs/tags/v1" })
+52 |     try await GitProcess.run(["update-ref", "-d", "refs/heads/temporary"], at: server)
+   |                          `- warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:)' is unused [#NoUsage]
+53 |     try await f.repo.fetchRemote(remote, prune: true)
+54 |     #expect(!(try await f.repo.references().contains { $0.fullName == "refs/remotes/origin/temporary" }))
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[65 / 77] GitCoreTests-product
+[65 / 77] GitPico
+[65 / 77] GitCoreTests-product
+[72 / 78] GitCoreTests-product
+[84 / 89] GitPicoTests-product
+[86 / 89] GitPicoTests-product
+[87 / 89] GitPicoTests-product
+[88 / 92] GitPicoTests-product
+Build complete! (11.71 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test worktreeMoveLockAndRepairRetainRegistrationIdentity() started.
+◇ Test submoduleMoveURLSyncRepairAndRemoveStageMetadataSafely() started.
+✘ Test worktreeMoveLockAndRepairRetainRegistrationIdentity() recorded an issue at WorktreeManagementTests.swift:25:2: Caught error: GitFailure(message: "Management paths cannot traverse symbolic links.")
+✘ Test worktreeMoveLockAndRepairRetainRegistrationIdentity() failed after 4.671 seconds with 1 issue.
+✘ Test submoduleMoveURLSyncRepairAndRemoveStageMetadataSafely() recorded an issue at SubmoduleManagementTests.swift:25:2: Caught error: GitFailure(message: "Management paths cannot traverse symbolic links.")
+✘ Test submoduleMoveURLSyncRepairAndRemoveStageMetadataSafely() failed after 10.959 seconds with 1 issue.
+✘ Test run with 2 tests in 0 suites failed after 10.959 seconds with 2 issues.
+Note: Some test targets reported failures:
+  - GitCoreTests (Swift Testing)

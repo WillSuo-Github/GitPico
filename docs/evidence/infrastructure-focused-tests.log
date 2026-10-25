@@ -1,0 +1,81 @@
+Building for debugging...
+[1 / 1]
+[2 / 20] GitCore
+[5 / 23] GitCore
+[11 / 29] GitCore
+[20 / 39] GitCore
+[21 / 61] GitCore
+[24 / 61] GitPico-product
+[24 / 61] GitCore
+[27 / 61] GitPico-product
+[28 / 61] GitCore
+[30 / 61] GitCore
+[32 / 61] GitPico-product
+[33 / 61] GitPico-product
+[35 / 61] GitPico
+[35 / 61] GitPico-product
+[38 / 61] GitPico
+[39 / 61] GitPico-product
+[41 / 61] GitPico
+[42 / 62] GitPico-product
+[44 / 62] GitPico-product
+[46 / 64] GitPico
+[46 / 64] GitPico-product
+[51 / 63] GitCoreTests-product
+[54 / 74] GitCoreTests-product
+[54 / 74] GitPico-product
+[57 / 74] GitCoreTests-product
+[58 / 74] GitCoreTests-product
+[59 / 74] GitCoreTests-product
+[59 / 74] GitPico
+[61 / 74] GitCoreTests-product
+[61 / 74] GitPico
+[62 / 74] GitCoreTests-product
+/Users/willsuo/files/Github/GitPico/Tests/GitCoreTests/ManagementEdgeTests.swift:52:26: warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:)' is unused [#NoUsage]
+50 |     try await f.repo.fetchRemote(remote, tags: true)
+51 |     #expect(try await f.repo.references().contains { $0.fullName == "refs/tags/v1" })
+52 |     try await GitProcess.run(["update-ref", "-d", "refs/heads/temporary"], at: server)
+   |                          `- warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:)' is unused [#NoUsage]
+53 |     try await f.repo.fetchRemote(remote, prune: true)
+54 |     #expect(!(try await f.repo.references().contains { $0.fullName == "refs/remotes/origin/temporary" }))
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[62 / 74] GitPico
+[66 / 74] GitPico
+[69 / 75] GitCoreTests-product
+[73 / 78] GitPicoTests-product
+[82 / 87] GitPicoTests-product
+[84 / 87] GitPicoTests-product
+[85 / 87] GitPicoTests-product
+[86 / 90] GitPicoTests-product
+Build complete! (19.48 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test emptyDirectoryReuseChecksNewFilesAndDoesNotOverwriteOccupiedDestinations() started.
+◇ Test archiveRetainedThenCloneFreshPreservesOldHistoryAndSavedIndex() started.
+◇ Test mainRepositoryMigrationReconnectsLinkedAndNestedTreesAndRestoresDirtyState() started.
+◇ Test forceSubmoduleCleanupRetainsConflictStateAndCanRecoverIndependentRepository() started.
+◇ Test pointerRepairResumesAfterMetadataLockAndRejectsForeignGitStorage() started.
+◇ Test mainMigrationRestoreResumesAfterExternalLockAndSavedCopyIsIndependent() started.
+◇ Test forcedCleanupCannotFollowAReplacedWorktreeSymbolicLink() started.
+◇ Test pointerRepairAfterExternalMainMoveAndLinkedMovePreservesData() started.
+◇ Test mainMigrationRejectsStaleSourceAndRestorationCannotOverwriteNewEdits() started.
+◇ Test retainedReuseAndArchiveRejectLiveLinkedWorkingTrees() started.
+◇ Test submoduleDirectoryReusePreservesExistingFilesAndRetainedIndexWithoutFetch() started.
+◇ Test forcedWorktreeRemovalPreservesIgnoredUntrackedAndConflictedIndexInBackup() started.
+◇ Test pointerRepairRelocatedModuleStagesMappingAndSupportsUndoAndStaleGuard() started.
+✔ Test forcedCleanupCannotFollowAReplacedWorktreeSymbolicLink() passed after 3.558 seconds.
+✔ Test mainMigrationRejectsStaleSourceAndRestorationCannotOverwriteNewEdits() passed after 6.305 seconds.
+✔ Test pointerRepairRelocatedModuleStagesMappingAndSupportsUndoAndStaleGuard() passed after 7.931 seconds.
+✔ Test pointerRepairResumesAfterMetadataLockAndRejectsForeignGitStorage() passed after 9.115 seconds.
+✔ Test pointerRepairAfterExternalMainMoveAndLinkedMovePreservesData() passed after 9.232 seconds.
+✔ Test forcedWorktreeRemovalPreservesIgnoredUntrackedAndConflictedIndexInBackup() passed after 11.500 seconds.
+✔ Test emptyDirectoryReuseChecksNewFilesAndDoesNotOverwriteOccupiedDestinations() passed after 11.884 seconds.
+✔ Test mainMigrationRestoreResumesAfterExternalLockAndSavedCopyIsIndependent() passed after 15.660 seconds.
+✔ Test retainedReuseAndArchiveRejectLiveLinkedWorkingTrees() passed after 21.705 seconds.
+✔ Test forceSubmoduleCleanupRetainsConflictStateAndCanRecoverIndependentRepository() passed after 30.060 seconds.
+✔ Test archiveRetainedThenCloneFreshPreservesOldHistoryAndSavedIndex() passed after 34.123 seconds.
+✔ Test submoduleDirectoryReusePreservesExistingFilesAndRetainedIndexWithoutFetch() passed after 42.489 seconds.
+✔ Test mainRepositoryMigrationReconnectsLinkedAndNestedTreesAndRestoresDirtyState() passed after 61.484 seconds.
+✔ Test run with 13 tests in 0 suites passed after 61.484 seconds.

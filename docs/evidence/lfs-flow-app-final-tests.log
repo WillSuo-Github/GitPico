@@ -1,0 +1,28 @@
+Building for debugging...
+[1 / 1]
+[2 / 19] GitCore
+[4 / 21] GitCore
+[11 / 27] GitCore
+[12 / 24] GitCoreTests-product
+[14 / 25] GitCoreTests-product
+[14 / 25] GitPico
+[18 / 29] GitPico
+[18 / 29] GitPico-product
+[26 / 33] GitPico
+[26 / 35] GitPico-product
+[29 / 34] GitPicoTests-product
+[31 / 36] GitPicoTests-product
+[34 / 37] GitPicoTests-product
+[36 / 40] GitPicoTests-product
+[38 / 40] GitPicoTests-product
+Build complete! (11.65 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test lfsStoreEnableRefreshesNativeSettingsStateWithoutOpeningWindows() started.
+◇ Test extensionMutationRequestsRejectStaleRepositorySessions() started.
+◇ Test extensionQuickActionsOpenSettingsAndRequireConfigurationBeforeStartingTopics() started.
+✔ Test extensionMutationRequestsRejectStaleRepositorySessions() passed after 7.676 seconds.
+✔ Test lfsStoreEnableRefreshesNativeSettingsStateWithoutOpeningWindows() passed after 10.357 seconds.
+✔ Test extensionQuickActionsOpenSettingsAndRequireConfigurationBeforeStartingTopics() passed after 16.421 seconds.
+✔ Test run with 3 tests in 0 suites passed after 16.421 seconds.

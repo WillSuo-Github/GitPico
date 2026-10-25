@@ -1,0 +1,37 @@
+Building for debugging...
+[Planning 25 / 153]
+[Planning deferred tasks]
+[1 / 6] GitCoreTests-product
+[11 / 26] GitPico-product
+[21 / 36] GitPico-product
+[21 / 36] GitPico
+[22 / 37] GitPico-product
+[22 / 37] GitPico
+[22 / 37] GitPico-product
+[31 / 57] GitPico-product
+[33 / 57] GitPico
+[34 / 57] GitPico
+[35 / 57] GitPico
+[35 / 57] GitPico-product
+[38 / 55] GitPico
+[41 / 55] GitPico
+[43 / 56] GitPico-product
+[46 / 58] GitPico
+[47 / 58] GitPico
+[47 / 58]
+[47 / 58] GitPico
+[47 / 58] GitPico-product
+[49 / 58] GitPico-product
+[49 / 58] GitPico
+[52 / 60] GitPico-product
+[55 / 60] GitPicoTests-product
+[66 / 71] GitPicoTests-product
+[68 / 71] GitPicoTests-product
+[70 / 74] GitPicoTests-product
+Build complete! (24.46 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test browseStoreSeparatesCleanIgnoredAndChangedFilesWithoutFakeStaging() started.
+✔ Test browseStoreSeparatesCleanIgnoredAndChangedFilesWithoutFakeStaging() passed after 2.844 seconds.
+✔ Test run with 1 test in 0 suites passed after 2.844 seconds.

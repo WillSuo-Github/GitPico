@@ -1,0 +1,20 @@
+{
+  "version": "0.01",
+  "build": "20261024185414",
+  "minimumOS": "26.0",
+  "hostOS": "27.0.1",
+  "tests": {
+    "GitCore": 160,
+    "application": 37,
+    "total": 197
+  },
+  "background": {
+    "backgroundTesting": true,
+    "build": "20261024185414",
+    "frontmostBundle": "com.openai.codex",
+    "isActive": false,
+    "version": "0.01",
+    "visibleWindows": 0
+  },
+  "executableSHA256": "82f9268a442aee7f3e555dad782655e05a5fb331398c196e986e3d6051059eac"
+}

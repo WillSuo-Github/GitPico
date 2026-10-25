@@ -1,0 +1,56 @@
+Building for debugging...
+[1 / 1]
+[2 / 18] GitCore
+[4 / 20] GitCore
+[14 / 30] GitCore
+[15 / 30] GitCore
+[18 / 35] GitCore
+[27 / 57] GitPico-product
+[29 / 57] GitPico-product
+[30 / 57] GitPico-product
+[31 / 57] GitPico
+[32 / 57] GitPico
+[33 / 57] GitPico
+[34 / 57] GitPico
+[35 / 57] GitPico
+[37 / 57] GitPico
+[39 / 57] GitPico
+[40 / 59] GitPico
+[43 / 59] GitPico
+[46 / 60]
+[48 / 63] GitPico
+[49 / 63] GitPico-product
+[54 / 74] GitPico-product
+[55 / 74] GitCoreTests-product
+[56 / 74] GitCoreTests-product
+[56 / 74] GitPico-product
+[58 / 74] GitCoreTests-product
+[59 / 74] GitCoreTests-product
+[61 / 74] GitCoreTests-product
+[62 / 74] GitCoreTests-product
+[62 / 74] GitPico
+[62 / 74] GitCoreTests-product
+/Users/willsuo/files/Github/GitPico/Tests/GitCoreTests/ManagementEdgeTests.swift:52:26: warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:lfsEnvironment:cancellable:)' is unused [#NoUsage]
+50 |     try await f.repo.fetchRemote(remote, tags: true)
+51 |     #expect(try await f.repo.references().contains { $0.fullName == "refs/tags/v1" })
+52 |     try await GitProcess.run(["update-ref", "-d", "refs/heads/temporary"], at: server)
+   |                          `- warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:lfsEnvironment:cancellable:)' is unused [#NoUsage]
+53 |     try await f.repo.fetchRemote(remote, prune: true)
+54 |     #expect(!(try await f.repo.references().contains { $0.fullName == "refs/remotes/origin/temporary" }))
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[62 / 74] GitPico
+[62 / 74] GitCoreTests-product
+[64 / 74] GitCoreTests-product
+[70 / 77] GitPico
+[74 / 79] GitPicoTests-product
+[85 / 90] GitPicoTests-product
+[87 / 90] GitPicoTests-product
+[89 / 93] GitPicoTests-product
+Build complete! (21.31 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test rapidPreviewNavigationOnlyLoadsFinalSelection() started.
+✔ Test rapidPreviewNavigationOnlyLoadsFinalSelection() passed after 5.110 seconds.
+✔ Test run with 1 test in 0 suites passed after 5.110 seconds.

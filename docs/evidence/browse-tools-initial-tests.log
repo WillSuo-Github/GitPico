@@ -1,0 +1,55 @@
+Building for debugging...
+[Planning deferred tasks]
+[8 / 34] GitCore
+[10 / 36] GitCore
+[15 / 39] GitCore
+[19 / 43] GitCoreTests-product
+[30 / 69] GitPico-product
+[31 / 69] GitPico
+[34 / 68] GitCoreTests-product
+[38 / 68] GitPico-product
+[39 / 68] GitPico
+[40 / 68] GitPico
+[41 / 68] GitPico
+[42 / 68] GitPico
+[44 / 69] GitPico-product
+[45 / 69] GitPico
+[46 / 69] GitPico
+[47 / 69] GitPico
+[48 / 71] GitPico
+[49 / 71] GitPico
+[50 / 71] GitPico
+[51 / 71] GitPico
+[53 / 71] GitPico-product
+[56 / 69] GitPico
+[59 / 72] GitPico
+[59 / 72] GitPico-product
+[59 / 72] GitPico
+/Users/willsuo/files/Github/GitPico/Tests/GitCoreTests/ManagementEdgeTests.swift:52:26: warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:)' is unused [#NoUsage]
+50 |     try await f.repo.fetchRemote(remote, tags: true)
+51 |     #expect(try await f.repo.references().contains { $0.fullName == "refs/tags/v1" })
+52 |     try await GitProcess.run(["update-ref", "-d", "refs/heads/temporary"], at: server)
+   |                          `- warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:)' is unused [#NoUsage]
+53 |     try await f.repo.fetchRemote(remote, prune: true)
+54 |     #expect(!(try await f.repo.references().contains { $0.fullName == "refs/remotes/origin/temporary" }))
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[59 / 72] GitCoreTests-product
+[61 / 72] GitCoreTests-product
+[63 / 72] GitPico
+[67 / 74] GitPico-product
+[69 / 74] GitPicoTests-product
+[76 / 81] GitPicoTests-product
+[78 / 81] GitPicoTests-product
+[80 / 84] GitPicoTests-product
+Build complete! (11.68 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test workingFilePreviewDoesNotFollowLinksOrReadDirectories() started.
+◇ Test ignoredForceAddUsesReviewedIndexBackupAndRejectsNewContent() started.
+◇ Test workingFileBrowserIncludesCleanDeletedIgnoredLiteralAndIndexFlags() started.
+✔ Test workingFilePreviewDoesNotFollowLinksOrReadDirectories() passed after 0.810 seconds.
+✔ Test workingFileBrowserIncludesCleanDeletedIgnoredLiteralAndIndexFlags() passed after 1.723 seconds.
+✔ Test ignoredForceAddUsesReviewedIndexBackupAndRejectsNewContent() passed after 11.314 seconds.
+✔ Test run with 3 tests in 0 suites passed after 11.314 seconds.

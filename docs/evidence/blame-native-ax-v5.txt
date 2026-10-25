@@ -1,0 +1,95 @@
+Window: "InspectionReview-9_v01e1h", App: GitPico.
+0 standard window InspectionReview-9_v01e1h – File History – App/Welcome.swift (main), ID: main, Secondary Actions: Raise
+	1 container
+		2 image Description: Divide, ID: arrow.triangle.branch
+		3 text main 0 changed files /Users/willsuo/files/Github/GitPico/dist/InspectionReview-9_v01e1h
+		4 split group main, SidebarNavigationSplitView
+			5 container
+				6 scroll area
+					7 list Sidebar
+						8 row (selectable) Workspace
+						9 row (selectable) Working Copy
+						10 row (selected) History
+						11 row (selectable) Stashes
+						12 row (selectable) Pull Requests
+						13 row (selectable) Branches Review
+						14 row (selectable) Reflog
+						15 row (selectable) Settings
+						16 row (selectable) Branches
+						17 row (selectable) main
+HEAD
+						18 row (selectable) Tags
+						19 row (selectable) review-base
+						20 row (selectable) Remotes
+				21 image Description: Filter, ID: line.3.horizontal.decrease.circle
+				22 text field (settable) Filter
+				23 button Description: Add, Help: Create branch, ID: plus
+				24 button Description: Edit, Help: Repository settings, ID: slider.horizontal.3
+			25 splitter (disabled, settable, float) 359
+			26 container
+				27 button Description: App/Welcome.swift, Help: Choose a tracked file
+				28 text 4 commits
+				29 scroll area
+					30 list Secondary Actions: AXScrollToTop, AXScrollToBottom
+						31 button PT, Pico Team, 10/24/26, 3e5330aa, Polish welcome title
+						32 button M, Maya, 10/24/26, 4cdf331c, Tune native spacing
+						33 button PT, Pico Team, 10/24/26, 056a14fb, Move welcome into App
+						34 button PT, Pico Team, 10/24/26, bf98bc58, Add welcome source
+				35 text Help: HEAD, Value: From 7927570d05b6
+				36 button Description: Refresh, ID: arrow.clockwise
+				37 unknown Description: Content list divider, Details: 320 points, Secondary Actions: Increment, Decrement
+				38 text 3e5330aa
+				39 menu button Actions
+				40 checkbox Description: Ignore Whitespace, Value: 0
+				41 File view
+					42 radio button Description: Diff, Value: 0
+					43 radio button Description: Raw, Value: 0
+					44 radio button Description: Blame, Value: 1
+				45 text App/Welcome.swift Polish welcome title
+				46 scroll area
+					47 list Secondary Actions: AXScrollToTop, AXScrollToBottom
+						48 text 1 let title = "A little clarity"
+						49 button Description: 3e5330aa, Polish welcome title, Pico Team · Oct 24, 2026, Help: Polish welcome title
+Pico Team <hello@example.invalid>
+App/Welcome.swift:1
+						50 text 2 let spacing = 14
+						51 button Description: 4cdf331c, Tune native spacing, Maya · Oct 24, 2026, Help: Tune native spacing
+Maya <maya@example.invalid>
+App/Welcome.swift:2
+						52 text 3 let showGraph = true
+						53 button Description: bf98bc58, Add welcome source, Pico Team · Oct 24, 2026, Help: Add welcome source
+Pico Team <hello@example.invalid>
+Sources/Welcome.swift:3
+	54 toolbar
+		55 button Description: Hide Sidebar, Secondary Actions: Increment, Decrement, Delete, Cancel
+		56 menu button chevron.pulldown, Help: Open a repository (⌘O), ID: folder
+		57 menu button chevron.pulldown, Help: Undo / redo Git history operations, ID: arrow.uturn.backward
+		58 button Description: Previous, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		59 button (disabled) Description: Next, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		60 button (disabled) Description: Fetch, Help: Fetch remotes, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		61 button (disabled) Description: Pull, Help: Pull current branch (fast-forward only), Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		62 button (disabled) Description: Push, Help: Push current branch, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		63 button (disabled) Description: Sync, Help: Fetch, fast-forward pull, then push, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		64 button Description: Merge, Help: Merge a branch into HEAD, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		65 button Description: Rebase, Help: Rebase HEAD onto a branch, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		66 menu button (disabled) chevron.pulldown, Help: Apply a saved stash, ID: tray.and.arrow.down
+		67 button (disabled) Description: Save Stash, Help: Save local changes to a stash, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		68 button Description: Refresh, Help: Refresh (⌘R), Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		69 container Secondary Actions: Move previous, Remove from toolbar
+			70 image Description: Search, ID: magnifyingglass
+			71 text field (settable) Description: Search, Placeholder: Search Loaded File History
+	72 close button
+	73 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	74 minimize button
+	75 text InspectionReview-9_v01e1h File History – App/Welcome.swift (main)
+76 menu bar
+	77 GitPico
+	78 File
+	79 Edit
+	80 View
+	81 Repository
+	82 Navigate
+	83 Window
+	84 Help
+
+The focused UI element is 0 standard window InspectionReview-9_v01e1h – File History – App/Welcome.swift (main), ID: main, Secondary Actions: Raise

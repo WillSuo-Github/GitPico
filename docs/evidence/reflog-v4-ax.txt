@@ -1,0 +1,179 @@
+Window: "HistoryReview-8zsc58q6", App: GitPico.
+0 standard window HistoryReview-8zsc58q6 – Reflog (main), ID: main, Secondary Actions: Raise
+	1 container
+		2 image Description: Divide, ID: arrow.triangle.branch
+		3 text main 0 changed files /Users/willsuo/files/Github/GitPico/dist/HistoryReview-8zsc58q6
+		4 split group main, SidebarNavigationSplitView
+			5 container
+				6 scroll area
+					7 list Sidebar
+						8 row (selectable) Workspace
+						9 row (selectable) Working Copy
+						10 row (selectable) History
+						11 row (selectable) Stashes
+						12 row (selectable) Pull Requests
+						13 row (selectable) Branches Review
+						14 row (selected) Reflog
+						15 row (selectable) Settings
+						16 row (selectable) Branches
+						17 row (selectable) main
+HEAD
+						18 row (selectable, collapsed) Description: recovered, Secondary Actions: Expand
+							19 disclosure triangle 0
+						20 row (selectable) Tags
+						21 row (selectable) review-base
+						22 row (selectable) Remotes
+				23 image Description: Filter, ID: line.3.horizontal.decrease.circle
+				24 text field (settable) Filter
+				25 button Description: Add, Help: Create branch, ID: plus
+				26 button Description: Edit, Help: Repository settings, ID: slider.horizontal.3
+			27 splitter (disabled, settable, float) 359
+			28 container
+				29 pop up button Ref:, Value: HEAD
+				30 text 22 events
+				31 scroll area Secondary Actions: Scroll Up, Scroll Down
+					32 list
+						33 row (selected) HEAD@{0}, 7a6933b3, reset: moving to 7a6933b3432797ac74b8832857e98e5cdfe68035, Oct 23, 2026 at 11:59 PM
+HEAD@{0}, 7a6933b3, reset: moving to 7a6933b3432797ac74b8832857e98e5cdfe68035, Oct 23, 2026 at 11:59 PM
+HEAD@{0}, 7a6933b3, reset: moving to 7a6933b3432797ac74b8832857e98e5cdfe68035, Oct 23, 2026 at 11:59 PM
+HEAD@{0}, 7a6933b3, reset: moving to 7a6933b3432797ac74b8832857e98e5cdfe68035, Oct 23, 2026 at 11:59 PM
+						34 row (selectable) HEAD@{1}, 66e7514c, rebase (finish): returning to refs/heads/main, Oct 23, 2026 at 11:59 PM
+HEAD@{1}, 66e7514c, rebase (finish): returning to refs/heads/main, Oct 23, 2026 at 11:59 PM
+HEAD@{1}, 66e7514c, rebase (finish): returning to refs/heads/main, Oct 23, 2026 at 11:59 PM
+HEAD@{1}, 66e7514c, rebase (finish): returning to refs/heads/main, Oct 23, 2026 at 11:59 PM
+						35 row (selectable) HEAD@{2}, 66e7514c, rebase (pick): Document review tips, Oct 23, 2026 at 11:59 PM
+HEAD@{2}, 66e7514c, rebase (pick): Document review tips, Oct 23, 2026 at 11:59 PM
+HEAD@{2}, 66e7514c, rebase (pick): Document review tips, Oct 23, 2026 at 11:59 PM
+HEAD@{2}, 66e7514c, rebase (pick): Document review tips, Oct 23, 2026 at 11:59 PM
+						36 row (selectable) HEAD@{3}, b5ce0338, rebase (edit): Tune native sidebar spacing, Oct 23, 2026 at 11:57 PM
+HEAD@{3}, b5ce0338, rebase (edit): Tune native sidebar spacing, Oct 23, 2026 at 11:57 PM
+HEAD@{3}, b5ce0338, rebase (edit): Tune native sidebar spacing, Oct 23, 2026 at 11:57 PM
+HEAD@{3}, b5ce0338, rebase (edit): Tune native sidebar spacing, Oct 23, 2026 at 11:57 PM
+						37 row (selectable) HEAD@{4}, 5041d90b, rebase (start): checkout 5041d90bfe924662ddfe504d73b223d1536432a9, Oct 23, 2026 at 11:57 PM
+HEAD@{4}, 5041d90b, rebase (start): checkout 5041d90bfe924662ddfe504d73b223d1536432a9, Oct 23, 2026 at 11:57 PM
+HEAD@{4}, 5041d90b, rebase (start): checkout 5041d90bfe924662ddfe504d73b223d1536432a9, Oct 23, 2026 at 11:57 PM
+HEAD@{4}, 5041d90b, rebase (start): checkout 5041d90bfe924662ddfe504d73b223d1536432a9, Oct 23, 2026 at 11:57 PM
+						38 row (selectable) HEAD@{5}, 7a6933b3, GitPico: undo Restore HEAD, Oct 23, 2026 at 11:54 PM
+HEAD@{5}, 7a6933b3, GitPico: undo Restore HEAD, Oct 23, 2026 at 11:54 PM
+HEAD@{5}, 7a6933b3, GitPico: undo Restore HEAD, Oct 23, 2026 at 11:54 PM
+HEAD@{5}, 7a6933b3, GitPico: undo Restore HEAD, Oct 23, 2026 at 11:54 PM
+						39 row (selectable) HEAD@{6}, 35bf0dab, reset: moving to 35bf0dab7477238c5f4d0e38d8e6d604742e0155, Oct 23, 2026 at 11:53 PM
+HEAD@{6}, 35bf0dab, reset: moving to 35bf0dab7477238c5f4d0e38d8e6d604742e0155, Oct 23, 2026 at 11:53 PM
+HEAD@{6}, 35bf0dab, reset: moving to 35bf0dab7477238c5f4d0e38d8e6d604742e0155, Oct 23, 2026 at 11:53 PM
+HEAD@{6}, 35bf0dab, reset: moving to 35bf0dab7477238c5f4d0e38d8e6d604742e0155, Oct 23, 2026 at 11:53 PM
+						40 row (selectable) HEAD@{7}, 7a6933b3, reset: moving to 7a6933b3432797ac74b8832857e98e5cdfe68035, Oct 23, 2026 at 11:43 PM
+HEAD@{7}, 7a6933b3, reset: moving to 7a6933b3432797ac74b8832857e98e5cdfe68035, Oct 23, 2026 at 11:43 PM
+HEAD@{7}, 7a6933b3, reset: moving to 7a6933b3432797ac74b8832857e98e5cdfe68035, Oct 23, 2026 at 11:43 PM
+HEAD@{7}, 7a6933b3, reset: moving to 7a6933b3432797ac74b8832857e98e5cdfe68035, Oct 23, 2026 at 11:43 PM
+						41 row (selectable) HEAD@{8}, 103e9f52, reset: moving to 103e9f528207a7f4b3c88363944c5e5fe1e04d5e, Oct 23, 2026 at 11:43 PM
+HEAD@{8}, 103e9f52, reset: moving to 103e9f528207a7f4b3c88363944c5e5fe1e04d5e, Oct 23, 2026 at 11:43 PM
+HEAD@{8}, 103e9f52, reset: moving to 103e9f528207a7f4b3c88363944c5e5fe1e04d5e, Oct 23, 2026 at 11:43 PM
+HEAD@{8}, 103e9f52, reset: moving to 103e9f528207a7f4b3c88363944c5e5fe1e04d5e, Oct 23, 2026 at 11:43 PM
+						42 row (selectable) HEAD@{9}, 7a6933b3, rebase (finish): returning to refs/heads/main, Oct 23, 2026 at 11:42 PM
+HEAD@{9}, 7a6933b3, rebase (finish): returning to refs/heads/main, Oct 23, 2026 at 11:42 PM
+HEAD@{9}, 7a6933b3, rebase (finish): returning to refs/heads/main, Oct 23, 2026 at 11:42 PM
+HEAD@{9}, 7a6933b3, rebase (finish): returning to refs/heads/main, Oct 23, 2026 at 11:42 PM
+						43 row (selectable) HEAD@{10}, 7a6933b3, rebase (pick): Document review tips, Oct 23, 2026 at 11:42 PM
+HEAD@{10}, 7a6933b3, rebase (pick): Document review tips, Oct 23, 2026 at 11:42 PM
+HEAD@{10}, 7a6933b3, rebase (pick): Document review tips, Oct 23, 2026 at 11:42 PM
+HEAD@{10}, 7a6933b3, rebase (pick): Document review tips, Oct 23, 2026 at 11:42 PM
+						44 row (selectable) HEAD@{11}, a9fa8097, commit (amend): Tune native sidebar spacing, Oct 23, 2026 at 11:41 PM
+HEAD@{11}, a9fa8097, commit (amend): Tune native sidebar spacing, Oct 23, 2026 at 11:41 PM
+HEAD@{11}, a9fa8097, commit (amend): Tune native sidebar spacing, Oct 23, 2026 at 11:41 PM
+HEAD@{11}, a9fa8097, commit (amend): Tune native sidebar spacing, Oct 23, 2026 at 11:41 PM
+						45 row (selectable) HEAD@{12}, 3c51e2fe, rebase (edit): Tune sidebar spacing, Oct 23, 2026 at 11:41 PM
+HEAD@{12}, 3c51e2fe, rebase (edit): Tune sidebar spacing, Oct 23, 2026 at 11:41 PM
+HEAD@{12}, 3c51e2fe, rebase (edit): Tune sidebar spacing, Oct 23, 2026 at 11:41 PM
+HEAD@{12}, 3c51e2fe, rebase (edit): Tune sidebar spacing, Oct 23, 2026 at 11:41 PM
+						46 row (selectable) HEAD@{13}, 5041d90b, rebase (pick): Add theme, Oct 23, 2026 at 11:41 PM
+HEAD@{13}, 5041d90b, rebase (pick): Add theme, Oct 23, 2026 at 11:41 PM
+HEAD@{13}, 5041d90b, rebase (pick): Add theme, Oct 23, 2026 at 11:41 PM
+HEAD@{13}, 5041d90b, rebase (pick): Add theme, Oct 23, 2026 at 11:41 PM
+						47 row (selectable) HEAD@{14}, d98c3bce, commit (amend): Add a calmer welcome, Oct 23, 2026 at 11:41 PM
+HEAD@{14}, d98c3bce, commit (amend): Add a calmer welcome, Oct 23, 2026 at 11:41 PM
+HEAD@{14}, d98c3bce, commit (amend): Add a calmer welcome, Oct 23, 2026 at 11:41 PM
+HEAD@{14}, d98c3bce, commit (amend): Add a calmer welcome, Oct 23, 2026 at 11:41 PM
+						48 row (selectable) HEAD@{15}, f5ceb7cc, rebase (pick): Add welcome copy, Oct 23, 2026 at 11:41 PM
+HEAD@{15}, f5ceb7cc, rebase (pick): Add welcome copy, Oct 23, 2026 at 11:41 PM
+HEAD@{15}, f5ceb7cc, rebase (pick): Add welcome copy, Oct 23, 2026 at 11:41 PM
+HEAD@{15}, f5ceb7cc, rebase (pick): Add welcome copy, Oct 23, 2026 at 11:41 PM
+						49 row (selectable) HEAD@{16}, 35bf0dab, rebase (start): checkout 35bf0dab7477238c5f4d0e38d8e6d604742e0155, Oct 23, 2026 at 11:41 PM
+HEAD@{16}, 35bf0dab, rebase (start): checkout 35bf0dab7477238c5f4d0e38d8e6d604742e0155, Oct 23, 2026 at 11:41 PM
+HEAD@{16}, 35bf0dab, rebase (start): checkout 35bf0dab7477238c5f4d0e38d8e6d604742e0155, Oct 23, 2026 at 11:41 PM
+HEAD@{16}, 35bf0dab, rebase (start): checkout 35bf0dab7477238c5f4d0e38d8e6d604742e0155, Oct 23, 2026 at 11:41 PM
+						50 row (selectable) HEAD@{17}, 103e9f52, commit: Document review tips, Oct 23, 2026 at 11:23 PM
+HEAD@{17}, 103e9f52, commit: Document review tips, Oct 23, 2026 at 11:23 PM
+HEAD@{17}, 103e9f52, commit: Document review tips, Oct 23, 2026 at 11:23 PM
+HEAD@{17}, 103e9f52, commit: Document review tips, Oct 23, 2026 at 11:23 PM
+						51 row (selectable) HEAD@{18}, 11ff0a59, commit: Tune sidebar spacing, Oct 23, 2026 at 11:23 PM
+HEAD@{18}, 11ff0a59, commit: Tune sidebar spacing, Oct 23, 2026 at 11:23 PM
+HEAD@{18}, 11ff0a59, commit: Tune sidebar spacing, Oct 23, 2026 at 11:23 PM
+HEAD@{18}, 11ff0a59, commit: Tune sidebar spacing, Oct 23, 2026 at 11:23 PM
+						52 row (selectable) HEAD@{19}, 01ea458e, commit: Add theme, Oct 23, 2026 at 11:23 PM
+HEAD@{19}, 01ea458e, commit: Add theme, Oct 23, 2026 at 11:23 PM
+HEAD@{19}, 01ea458e, commit: Add theme, Oct 23, 2026 at 11:23 PM
+HEAD@{19}, 01ea458e, commit: Add theme, Oct 23, 2026 at 11:23 PM
+						53 row (selectable) HEAD@{20}, c7fc352b, commit: Add welcome copy, Oct 23, 2026 at 11:23 PM
+HEAD@{20}, c7fc352b, commit: Add welcome copy, Oct 23, 2026 at 11:23 PM
+HEAD@{20}, c7fc352b, commit: Add welcome copy, Oct 23, 2026 at 11:23 PM
+HEAD@{20}, c7fc352b, commit: Add welcome copy, Oct 23, 2026 at 11:23 PM
+						54 row (selectable) HEAD@{21}, 35bf0dab, commit (initial): Prepare a quiet history review, Oct 23, 2026 at 11:23 PM
+HEAD@{21}, 35bf0dab, commit (initial): Prepare a quiet history review, Oct 23, 2026 at 11:23 PM
+HEAD@{21}, 35bf0dab, commit (initial): Prepare a quiet history review, Oct 23, 2026 at 11:23 PM
+HEAD@{21}, 35bf0dab, commit (initial): Prepare a quiet history review, Oct 23, 2026 at 11:23 PM
+					55 scroll bar (settable, float) 0
+						56 value indicator (settable, float) 0
+						57 increment arrow button
+						58 decrement arrow button
+						59 increment page button
+						60 decrement page button
+				61 unknown Description: Content list divider, Details: 320 points, Secondary Actions: Increment, Decrement
+				62 text 7a6933b3
+				63 menu button Recover…
+				64 Description: Diff layout, Help: Unified / side-by-side diff
+					65 radio button Description: Unified, Value: 0, ID: rectangle
+					66 radio button Description: Side by Side, Value: 1, ID: rectangle.split.2x1
+				67 View
+					68 radio button Description: Changeset, Value: 1
+					69 radio button Description: Tree, Value: 0
+				70 scroll area
+					71 text Author Pico Team <hello@example.invalid>
+					72 button Description: Go Down, Help: Show or hide commit details, ID: chevron.down
+					73 text Author Date October 23, 2026 at 11:23:05 PM GMT+8 Committer Pico Team <hello@example.invalid> PT Committer Date October 23, 2026 at 11:42:02 PM GMT+8 Refs HEAD main Commit Hash 7a6933b3432797ac74b8832857e98e5cdfe68035 Parent Hash a9fa8097452af575973d6419f712ba3e1698d6a6 Tree Hash 2e0d21f5495916c9a1d4406f4a1e147e9b8ca669 Document review tips
+					74 button Expand All
+					75 text Showing 1 changed files with 1 additions and 0 deletions
+					76 disclosure triangle Description: added, A, Notes.md, +1 −0, Help: A, Value: off
+						77 text added A Notes.md +1 −0
+	78 toolbar
+		79 button Description: Hide Sidebar, Secondary Actions: Increment, Decrement, Delete, Cancel
+		80 menu button chevron.pulldown, Help: Open a repository (⌘O), ID: folder
+		81 menu button chevron.pulldown, Help: Undo / redo Git history operations, ID: arrow.uturn.backward
+		82 button Description: Previous, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		83 button (disabled) Description: Next, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		84 button (disabled) Description: Fetch, Help: Fetch remotes, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		85 button (disabled) Description: Pull, Help: Pull current branch (fast-forward only), Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		86 button (disabled) Description: Push, Help: Push current branch, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		87 button (disabled) Description: Sync, Help: Fetch, fast-forward pull, then push, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		88 button Description: Merge, Help: Merge a branch into HEAD, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		89 button Description: Rebase, Help: Rebase HEAD onto a branch, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		90 menu button (disabled) chevron.pulldown, Help: Apply a saved stash, ID: tray.and.arrow.down
+		91 button (disabled) Description: Save Stash, Help: Save local changes to a stash, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		92 button Description: Refresh, Help: Refresh (⌘R), Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		93 container Secondary Actions: Move previous, Remove from toolbar
+			94 image Description: Search, ID: magnifyingglass
+			95 text field (settable) Description: Search, Placeholder: Search Reflog
+	96 close button
+	97 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	98 minimize button
+	99 text HistoryReview-8zsc58q6 Reflog (main)
+100 menu bar
+	101 GitPico
+	102 File
+	103 Edit
+	104 View
+	105 Repository
+	106 Navigate
+	107 Window
+	108 Help
+
+The focused UI element is 0 standard window HistoryReview-8zsc58q6 – Reflog (main), ID: main, Secondary Actions: Raise

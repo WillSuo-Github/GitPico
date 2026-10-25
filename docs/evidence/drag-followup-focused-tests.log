@@ -1,0 +1,42 @@
+Building for debugging...
+[4 / 19] GitCoreTests-product
+[6 / 21] GitPico
+[12 / 27] GitCoreTests-product
+[12 / 27] GitPico-product
+[18 / 32] GitPico-product
+[21 / 33] GitPico
+[21 / 33] GitPico-product
+[30 / 39] GitPico-product
+[33 / 38] GitPicoTests-product
+[36 / 41] GitPicoTests-product
+[40 / 43] GitPicoTests-product
+[42 / 46] GitPicoTests-product
+Build complete! (3.63 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test rebasePlanReloadRejectsTokensFromEarlierPlan() started.
+◇ Test nativeDropCombinesAllSelectedWorkingFilesAndRejectsMixedPayloads() started.
+◇ Test nativeWholeStashDropNegotiatesMoveAndDeliversExactlyOneReview() started.
+◇ Test nativeDropRevalidatesBusyStatePayloadAndSourceOperation() started.
+◇ Test nativeHeadDropPinsDestinationAndRejectsExternalBranchSwitch() started.
+◇ Test nativeDropRejectsInvalidDataAndClearsTargetOnExitOrCancel() started.
+◇ Test nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:) started.
+◇ Test case passing 1 argument variant → 0 to nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:) started.
+◇ Test case passing 1 argument variant → 1 to nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:) started.
+◇ Test case passing 1 argument variant → 2 to nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:) started.
+◇ Test case passing 1 argument variant → 3 to nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:) started.
+✔ Test rebasePlanReloadRejectsTokensFromEarlierPlan() passed after 2.263 seconds.
+✔ Test nativeDropRejectsInvalidDataAndClearsTargetOnExitOrCancel() passed after 2.481 seconds.
+✔ Test nativeDropRevalidatesBusyStatePayloadAndSourceOperation() passed after 2.575 seconds.
+✔ Test nativeDropCombinesAllSelectedWorkingFilesAndRejectsMixedPayloads() passed after 4.204 seconds.
+✔ Test nativeWholeStashDropNegotiatesMoveAndDeliversExactlyOneReview() passed after 4.408 seconds.
+✔ Test nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:) with 4 test cases passed after 6.452 seconds.
+✔ Test nativeHeadDropPinsDestinationAndRejectsExternalBranchSwitch() passed after 8.969 seconds.
+✔ Test run with 7 tests in 0 suites passed after 8.969 seconds.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test rebasePlanRowDropMovesBeforeOrAfterInBothDirections() started.
+✔ Test rebasePlanRowDropMovesBeforeOrAfterInBothDirections() passed after 0.001 seconds.
+✔ Test run with 1 test in 0 suites passed after 0.001 seconds.

@@ -1,0 +1,10 @@
+{
+  "backgroundTesting" : true,
+  "build" : "20261025010509",
+  "frontmostBundle" : "com.apple.UserNotificationCenter",
+  "frontmostProcessIdentifier" : 90302,
+  "isActive" : false,
+  "processIdentifier" : 20480,
+  "version" : "0.01",
+  "visibleWindows" : 0
+}

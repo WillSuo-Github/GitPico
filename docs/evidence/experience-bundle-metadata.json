@@ -1,0 +1,10 @@
+{
+  "CFBundleIdentifier": "com.willsuo.GitPico",
+  "CFBundleShortVersionString": "0.01",
+  "CFBundleVersion": "20261024233619",
+  "LSMinimumSystemVersion": "26.0",
+  "nativeAndStagedBundleMatch": true,
+  "verifiedEntries": 12,
+  "verificationProcessExited": true,
+  "host": "27.0.1"
+}

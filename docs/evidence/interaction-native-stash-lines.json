@@ -1,0 +1,6 @@
+{
+  "status": " M Layout.swift\n",
+  "workingLayout": "let spacing = 14\nlet radius = 8\nlet title = \"Welcome\"\n",
+  "indexLayout": "let spacing = 12\nlet radius = 8\nlet title = \"Welcome\"\n",
+  "stashes": "stash@{0}: On feature/sidebar: Native dragged files\nstash@{1}: On main: Line and drag review\n"
+}

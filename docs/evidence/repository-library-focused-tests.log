@@ -1,0 +1,87 @@
+Building for debugging...
+[Planning deferred tasks]
+[10 / 33] GitPico
+[19 / 42] GitPico
+[23 / 52] GitPico
+[26 / 52] GitPico
+/Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositoryLibraryView.swift:42:178: warning: result of call to 'acceptDrop(_:to:before:)' is unused [#NoUsage]
+ 40 |             HStack(spacing: 0) {
+ 41 |                 List(selection: Binding<RepositoryLibraryFilter?>(get: { filter }, set: { if let value = $0 { filter = value } })) {
+ 42 |                     Label("All Repositories", systemImage: "tray.full").tag(RepositoryLibraryFilter.all).dropDestination(for: RepositoryLibraryDrop.self) { tokens, _ in library.acceptDrop(tokens, to: nil) }
+    |                                                                                                                                                                                  `- warning: result of call to 'acceptDrop(_:to:before:)' is unused [#NoUsage]
+ 43 |                     Label("Favorites", systemImage: "star").tag(RepositoryLibraryFilter.favorites)
+ 44 |                     Label("Recent", systemImage: "clock").tag(RepositoryLibraryFilter.recent)
+
+/Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositoryLibraryView.swift:45:174: warning: result of call to 'acceptDrop(_:to:before:)' is unused [#NoUsage]
+ 43 |                     Label("Favorites", systemImage: "star").tag(RepositoryLibraryFilter.favorites)
+ 44 |                     Label("Recent", systemImage: "clock").tag(RepositoryLibraryFilter.recent)
+ 45 |                     Label("Ungrouped", systemImage: "folder").tag(RepositoryLibraryFilter.ungrouped).dropDestination(for: RepositoryLibraryDrop.self) { tokens, _ in library.acceptDrop(tokens, to: nil) }
+    |                                                                                                                                                                              `- warning: result of call to 'acceptDrop(_:to:before:)' is unused [#NoUsage]
+ 46 |                     Section("Groups") {
+ 47 |                         ForEach(library.orderedGroups) { group in
+
+/Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositoryLibraryView.swift:49:106: warning: result of call to 'acceptDrop(_:to:before:)' is unused [#NoUsage]
+ 47 |                         ForEach(library.orderedGroups) { group in
+ 48 |                             Label(library.breadcrumb(group.id), systemImage: "folder").lineLimit(2).tag(RepositoryLibraryFilter.group(group.id))
+ 49 |                                 .dropDestination(for: RepositoryLibraryDrop.self) { tokens, _ in library.acceptDrop(tokens, to: group.id) }
+    |                                                                                                          `- warning: result of call to 'acceptDrop(_:to:before:)' is unused [#NoUsage]
+ 50 |                                 .contextMenu { groupMenu(group) }
+ 51 |                         }
+
+/Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositoryLibraryView.swift:70:102: warning: result of call to 'acceptDrop(_:to:before:)' is unused [#NoUsage]
+ 68 |                             .contextMenu { repositoryMenu(entry) }
+ 69 |                             .draggable(RepositoryLibraryDrop(session: library.session, repositories: selection.contains(entry.id) ? Array(selection) : [entry.id]))
+ 70 |                             .dropDestination(for: RepositoryLibraryDrop.self) { tokens, _ in library.acceptDrop(tokens, to: entry.group, before: entry.id) }
+    |                                                                                                      `- warning: result of call to 'acceptDrop(_:to:before:)' is unused [#NoUsage]
+ 71 |                     }.listStyle(.plain)
+ 72 |                         .overlay { if entries.isEmpty { ContentUnavailableView("No repositories", systemImage: "folder", description: Text(query.isEmpty ? "Add a local Git repository to this library." : "No repositories match this search.")) } }
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[27 / 52] GitPico
+[28 / 52] GitPico
+[29 / 52] GitPico
+[33 / 48] GitPico
+[37 / 48] GitPicoTests-product
+[44 / 55] GitPicoTests-product
+[48 / 54] GitPicoTests-product
+[50 / 54] GitPicoTests-product
+Build complete! (6.01 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test librarySearchRankingKeyboardSelectionAndRecentOrdering() started.
+◇ Test libraryPersistsBookmarksGroupsFavoritesAndNameAcrossRestart() started.
+◇ Test libraryGroupCyclesAreRejectedAndRemovalKeepsContents() started.
+◇ Test libraryRelocateKeepsIdentityAndRejectsExistingRegistration() started.
+◇ Test libraryMultiDropSortAndStaleSessionGuard() started.
+◇ Test libraryMigratesLegacyRecentsOnceAndKeepsAllBeyondTwelve() started.
+◇ Test libraryCorruptFutureAndSymlinkStorageAreNeverReplaced() started.
+◇ Test libraryCrossInstanceEditsAndLockCannotOverwriteNewState() started.
+◇ Test libraryCanonicalizesAliasesAndPreservesMetadataWhenReopened() started.
+✘ Test libraryMigratesLegacyRecentsOnceAndKeepsAllBeyondTwelve() recorded an issue at RepositoryLibraryTests.swift:42:5: Expectation failed: library.document.repositories.count == 2
+↳ library.document.repositories.count == 2 → false
+↳   library.document.repositories.count → 0
+✘ Test libraryMigratesLegacyRecentsOnceAndKeepsAllBeyondTwelve() recorded an issue at RepositoryLibraryTests.swift:43:5: Expectation failed: library.recentPaths == [first.path, second.path]
+↳ library.recentPaths == [first.path, second.path] → false
+↳   library.recentPaths → []
+↳   [first.path, second.path] → ["/var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-library-1D28500E-89F7-424A-A3CA-994EAE669D7E/First", "/var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-library-1D28500E-89F7-424A-A3CA-994EAE669D7E/Second"]
+✘ Test libraryMigratesLegacyRecentsOnceAndKeepsAllBeyondTwelve() recorded an issue at RepositoryLibraryTests.swift:38:2: Caught error: GitFailure(message: "Reload the library after fixing its storage error. The existing file was kept.")
+✘ Test libraryMigratesLegacyRecentsOnceAndKeepsAllBeyondTwelve() failed after 0.004 seconds with 3 issues.
+✘ Test libraryRelocateKeepsIdentityAndRejectsExistingRegistration() recorded an issue at RepositoryLibraryTests.swift:157:2: Caught error: GitFailure(message: "Reload the library after fixing its storage error. The existing file was kept.")
+✘ Test libraryRelocateKeepsIdentityAndRejectsExistingRegistration() failed after 0.004 seconds with 1 issue.
+✔ Test libraryCorruptFutureAndSymlinkStorageAreNeverReplaced() passed after 0.006 seconds.
+✘ Test libraryGroupCyclesAreRejectedAndRemovalKeepsContents() recorded an issue at RepositoryLibraryTests.swift:69:2: Caught error: GitFailure(message: "Reload the library after fixing its storage error. The existing file was kept.")
+✘ Test libraryGroupCyclesAreRejectedAndRemovalKeepsContents() failed after 0.006 seconds with 1 issue.
+✘ Test libraryPersistsBookmarksGroupsFavoritesAndNameAcrossRestart() recorded an issue at RepositoryLibraryTests.swift:23:2: Caught error: GitFailure(message: "Reload the library after fixing its storage error. The existing file was kept.")
+✘ Test libraryPersistsBookmarksGroupsFavoritesAndNameAcrossRestart() failed after 0.006 seconds with 1 issue.
+✘ Test libraryMultiDropSortAndStaleSessionGuard() recorded an issue at RepositoryLibraryTests.swift:138:2: Caught error: GitFailure(message: "Reload the library after fixing its storage error. The existing file was kept.")
+✘ Test libraryMultiDropSortAndStaleSessionGuard() failed after 0.007 seconds with 1 issue.
+✘ Test librarySearchRankingKeyboardSelectionAndRecentOrdering() recorded an issue at RepositoryLibraryTests.swift:119:2: Caught error: GitFailure(message: "Reload the library after fixing its storage error. The existing file was kept.")
+✘ Test librarySearchRankingKeyboardSelectionAndRecentOrdering() failed after 0.007 seconds with 1 issue.
+✘ Test libraryCrossInstanceEditsAndLockCannotOverwriteNewState() recorded an issue at RepositoryLibraryTests.swift:85:2: Caught error: GitFailure(message: "Reload the library after fixing its storage error. The existing file was kept.")
+✘ Test libraryCrossInstanceEditsAndLockCannotOverwriteNewState() failed after 0.008 seconds with 1 issue.
+✘ Test libraryCanonicalizesAliasesAndPreservesMetadataWhenReopened() recorded an issue at RepositoryLibraryTests.swift:57:2: Caught error: GitFailure(message: "Reload the library after fixing its storage error. The existing file was kept.")
+✘ Test libraryCanonicalizesAliasesAndPreservesMetadataWhenReopened() failed after 0.008 seconds with 1 issue.
+✘ Test run with 9 tests in 0 suites failed after 0.009 seconds with 10 issues.
+Note: Some test targets reported failures:
+  - GitPicoTests (Swift Testing)

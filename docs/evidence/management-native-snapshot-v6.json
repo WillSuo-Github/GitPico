@@ -1,0 +1,6 @@
+{
+  "status": " M README.md\nM  Sources/Layout.swift\n?? Draft.txt\n",
+  "stashes": "stash@{0}: On main: Native snapshot verification\nstash@{1}: On main: Review checklist\n",
+  "indexLayout": "let spacing = 14\nlet radius = 8\n",
+  "draftExists": true
+}

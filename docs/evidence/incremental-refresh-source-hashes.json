@@ -1,0 +1,17 @@
+{
+  "Sources/GitCore/Models.swift": "3dff7853eb7061ec11ce343b481792216b8217296c9e1ceb070980c85fa945a0",
+  "Sources/GitCore/GitRepository.swift": "23167d4a9f0359a484ef759f6aff252405d2a817deeff681d4b16346fe7d8687",
+  "Sources/GitCore/GitInspection.swift": "0cf4da36fefe05ecabce31d96eff24ac052220d061318fff9afe406e436bce6a",
+  "Sources/GitCore/IncrementalSnapshot.swift": "2c71960f8f45f2983d02a9d811c8d6d73791eb61405bc9c085fd1380c75ed179",
+  "Sources/GitPico/Stores/RepositoryStore.swift": "e758992fe5cd32a22083aad620a10430ae0ddd5428e3b3b94cf9090cfd970843",
+  "Sources/GitPico/Stores/RepositoryActions.swift": "c498b57c94d3da6f6b9a5f2fd18afc2150a8d018fa9c191682e46393b8702d5f",
+  "Sources/GitPico/Stores/IncrementalRefresh.swift": "e01118a31e86889ccfe2254c32295c72a18498f7ca322b0a2428eb9e44205fc1",
+  "Sources/GitPico/Stores/RelatedRepositoryActions.swift": "27c8ac8addbe008df5f0b1f578b88f759d89a476e36bca4f11f813fdaedf62a1",
+  "Sources/GitPico/Stores/ExtensionActions.swift": "919bc07f4268563d0f1f7d13069d0a9885c78afd5724cdb590463c22edd51659",
+  "Sources/GitPico/Stores/ManagementActions.swift": "20200884f5dbeeea802fca5dd8e9718aaab5f431578868e1e456f63caa80e9b8",
+  "Sources/GitPico/Stores/LocalChangeActions.swift": "5ca9823de2cf65431ae2a78d89e50d968307d2ef4a738b1100d7e6d00891358d",
+  "Tests/GitCoreTests/IncrementalSnapshotTests.swift": "5517140dd6d87d0e2107f8889c8d117d62253152cca14373ea1a82eff3ef436f",
+  "Tests/GitPicoTests/IncrementalRefreshTests.swift": "96021b0a99b854390f7d2943c6d622ca86b12d1a92f410f455e705ddcf6afb5e",
+  "Tests/GitPicoTests/IncrementalRefreshPerformanceTests.swift": "6f9714321ea29cbcaf5d305654fb6c82f5e861b7b6894d05d76add2c5cce2b56",
+  "Tests/GitPicoTests/HistoryPreviewTests.swift": "8c2f59ec980514f1785e219dc260bd39abd4dbb8a0940de4cc06e4e74ea40aa9"
+}

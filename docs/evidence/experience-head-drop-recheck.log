@@ -1,0 +1,14 @@
+Building for debugging...
+[1 / 4] GitPico-product
+[3 / 13] GitPico
+[7 / 17] GitPico
+[15 / 21] GitPico
+[15 / 23] GitPico-product
+[18 / 19] GitPicoTests-product
+Build complete! (5.67 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test nativeHeadDropPinsDestinationAndRejectsExternalBranchSwitch() started.
+✔ Test nativeHeadDropPinsDestinationAndRejectsExternalBranchSwitch() passed after 8.201 seconds.
+✔ Test run with 1 test in 0 suites passed after 8.201 seconds.

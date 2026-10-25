@@ -1,0 +1,21 @@
+The following is a diff from the previous accessibility tree for Window: "Integration" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 90-116
+~88 standard window Integration, Secondary Actions: Raise
++		135 text Tower Command Line Tool: Open repositories from github.com: The Tower command line tool lets you open existing Git repositories from the command line. Issue Tracker URL: Inferring issue tracker URL from repository configuration. Issue Number Prefix: #
++		136 button Edit
++		137 pop up button GitHub Desktop (3.6.7)
++		138 text Open repositories from bitbucket.com:
++		139 pop up button Tower (18.0)
++		140 text Gerrit Code Review:
++		141 button Install
++		142 checkbox Always send crash reports, Value: 0
++		143 text Automatically submit crash reports to help us diagnose and fix issues in Tower. Help us improve by sending anonymous usage data. SSH Agent:
++		144 pop up button System SSH Agent
++		145 text Selected SSH Agent will be used for SSH remote connections and SSH signing. Graphite Binary:
++		146 pop up button No Value
++		147 text Minimum required Graphite version is 1.5.3
++		148 checkbox Always prompt to use Graphite commands, Value: 1
++		149 checkbox Send anonymous usage data, Value: 0
++		150 checkbox Enable easy push action for Gerrit, Value: 0
+~	134 text Integration
+The focused UI element is 88 standard window Integration, Secondary Actions: Raise

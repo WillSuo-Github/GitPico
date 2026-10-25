@@ -1,0 +1,40 @@
+Building for debugging...
+[1 / 1]
+[3 / 13] GitPico
+[14 / 25] GitPico
+[15 / 25] GitPico
+[17 / 31] GitPico-product
+[19 / 31] GitPico
+[21 / 31] GitPico-product
+[21 / 31] GitPico
+[21 / 31] GitPico-product
+[27 / 37] GitPico
+[27 / 37] GitPico-product
+[27 / 37] GitPico
+[27 / 37] GitPico-product
+[27 / 37] GitPico
+[27 / 37] GitPico-product
+[27 / 37] GitPico
+[36 / 42] GitPico
+[36 / 44] GitPico-product
+[39 / 44] GitPicoTests-product
+[41 / 46] GitPicoTests-product
+[43 / 46] GitPicoTests-product
+[45 / 49] GitPicoTests-product
+Build complete! (10.41 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test rejectedCommitKeepsDraftStagingAndHead() started.
+◇ Test preparedPatchSelectionUsesOnlyVisibleChangedLines() started.
+◇ Test workingDiffDeduplicatesSelectionAndRejectsLateFileResults() started.
+◇ Test fileFilterPrunesSelectionAndDoesNotStageIgnoredFiles() started.
+◇ Test partialCheckboxStagesRemainingChangesAndCommitKeepsUnstagedContent() started.
+◇ Test workingMultiselectionStagesOnlyTargetsAndKeepsActiveFile() started.
+✔ Test preparedPatchSelectionUsesOnlyVisibleChangedLines() passed after 0.010 seconds.
+✔ Test fileFilterPrunesSelectionAndDoesNotStageIgnoredFiles() passed after 6.611 seconds.
+✔ Test workingDiffDeduplicatesSelectionAndRejectsLateFileResults() passed after 6.716 seconds.
+✔ Test workingMultiselectionStagesOnlyTargetsAndKeepsActiveFile() passed after 12.677 seconds.
+✔ Test rejectedCommitKeepsDraftStagingAndHead() passed after 13.177 seconds.
+✔ Test partialCheckboxStagesRemainingChangesAndCommitKeepsUnstagedContent() passed after 18.311 seconds.
+✔ Test run with 6 tests in 0 suites passed after 18.312 seconds.

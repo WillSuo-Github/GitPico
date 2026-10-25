@@ -1,0 +1,58 @@
+Building for debugging...
+[Planning deferred tasks]
+[7 / 25] GitCoreTests-product
+[17 / 36] GitCoreTests-product
+[18 / 47] GitPico
+[21 / 46] GitCoreTests-product
+[25 / 46] GitPico
+/Users/willsuo/files/Github/GitPico/Tests/GitCoreTests/ManagementEdgeTests.swift:52:26: warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:)' is unused [#NoUsage]
+50 |     try await f.repo.fetchRemote(remote, tags: true)
+51 |     #expect(try await f.repo.references().contains { $0.fullName == "refs/tags/v1" })
+52 |     try await GitProcess.run(["update-ref", "-d", "refs/heads/temporary"], at: server)
+   |                          `- warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:)' is unused [#NoUsage]
+53 |     try await f.repo.fetchRemote(remote, prune: true)
+54 |     #expect(!(try await f.repo.references().contains { $0.fullName == "refs/remotes/origin/temporary" }))
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[27 / 46] GitPico
+[28 / 46] GitPico
+[30 / 46] GitPico
+[32 / 46] GitPico
+[33 / 46] GitCoreTests-product
+[33 / 46] GitPico
+[37 / 50] GitPico
+[39 / 50] GitPico
+[39 / 50] GitCoreTests-product
+[41 / 50] GitPico
+[45 / 50] GitPicoTests-product
+[52 / 57] GitPicoTests-product
+[54 / 57] GitPicoTests-product
+[56 / 60] GitPicoTests-product
+Build complete! (7.19 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test submoduleAddListDeinitializeAndInitializeKeepGitData() started.
+◇ Test submoduleFetchCheckoutAndPinnedUpdateDoNotCommitParent() started.
+◇ Test worktreeCreationRejectsExistingDestinationsAndChangedBranchPreview() started.
+◇ Test worktreeMoveLockAndRepairRetainRegistrationIdentity() started.
+◇ Test worktreeDirtyIgnoredCurrentAndStaleGuardsPreventRemoval() started.
+◇ Test worktreeCreateModesPreserveMainAndEnforceBranchOccupancy() started.
+◇ Test submoduleMoveURLSyncRepairAndRemoveStageMetadataSafely() started.
+◇ Test submoduleDirtyAndChangedPreviewCannotOverwriteLocalFiles() started.
+✘ Test worktreeMoveLockAndRepairRetainRegistrationIdentity() recorded an issue at WorktreeManagementTests.swift:25:2: Caught error: GitFailure(message: "Git created a worktree but its state differs from the preview. Inspect the worktree list before continuing.")
+✘ Test worktreeMoveLockAndRepairRetainRegistrationIdentity() failed after 1.671 seconds with 1 issue.
+✘ Test worktreeCreateModesPreserveMainAndEnforceBranchOccupancy() recorded an issue at WorktreeManagementTests.swift:5:2: Caught error: GitFailure(message: "Git created a worktree but its state differs from the preview. Inspect the worktree list before continuing.")
+✘ Test worktreeCreateModesPreserveMainAndEnforceBranchOccupancy() failed after 1.923 seconds with 1 issue.
+✘ Test worktreeDirtyIgnoredCurrentAndStaleGuardsPreventRemoval() recorded an issue at WorktreeManagementTests.swift:47:2: Caught error: GitFailure(message: "Git created a worktree but its state differs from the preview. Inspect the worktree list before continuing.")
+✘ Test worktreeDirtyIgnoredCurrentAndStaleGuardsPreventRemoval() failed after 1.951 seconds with 1 issue.
+✔ Test worktreeCreationRejectsExistingDestinationsAndChangedBranchPreview() passed after 2.142 seconds.
+✘ Test submoduleAddListDeinitializeAndInitializeKeepGitData() recorded an issue at SubmoduleManagementTests.swift:11:2: Caught error: GitFailure(message: "Repair/absorb the embedded submodule Git directory before removal.")
+✘ Test submoduleAddListDeinitializeAndInitializeKeepGitData() failed after 7.448 seconds with 1 issue.
+✔ Test submoduleDirtyAndChangedPreviewCannotOverwriteLocalFiles() passed after 10.751 seconds.
+✘ Test submoduleMoveURLSyncRepairAndRemoveStageMetadataSafely() recorded an issue at SubmoduleManagementTests.swift:25:2: Caught error: GitFailure(message: "Repair/absorb the embedded submodule Git directory before removal.")
+✘ Test submoduleMoveURLSyncRepairAndRemoveStageMetadataSafely() failed after 29.026 seconds with 1 issue.
+✔ Test submoduleFetchCheckoutAndPinnedUpdateDoNotCommitParent() passed after 29.026 seconds.
+✘ Test run with 8 tests in 0 suites failed after 29.027 seconds with 5 issues.
+Note: Some test targets reported failures:
+  - GitCoreTests (Swift Testing)

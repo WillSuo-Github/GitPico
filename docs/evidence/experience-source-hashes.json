@@ -1,0 +1,21 @@
+{
+  "Sources/GitCore/ReferenceManagement.swift": "0a126d0cfdc03b2a8628314ce766467b673744461cf1fc6ee54ecdb74b149d13",
+  "Sources/GitPico/App/GitPicoApp.swift": "7ed570c2eab229151555305e26b518eb5642a2427b8a6ad02c6d6758024d3e9a",
+  "Sources/GitPico/App/RepositoryCommands.swift": "b1b0eafd1582b445dce7bdf7b6e43ccc18132f62c61c35180e6248a052a49a12",
+  "Sources/GitPico/Stores/RepositoryStore.swift": "11bb8ed5ad925aa0a7173cc39ccaa8d54061993657bb2db7cafd92365af35804",
+  "Sources/GitPico/Stores/RepositoryActions.swift": "4444a8f020d0f74b8feea0be9b4453c90d31223f7f781210443efb35b76951d0",
+  "Sources/GitPico/Stores/DragActions.swift": "4ef0322d5170425f567ffc337cc4391787d8b74aba5f646196936dd89b719fa0",
+  "Sources/GitPico/Stores/HistoryPreview.swift": "3bb81b36ccb1d3482d716da4df511f5f45a1618919b9064351a9c674ddc4dd5d",
+  "Sources/GitPico/Stores/NavigationState.swift": "9d55368f795c9c18472bdb6e642e97b22a0f5529aab3ce587288cba7b6a5cc6f",
+  "Sources/GitPico/Views/RepositoryToolbar.swift": "76d14b27ed7e0bf7a1a7db635dd53e783eddd8c0223d041572b496607e521d8a",
+  "Sources/GitPico/Views/BranchNavigationMenu.swift": "939aee3be61e8d31f7c61590746ed4149eeeea3c52bddcf154cf6261b62b0c2f",
+  "Sources/GitPico/Views/ContentView.swift": "55c82a85de30fa6989f01c0f85d350cbe6638586f3a24b271adff805bebe83ed",
+  "Sources/GitPico/Views/HistoryView.swift": "a7eb29d063b65045e11ceeefe52499253bbe31253b85f78871634148d6dd7ce5",
+  "Sources/GitPico/Views/CommitRow.swift": "caa7d84b2d73a3e4221f933dc58c45b74ba02f0028199d9f66f652af68ee943d",
+  "Sources/GitPico/Views/FileHistoryView.swift": "b9e1f3a7c145f9a2a60e549e7415692d65aa6a842d32002d6b45c3d2d7d8193a",
+  "Sources/GitPico/Views/SidebarView.swift": "ab0d8e102d938cc0a772643be4b1acdfbe9e36973c3633675175be2153d00781",
+  "Tests/GitPicoTests/NavigationExperienceTests.swift": "33e45897aa16d7edc4b6b6f4a5da30456a8fe148a74718b5f4177a280eedd0e1",
+  "Tests/GitPicoTests/HistoryComponentRenderTests.swift": "dc7a74ccf88897501f0bc633b74251cca871d2dabdd49ebd8375efdd957de9f0",
+  "Tests/GitPicoTests/NativeDropTests.swift": "a40790cd41174c3ebcc2aa4ddba7faccae23f694bb922546842154861014f7bb",
+  "Tests/GitCoreTests/BranchCheckoutExperienceTests.swift": "667f6bff5d379b31f882c7b38536c5ca375531e0fcb2f1617afc6c7565b54250"
+}

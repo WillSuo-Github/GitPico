@@ -1,0 +1,39 @@
+Building for debugging...
+[Computing dependencies]
+[Pre-planning 1 / 153]
+[Planning deferred tasks]
+[1 / 4] GitPico-product
+[8 / 30] GitCoreTests-product
+[8 / 29] GitPico
+[14 / 35] GitPico
+[22 / 55] GitPico
+[24 / 55] GitPico-product
+[25 / 55] GitPico-product
+[26 / 55] GitPico-product
+[27 / 55] GitPico
+[29 / 55] GitPico
+[30 / 57] GitPico
+[33 / 57] GitPico
+[35 / 57] GitPico-product
+[36 / 57] GitPico-product
+[36 / 57] GitPico
+[37 / 58] GitPico
+[39 / 58] GitPico-product
+[39 / 56] GitPico-product
+[39 / 56] GitPico
+[41 / 56] GitPico
+[41 / 56] GitPico-product
+[43 / 58] GitPico-product
+[47 / 58] GitPicoTests-product
+[58 / 69] GitPicoTests-product
+[62 / 68] GitPicoTests-product
+[64 / 68] GitPicoTests-product
+Build complete! (34.21 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test renderWorkingFileAndDiffRowsWithoutWindows() started.
+◇ Test failedWorkingDiffCanRetryWithoutLosingFileSelection() started.
+✔ Test renderWorkingFileAndDiffRowsWithoutWindows() passed after 0.235 seconds.
+✔ Test failedWorkingDiffCanRetryWithoutLosingFileSelection() passed after 6.279 seconds.
+✔ Test run with 2 tests in 0 suites passed after 6.279 seconds.

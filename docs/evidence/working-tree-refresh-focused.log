@@ -1,0 +1,74 @@
+Building for debugging...
+[Computing dependencies]
+[Pre-planning 1 / 153]
+[Planning deferred tasks]
+[1 / 1]
+[7 / 29] GitCoreTests-product
+[8 / 30] GitCoreTests-product
+[8 / 29] GitPico-product
+[19 / 47] GitPico
+[20 / 57] GitPico-product
+[21 / 59] GitPico-product
+[22 / 59] GitPico-product
+[23 / 59] GitPico-product
+[23 / 69] GitPico-product
+[25 / 69] GitPico-product
+[26 / 69] GitPico-product
+[27 / 69] GitPico-product
+[29 / 69] GitPico-product
+[31 / 69] GitPico-product
+[32 / 69] GitPico
+[33 / 69] GitPico
+[34 / 69] GitPico-product
+[38 / 71] GitPico
+[41 / 71] GitPico-product
+[43 / 72] GitPico-product
+[44 / 72] GitPico-product
+[45 / 72] GitPico
+[46 / 70] GitPico
+[47 / 70] GitPico-product
+[49 / 70] GitPico
+[50 / 70] GitPico
+[51 / 80] GitPico
+[52 / 80] GitPico
+[53 / 80] GitPico
+[54 / 80] GitPico
+[55 / 80] GitPico
+[56 / 80] GitPico
+[57 / 80] GitPico
+[58 / 80] GitPico
+[60 / 80] GitPico
+[61 / 80] GitPico
+[61 / 80] GitPico-product
+[63 / 80] GitPico
+[63 / 80] GitPico-product
+[65 / 80] GitPico
+[65 / 80] GitPico-product
+[65 / 80] GitPico
+[67 / 80] GitPico
+[71 / 82] GitPicoTests-product
+[82 / 93] GitPicoTests-product
+[86 / 92] GitPicoTests-product
+[88 / 92] GitPicoTests-product
+[90 / 92] GitPicoTests-product
+Build complete! (51.93 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test stashSaveRenamePopAndDeleteRefreshStackAndKeepStableHistory() started.
+◇ Test stashBranchAndPartialFileApplyUseIncrementalState() started.
+◇ Test checkoutUpdatesHeadHistoryAndBrowserWithoutManagementReload() started.
+◇ Test mergeConflictAbortAndContinueRefreshOperationAndUndo() started.
+◇ Test automaticStashWaitingBannerSurvivesMergeConflictAndAbortRestoresWork() started.
+◇ Test automaticStashCarriesRefreshScopeAndRestoresStagingAfterCheckout() started.
+◇ Test failedStashPopPublishesConflictsAndRetainsSavedEntry() started.
+◇ Test fastForwardAndNoOpMergeUpdateHistoryOnlyWhenHeadMoves() started.
+✔ Test failedStashPopPublishesConflictsAndRetainsSavedEntry() passed after 13.726 seconds.
+✔ Test checkoutUpdatesHeadHistoryAndBrowserWithoutManagementReload() passed after 15.055 seconds.
+✔ Test automaticStashCarriesRefreshScopeAndRestoresStagingAfterCheckout() passed after 15.685 seconds.
+✔ Test fastForwardAndNoOpMergeUpdateHistoryOnlyWhenHeadMoves() passed after 15.986 seconds.
+✔ Test automaticStashWaitingBannerSurvivesMergeConflictAndAbortRestoresWork() passed after 17.066 seconds.
+✔ Test stashBranchAndPartialFileApplyUseIncrementalState() passed after 17.690 seconds.
+✔ Test mergeConflictAbortAndContinueRefreshOperationAndUndo() passed after 18.263 seconds.
+✔ Test stashSaveRenamePopAndDeleteRefreshStackAndKeepStableHistory() passed after 22.179 seconds.
+✔ Test run with 8 tests in 0 suites passed after 22.180 seconds.

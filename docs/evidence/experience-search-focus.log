@@ -1,0 +1,20 @@
+Building for debugging...
+[Computing dependencies]
+[1 / 1]
+[3 / 13] GitPico
+[7 / 17] GitPico
+[7 / 17] GitPico-product
+[16 / 23] GitPico
+[16 / 25] GitPico-product
+[19 / 24] GitPicoTests-product
+[21 / 26] GitPicoTests-product
+[23 / 26] GitPicoTests-product
+[25 / 29] GitPicoTests-product
+[27 / 29] GitPicoTests-product
+Build complete! (8.58 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test toolbarSearchBridgeUpdatesQueryAndCancelsObsoleteFocus() started.
+✔ Test toolbarSearchBridgeUpdatesQueryAndCancelsObsoleteFocus() passed after 0.075 seconds.
+✔ Test run with 1 test in 0 suites passed after 0.075 seconds.

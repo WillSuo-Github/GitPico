@@ -1,0 +1,77 @@
+Building for debugging...
+[Pre-planning 1 / 153]
+[Planning deferred tasks]
+[4 / 29] GitCoreTests-product
+[5 / 32] GitCore
+[8 / 35] GitCore
+[17 / 45] GitCore
+[18 / 45] GitCore
+[21 / 57] GitCore
+[24 / 57] GitCore
+[29 / 60] GitCoreTests-product
+[29 / 59] GitCoreTests-product
+[32 / 59] GitCore
+[33 / 59] GitCore
+[34 / 59] GitCore
+[41 / 70] GitPico-product
+[42 / 81] GitPico
+[44 / 81] GitPico-product
+[45 / 81] GitPico-product
+[46 / 81] GitPico-product
+[48 / 81] GitPico
+[49 / 81] GitPico
+[50 / 81] GitPico
+[50 / 81] GitPico-product
+[52 / 81] GitPico
+[53 / 81] GitPico
+[54 / 81] GitPico
+[56 / 81] GitPico
+[58 / 83] GitPico
+[60 / 83] GitPico
+[64 / 84] GitPico-product
+[65 / 85] GitCoreTests-product
+[67 / 85] GitCoreTests-product
+[70 / 96] GitCoreTests-product
+[71 / 96] GitCoreTests-product
+[72 / 96] GitPico
+[75 / 96] GitCoreTests-product
+[76 / 96] GitCoreTests-product
+[77 / 96] GitCoreTests-product
+[79 / 95] GitCoreTests-product
+[82 / 95] GitPico
+[82 / 95] GitCoreTests-product
+/Users/willsuo/files/Github/GitPico/Tests/GitCoreTests/ManagementEdgeTests.swift:52:26: warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:lfsEnvironment:cancellable:)' is unused [#NoUsage]
+50 |     try await f.repo.fetchRemote(remote, tags: true)
+51 |     #expect(try await f.repo.references().contains { $0.fullName == "refs/tags/v1" })
+52 |     try await GitProcess.run(["update-ref", "-d", "refs/heads/temporary"], at: server)
+   |                          `- warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:lfsEnvironment:cancellable:)' is unused [#NoUsage]
+53 |     try await f.repo.fetchRemote(remote, prune: true)
+54 |     #expect(!(try await f.repo.references().contains { $0.fullName == "refs/remotes/origin/temporary" }))
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[82 / 95] GitPico
+[84 / 95] GitPico
+[88 / 97] GitCoreTests-product
+[88 / 97] GitPicoTests-product
+[98 / 108] GitPicoTests-product
+[103 / 110] GitPicoTests-product
+[105 / 110] GitCoreTests-product
+[107 / 110] GitPicoTests-product
+[109 / 113] GitPicoTests-product
+Build complete! (28.96 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test partialCheckboxStagesRemainingChangesAndCommitKeepsUnstagedContent() started.
+◇ Test successfulCommitWithUndoFailureClearsDraftAndReportsWarning() started.
+◇ Test rejectedCommitKeepsDraftStagingAndHead() started.
+✔ Test successfulCommitWithUndoFailureClearsDraftAndReportsWarning() passed after 11.796 seconds.
+✔ Test rejectedCommitKeepsDraftStagingAndHead() passed after 12.977 seconds.
+✔ Test partialCheckboxStagesRemainingChangesAndCommitKeepsUnstagedContent() passed after 17.758 seconds.
+✔ Test run with 3 tests in 0 suites passed after 17.758 seconds.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test createdCommitIsNotReportedAsFailureWhenUndoStorageFails() started.
+✔ Test createdCommitIsNotReportedAsFailureWhenUndoStorageFails() passed after 2.351 seconds.
+✔ Test run with 1 test in 0 suites passed after 2.352 seconds.

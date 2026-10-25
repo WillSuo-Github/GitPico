@@ -1,0 +1,146 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project GitPico.xcodeproj -scheme GitPico -configuration Debug -destination platform=macOS -derivedDataPath .build/xcode -parallel-testing-enabled NO "-only-testing:GitPicoTests" -resultBundlePath .build/xcode/AppTests.xcresult test-without-building
+
+Writing result bundle at path:
+	/Users/willsuo/files/Github/GitPico/.build/xcode/AppTests.xcresult
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:macOS, arch:arm64, id:00008132-000C284E0205001C, name:My Mac }
+{ platform:macOS, arch:x86_64, id:00008132-000C284E0205001C, name:My Mac }
+2026-10-24 21:52:55.596824+0800 GitPico[55254:2375865] [Connection] Unable to get synchronousRemoteObjectProxy, error: Error Domain=NSCocoaErrorDomain Code=4097 "connection to service named com.apple.linkd.autoShortcut" UserInfo={NSDebugDescription=connection to service named com.apple.linkd.autoShortcut}
+2026-10-24 21:52:55.597049+0800 GitPico[55254:2375865] [Application] Error registering app with intents framework: Error Domain=NSCocoaErrorDomain Code=4097 "connection to service named com.apple.linkd.autoShortcut" UserInfo={NSDebugDescription=connection to service named com.apple.linkd.autoShortcut}
+2026-10-24 21:52:55.597488+0800 GitPico[55254:2375881] [Connection] Unable to get synchronousRemoteObjectProxy, error: Error Domain=NSCocoaErrorDomain Code=4097 "connection to service named com.apple.linkd.autoShortcut" UserInfo={NSDebugDescription=connection to service named com.apple.linkd.autoShortcut}
+2026-10-24 21:52:55.597543+0800 GitPico[55254:2375881] [Connection] Unable to re-register with Process Instance Registry, error: Error Domain=NSCocoaErrorDomain Code=4097 "connection to service named com.apple.linkd.autoShortcut" UserInfo={NSDebugDescription=connection to service named com.apple.linkd.autoShortcut}
+2026-10-24 21:52:55.598143+0800 GitPico[55254:2375866] [Connection] Unable to get synchronousRemoteObjectProxy, error: Error Domain=NSCocoaErrorDomain Code=4097 "connection to service named com.apple.linkd.autoShortcut" UserInfo={NSDebugDescription=connection to service named com.apple.linkd.autoShortcut}
+2026-10-24 21:52:55.598178+0800 GitPico[55254:2375866] [Connection] Unable to re-register with Process Instance Registry, error: Error Domain=NSCocoaErrorDomain Code=4097 "connection to service named com.apple.linkd.autoShortcut" UserInfo={NSDebugDescription=connection to service named com.apple.linkd.autoShortcut}
+2026-10-24 21:52:55.598592+0800 GitPico[55254:2375866] [Connection] Will NOT re-try to establish the connection
+2026-10-24 21:52:55.598626+0800 GitPico[55254:2375865] [Connection] Unable to get synchronousRemoteObjectProxy, error: Error Domain=NSCocoaErrorDomain Code=4097 "connection to service named com.apple.linkd.autoShortcut" UserInfo={NSDebugDescription=connection to service named com.apple.linkd.autoShortcut}
+2026-10-24 21:52:55.598654+0800 GitPico[55254:2375865] [Connection] Unable to re-register with Process Instance Registry, error: Error Domain=NSCocoaErrorDomain Code=4097 "connection to service named com.apple.linkd.autoShortcut" UserInfo={NSDebugDescription=connection to service named com.apple.linkd.autoShortcut}
+Test Suite 'All tests' started at 2026-10-24 21:52:55.648.
+Test Suite 'All tests' passed at 2026-10-24 21:52:55.648.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test browseStoreSeparatesCleanIgnoredAndChangedFilesWithoutFakeStaging() started.
+✔ Test browseStoreSeparatesCleanIgnoredAndChangedFilesWithoutFakeStaging() passed after 4.203 seconds.
+◇ Test quickActionsExposeContextSearchAndKeepDangerousActionsReviewed() started.
+✔ Test quickActionsExposeContextSearchAndKeepDangerousActionsReviewed() passed after 2.612 seconds.
+◇ Test quickActionCanSelectCleanFileWithAllFilesEnabled() started.
+✔ Test quickActionCanSelectCleanFileWithAllFilesEnabled() passed after 1.841 seconds.
+◇ Test toolPreferencesPersistAndRejectStaleInvalidAndCorruptEdits() started.
+✔ Test toolPreferencesPersistAndRejectStaleInvalidAndCorruptEdits() passed after 0.005 seconds.
+◇ Test dragTokensRejectOtherRepositoriesUnsupportedTargetsAndBusyState() started.
+2026-10-24 21:53:06.612117+0800 GitPico[55254:2375637] [Type Declaration Issues] Type "com.willsuo.GitPico.drag" was expected to be declared and exported in the Info.plist of GitPico.app, but it was not found.
+2026-10-24 21:53:06.613128+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+2026-10-24 21:53:06.613298+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+✔ Test dragTokensRejectOtherRepositoriesUnsupportedTargetsAndBusyState() passed after 2.306 seconds.
+◇ Test stashDropRoutesWholeFilesChunksAndLinesWithoutMutatingGit() started.
+2026-10-24 21:53:10.409261+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+2026-10-24 21:53:10.409447+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+2026-10-24 21:53:10.409585+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+2026-10-24 21:53:10.409732+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+✔ Test stashDropRoutesWholeFilesChunksAndLinesWithoutMutatingGit() passed after 4.668 seconds.
+◇ Test branchAndCommitDropsCreateReviewedOperations() started.
+2026-10-24 21:53:13.650244+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+2026-10-24 21:53:13.650375+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+2026-10-24 21:53:13.650399+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+2026-10-24 21:53:13.650414+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+2026-10-24 21:53:13.841140+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+2026-10-24 21:53:13.841199+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+✔ Test branchAndCommitDropsCreateReviewedOperations() passed after 2.556 seconds.
+◇ Test historicalRequestsRetainSelectionRevisionAndRepositorySession() started.
+✔ Test historicalRequestsRetainSelectionRevisionAndRepositorySession() passed after 2.656 seconds.
+◇ Test historicalStoreExportsFrozenSnapshotInBackgroundWithoutWindows() started.
+✔ Test historicalStoreExportsFrozenSnapshotInBackgroundWithoutWindows() passed after 0.933 seconds.
+◇ Test localChangeRoutesSelectionAndRejectsOldRepositoryRequests() started.
+✔ Test localChangeRoutesSelectionAndRejectsOldRepositoryRequests() passed after 2.367 seconds.
+◇ Test exportedPatchWriterPreservesBytesAndExistingFiles() started.
+✔ Test exportedPatchWriterPreservesBytesAndExistingFiles() passed after 0.005 seconds.
+◇ Test nativeWholeStashDropNegotiatesMoveAndDeliversExactlyOneReview() started.
+2026-10-24 21:53:22.465788+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+✔ Test nativeWholeStashDropNegotiatesMoveAndDeliversExactlyOneReview() passed after 3.478 seconds.
+◇ Test nativeDropRevalidatesBusyStatePayloadAndSourceOperation() started.
+✔ Test nativeDropRevalidatesBusyStatePayloadAndSourceOperation() passed after 1.736 seconds.
+◇ Test nativeDropCombinesAllSelectedWorkingFilesAndRejectsMixedPayloads() started.
+2026-10-24 21:53:27.358258+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+✔ Test nativeDropCombinesAllSelectedWorkingFilesAndRejectsMixedPayloads() passed after 3.495 seconds.
+◇ Test nativeDropRejectsInvalidDataAndClearsTargetOnExitOrCancel() started.
+✔ Test nativeDropRejectsInvalidDataAndClearsTargetOnExitOrCancel() passed after 1.719 seconds.
+◇ Test nativeHeadDropPinsDestinationAndRejectsExternalBranchSwitch() started.
+2026-10-24 21:53:32.910668+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+✔ Test nativeHeadDropPinsDestinationAndRejectsExternalBranchSwitch() passed after 8.555 seconds.
+◇ Test nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:) started.
+◇ Test case passing 1 argument variant → 0 to nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:) started.
+2026-10-24 21:53:42.829690+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+​◇ Test case passing 1 argument variant → 1 to nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:) started.
+2026-10-24 21:53:49.170762+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+​◇ Test case passing 1 argument variant → 2 to nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:) started.
+2026-10-24 21:53:55.427301+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+​◇ Test case passing 1 argument variant → 3 to nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:) started.
+2026-10-24 21:54:01.700260+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+​✔ Test nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:) with 4 test cases passed after 25.202 seconds.
+◇ Test rebasePlanReloadRejectsTokensFromEarlierPlan() started.
+✔ Test rebasePlanReloadRejectsTokensFromEarlierPlan() passed after 1.493 seconds.
+◇ Test nativeCommitDropRejectsBranchChangesBeforePlanPreparation() started.
+2026-10-24 21:54:09.568623+0800 GitPico[55254:2375637] [DragDrop] Drop routed
+✔ Test nativeCommitDropRejectsBranchChangesBeforePlanPreparation() passed after 6.829 seconds.
+◇ Test relatedRepositoryActionsReviewBeforeWritingAndRejectOldTokens() started.
+✔ Test relatedRepositoryActionsReviewBeforeWritingAndRejectOldTokens() passed after 4.557 seconds.
+◇ Test relatedRepositoryListsAndQuickOpenReuseCurrentStore() started.
+✔ Test relatedRepositoryListsAndQuickOpenReuseCurrentStore() passed after 8.954 seconds.
+◇ Test malformedSubmoduleConfigurationKeepsRepositoryUsable() started.
+✔ Test malformedSubmoduleConfigurationKeepsRepositoryUsable() passed after 4.506 seconds.
+◇ Test administrationRoutesRequireReviewAndRejectOldRepositoryTokens() started.
+✔ Test administrationRoutesRequireReviewAndRejectOldRepositoryTokens() passed after 6.198 seconds.
+◇ Test administrationBatchPublishesProgressAndReloadsInBackground() started.
+✔ Test administrationBatchPublishesProgressAndReloadsInBackground() passed after 13.755 seconds.
+◇ Test administrationRestoreValidatesTokenAndRepopulatesWorktreeList() started.
+✔ Test administrationRestoreValidatesTokenAndRepopulatesWorktreeList() passed after 16.548 seconds.
+◇ Test infrastructureReviewsWorkFromWelcomeAndRejectStaleMigrationRequests() started.
+✔ Test infrastructureReviewsWorkFromWelcomeAndRejectStaleMigrationRequests() passed after 5.639 seconds.
+◇ Test extensionQuickActionsOpenSettingsAndRequireConfigurationBeforeStartingTopics() started.
+✔ Test extensionQuickActionsOpenSettingsAndRequireConfigurationBeforeStartingTopics() passed after 16.589 seconds.
+◇ Test extensionMutationRequestsRejectStaleRepositorySessions() started.
+✔ Test extensionMutationRequestsRejectStaleRepositorySessions() passed after 7.537 seconds.
+◇ Test lfsStoreEnableRefreshesNativeSettingsStateWithoutOpeningWindows() started.
+✔ Test lfsStoreEnableRefreshesNativeSettingsStateWithoutOpeningWindows() passed after 10.334 seconds.
+◇ Test libraryPersistsBookmarksGroupsFavoritesAndNameAcrossRestart() started.
+✔ Test libraryPersistsBookmarksGroupsFavoritesAndNameAcrossRestart() passed after 0.011 seconds.
+◇ Test libraryMigratesLegacyRecentsOnceAndKeepsAllBeyondTwelve() started.
+✔ Test libraryMigratesLegacyRecentsOnceAndKeepsAllBeyondTwelve() passed after 0.026 seconds.
+◇ Test libraryCanonicalizesAliasesAndPreservesMetadataWhenReopened() started.
+✔ Test libraryCanonicalizesAliasesAndPreservesMetadataWhenReopened() passed after 0.004 seconds.
+◇ Test libraryGroupCyclesAreRejectedAndRemovalKeepsContents() started.
+✔ Test libraryGroupCyclesAreRejectedAndRemovalKeepsContents() passed after 0.005 seconds.
+◇ Test libraryCrossInstanceEditsAndLockCannotOverwriteNewState() started.
+✔ Test libraryCrossInstanceEditsAndLockCannotOverwriteNewState() passed after 0.003 seconds.
+◇ Test libraryCorruptFutureAndSymlinkStorageAreNeverReplaced() started.
+✔ Test libraryCorruptFutureAndSymlinkStorageAreNeverReplaced() passed after 0.001 seconds.
+◇ Test librarySearchRankingKeyboardSelectionAndRecentOrdering() started.
+✔ Test librarySearchRankingKeyboardSelectionAndRecentOrdering() passed after 0.004 seconds.
+◇ Test libraryMultiDropSortAndStaleSessionGuard() started.
+✔ Test libraryMultiDropSortAndStaleSessionGuard() passed after 0.005 seconds.
+◇ Test libraryRelocateKeepsIdentityAndRejectsExistingRegistration() started.
+✔ Test libraryRelocateKeepsIdentityAndRejectsExistingRegistration() passed after 0.003 seconds.
+◇ Test libraryStoreOpensRealRepositoryAndRejectsStaleRelocation() started.
+✔ Test libraryStoreOpensRealRepositoryAndRejectsStaleRelocation() passed after 6.830 seconds.
+◇ Test libraryOpenSurvivesMetadataConflictWithoutLosingExistingLibrary() started.
+✔ Test libraryOpenSurvivesMetadataConflictWithoutLosingExistingLibrary() passed after 2.958 seconds.
+◇ Test libraryImportSanitizesDisplayNameButPreservesUnusualPath() started.
+✔ Test libraryImportSanitizesDisplayNameButPreservesUnusualPath() passed after 0.004 seconds.
+◇ Test libraryMainMigrationRelocatesNestedEntriesAtomicallyAndPreservesMetadata() started.
+✔ Test libraryMainMigrationRelocatesNestedEntriesAtomicallyAndPreservesMetadata() passed after 0.018 seconds.
+◇ Test nativeXcodeTestHostSuppressesWindowsAndUsesActualBundleMetadata() started.
+✔ Test nativeXcodeTestHostSuppressesWindowsAndUsesActualBundleMetadata() passed after 0.001 seconds.
+✔ Test run with 43 tests in 0 suites passed after 181.179 seconds.
+2026-10-24 21:56:02.548 xcodebuild[55241:2375469] [MT] IDETestOperationsObserverDebug: 188.326 elapsed -- Testing started completed.
+2026-10-24 21:56:02.548 xcodebuild[55241:2375469] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-24 21:56:02.548 xcodebuild[55241:2375469] [MT] IDETestOperationsObserverDebug: 188.326 sec, +188.326 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/willsuo/files/Github/GitPico/.build/xcode/AppTests.xcresult
+
+** TEST EXECUTE SUCCEEDED **
+
+Testing started

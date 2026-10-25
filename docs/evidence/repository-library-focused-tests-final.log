@@ -1,0 +1,45 @@
+Building for debugging...
+[Planning deferred tasks]
+[1 / 1]
+[5 / 31] GitCore
+[7 / 33] GitCore
+[10 / 32] GitCore
+[15 / 31] GitCoreTests-product
+[17 / 33] GitPico-product
+[21 / 31] GitCoreTests-product
+[27 / 30] GitCoreTests-product
+Build complete! (1.93 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test libraryPersistsBookmarksGroupsFavoritesAndNameAcrossRestart() started.
+◇ Test libraryCorruptFutureAndSymlinkStorageAreNeverReplaced() started.
+◇ Test libraryStoreOpensRealRepositoryAndRejectsStaleRelocation() started.
+◇ Test libraryOpenSurvivesMetadataConflictWithoutLosingExistingLibrary() started.
+◇ Test libraryRelocateKeepsIdentityAndRejectsExistingRegistration() started.
+◇ Test libraryCanonicalizesAliasesAndPreservesMetadataWhenReopened() started.
+◇ Test librarySearchRankingKeyboardSelectionAndRecentOrdering() started.
+◇ Test libraryGroupCyclesAreRejectedAndRemovalKeepsContents() started.
+◇ Test libraryCrossInstanceEditsAndLockCannotOverwriteNewState() started.
+◇ Test libraryMigratesLegacyRecentsOnceAndKeepsAllBeyondTwelve() started.
+◇ Test libraryMultiDropSortAndStaleSessionGuard() started.
+◇ Test libraryImportSanitizesDisplayNameButPreservesUnusualPath() started.
+✔ Test libraryCorruptFutureAndSymlinkStorageAreNeverReplaced() passed after 0.005 seconds.
+✔ Test libraryPersistsBookmarksGroupsFavoritesAndNameAcrossRestart() passed after 0.008 seconds.
+✔ Test librarySearchRankingKeyboardSelectionAndRecentOrdering() passed after 0.012 seconds.
+✔ Test libraryCrossInstanceEditsAndLockCannotOverwriteNewState() passed after 0.014 seconds.
+✔ Test libraryGroupCyclesAreRejectedAndRemovalKeepsContents() passed after 0.017 seconds.
+✔ Test libraryCanonicalizesAliasesAndPreservesMetadataWhenReopened() passed after 0.020 seconds.
+✔ Test libraryRelocateKeepsIdentityAndRejectsExistingRegistration() passed after 0.023 seconds.
+✔ Test libraryMigratesLegacyRecentsOnceAndKeepsAllBeyondTwelve() passed after 0.035 seconds.
+✔ Test libraryImportSanitizesDisplayNameButPreservesUnusualPath() passed after 0.036 seconds.
+✔ Test libraryMultiDropSortAndStaleSessionGuard() passed after 0.040 seconds.
+✔ Test libraryOpenSurvivesMetadataConflictWithoutLosingExistingLibrary() passed after 2.633 seconds.
+✔ Test libraryStoreOpensRealRepositoryAndRejectsStaleRelocation() passed after 5.689 seconds.
+✔ Test run with 12 tests in 0 suites passed after 5.690 seconds.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test openRepositoryPreservesTrailingNewlineInsteadOfOpeningSibling() started.
+✔ Test openRepositoryPreservesTrailingNewlineInsteadOfOpeningSibling() passed after 2.546 seconds.
+✔ Test run with 1 test in 0 suites passed after 2.546 seconds.

@@ -1,0 +1,13 @@
+Building for debugging...
+[Planning deferred tasks]
+Build complete! (0.32 sec)
+/Users/willsuo/files/Github/GitPico/dist/GitPico.app: replacing existing signature
+56704
+{
+  "backgroundTesting": true,
+  "build": "20261024155750",
+  "frontmostBundle": "com.apple.loginwindow",
+  "isActive": false,
+  "version": "0.01",
+  "visibleWindows": 0
+}

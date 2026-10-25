@@ -1,0 +1,30 @@
+Building for debugging...
+[1 / 1]
+[2 / 14] GitCore
+[6 / 18] GitCore
+[9 / 19] GitCore
+[13 / 18] GitCoreTests-product
+[15 / 20] GitCoreTests-product
+[18 / 21] GitCoreTests-product
+[20 / 24] GitCoreTests-product
+Build complete! (2.71 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test revertConflictCanAbortAndContinue() started.
+◇ Test fileInspectionFollowsRenameAndPreservesUnusualPaths() started.
+◇ Test revisionComparisonPinsSnapshotsAndUsesMergeBase() started.
+◇ Test revisionComparisonShowsRenameWithoutArtificialDeletion() started.
+◇ Test revertMergeRequiresExplicitMainlineAndGuardsDirtyWork() started.
+◇ Test fileInspectionDeletionBinaryAndLiteralPathGuards() started.
+◇ Test revertCreatesNewHistoryAndSupportsUndoRedo() started.
+◇ Test blameHandlesEmptyAndUnterminatedText() started.
+✔ Test revisionComparisonShowsRenameWithoutArtificialDeletion() passed after 2.863 seconds.
+✔ Test blameHandlesEmptyAndUnterminatedText() passed after 4.034 seconds.
+✔ Test fileInspectionDeletionBinaryAndLiteralPathGuards() passed after 7.565 seconds.
+✔ Test fileInspectionFollowsRenameAndPreservesUnusualPaths() passed after 7.949 seconds.
+✔ Test revertMergeRequiresExplicitMainlineAndGuardsDirtyWork() passed after 8.842 seconds.
+✔ Test revisionComparisonPinsSnapshotsAndUsesMergeBase() passed after 9.329 seconds.
+✔ Test revertCreatesNewHistoryAndSupportsUndoRedo() passed after 12.416 seconds.
+✔ Test revertConflictCanAbortAndContinue() passed after 19.146 seconds.
+✔ Test run with 8 tests in 0 suites passed after 19.146 seconds.

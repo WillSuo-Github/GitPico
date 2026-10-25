@@ -1,0 +1,315 @@
+Building for debugging...
+[1 / 1]
+[2 / 20] GitCore
+[5 / 23] GitCore
+[6 / 24] GitCore
+[8 / 24] GitCore
+[15 / 29] GitCoreTests-product
+[18 / 32] GitPico-product
+[26 / 42] GitPico
+[28 / 42] GitPico
+[28 / 42] GitPico-product
+[28 / 42] GitCoreTests-product
+[33 / 46] GitPico
+[35 / 46] GitCoreTests-product
+[35 / 46] GitPico-product
+[35 / 46] GitPico
+[35 / 46] GitPico-product
+[44 / 51] GitPico
+[44 / 53] GitPico-product
+[47 / 52] GitPicoTests-product
+[49 / 54] GitPicoTests-product
+[52 / 55] GitPicoTests-product
+[54 / 58] GitPicoTests-product
+Build complete! (7.97 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test lfsStoreEnableRefreshesNativeSettingsStateWithoutOpeningWindows() started.
+◇ Test extensionMutationRequestsRejectStaleRepositorySessions() started.
+◇ Test extensionQuickActionsOpenSettingsAndRequireConfigurationBeforeStartingTopics() started.
+✘ Test extensionQuickActionsOpenSettingsAndRequireConfigurationBeforeStartingTopics() recorded an issue at RelatedRepositoryRoutingTests.swift:165:42: Expectation failed: f.store.flowRequest
+↳ f.store.flowRequest → nil
+↳   f.store → GitPico.RepositoryStore
+↳     _backStack → [GitPico.Destination.workingCopy]
+↳     _forwardStack → []
+↳     _historyOptions → HistoryOptions(limit: 500, query: "", firstParent: false, sortByDate: false)
+↳       limit → 500
+↳       query → ""
+↳       firstParent → false
+↳       sortByDate → false
+↳     _isLoadingHistory → false
+↳     _diffContext → 7
+↳     _ignoreWhitespace → false
+↳     _amend → false
+↳     _signOff → false
+↳     _integrationRequest → nil
+↳     _rebaseRequest → nil
+↳     _recoveryRequest → nil
+↳     _undoAvailability → UndoAvailability(undo: nil, redo: nil)
+↳       some → UndoAvailability(undo: nil, redo: nil)
+↳         undo → nil
+↳         redo → nil
+↳     _rebaseProgress → nil
+↳     _showingRebaseEdit → false
+↳     _settingsTab → "Git Flow"
+↳     _lfsRequest → nil
+↳     _flowRequest → nil
+↳     _lfsState → nil
+↳     _lfsChanges → []
+↳     _lfsTransfers → []
+↳     _lfsProgress → ""
+↳     _lfsError → nil
+↳     _flowConfiguration → nil
+↳     _activeFlow → nil
+↳     _flowHistory → []
+↳     _workflowError → nil
+↳     _configuration → nil
+↳     _managedRemotes → []
+↳     _organization → ReferenceOrganization(archived: Set([]), pinned: Set([]))
+↳       archived → []
+↳       pinned → []
+↳     _managementRequest → nil
+↳     _stashRequest → nil
+↳     _localChangeRequest → nil
+↳     _worktrees → [GitCore.ManagedWorktree(path: "/var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-related-app-4B67503F-BC71-453F-8B1E-554909E1DB1C/Repo", head: Optional("81ee330e22c7b734be63c0dd039e81ec8b0871d8"), branch: Optional("refs/heads/main"), isBare: false, isMain: true, locked: nil, prunable: nil)]
+↳     _submodules → []
+↳     _worktreeError → nil
+↳     _submoduleError → nil
+↳     _infrastructureRequest → nil
+↳     _relatedAdministrationRequest → nil
+↳     _relatedBatchProgress → nil
+↳     relatedBatchTask → nil
+↳     _worktreeRequest → nil
+↳     _submoduleRequest → nil
+↳     _historicalRequest → nil
+↳     _snapshot → RepositorySnapshot(root: file:///var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-related-app-4B67503F-BC71-453F-8B1E-554909E1DB1C/Repo/, branch: "main", changes: [], commits: [GitCore.Commit(hash: "81ee330e22c7b734be63c0dd039e81ec8b0871d8", parents: [], author: "Test", email: "test@example.invalid", date: 2026-10-24 13:15:14 +0000, subject: "Initial", decorations: ["HEAD -> main"])], references: [GitCore.Reference(fullName: "refs/heads/main", name: "main", hash: "81ee330e22c7b734be63c0dd039e81ec8b0871d8", upstream: "", isCurrent: true)], stashes: [], remotes: [], ahead: 0, behind: 0, hasHEAD: true, identity: GitCore.GitIdentity(name: "Test", email: "test@example.invalid"), operation: GitCore.RepositoryOperation.none, historyCount: 1)
+↳       some → RepositorySnapshot(root: file:///var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-related-app-4B67503F-BC71-453F-8B1E-554909E1DB1C/Repo/, branch: "main", changes: [], commits: [GitCore.Commit(hash: "81ee330e22c7b734be63c0dd039e81ec8b0871d8", parents: [], author: "Test", email: "test@example.invalid", date: 2026-10-24 13:15:14 +0000, subject: "Initial", decorations: ["HEAD -> main"])], references: [GitCore.Reference(fullName: "refs/heads/main", name: "main", hash: "81ee330e22c7b734be63c0dd039e81ec8b0871d8", upstream: "", isCurrent: true)], stashes: [], remotes: [], ahead: 0, behind: 0, hasHEAD: true, identity: GitCore.GitIdentity(name: "Test", email: "test@example.invalid"), operation: GitCore.RepositoryOperation.none, historyCount: 1)
+↳         root → file:///var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-related-app-4B67503F-BC71-453F-8B1E-554909E1DB1C/Repo/
+↳           _url → Foundation._SwiftURL
+↳             _parseInfo → Foundation.URLParseInfo
+↳               urlString → "file:///var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-related-app-4B67503F-BC71-453F-8B1E-554909E1DB1C/Repo/"
+↳               schemeRange → 0[any] ..< 4[utf8]
+↳                 some → 0[any] ..< 4[utf8]
+↳                   lowerBound → 0[any]
+↳                     _rawBits → 15
+↳                   upperBound → 4[utf8]
+↳                     _rawBits → 262148
+↳               userRange → nil
+↳               passwordRange → nil
+↳               hostRange → 7[utf8] ..< 7[utf8]
+↳                 some → 7[utf8] ..< 7[utf8]
+↳                   lowerBound → 7[utf8]
+↳                     _rawBits → 458756
+↳                   upperBound → 7[utf8]
+↳                     _rawBits → 458756
+↳               portRange → nil
+↳               pathRange → 7[utf8] ..< 118[utf8]
+↳                 some → 7[utf8] ..< 118[utf8]
+↳                   lowerBound → 7[utf8]
+↳                     _rawBits → 458756
+↳                   upperBound → 118[utf8]
+↳                     _rawBits → 7733255
+↳               queryRange → nil
+↳               fragmentRange → nil
+↳               isIPLiteral → false
+↳               didPercentEncodeHost → false
+↳               pathHasFileID → false
+↳               encodedComponents → EncodedComponentSet(rawValue: 0)
+↳                 rawValue → 0
+↳             _baseURL → nil
+↳             _encoding → Unicode (UTF-8)
+↳               rawValue → 4
+↳             _isCanonicalFileURL → true
+↳             _nsurlLock → ()
+↳         branch → "main"
+↳         changes → []
+↳         commits → [GitCore.Commit(hash: "81ee330e22c7b734be63c0dd039e81ec8b0871d8", parents: [], author: "Test", email: "test@example.invalid", date: 2026-10-24 13:15:14 +0000, subject: "Initial", decorations: ["HEAD -> main"])]
+↳         references → [GitCore.Reference(fullName: "refs/heads/main", name: "main", hash: "81ee330e22c7b734be63c0dd039e81ec8b0871d8", upstream: "", isCurrent: true)]
+↳         stashes → []
+↳         remotes → []
+↳         ahead → 0
+↳         behind → 0
+↳         hasHEAD → true
+↳         identity → GitIdentity(name: "Test", email: "test@example.invalid")
+↳           name → "Test"
+↳           email → "test@example.invalid"
+↳         operation → .none
+↳         historyCount → 1
+↳     _destination → .repositorySettings
+↳     dragActions → [:]
+↳     _selectedWorkingFiles → []
+↳     _showAllFiles → false
+↳     _showIgnoredFiles → false
+↳     _showAssumeUnchanged → false
+↳     _workingFileEntries → []
+↳     _externalToolRequest → nil
+↳     _showingExternalToolSettings → false
+↳     _showingQuickActions → false
+↳     _toolPreferences → GitPico.ExternalToolPreferences
+↳       _value → ExternalToolSettings(version: 1, diff: GitCore.ExternalToolCommand(executable: "/usr/bin/opendiff", arguments: ["{local}", "{remote}"]), merge: GitCore.ExternalToolCommand(executable: "/usr/bin/opendiff", arguments: ["{local}", "{remote}", "-ancestor", "{base}", "-merge", "{merged}"]))
+↳         version → 1
+↳         diff → ExternalToolCommand(executable: "/usr/bin/opendiff", arguments: ["{local}", "{remote}"])
+↳           executable → "/usr/bin/opendiff"
+↳           arguments → ["{local}", "{remote}"]
+↳         merge → ExternalToolCommand(executable: "/usr/bin/opendiff", arguments: ["{local}", "{remote}", "-ancestor", "{base}", "-merge", "{merged}"])
+↳           executable → "/usr/bin/opendiff"
+↳           arguments → ["{local}", "{remote}", "-ancestor", "{base}", "-merge", "{merged}"]
+↳       _error → nil
+↳       file → file:///var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-related-app-4B67503F-BC71-453F-8B1E-554909E1DB1C/tools.json
+↳         _url → file:///var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-related-app-4B67503F-BC71-453F-8B1E-554909E1DB1C/tools.json
+↳           _url → file:///var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-related-app-4B67503F-BC71-453F-8B1E-554909E1DB1C/tools.json
+↳       original → nil
+↳       valid → true
+↳       _$observationRegistrar → ObservationRegistrar(extent: Observation.ObservationRegistrar.(unknown context at $2b63cd96c).Extent)
+↳         extent → Observation.ObservationRegistrar.(unknown context at $2b63cd96c).Extent
+↳           context → Context(state: Observation._ManagedCriticalState<Observation.ObservationRegistrar.(unknown context at $2b63cd9b0).State>(buffer: Observation._ManagedCriticalState<Observation.ObservationRegistrar.(unknown context at $2b63cd9b0).State>.(unknown context at $2b63cd84c).LockedBuffer))
+↳             state → _ManagedCriticalState<State>(buffer: Observation._ManagedCriticalState<Observation.ObservationRegistrar.(unknown context at $2b63cd9b0).State>.(unknown context at $2b63cd84c).LockedBuffer)
+↳               buffer → Observation._ManagedCriticalState<Observation.ObservationRegistrar.(unknown context at $2b63cd9b0).State>.(unknown context at $2b63cd84c).LockedBuffer
+↳     externalToolRunner → GitCore.ExternalToolRunner
+↳       $defaultActor → (Opaque Value)
+↳       processes → [:]
+↳       diagnostics → [:]
+↳     fileBrowserGeneration → A5470110-D3A4-464A-B344-068474C03166
+↳     _selectedChange → nil
+↳     _stagedDiff → false
+↳     _selectedCommit → nil
+↳     _commitDetail → nil
+↳     _selectedCommitPath → nil
+↳     _automaticStash → nil
+↳     _automaticStashRequest → nil
+↳     _pendingAutomaticStashRequest → nil
+↳     _selectedStash → nil
+↳     _diff → ""
+↳     _isLoadingDiff → false
+↳     _isBusy → true
+↳     _activity → "Refreshing…"
+↳     _error → nil
+↳     _search → ""
+↳     _commitSubject → ""
+↳     _commitBody → ""
+↳     _conflictDrafts → [:]
+↳     _showingBranchSheet → false
+↳     _showingStashSheet → false
+↳     _creationRequest → nil
+↳     _library → GitPico.RepositoryLibrary
+↳       _document → RepositoryLibraryDocument(version: 1, repositories: [GitPico.SavedRepository(id: 50194880-E674-4871-99DD-8AAF75DAC4CD, path: "/var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-related-app-4B67503F-BC71-453F-8B1E-554909E1DB1C/Repo", name: "Repo", group: nil, favorite: false, lastOpened: Optional(2026-10-24 13:15:17 +0000))], groups: [], recent: [50194880-E674-4871-99DD-8AAF75DAC4CD])
+↳         version → 1
+↳         repositories → [GitPico.SavedRepository(id: 50194880-E674-4871-99DD-8AAF75DAC4CD, path: "/var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-related-app-4B67503F-BC71-453F-8B1E-554909E1DB1C/Repo", name: "Repo", group: nil, favorite: false, lastOpened: Optional(2026-10-24 13:15:17 +0000))]
+↳         groups → []
+↳         recent → [50194880-E674-4871-99DD-8AAF75DAC4CD]
+↳       _error → nil
+↳       _session → 3FF6F71A-49CA-450E-BC19-EB15123C3858
+↳       file → file:///var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-related-app-4B67503F-BC71-453F-8B1E-554909E1DB1C/library.json
+↳         _url → file:///var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-related-app-4B67503F-BC71-453F-8B1E-554909E1DB1C/library.json
+↳           _url → file:///var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-related-app-4B67503F-BC71-453F-8B1E-554909E1DB1C/library.json
+↳       diskData → 326 bytes
+↳         some → 326 bytes
+↳           count → 326
+↳           pointer → 0x00000075fc028180
+↳             pointerValue → 506739196288
+↳       loaded → true
+↳       _legacy → []
+↳       _$observationRegistrar → ObservationRegistrar(extent: Observation.ObservationRegistrar.(unknown context at $2b63cd96c).Extent)
+↳         extent → Observation.ObservationRegistrar.(unknown context at $2b63cd96c).Extent
+↳           context → Context(state: Observation._ManagedCriticalState<Observation.ObservationRegistrar.(unknown context at $2b63cd9b0).State>(buffer: Observation._ManagedCriticalState<Observation.ObservationRegistrar.(unknown context at $2b63cd9b0).State>.(unknown context at $2b63cd84c).LockedBuffer))
+↳             state → _ManagedCriticalState<State>(buffer: Observation._ManagedCriticalState<Observation.ObservationRegistrar.(unknown context at $2b63cd9b0).State>.(unknown context at $2b63cd84c).LockedBuffer)
+↳               buffer → Observation._ManagedCriticalState<Observation.ObservationRegistrar.(unknown context at $2b63cd9b0).State>.(unknown context at $2b63cd84c).LockedBuffer
+↳     _showingRepositoryLibrary → false
+↳     _showingQuickOpen → false
+↳     _lastUpdated → 2026-10-24 13:15:17 +0000
+↳       some → 2026-10-24 13:15:17 +0000
+↳         timeIntervalSinceReferenceDate → 814540517.743068
+↳     repository → GitCore.GitRepository
+↳       some → GitCore.GitRepository
+↳         $defaultActor → (Opaque Value)
+↳         root → file:///var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-related-app-4B67503F-BC71-453F-8B1E-554909E1DB1C/Repo/
+↳           _url → Foundation._SwiftURL
+↳             _parseInfo → Foundation.URLParseInfo
+↳               urlString → "file:///var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-related-app-4B67503F-BC71-453F-8B1E-554909E1DB1C/Repo/"
+↳               schemeRange → 0[any] ..< 4[utf8]
+↳                 some → 0[any] ..< 4[utf8]
+↳                   lowerBound → 0[any]
+↳                     _rawBits → 15
+↳                   upperBound → 4[utf8]
+↳                     _rawBits → 262148
+↳               userRange → nil
+↳               passwordRange → nil
+↳               hostRange → 7[utf8] ..< 7[utf8]
+↳                 some → 7[utf8] ..< 7[utf8]
+↳                   lowerBound → 7[utf8]
+↳                     _rawBits → 458756
+↳                   upperBound → 7[utf8]
+↳                     _rawBits → 458756
+↳               portRange → nil
+↳               pathRange → 7[utf8] ..< 118[utf8]
+↳                 some → 7[utf8] ..< 118[utf8]
+↳                   lowerBound → 7[utf8]
+↳                     _rawBits → 458756
+↳                   upperBound → 118[utf8]
+↳                     _rawBits → 7733255
+↳               queryRange → nil
+↳               fragmentRange → nil
+↳               isIPLiteral → false
+↳               didPercentEncodeHost → false
+↳               pathHasFileID → false
+↳               encodedComponents → EncodedComponentSet(rawValue: 0)
+↳                 rawValue → 0
+↳             _baseURL → nil
+↳             _encoding → Unicode (UTF-8)
+↳               rawValue → 4
+↳             _isCanonicalFileURL → true
+↳             _nsurlLock → ()
+↳     detailToken → C2280AC4-23EA-422F-89C3-FD0026EC4E70
+↳     repositoryToken → 4D0D92EA-9806-456D-9CE8-9D61F0A507B2
+↳     draftBeforeAmend → nil
+↳     _$observationRegistrar → ObservationRegistrar(extent: Observation.ObservationRegistrar.(unknown context at $2b63cd96c).Extent)
+↳       extent → Observation.ObservationRegistrar.(unknown context at $2b63cd96c).Extent
+↳         context → Context(state: Observation._ManagedCriticalState<Observation.ObservationRegistrar.(unknown context at $2b63cd9b0).State>(buffer: Observation._ManagedCriticalState<Observation.ObservationRegistrar.(unknown context at $2b63cd9b0).State>.(unknown context at $2b63cd84c).LockedBuffer))
+↳           state → _ManagedCriticalState<State>(buffer: Observation._ManagedCriticalState<Observation.ObservationRegistrar.(unknown context at $2b63cd9b0).State>.(unknown context at $2b63cd84c).LockedBuffer)
+↳             buffer → Observation._ManagedCriticalState<Observation.ObservationRegistrar.(unknown context at $2b63cd9b0).State>.(unknown context at $2b63cd84c).LockedBuffer
+↳   flowRequest → nil
+✘ Test extensionQuickActionsOpenSettingsAndRequireConfigurationBeforeStartingTopics() failed after 6.003 seconds with 1 issue.
+✔ Test extensionMutationRequestsRejectStaleRepositorySessions() passed after 7.269 seconds.
+✔ Test lfsStoreEnableRefreshesNativeSettingsStateWithoutOpeningWindows() passed after 9.933 seconds.
+✘ Test run with 3 tests in 0 suites failed after 9.933 seconds with 1 issue.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test lfsLocalActivationTrackingLiteralNamesAndRecoveryPreserveStaging() started.
+◇ Test lfsSettingRecoveryProtectsNewEditsLocksAndChangedHeads() started.
+◇ Test gitFlowConflictPersistsAcrossReopenAndCanContinueAfterStaging() started.
+◇ Test lfsRealLocalObjectPushCloneFetchPullAndCheckoutKeepModifiedFiles() started.
+◇ Test gitFlowSigningFailureKeepsTopicAndProductionAndAllowsExplicitStop() started.
+◇ Test lfsPatternRemovalNestedAttributesAndStaleChangesAreGuarded() started.
+◇ Test gitFlowSupportAndRemoteTrackingPreserveClassicBranchBases() started.
+◇ Test lfsTransferRejectsChangedEndpointsAndReportsActualErrors() started.
+◇ Test gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:) started.
+◇ Test gitFlowIgnoredDestinationCannotOverwriteLocalData() started.
+◇ Test lfsHooksAreLocalExecutableAndCustomScriptsAreNeverReplaced() started.
+◇ Test gitFlowConfigurationAdoptsClassicKeysAndCreatesDevelopmentWithoutSwitching() started.
+◇ Test gitFlowStopAbortsOnlyCurrentMergeAndKeepsEarlierProductionAndTag() started.
+◇ Test gitFlowCanAcceptManualMergeCompletionAndProtectsExternalBranchChanges() started.
+◇ Test gitFlowFeatureStartFinishMergesAndPinsBeforeDeletingTopic() started.
+◇ Test gitFlowStaleDirtyOccupiedBaseAndVersionCollisionsAreProtected() started.
+◇ Test case passing 1 argument kind → .release to gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:) started.
+◇ Test case passing 1 argument kind → .hotfix to gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:) started.
+✔ Test lfsLocalActivationTrackingLiteralNamesAndRecoveryPreserveStaging() passed after 12.744 seconds.
+✔ Test gitFlowConfigurationAdoptsClassicKeysAndCreatesDevelopmentWithoutSwitching() passed after 15.118 seconds.
+✔ Test lfsSettingRecoveryProtectsNewEditsLocksAndChangedHeads() passed after 16.686 seconds.
+✔ Test lfsTransferRejectsChangedEndpointsAndReportsActualErrors() passed after 16.901 seconds.
+✔ Test gitFlowIgnoredDestinationCannotOverwriteLocalData() passed after 17.303 seconds.
+✔ Test lfsPatternRemovalNestedAttributesAndStaleChangesAreGuarded() passed after 17.303 seconds.
+✔ Test lfsHooksAreLocalExecutableAndCustomScriptsAreNeverReplaced() passed after 17.390 seconds.
+✔ Test gitFlowSupportAndRemoteTrackingPreserveClassicBranchBases() passed after 23.165 seconds.
+✔ Test gitFlowFeatureStartFinishMergesAndPinsBeforeDeletingTopic() passed after 32.351 seconds.
+✔ Test gitFlowSigningFailureKeepsTopicAndProductionAndAllowsExplicitStop() passed after 33.818 seconds.
+✔ Test gitFlowStaleDirtyOccupiedBaseAndVersionCollisionsAreProtected() passed after 35.177 seconds.
+✔ Test gitFlowCanAcceptManualMergeCompletionAndProtectsExternalBranchChanges() passed after 35.946 seconds.
+✔ Test gitFlowConflictPersistsAcrossReopenAndCanContinueAfterStaging() passed after 37.910 seconds.
+✔ Test gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:) with 2 test cases passed after 38.387 seconds.
+✔ Test gitFlowStopAbortsOnlyCurrentMergeAndKeepsEarlierProductionAndTag() passed after 39.631 seconds.
+✔ Test lfsRealLocalObjectPushCloneFetchPullAndCheckoutKeepModifiedFiles() passed after 48.152 seconds.
+✔ Test run with 16 tests in 0 suites passed after 48.152 seconds.
+Note: Some test targets reported failures:
+  - GitPicoTests (Swift Testing)

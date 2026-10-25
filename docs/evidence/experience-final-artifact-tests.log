@@ -1,0 +1,42 @@
+Building for debugging...
+[1 / 1]
+[1 / 2] GitPicoTests-product
+[1 / 6] GitPico-product
+[1 / 9] GitCore
+[1 / 11] GitPico
+[1 / 14] GitCore
+[3 / 14] GitPico
+[9 / 20] GitPico-product
+[16 / 40] GitPico-product
+[18 / 40] GitPico-product
+[19 / 40] GitPico-product
+[20 / 40] GitPico
+[21 / 40] GitPico
+[22 / 40] GitPico
+[23 / 40] GitPico
+[24 / 40] GitPico
+[26 / 40] GitPico-product
+[29 / 42] GitPico
+[31 / 42] GitPico
+[33 / 43] GitPico-product
+[34 / 43] GitPico-product
+[34 / 45] GitPico
+[34 / 45] GitPico-product
+[36 / 45] GitPico
+[36 / 45] GitPico-product
+[36 / 45] GitPico
+[39 / 47] GitPico-product
+[41 / 46] GitPicoTests-product
+[51 / 57] GitPicoTests-product
+[53 / 57] GitPicoTests-product
+[55 / 58] GitPicoTests-product
+[57 / 61] GitPicoTests-product
+Build complete! (19.66 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test branchPreviewPerformanceBenchmark() started.
+◇ Test renderHistoryRowsWithoutWindows() started.
+✔ Test renderHistoryRowsWithoutWindows() passed after 0.103 seconds.
+✔ Test branchPreviewPerformanceBenchmark() passed after 5.817 seconds.
+✔ Test run with 2 tests in 0 suites passed after 5.818 seconds.

@@ -1,0 +1,2640 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64",
+      "deviceId" : "00008132-000C284E0205001C",
+      "deviceName" : "My Mac",
+      "modelName" : "Mac mini",
+      "osBuildNumber" : "26A434",
+      "osVersion" : "27.0.1",
+      "platform" : "macOS"
+    }
+  ],
+  "testNodes" : [
+    {
+      "children" : [
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "name" : "Test skipped: Explicit isolated performance run only.",
+                  "nodeType" : "Skip Message"
+                }
+              ],
+              "name" : "branchPreviewPerformanceBenchmark()",
+              "nodeIdentifier" : "branchPreviewPerformanceBenchmark()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/branchPreviewPerformanceBenchmark()",
+              "nodeType" : "Test Case",
+              "result" : "Skipped"
+            },
+            {
+              "children" : [
+                {
+                  "name" : "Test skipped: Explicit offscreen component capture only.",
+                  "nodeType" : "Skip Message"
+                }
+              ],
+              "name" : "renderHistoryRowsWithoutWindows()",
+              "nodeIdentifier" : "renderHistoryRowsWithoutWindows()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/renderHistoryRowsWithoutWindows()",
+              "nodeType" : "Test Case",
+              "result" : "Skipped"
+            },
+            {
+              "duration" : "0.0033s",
+              "durationInSeconds" : 0.0033431053161621094,
+              "name" : "exportedPatchWriterPreservesBytesAndExistingFiles()",
+              "nodeIdentifier" : "exportedPatchWriterPreservesBytesAndExistingFiles()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/exportedPatchWriterPreservesBytesAndExistingFiles()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.02s",
+              "durationInSeconds" : 0.020234107971191406,
+              "name" : "libraryMigratesLegacyRecentsOnceAndKeepsAllBeyondTwelve()",
+              "nodeIdentifier" : "libraryMigratesLegacyRecentsOnceAndKeepsAllBeyondTwelve()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/libraryMigratesLegacyRecentsOnceAndKeepsAllBeyondTwelve()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "36s",
+              "durationInSeconds" : 36.44409704208374,
+              "name" : "administrationRestoreValidatesTokenAndRepopulatesWorktreeList()",
+              "nodeIdentifier" : "administrationRestoreValidatesTokenAndRepopulatesWorktreeList()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/administrationRestoreValidatesTokenAndRepopulatesWorktreeList()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "28s",
+              "durationInSeconds" : 28.24437975883484,
+              "name" : "previewOptionsHaveSeparateCacheEntries()",
+              "nodeIdentifier" : "previewOptionsHaveSeparateCacheEntries()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/previewOptionsHaveSeparateCacheEntries()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "24s",
+              "durationInSeconds" : 24.31007218360901,
+              "name" : "warmTipRevalidationDoesNotResetNewUserSelection()",
+              "nodeIdentifier" : "warmTipRevalidationDoesNotResetNewUserSelection()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/warmTipRevalidationDoesNotResetNewUserSelection()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "17s",
+              "durationInSeconds" : 17.8435640335083,
+              "name" : "nativeWholeStashDropNegotiatesMoveAndDeliversExactlyOneReview()",
+              "nodeIdentifier" : "nativeWholeStashDropNegotiatesMoveAndDeliversExactlyOneReview()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/nativeWholeStashDropNegotiatesMoveAndDeliversExactlyOneReview()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "20s",
+              "durationInSeconds" : 20.188680171966553,
+              "name" : "navigationCancelsPendingSearchFocusAndBoundsBookmarks()",
+              "nodeIdentifier" : "navigationCancelsPendingSearchFocusAndBoundsBookmarks()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/navigationCancelsPendingSearchFocusAndBoundsBookmarks()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "10s",
+              "durationInSeconds" : 10.777933120727539,
+              "name" : "nativeDropRejectsInvalidDataAndClearsTargetOnExitOrCancel()",
+              "nodeIdentifier" : "nativeDropRejectsInvalidDataAndClearsTargetOnExitOrCancel()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/nativeDropRejectsInvalidDataAndClearsTargetOnExitOrCancel()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "name" : "Type \"com.willsuo.GitPico.drag\" was expected to be declared and exported in the Info.plist of GitPico.app, but it was not found.",
+                  "nodeType" : "Runtime Warning",
+                  "sourceLocation" : {
+                    "filePath" : "/Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/DragRoutingTests.swift",
+                    "lineNumber" : 22
+                  }
+                }
+              ],
+              "duration" : "9s",
+              "durationInSeconds" : 9.510617017745972,
+              "name" : "rebasePlanReloadRejectsTokensFromEarlierPlan()",
+              "nodeIdentifier" : "rebasePlanReloadRejectsTokensFromEarlierPlan()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/rebasePlanReloadRejectsTokensFromEarlierPlan()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "24s",
+              "durationInSeconds" : 24.427971124649048,
+              "name" : "rewrittenBranchRevealsTipWhenBookmarkedCommitDisappears()",
+              "nodeIdentifier" : "rewrittenBranchRevealsTipWhenBookmarkedCommitDisappears()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/rewrittenBranchRevealsTipWhenBookmarkedCommitDisappears()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.032s",
+              "durationInSeconds" : 0.031968116760253906,
+              "name" : "libraryMultiDropSortAndStaleSessionGuard()",
+              "nodeIdentifier" : "libraryMultiDropSortAndStaleSessionGuard()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/libraryMultiDropSortAndStaleSessionGuard()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "19s",
+              "durationInSeconds" : 19.29840111732483,
+              "name" : "nativeDropCombinesAllSelectedWorkingFilesAndRejectsMixedPayloads()",
+              "nodeIdentifier" : "nativeDropCombinesAllSelectedWorkingFilesAndRejectsMixedPayloads()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/nativeDropCombinesAllSelectedWorkingFilesAndRejectsMixedPayloads()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "25s",
+                  "durationInSeconds" : 25.92397403717041,
+                  "name" : "0",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:)?args=5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "26s",
+                  "durationInSeconds" : 26.406041860580444,
+                  "name" : "1",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:)?args=6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "26s",
+                  "durationInSeconds" : 26.40575623512268,
+                  "name" : "2",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:)?args=d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "26s",
+                  "durationInSeconds" : 26.315978050231934,
+                  "name" : "3",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:)?args=4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                }
+              ],
+              "duration" : "26s",
+              "durationInSeconds" : 26.262937545776367,
+              "name" : "nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:)",
+              "nodeIdentifier" : "nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:)",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:)",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "30s",
+              "durationInSeconds" : 30.439859628677368,
+              "name" : "backForwardRestoresQueryPageOptionsAndSelectedCommit()",
+              "nodeIdentifier" : "backForwardRestoresQueryPageOptionsAndSelectedCommit()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/backForwardRestoresQueryPageOptionsAndSelectedCommit()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "24s",
+              "durationInSeconds" : 24.30959701538086,
+              "name" : "navigationCapturesQueryBeforeDebouncedSearchStarts()",
+              "nodeIdentifier" : "navigationCapturesQueryBeforeDebouncedSearchStarts()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/navigationCapturesQueryBeforeDebouncedSearchStarts()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.14s",
+              "durationInSeconds" : 0.1444101333618164,
+              "name" : "libraryCrossInstanceEditsAndLockCannotOverwriteNewState()",
+              "nodeIdentifier" : "libraryCrossInstanceEditsAndLockCannotOverwriteNewState()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/libraryCrossInstanceEditsAndLockCannotOverwriteNewState()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "25s",
+              "durationInSeconds" : 25.542303800582886,
+              "name" : "administrationRoutesRequireReviewAndRejectOldRepositoryTokens()",
+              "nodeIdentifier" : "administrationRoutesRequireReviewAndRejectOldRepositoryTokens()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/administrationRoutesRequireReviewAndRejectOldRepositoryTokens()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "25s",
+              "durationInSeconds" : 25.653377056121826,
+              "name" : "previewCacheIsImmediateAndDoesNotRescanWorkingCopy()",
+              "nodeIdentifier" : "previewCacheIsImmediateAndDoesNotRescanWorkingCopy()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/previewCacheIsImmediateAndDoesNotRescanWorkingCopy()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.14s",
+              "durationInSeconds" : 0.14455795288085938,
+              "name" : "libraryRelocateKeepsIdentityAndRejectsExistingRegistration()",
+              "nodeIdentifier" : "libraryRelocateKeepsIdentityAndRejectsExistingRegistration()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/libraryRelocateKeepsIdentityAndRejectsExistingRegistration()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "12s",
+              "durationInSeconds" : 12.138319969177246,
+              "name" : "quickActionCanSelectCleanFileWithAllFilesEnabled()",
+              "nodeIdentifier" : "quickActionCanSelectCleanFileWithAllFilesEnabled()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/quickActionCanSelectCleanFileWithAllFilesEnabled()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "16s",
+              "durationInSeconds" : 16.28507900238037,
+              "name" : "libraryOpenSurvivesMetadataConflictWithoutLosingExistingLibrary()",
+              "nodeIdentifier" : "libraryOpenSurvivesMetadataConflictWithoutLosingExistingLibrary()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/libraryOpenSurvivesMetadataConflictWithoutLosingExistingLibrary()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "23s",
+              "durationInSeconds" : 23.76424765586853,
+              "name" : "infrastructureReviewsWorkFromWelcomeAndRejectStaleMigrationRequests()",
+              "nodeIdentifier" : "infrastructureReviewsWorkFromWelcomeAndRejectStaleMigrationRequests()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/infrastructureReviewsWorkFromWelcomeAndRejectStaleMigrationRequests()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "29s",
+              "durationInSeconds" : 29.41608715057373,
+              "name" : "previewCacheRevalidatesMovedTipAndExplicitRefresh()",
+              "nodeIdentifier" : "previewCacheRevalidatesMovedTipAndExplicitRefresh()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/previewCacheRevalidatesMovedTipAndExplicitRefresh()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "33s",
+              "durationInSeconds" : 33.283241987228394,
+              "name" : "extensionQuickActionsOpenSettingsAndRequireConfigurationBeforeStartingTopics()",
+              "nodeIdentifier" : "extensionQuickActionsOpenSettingsAndRequireConfigurationBeforeStartingTopics()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/extensionQuickActionsOpenSettingsAndRequireConfigurationBeforeStartingTopics()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.00068s",
+              "durationInSeconds" : 0.0006842613220214844,
+              "name" : "sidebarOutlineRetainsNestedRemotesPinnedAndFilteredBranches()",
+              "nodeIdentifier" : "sidebarOutlineRetainsNestedRemotesPinnedAndFilteredBranches()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/sidebarOutlineRetainsNestedRemotesPinnedAndFilteredBranches()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "name" : "Expectation failed: !store.isBusy\nstore.isBusy → false",
+                  "nodeType" : "Failure Message",
+                  "sourceLocation" : {
+                    "filePath" : "/Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/NativeDropTests.swift",
+                    "lineNumber" : 154
+                  }
+                }
+              ],
+              "duration" : "28s",
+              "durationInSeconds" : 28.255810737609863,
+              "name" : "nativeHeadDropPinsDestinationAndRejectsExternalBranchSwitch()",
+              "nodeIdentifier" : "nativeHeadDropPinsDestinationAndRejectsExternalBranchSwitch()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/nativeHeadDropPinsDestinationAndRejectsExternalBranchSwitch()",
+              "nodeType" : "Test Case",
+              "result" : "Failed"
+            },
+            {
+              "duration" : "21s",
+              "durationInSeconds" : 21.032001733779907,
+              "name" : "previewCacheEvictsOldPagesWithinCountAndCommitBudget()",
+              "nodeIdentifier" : "previewCacheEvictsOldPagesWithinCountAndCommitBudget()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/previewCacheEvictsOldPagesWithinCountAndCommitBudget()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "26s",
+              "durationInSeconds" : 26.597226858139038,
+              "name" : "libraryStoreOpensRealRepositoryAndRejectsStaleRelocation()",
+              "nodeIdentifier" : "libraryStoreOpensRealRepositoryAndRejectsStaleRelocation()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/libraryStoreOpensRealRepositoryAndRejectsStaleRelocation()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "11s",
+              "durationInSeconds" : 11.466772079467773,
+              "name" : "nativeDropRevalidatesBusyStatePayloadAndSourceOperation()",
+              "nodeIdentifier" : "nativeDropRevalidatesBusyStatePayloadAndSourceOperation()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/nativeDropRevalidatesBusyStatePayloadAndSourceOperation()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "14s",
+              "durationInSeconds" : 14.435601949691772,
+              "name" : "dragTokensRejectOtherRepositoriesUnsupportedTargetsAndBusyState()",
+              "nodeIdentifier" : "dragTokensRejectOtherRepositoriesUnsupportedTargetsAndBusyState()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/dragTokensRejectOtherRepositoriesUnsupportedTargetsAndBusyState()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "30s",
+              "durationInSeconds" : 30.30811095237732,
+              "name" : "lfsStoreEnableRefreshesNativeSettingsStateWithoutOpeningWindows()",
+              "nodeIdentifier" : "lfsStoreEnableRefreshesNativeSettingsStateWithoutOpeningWindows()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/lfsStoreEnableRefreshesNativeSettingsStateWithoutOpeningWindows()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.15s",
+              "durationInSeconds" : 0.14500975608825684,
+              "name" : "toolPreferencesPersistAndRejectStaleInvalidAndCorruptEdits()",
+              "nodeIdentifier" : "toolPreferencesPersistAndRejectStaleInvalidAndCorruptEdits()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/toolPreferencesPersistAndRejectStaleInvalidAndCorruptEdits()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "24s",
+              "durationInSeconds" : 24.21907925605774,
+              "name" : "rapidPreviewNavigationOnlyLoadsFinalSelection()",
+              "nodeIdentifier" : "rapidPreviewNavigationOnlyLoadsFinalSelection()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/rapidPreviewNavigationOnlyLoadsFinalSelection()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "15s",
+              "durationInSeconds" : 15.898946046829224,
+              "name" : "quickActionsExposeContextSearchAndKeepDangerousActionsReviewed()",
+              "nodeIdentifier" : "quickActionsExposeContextSearchAndKeepDangerousActionsReviewed()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/quickActionsExposeContextSearchAndKeepDangerousActionsReviewed()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.15s",
+              "durationInSeconds" : 0.14536285400390625,
+              "name" : "libraryImportSanitizesDisplayNameButPreservesUnusualPath()",
+              "nodeIdentifier" : "libraryImportSanitizesDisplayNameButPreservesUnusualPath()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/libraryImportSanitizesDisplayNameButPreservesUnusualPath()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.72s",
+              "durationInSeconds" : 0.7185139656066895,
+              "name" : "toolbarSearchBridgeUpdatesQueryAndCancelsObsoleteFocus()",
+              "nodeIdentifier" : "toolbarSearchBridgeUpdatesQueryAndCancelsObsoleteFocus()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/toolbarSearchBridgeUpdatesQueryAndCancelsObsoleteFocus()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "27s",
+              "durationInSeconds" : 27.290283918380737,
+              "name" : "extensionMutationRequestsRejectStaleRepositorySessions()",
+              "nodeIdentifier" : "extensionMutationRequestsRejectStaleRepositorySessions()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/extensionMutationRequestsRejectStaleRepositorySessions()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "22s",
+              "durationInSeconds" : 22.62748622894287,
+              "name" : "stashDropRoutesWholeFilesChunksAndLinesWithoutMutatingGit()",
+              "nodeIdentifier" : "stashDropRoutesWholeFilesChunksAndLinesWithoutMutatingGit()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/stashDropRoutesWholeFilesChunksAndLinesWithoutMutatingGit()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.15s",
+              "durationInSeconds" : 0.14566993713378906,
+              "name" : "libraryGroupCyclesAreRejectedAndRemovalKeepsContents()",
+              "nodeIdentifier" : "libraryGroupCyclesAreRejectedAndRemovalKeepsContents()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/libraryGroupCyclesAreRejectedAndRemovalKeepsContents()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "29s",
+              "durationInSeconds" : 29.313520193099976,
+              "name" : "gitWriteInvalidatesPreviewEvenWhenBranchTipIsUnchanged()",
+              "nodeIdentifier" : "gitWriteInvalidatesPreviewEvenWhenBranchTipIsUnchanged()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/gitWriteInvalidatesPreviewEvenWhenBranchTipIsUnchanged()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "5s",
+              "durationInSeconds" : 5.719061851501465,
+              "name" : "historicalStoreExportsFrozenSnapshotInBackgroundWithoutWindows()",
+              "nodeIdentifier" : "historicalStoreExportsFrozenSnapshotInBackgroundWithoutWindows()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/historicalStoreExportsFrozenSnapshotInBackgroundWithoutWindows()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "26s",
+              "durationInSeconds" : 26.882715940475464,
+              "name" : "nativeCommitDropRejectsBranchChangesBeforePlanPreparation()",
+              "nodeIdentifier" : "nativeCommitDropRejectsBranchChangesBeforePlanPreparation()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/nativeCommitDropRejectsBranchChangesBeforePlanPreparation()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "17s",
+              "durationInSeconds" : 17.84276580810547,
+              "name" : "browseStoreSeparatesCleanIgnoredAndChangedFilesWithoutFakeStaging()",
+              "nodeIdentifier" : "browseStoreSeparatesCleanIgnoredAndChangedFilesWithoutFakeStaging()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/browseStoreSeparatesCleanIgnoredAndChangedFilesWithoutFakeStaging()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.15s",
+              "durationInSeconds" : 0.1460399627685547,
+              "name" : "libraryPersistsBookmarksGroupsFavoritesAndNameAcrossRestart()",
+              "nodeIdentifier" : "libraryPersistsBookmarksGroupsFavoritesAndNameAcrossRestart()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/libraryPersistsBookmarksGroupsFavoritesAndNameAcrossRestart()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "21s",
+              "durationInSeconds" : 21.41009521484375,
+              "name" : "malformedSubmoduleConfigurationKeepsRepositoryUsable()",
+              "nodeIdentifier" : "malformedSubmoduleConfigurationKeepsRepositoryUsable()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/malformedSubmoduleConfigurationKeepsRepositoryUsable()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "29s",
+              "durationInSeconds" : 29.134249925613403,
+              "name" : "relatedRepositoryListsAndQuickOpenReuseCurrentStore()",
+              "nodeIdentifier" : "relatedRepositoryListsAndQuickOpenReuseCurrentStore()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/relatedRepositoryListsAndQuickOpenReuseCurrentStore()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "29s",
+              "durationInSeconds" : 29.582372903823853,
+              "name" : "latePreviewFailureCannotOverwriteNewerBranchOrRepository()",
+              "nodeIdentifier" : "latePreviewFailureCannotOverwriteNewerBranchOrRepository()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/latePreviewFailureCannotOverwriteNewerBranchOrRepository()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "13s",
+              "durationInSeconds" : 13.07690691947937,
+              "name" : "localChangeRoutesSelectionAndRejectsOldRepositoryRequests()",
+              "nodeIdentifier" : "localChangeRoutesSelectionAndRejectsOldRepositoryRequests()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/localChangeRoutesSelectionAndRejectsOldRepositoryRequests()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "23s",
+              "durationInSeconds" : 23.094730138778687,
+              "name" : "cancelledDetailIsReloadedForPreservedHistorySelection()",
+              "nodeIdentifier" : "cancelledDetailIsReloadedForPreservedHistorySelection()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/cancelledDetailIsReloadedForPreservedHistorySelection()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "30s",
+              "durationInSeconds" : 30.256226778030396,
+              "name" : "branchPreviewAndCheckoutRemainSeparateAndBusyCommandsAreDisabled()",
+              "nodeIdentifier" : "branchPreviewAndCheckoutRemainSeparateAndBusyCommandsAreDisabled()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/branchPreviewAndCheckoutRemainSeparateAndBusyCommandsAreDisabled()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.15s",
+              "durationInSeconds" : 0.14635181427001953,
+              "name" : "libraryCanonicalizesAliasesAndPreservesMetadataWhenReopened()",
+              "nodeIdentifier" : "libraryCanonicalizesAliasesAndPreservesMetadataWhenReopened()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/libraryCanonicalizesAliasesAndPreservesMetadataWhenReopened()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "13s",
+              "durationInSeconds" : 13.896981954574585,
+              "name" : "historicalRequestsRetainSelectionRevisionAndRepositorySession()",
+              "nodeIdentifier" : "historicalRequestsRetainSelectionRevisionAndRepositorySession()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/historicalRequestsRetainSelectionRevisionAndRepositorySession()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.15s",
+              "durationInSeconds" : 0.14637494087219238,
+              "name" : "nativeXcodeTestHostSuppressesWindowsAndUsesActualBundleMetadata()",
+              "nodeIdentifier" : "nativeXcodeTestHostSuppressesWindowsAndUsesActualBundleMetadata()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/nativeXcodeTestHostSuppressesWindowsAndUsesActualBundleMetadata()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "34s",
+              "durationInSeconds" : 34.0143461227417,
+              "name" : "administrationBatchPublishesProgressAndReloadsInBackground()",
+              "nodeIdentifier" : "administrationBatchPublishesProgressAndReloadsInBackground()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/administrationBatchPublishesProgressAndReloadsInBackground()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.15s",
+              "durationInSeconds" : 0.14637494087219238,
+              "name" : "librarySearchRankingKeyboardSelectionAndRecentOrdering()",
+              "nodeIdentifier" : "librarySearchRankingKeyboardSelectionAndRecentOrdering()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/librarySearchRankingKeyboardSelectionAndRecentOrdering()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "22s",
+              "durationInSeconds" : 22.161904335021973,
+              "name" : "relatedRepositoryActionsReviewBeforeWritingAndRejectOldTokens()",
+              "nodeIdentifier" : "relatedRepositoryActionsReviewBeforeWritingAndRejectOldTokens()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/relatedRepositoryActionsReviewBeforeWritingAndRejectOldTokens()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.15s",
+              "durationInSeconds" : 0.1464071273803711,
+              "name" : "libraryMainMigrationRelocatesNestedEntriesAtomicallyAndPreservesMetadata()",
+              "nodeIdentifier" : "libraryMainMigrationRelocatesNestedEntriesAtomicallyAndPreservesMetadata()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/libraryMainMigrationRelocatesNestedEntriesAtomicallyAndPreservesMetadata()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.15s",
+              "durationInSeconds" : 0.14638876914978027,
+              "name" : "libraryCorruptFutureAndSymlinkStorageAreNeverReplaced()",
+              "nodeIdentifier" : "libraryCorruptFutureAndSymlinkStorageAreNeverReplaced()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/libraryCorruptFutureAndSymlinkStorageAreNeverReplaced()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "15s",
+              "durationInSeconds" : 15.11382508277893,
+              "name" : "branchAndCommitDropsCreateReviewedOperations()",
+              "nodeIdentifier" : "branchAndCommitDropsCreateReviewedOperations()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests/branchAndCommitDropsCreateReviewedOperations()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            }
+          ],
+          "name" : "GitPicoTests",
+          "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitPicoTests",
+          "nodeType" : "Unit test bundle",
+          "result" : "Failed"
+        },
+        {
+          "children" : [
+            {
+              "duration" : "43s",
+              "durationInSeconds" : 43.618138790130615,
+              "name" : "workingFileBrowserIncludesCleanDeletedIgnoredLiteralAndIndexFlags()",
+              "nodeIdentifier" : "workingFileBrowserIncludesCleanDeletedIgnoredLiteralAndIndexFlags()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/workingFileBrowserIncludesCleanDeletedIgnoredLiteralAndIndexFlags()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 48s",
+              "durationInSeconds" : 168.1592447757721,
+              "name" : "independentWorktreeManagementPreservesConflictedParentIndex()",
+              "nodeIdentifier" : "independentWorktreeManagementPreservesConflictedParentIndex()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/independentWorktreeManagementPreservesConflictedParentIndex()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 27s",
+              "durationInSeconds" : 207.11984086036682,
+              "name" : "managementWorktreeRestoreRejectsBranchReuseAndManifestPathTraversal()",
+              "nodeIdentifier" : "managementWorktreeRestoreRejectsBranchReuseAndManifestPathTraversal()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/managementWorktreeRestoreRejectsBranchReuseAndManifestPathTraversal()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 46s",
+              "durationInSeconds" : 166.91998505592346,
+              "name" : "gitFlowIgnoredDestinationCannotOverwriteLocalData()",
+              "nodeIdentifier" : "gitFlowIgnoredDestinationCannotOverwriteLocalData()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/gitFlowIgnoredDestinationCannotOverwriteLocalData()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 39s",
+              "durationInSeconds" : 159.81947708129883,
+              "name" : "lfsTransferRejectsChangedEndpointsAndReportsActualErrors()",
+              "nodeIdentifier" : "lfsTransferRejectsChangedEndpointsAndReportsActualErrors()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/lfsTransferRejectsChangedEndpointsAndReportsActualErrors()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 50s",
+              "durationInSeconds" : 170.4210867881775,
+              "name" : "ignoredForceAddUsesReviewedIndexBackupAndRejectsNewContent()",
+              "nodeIdentifier" : "ignoredForceAddUsesReviewedIndexBackupAndRejectsNewContent()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/ignoredForceAddUsesReviewedIndexBackupAndRejectsNewContent()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "45s",
+              "durationInSeconds" : 45.88524293899536,
+              "name" : "checkoutReferenceRejectsBranchOccupiedByAnotherWorktree()",
+              "nodeIdentifier" : "checkoutReferenceRejectsBranchOccupiedByAnotherWorktree()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/checkoutReferenceRejectsBranchOccupiedByAnotherWorktree()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 32s",
+              "durationInSeconds" : 152.99257969856262,
+              "name" : "branchDeletionIsGuardedAndRecoverable()",
+              "nodeIdentifier" : "branchDeletionIsGuardedAndRecoverable()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/branchDeletionIsGuardedAndRecoverable()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 14s",
+              "durationInSeconds" : 74.50007200241089,
+              "name" : "externalCommitComparisonSupportsRootAndBinaryCopies()",
+              "nodeIdentifier" : "externalCommitComparisonSupportsRootAndBinaryCopies()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/externalCommitComparisonSupportsRootAndBinaryCopies()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "38s",
+              "durationInSeconds" : 38.190587282180786,
+              "name" : "localRecoveryRejectsSymlinksAndUnsafePaths()",
+              "nodeIdentifier" : "localRecoveryRejectsSymlinksAndUnsafePaths()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/localRecoveryRejectsSymlinksAndUnsafePaths()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 45s",
+              "durationInSeconds" : 105.5502278804779,
+              "name" : "branchFromStashUsesOriginalBaseAndRestoresIndex()",
+              "nodeIdentifier" : "branchFromStashUsesOriginalBaseAndRestoresIndex()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/branchFromStashUsesOriginalBaseAndRestoresIndex()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 5s",
+              "durationInSeconds" : 185.908673286438,
+              "name" : "completedConflictIntegrationCanBeUndoneAfterRestart()",
+              "nodeIdentifier" : "completedConflictIntegrationCanBeUndoneAfterRestart()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/completedConflictIntegrationCanBeUndoneAfterRestart()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.00016s",
+              "durationInSeconds" : 0.00015687942504882812,
+              "name" : "rebasePlanRowDropMovesBeforeOrAfterInBothDirections()",
+              "nodeIdentifier" : "rebasePlanRowDropMovesBeforeOrAfterInBothDirections()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/rebasePlanRowDropMovesBeforeOrAfterInBothDirections()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 40s",
+              "durationInSeconds" : 160.9524188041687,
+              "name" : "historicalRestoreRenamedDestinationBinaryModeAndBothTarget()",
+              "nodeIdentifier" : "historicalRestoreRenamedDestinationBinaryModeAndBothTarget()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/historicalRestoreRenamedDestinationBinaryModeAndBothTarget()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "2m 39s",
+                  "durationInSeconds" : 159.84174489974976,
+                  "name" : ".both",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/patchRoundTripAndRecovery(destination:)?args=6a4adbca11192a326f61110cda055762eb10de529ff037da568d56e23724242d",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "2m 32s",
+                  "durationInSeconds" : 152.11249208450317,
+                  "name" : ".index",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/patchRoundTripAndRecovery(destination:)?args=8a76c15acafa28c88578c73027916c210ff030f193fa787b2affa93b6286bed3",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "2m 35s",
+                  "durationInSeconds" : 155.20344018936157,
+                  "name" : ".workingCopy",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/patchRoundTripAndRecovery(destination:)?args=77cab79fde90de154f4e57b002388d3104cfc97da486635134d06e4b7627fa2f",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                }
+              ],
+              "duration" : "2m 35s",
+              "durationInSeconds" : 155.71922572453818,
+              "name" : "patchRoundTripAndRecovery(destination:)",
+              "nodeIdentifier" : "patchRoundTripAndRecovery(destination:)",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/patchRoundTripAndRecovery(destination:)",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 21s",
+              "durationInSeconds" : 141.9676697254181,
+              "name" : "pointerRepairResumesAfterMetadataLockAndRejectsForeignGitStorage()",
+              "nodeIdentifier" : "pointerRepairResumesAfterMetadataLockAndRejectsForeignGitStorage()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/pointerRepairResumesAfterMetadataLockAndRejectsForeignGitStorage()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 29s",
+              "durationInSeconds" : 149.1874589920044,
+              "name" : "worktreeDirtyIgnoredCurrentAndStaleGuardsPreventRemoval()",
+              "nodeIdentifier" : "worktreeDirtyIgnoredCurrentAndStaleGuardsPreventRemoval()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/worktreeDirtyIgnoredCurrentAndStaleGuardsPreventRemoval()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 56s",
+              "durationInSeconds" : 296.9275736808777,
+              "name" : "nestedEmbeddedRepositoryMigrationRetainsExternalAndEmbeddedPointers()",
+              "nodeIdentifier" : "nestedEmbeddedRepositoryMigrationRetainsExternalAndEmbeddedPointers()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/nestedEmbeddedRepositoryMigrationRetainsExternalAndEmbeddedPointers()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 41s",
+              "durationInSeconds" : 281.8224551677704,
+              "name" : "mainRepositoryMigrationReconnectsLinkedAndNestedTreesAndRestoresDirtyState()",
+              "nodeIdentifier" : "mainRepositoryMigrationReconnectsLinkedAndNestedTreesAndRestoresDirtyState()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/mainRepositoryMigrationReconnectsLinkedAndNestedTreesAndRestoresDirtyState()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 10s",
+              "durationInSeconds" : 130.68988394737244,
+              "name" : "automaticStashFailedOperationRestoresDraftWithoutMaskingFailure()",
+              "nodeIdentifier" : "automaticStashFailedOperationRestoresDraftWithoutMaskingFailure()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/automaticStashFailedOperationRestoresDraftWithoutMaskingFailure()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 36s",
+              "durationInSeconds" : 96.11265802383423,
+              "name" : "patchImportChecksAllFilesBeforeAnyWrite()",
+              "nodeIdentifier" : "patchImportChecksAllFilesBeforeAnyWrite()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/patchImportChecksAllFilesBeforeAnyWrite()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 34s",
+              "durationInSeconds" : 214.4620041847229,
+              "name" : "revertConflictCanAbortAndContinue()",
+              "nodeIdentifier" : "revertConflictCanAbortAndContinue()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/revertConflictCanAbortAndContinue()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 14s",
+              "durationInSeconds" : 134.96867108345032,
+              "name" : "mailboxCommitPatchIncludesRootMetadataAndBinaryChanges()",
+              "nodeIdentifier" : "mailboxCommitPatchIncludesRootMetadataAndBinaryChanges()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/mailboxCommitPatchIncludesRootMetadataAndBinaryChanges()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 40s",
+              "durationInSeconds" : 160.94736099243164,
+              "name" : "patchBinaryNewFilesAndDeletedFilesPreserveExactBytes()",
+              "nodeIdentifier" : "patchBinaryNewFilesAndDeletedFilesPreserveExactBytes()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/patchBinaryNewFilesAndDeletedFilesPreserveExactBytes()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 30s",
+              "durationInSeconds" : 210.85570788383484,
+              "name" : "submoduleRecursiveCloneAndNestedDirtyGuardsKeepLocalData()",
+              "nodeIdentifier" : "submoduleRecursiveCloneAndNestedDirtyGuardsKeepLocalData()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/submoduleRecursiveCloneAndNestedDirtyGuardsKeepLocalData()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 42s",
+              "durationInSeconds" : 162.5429539680481,
+              "name" : "branchManagementRetainsTrackingAndRejectsStaleReferences()",
+              "nodeIdentifier" : "branchManagementRetainsTrackingAndRejectsStaleReferences()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/branchManagementRetainsTrackingAndRejectsStaleReferences()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 54s",
+              "durationInSeconds" : 234.4030191898346,
+              "name" : "gitFlowFeatureStartFinishMergesAndPinsBeforeDeletingTopic()",
+              "nodeIdentifier" : "gitFlowFeatureStartFinishMergesAndPinsBeforeDeletingTopic()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/gitFlowFeatureStartFinishMergesAndPinsBeforeDeletingTopic()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 31s",
+              "durationInSeconds" : 151.85105514526367,
+              "name" : "revertMergeRequiresExplicitMainlineAndGuardsDirtyWork()",
+              "nodeIdentifier" : "revertMergeRequiresExplicitMainlineAndGuardsDirtyWork()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/revertMergeRequiresExplicitMainlineAndGuardsDirtyWork()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "43s",
+              "durationInSeconds" : 43.903635025024414,
+              "name" : "linkedWorktreeAndNestedFolderResolveRoot()",
+              "nodeIdentifier" : "linkedWorktreeAndNestedFolderResolveRoot()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/linkedWorktreeAndNestedFolderResolveRoot()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 51s",
+              "durationInSeconds" : 291.4370141029358,
+              "name" : "submoduleBatchRemovalSupportsControlledMetadataChangesAndRestoreInReverse()",
+              "nodeIdentifier" : "submoduleBatchRemovalSupportsControlledMetadataChangesAndRestoreInReverse()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/submoduleBatchRemovalSupportsControlledMetadataChangesAndRestoreInReverse()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 8s",
+              "durationInSeconds" : 188.95564699172974,
+              "name" : "discardLinesAndChunkKeepOtherChanges()",
+              "nodeIdentifier" : "discardLinesAndChunkKeepOtherChanges()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/discardLinesAndChunkKeepOtherChanges()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 58s",
+              "durationInSeconds" : 178.10286784172058,
+              "name" : "selectedLinePatchAndReverseImportPreserveOtherChanges()",
+              "nodeIdentifier" : "selectedLinePatchAndReverseImportPreserveOtherChanges()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/selectedLinePatchAndReverseImportPreserveOtherChanges()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 31s",
+              "durationInSeconds" : 151.95418500900269,
+              "name" : "modifyDeleteConflictCanAcceptDeletion()",
+              "nodeIdentifier" : "modifyDeleteConflictCanAcceptDeletion()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/modifyDeleteConflictCanAcceptDeletion()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 27s",
+              "durationInSeconds" : 87.7541561126709,
+              "name" : "branchManagementProtectsOtherWorktreesAndSharesOrganization()",
+              "nodeIdentifier" : "branchManagementProtectsOtherWorktreesAndSharesOrganization()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/branchManagementProtectsOtherWorktreesAndSharesOrganization()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 30s",
+              "durationInSeconds" : 210.1615059375763,
+              "name" : "interactiveRebaseValidatesDirtyStaleAndInvalidPlans()",
+              "nodeIdentifier" : "interactiveRebaseValidatesDirtyStaleAndInvalidPlans()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/interactiveRebaseValidatesDirtyStaleAndInvalidPlans()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 9s",
+              "durationInSeconds" : 129.35373973846436,
+              "name" : "pointerRepairRelocatedModuleStagesMappingAndSupportsUndoAndStaleGuard()",
+              "nodeIdentifier" : "pointerRepairRelocatedModuleStagesMappingAndSupportsUndoAndStaleGuard()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/pointerRepairRelocatedModuleStagesMappingAndSupportsUndoAndStaleGuard()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 50s",
+              "durationInSeconds" : 170.61274409294128,
+              "name" : "lfsExistingTrackedFilesConvertThroughReviewedIndexAndRecoverOriginalStaging()",
+              "nodeIdentifier" : "lfsExistingTrackedFilesConvertThroughReviewedIndexAndRecoverOriginalStaging()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/lfsExistingTrackedFilesConvertThroughReviewedIndexAndRecoverOriginalStaging()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "5m 18s",
+              "durationInSeconds" : 318.8399848937988,
+              "name" : "nestedWorktreeMoveRemoveAndRestoreRetainModuleGitStorage()",
+              "nodeIdentifier" : "nestedWorktreeMoveRemoveAndRestoreRetainModuleGitStorage()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/nestedWorktreeMoveRemoveAndRestoreRetainModuleGitStorage()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "56s",
+              "durationInSeconds" : 56.86476993560791,
+              "name" : "automaticStashRejectsUnbornOrConflictedSaveWithoutStartingOperation()",
+              "nodeIdentifier" : "automaticStashRejectsUnbornOrConflictedSaveWithoutStartingOperation()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/automaticStashRejectsUnbornOrConflictedSaveWithoutStartingOperation()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 15s",
+              "durationInSeconds" : 135.17750096321106,
+              "name" : "automaticStashFastForwardPullRetainsStagedAndUntrackedDrafts()",
+              "nodeIdentifier" : "automaticStashFastForwardPullRetainsStagedAndUntrackedDrafts()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/automaticStashFastForwardPullRetainsStagedAndUntrackedDrafts()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 18s",
+              "durationInSeconds" : 138.02177500724792,
+              "name" : "branchesTagsScopeAndMergeGraph()",
+              "nodeIdentifier" : "branchesTagsScopeAndMergeGraph()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/branchesTagsScopeAndMergeGraph()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 28s",
+              "durationInSeconds" : 148.24647498130798,
+              "name" : "automaticStashCheckoutRestoresExactIndexAndPreservesExistingStack()",
+              "nodeIdentifier" : "automaticStashCheckoutRestoresExactIndexAndPreservesExistingStack()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/automaticStashCheckoutRestoresExactIndexAndPreservesExistingStack()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 21s",
+              "durationInSeconds" : 81.47841310501099,
+              "name" : "amendSignOffAndFullMetadata()",
+              "nodeIdentifier" : "amendSignOffAndFullMetadata()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/amendSignOffAndFullMetadata()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 53s",
+              "durationInSeconds" : 173.19679141044617,
+              "name" : "conflictResolutionPreservesExecutableModeAndRefusesSymlinkWrites()",
+              "nodeIdentifier" : "conflictResolutionPreservesExecutableModeAndRefusesSymlinkWrites()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/conflictResolutionPreservesExecutableModeAndRefusesSymlinkWrites()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 11s",
+              "durationInSeconds" : 251.16204690933228,
+              "name" : "gitFlowStopAbortsOnlyCurrentMergeAndKeepsEarlierProductionAndTag()",
+              "nodeIdentifier" : "gitFlowStopAbortsOnlyCurrentMergeAndKeepsEarlierProductionAndTag()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/gitFlowStopAbortsOnlyCurrentMergeAndKeepsEarlierProductionAndTag()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 8s",
+              "durationInSeconds" : 128.04620909690857,
+              "name" : "tagCreationRenameAndRecoveryPreserveAnnotatedObject()",
+              "nodeIdentifier" : "tagCreationRenameAndRecoveryPreserveAnnotatedObject()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/tagCreationRenameAndRecoveryPreserveAnnotatedObject()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 24s",
+              "durationInSeconds" : 144.34013605117798,
+              "name" : "fileInspectionFollowsRenameAndPreservesUnusualPaths()",
+              "nodeIdentifier" : "fileInspectionFollowsRenameAndPreservesUnusualPaths()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/fileInspectionFollowsRenameAndPreservesUnusualPaths()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 15s",
+              "durationInSeconds" : 255.51836514472961,
+              "name" : "archivedUninitializedModuleRecoversSavedIndexFromEmptyWorkingFolder()",
+              "nodeIdentifier" : "archivedUninitializedModuleRecoversSavedIndexFromEmptyWorkingFolder()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/archivedUninitializedModuleRecoversSavedIndexFromEmptyWorkingFolder()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 19s",
+              "durationInSeconds" : 139.5397322177887,
+              "name" : "restoringHistoryNeverOverwritesIgnoredFiles()",
+              "nodeIdentifier" : "restoringHistoryNeverOverwritesIgnoredFiles()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/restoringHistoryNeverOverwritesIgnoredFiles()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 57s",
+              "durationInSeconds" : 117.02286696434021,
+              "name" : "publishSelectsOnlyOneOfMultiplePushURLs()",
+              "nodeIdentifier" : "publishSelectsOnlyOneOfMultiplePushURLs()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/publishSelectsOnlyOneOfMultiplePushURLs()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 4s",
+              "durationInSeconds" : 244.7659728527069,
+              "name" : "forceSubmoduleCleanupRetainsConflictStateAndCanRecoverIndependentRepository()",
+              "nodeIdentifier" : "forceSubmoduleCleanupRetainsConflictStateAndCanRecoverIndependentRepository()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/forceSubmoduleCleanupRetainsConflictStateAndCanRecoverIndependentRepository()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 34s",
+              "durationInSeconds" : 154.5561752319336,
+              "name" : "gitFlowConfigurationAdoptsClassicKeysAndCreatesDevelopmentWithoutSwitching()",
+              "nodeIdentifier" : "gitFlowConfigurationAdoptsClassicKeysAndCreatesDevelopmentWithoutSwitching()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/gitFlowConfigurationAdoptsClassicKeysAndCreatesDevelopmentWithoutSwitching()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 13s",
+              "durationInSeconds" : 133.81745386123657,
+              "name" : "externalHeadlessMergeProcessWritesOnlyReviewedResultBeforeApplying()",
+              "nodeIdentifier" : "externalHeadlessMergeProcessWritesOnlyReviewedResultBeforeApplying()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/externalHeadlessMergeProcessWritesOnlyReviewedResultBeforeApplying()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.00037s",
+              "durationInSeconds" : 0.00036907196044921875,
+              "name" : "splitRowsAlignReplacementsWithoutLosingLines()",
+              "nodeIdentifier" : "splitRowsAlignReplacementsWithoutLosingLines()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/splitRowsAlignReplacementsWithoutLosingLines()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 22s",
+              "durationInSeconds" : 82.58947706222534,
+              "name" : "automaticStashRecoversInterruptedSaveAndProtectsNewLocalWork()",
+              "nodeIdentifier" : "automaticStashRecoversInterruptedSaveAndProtectsNewLocalWork()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/automaticStashRecoversInterruptedSaveAndProtectsNewLocalWork()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 40s",
+              "durationInSeconds" : 160.11911487579346,
+              "name" : "automaticStashRestorationFailureIsPersistentAndNeverReplayed()",
+              "nodeIdentifier" : "automaticStashRestorationFailureIsPersistentAndNeverReplayed()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/automaticStashRestorationFailureIsPersistentAndNeverReplayed()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 45s",
+              "durationInSeconds" : 165.3215389251709,
+              "name" : "forcedWorktreeRemovalPreservesIgnoredUntrackedAndConflictedIndexInBackup()",
+              "nodeIdentifier" : "forcedWorktreeRemovalPreservesIgnoredUntrackedAndConflictedIndexInBackup()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/forcedWorktreeRemovalPreservesIgnoredUntrackedAndConflictedIndexInBackup()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "17s",
+              "durationInSeconds" : 17.831950902938843,
+              "name" : "historyPageUnbornAndInvalidInputs()",
+              "nodeIdentifier" : "historyPageUnbornAndInvalidInputs()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/historyPageUnbornAndInvalidInputs()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "4m 8s",
+                  "durationInSeconds" : 248.43339085578918,
+                  "name" : ".hotfix",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:)?args=48985547c6792ceb9fa230ca0ee4408085b930335ec1e1ae35d631d9bc81e617",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "4m 8s",
+                  "durationInSeconds" : 248.55301427841187,
+                  "name" : ".release",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:)?args=3c449ba17a333bf2bc9ad4f67897ba023e65a6a23e2e6dbe230e6559529e8555",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                }
+              ],
+              "duration" : "4m 8s",
+              "durationInSeconds" : 248.49320256710052,
+              "name" : "gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:)",
+              "nodeIdentifier" : "gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:)",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:)",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 39s",
+              "durationInSeconds" : 159.99627470970154,
+              "name" : "importedRenamePatchCapturesSourceAndDestination()",
+              "nodeIdentifier" : "importedRenamePatchCapturesSourceAndDestination()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/importedRenamePatchCapturesSourceAndDestination()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 59s",
+              "durationInSeconds" : 119.31766033172607,
+              "name" : "localRemoteFetchPullAndPush()",
+              "nodeIdentifier" : "localRemoteFetchPullAndPush()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/localRemoteFetchPullAndPush()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 34s",
+              "durationInSeconds" : 94.82430982589722,
+              "name" : "stashFileApplyChecksAllPatchesBeforeChangingAnyFiles()",
+              "nodeIdentifier" : "stashFileApplyChecksAllPatchesBeforeChangingAnyFiles()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/stashFileApplyChecksAllPatchesBeforeChangingAnyFiles()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 34s",
+              "durationInSeconds" : 154.63580298423767,
+              "name" : "patchConversionAttributesRequireIndexOnlyWithoutTouchingWorktree()",
+              "nodeIdentifier" : "patchConversionAttributesRequireIndexOnlyWithoutTouchingWorktree()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/patchConversionAttributesRequireIndexOnlyWithoutTouchingWorktree()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 33s",
+              "durationInSeconds" : 153.66910409927368,
+              "name" : "historicalRestorePreservesStagingAndCanRecoverAfterRestart()",
+              "nodeIdentifier" : "historicalRestorePreservesStagingAndCanRecoverAfterRestart()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/historicalRestorePreservesStagingAndCanRecoverAfterRestart()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 15s",
+              "durationInSeconds" : 75.13906192779541,
+              "name" : "blameHandlesEmptyAndUnterminatedText()",
+              "nodeIdentifier" : "blameHandlesEmptyAndUnterminatedText()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/blameHandlesEmptyAndUnterminatedText()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 39s",
+              "durationInSeconds" : 159.34145498275757,
+              "name" : "undoRedoCommitPreservesStagedUnstagedAndUntrackedContents()",
+              "nodeIdentifier" : "undoRedoCommitPreservesStagedUnstagedAndUntrackedContents()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/undoRedoCommitPreservesStagedUnstagedAndUntrackedContents()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 16s",
+              "durationInSeconds" : 256.78308296203613,
+              "name" : "lfsRealLocalObjectPushCloneFetchPullAndCheckoutKeepModifiedFiles()",
+              "nodeIdentifier" : "lfsRealLocalObjectPushCloneFetchPullAndCheckoutKeepModifiedFiles()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/lfsRealLocalObjectPushCloneFetchPullAndCheckoutKeepModifiedFiles()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 8s",
+              "durationInSeconds" : 188.77417516708374,
+              "name" : "automaticStashWaitsThroughInteractiveRebaseEditStop()",
+              "nodeIdentifier" : "automaticStashWaitsThroughInteractiveRebaseEditStop()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/automaticStashWaitsThroughInteractiveRebaseEditStop()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 19s",
+              "durationInSeconds" : 259.201064825058,
+              "name" : "managementRestoreGuardsNewFilesStagingAndChangedBackupAndCanResumeLocks()",
+              "nodeIdentifier" : "managementRestoreGuardsNewFilesStagingAndChangedBackupAndCanResumeLocks()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/managementRestoreGuardsNewFilesStagingAndChangedBackupAndCanResumeLocks()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 12s",
+              "durationInSeconds" : 132.28152227401733,
+              "name" : "mergeAndDirtyGuard()",
+              "nodeIdentifier" : "mergeAndDirtyGuard()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/mergeAndDirtyGuard()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 41s",
+              "durationInSeconds" : 221.4602391719818,
+              "name" : "interactiveEditStopAmendContinueSurvivesRepositoryReopen()",
+              "nodeIdentifier" : "interactiveEditStopAmendContinueSurvivesRepositoryReopen()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/interactiveEditStopAmendContinueSurvivesRepositoryReopen()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 13s",
+              "durationInSeconds" : 133.84279203414917,
+              "name" : "externalDiffSnapshotsPreserveIndexWorkingBytesAndRenameSources()",
+              "nodeIdentifier" : "externalDiffSnapshotsPreserveIndexWorkingBytesAndRenameSources()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/externalDiffSnapshotsPreserveIndexWorkingBytesAndRenameSources()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "46s",
+              "durationInSeconds" : 46.184622049331665,
+              "name" : "worktreeCreationRejectsExistingDestinationsAndChangedBranchPreview()",
+              "nodeIdentifier" : "worktreeCreationRejectsExistingDestinationsAndChangedBranchPreview()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/worktreeCreationRejectsExistingDestinationsAndChangedBranchPreview()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 11s",
+              "durationInSeconds" : 131.34652376174927,
+              "name" : "externalMergeResultRequiresExplicitApplyAndSurvivesReopen()",
+              "nodeIdentifier" : "externalMergeResultRequiresExplicitApplyAndSurvivesReopen()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/externalMergeResultRequiresExplicitApplyAndSurvivesReopen()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "57s",
+              "durationInSeconds" : 57.27210783958435,
+              "name" : "openRepositoryPreservesTrailingNewlineInsteadOfOpeningSibling()",
+              "nodeIdentifier" : "openRepositoryPreservesTrailingNewlineInsteadOfOpeningSibling()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/openRepositoryPreservesTrailingNewlineInsteadOfOpeningSibling()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 42s",
+              "durationInSeconds" : 162.19196891784668,
+              "name" : "historyPagingAndSearchBeyondLoadedPage()",
+              "nodeIdentifier" : "historyPagingAndSearchBeyondLoadedPage()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/historyPagingAndSearchBeyondLoadedPage()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 31s",
+              "durationInSeconds" : 271.38794898986816,
+              "name" : "retainedCleanupProtectsLinkedWorkingTreesOfNestedModules()",
+              "nodeIdentifier" : "retainedCleanupProtectsLinkedWorkingTreesOfNestedModules()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/retainedCleanupProtectsLinkedWorkingTreesOfNestedModules()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 35s",
+              "durationInSeconds" : 155.5895938873291,
+              "name" : "stashSelectedChunksAndBinaryFilesPreserveUnselectedChanges()",
+              "nodeIdentifier" : "stashSelectedChunksAndBinaryFilesPreserveUnselectedChanges()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/stashSelectedChunksAndBinaryFilesPreserveUnselectedChanges()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "50s",
+              "durationInSeconds" : 50.122021198272705,
+              "name" : "historicalExportRejectsEscapingSymlinksAndDeclaresSubmoduleBoundary()",
+              "nodeIdentifier" : "historicalExportRejectsEscapingSymlinksAndDeclaresSubmoduleBoundary()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/historicalExportRejectsEscapingSymlinksAndDeclaresSubmoduleBoundary()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "44s",
+              "durationInSeconds" : 44.10563802719116,
+              "name" : "historyPageAllReferencesAndFirstParentHandleMergeAndAnnotatedTag()",
+              "nodeIdentifier" : "historyPageAllReferencesAndFirstParentHandleMergeAndAnnotatedTag()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/historyPageAllReferencesAndFirstParentHandleMergeAndAnnotatedTag()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 27s",
+              "durationInSeconds" : 87.3472809791565,
+              "name" : "checkoutFailurePreservesDirtyWorktree()",
+              "nodeIdentifier" : "checkoutFailurePreservesDirtyWorktree()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/checkoutFailurePreservesDirtyWorktree()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 45s",
+              "durationInSeconds" : 225.4526960849762,
+              "name" : "interruptedManagementBackupCanExtractSavedFilesWithoutOverwritingNewEdits()",
+              "nodeIdentifier" : "interruptedManagementBackupCanExtractSavedFilesWithoutOverwritingNewEdits()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/interruptedManagementBackupCanExtractSavedFilesWithoutOverwritingNewEdits()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 55s",
+              "durationInSeconds" : 235.54588294029236,
+              "name" : "gitFlowNeverContinuesOrAbortsAReplacementExternalMerge()",
+              "nodeIdentifier" : "gitFlowNeverContinuesOrAbortsAReplacementExternalMerge()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/gitFlowNeverContinuesOrAbortsAReplacementExternalMerge()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "36s",
+              "durationInSeconds" : 36.73424696922302,
+              "name" : "historyPageUsesImmutableTipAndBoundedPagination()",
+              "nodeIdentifier" : "historyPageUsesImmutableTipAndBoundedPagination()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/historyPageUsesImmutableTipAndBoundedPagination()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "32s",
+              "durationInSeconds" : 32.525413036346436,
+              "name" : "historicalFolderExportKeepsExactObjectsDespiteArchiveAttributes()",
+              "nodeIdentifier" : "historicalFolderExportKeepsExactObjectsDespiteArchiveAttributes()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/historicalFolderExportKeepsExactObjectsDespiteArchiveAttributes()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 18s",
+              "durationInSeconds" : 138.6787610054016,
+              "name" : "binaryConflictAcceptsExactIncomingBytes()",
+              "nodeIdentifier" : "binaryConflictAcceptsExactIncomingBytes()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/binaryConflictAcceptsExactIncomingBytes()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 47s",
+              "durationInSeconds" : 167.60263323783875,
+              "name" : "emptyDirectoryReuseChecksNewFilesAndDoesNotOverwriteOccupiedDestinations()",
+              "nodeIdentifier" : "emptyDirectoryReuseChecksNewFilesAndDoesNotOverwriteOccupiedDestinations()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/emptyDirectoryReuseChecksNewFilesAndDoesNotOverwriteOccupiedDestinations()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 29s",
+              "durationInSeconds" : 269.47164607048035,
+              "name" : "recursiveManagementRestoreGuardsNewlyInitializedModuleIndexAndHead()",
+              "nodeIdentifier" : "recursiveManagementRestoreGuardsNewlyInitializedModuleIndexAndHead()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/recursiveManagementRestoreGuardsNewlyInitializedModuleIndexAndHead()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m",
+              "durationInSeconds" : 60.801393270492554,
+              "name" : "createAndCloneNeverOverwriteExistingFolders()",
+              "nodeIdentifier" : "createAndCloneNeverOverwriteExistingFolders()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/createAndCloneNeverOverwriteExistingFolders()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "54s",
+              "durationInSeconds" : 54.035341024398804,
+              "name" : "revisionComparisonShowsRenameWithoutArtificialDeletion()",
+              "nodeIdentifier" : "revisionComparisonShowsRenameWithoutArtificialDeletion()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/revisionComparisonShowsRenameWithoutArtificialDeletion()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 55s",
+              "durationInSeconds" : 175.49052786827087,
+              "name" : "stashRenameDeleteClearAndRecoveryPreserveStoredContent()",
+              "nodeIdentifier" : "stashRenameDeleteClearAndRecoveryPreserveStoredContent()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/stashRenameDeleteClearAndRecoveryPreserveStoredContent()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 38s",
+              "durationInSeconds" : 98.43647193908691,
+              "name" : "mainMigrationRejectsStaleSourceAndRestorationCannotOverwriteNewEdits()",
+              "nodeIdentifier" : "mainMigrationRejectsStaleSourceAndRestorationCannotOverwriteNewEdits()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/mainMigrationRejectsStaleSourceAndRestorationCannotOverwriteNewEdits()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 27s",
+              "durationInSeconds" : 87.94001626968384,
+              "name" : "branchComparisonUsesActualAncestry()",
+              "nodeIdentifier" : "branchComparisonUsesActualAncestry()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/branchComparisonUsesActualAncestry()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.00044s",
+              "durationInSeconds" : 0.00043702125549316406,
+              "name" : "diffNumbersAndPreviewLimit()",
+              "nodeIdentifier" : "diffNumbersAndPreviewLimit()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/diffNumbersAndPreviewLimit()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "1m 52s",
+                  "durationInSeconds" : 112.52617287635803,
+                  "name" : "[\"-old\", \"+new\"]",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/selectedLinesApplyOnlyTheChosenChanges(_:)?args=a1a0f93e0675ee32f413a86072fed4e937f726a527441357f6edd6bcfa9e0071",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1m 52s",
+                  "durationInSeconds" : 112.40880703926086,
+                  "name" : "[\"-old\"]",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/selectedLinesApplyOnlyTheChosenChanges(_:)?args=f4584b5aff9970acb43bb6bfd7fd735e58d1f0c24aac0edcd97f78f8555c34eb",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1m 52s",
+                  "durationInSeconds" : 112.32510900497437,
+                  "name" : "[\"+new\", \"+extra\"]",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/selectedLinesApplyOnlyTheChosenChanges(_:)?args=50dd7024796d654800a5c698cde9bd4dfd26dd88d30813f26af75de90267deca",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "1m 51s",
+                  "durationInSeconds" : 111.9395899772644,
+                  "name" : "[\"+new\"]",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/selectedLinesApplyOnlyTheChosenChanges(_:)?args=ea75bdc9acfb55594e0d1e9fd242b0ae0e479d811cbe2b791ac5aa2e73c4dc36",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                }
+              ],
+              "duration" : "1m 52s",
+              "durationInSeconds" : 112.29991972446442,
+              "name" : "selectedLinesApplyOnlyTheChosenChanges(_:)",
+              "nodeIdentifier" : "selectedLinesApplyOnlyTheChosenChanges(_:)",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/selectedLinesApplyOnlyTheChosenChanges(_:)",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 41s",
+              "durationInSeconds" : 101.68412590026855,
+              "name" : "renamingNewestStashChangesOnlyMetadataAndRemainsApplicable()",
+              "nodeIdentifier" : "renamingNewestStashChangesOnlyMetadataAndRemainsApplicable()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/renamingNewestStashChangesOnlyMetadataAndRemainsApplicable()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 59s",
+              "durationInSeconds" : 179.86375308036804,
+              "name" : "rebaseAndCherryPick()",
+              "nodeIdentifier" : "rebaseAndCherryPick()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/rebaseAndCherryPick()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "2m 16s",
+                  "durationInSeconds" : 136.40159487724304,
+                  "name" : "\"\r \"",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/stashSelectedLinesPreserveOtherLinesIndexAndLocalWork(newline:)?args=645e13cf9b57d854c950a571c2fb9e25a0aea0d8cf2c4b020a8faa4dad6e16c5",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "2m 16s",
+                  "durationInSeconds" : 136.39589834213257,
+                  "name" : "\" \"",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/stashSelectedLinesPreserveOtherLinesIndexAndLocalWork(newline:)?args=d7a5e915306d21dc1937ad5616f1dc9682e759e75ef51dd05fd9ddc98a078ea1",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                }
+              ],
+              "duration" : "2m 16s",
+              "durationInSeconds" : 136.3987466096878,
+              "name" : "stashSelectedLinesPreserveOtherLinesIndexAndLocalWork(newline:)",
+              "nodeIdentifier" : "stashSelectedLinesPreserveOtherLinesIndexAndLocalWork(newline:)",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/stashSelectedLinesPreserveOtherLinesIndexAndLocalWork(newline:)",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 54s",
+              "durationInSeconds" : 174.14065289497375,
+              "name" : "submoduleDirtyAndChangedPreviewCannotOverwriteLocalFiles()",
+              "nodeIdentifier" : "submoduleDirtyAndChangedPreviewCannotOverwriteLocalFiles()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/submoduleDirtyAndChangedPreviewCannotOverwriteLocalFiles()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 39s",
+              "durationInSeconds" : 159.39924001693726,
+              "name" : "missingWorktreeBackupPinsStagedObjectsAndRecoversSavedIndexAfterGC()",
+              "nodeIdentifier" : "missingWorktreeBackupPinsStagedObjectsAndRecoversSavedIndexAfterGC()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/missingWorktreeBackupPinsStagedObjectsAndRecoversSavedIndexAfterGC()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 27s",
+              "durationInSeconds" : 147.48686003684998,
+              "name" : "externalMergeRejectsMarkersNewEditsChangedOperationAndLinks()",
+              "nodeIdentifier" : "externalMergeRejectsMarkersNewEditsChangedOperationAndLinks()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/externalMergeRejectsMarkersNewEditsChangedOperationAndLinks()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "34s",
+              "durationInSeconds" : 34.82681703567505,
+              "name" : "remoteConfigLockAndValidationDoNotOverwriteData()",
+              "nodeIdentifier" : "remoteConfigLockAndValidationDoNotOverwriteData()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/remoteConfigLockAndValidationDoNotOverwriteData()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 7s",
+              "durationInSeconds" : 187.99250721931458,
+              "name" : "staleDiscardPreviewRecoveryAndIndexLockProtectNewEdits()",
+              "nodeIdentifier" : "staleDiscardPreviewRecoveryAndIndexLockProtectNewEdits()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/staleDiscardPreviewRecoveryAndIndexLockProtectNewEdits()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "46s",
+              "durationInSeconds" : 46.316588163375854,
+              "name" : "checkoutReferenceRejectsMovedTargetAndPreservesHead()",
+              "nodeIdentifier" : "checkoutReferenceRejectsMovedTargetAndPreservesHead()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/checkoutReferenceRejectsMovedTargetAndPreservesHead()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 42s",
+              "durationInSeconds" : 102.87676620483398,
+              "name" : "duplicateStashHashesHaveUniqueRowsAndRejectStaleAmbiguity()",
+              "nodeIdentifier" : "duplicateStashHashesHaveUniqueRowsAndRejectStaleAmbiguity()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/duplicateStashHashesHaveUniqueRowsAndRejectStaleAmbiguity()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "54s",
+              "durationInSeconds" : 54.107962131500244,
+              "name" : "discardRejectsGitlinksAndExternalParentSymlinks()",
+              "nodeIdentifier" : "discardRejectsGitlinksAndExternalParentSymlinks()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/discardRejectsGitlinksAndExternalParentSymlinks()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 34s",
+              "durationInSeconds" : 274.83610224723816,
+              "name" : "submoduleFetchCheckoutAndPinnedUpdateDoNotCommitParent()",
+              "nodeIdentifier" : "submoduleFetchCheckoutAndPinnedUpdateDoNotCommitParent()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/submoduleFetchCheckoutAndPinnedUpdateDoNotCommitParent()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 34s",
+              "durationInSeconds" : 214.14171504974365,
+              "name" : "managementLeaseBlocksConcurrentMutationAndReleasesWithoutStaleOwnership()",
+              "nodeIdentifier" : "managementLeaseBlocksConcurrentMutationAndReleasesWithoutStaleOwnership()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/managementLeaseBlocksConcurrentMutationAndReleasesWithoutStaleOwnership()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 7s",
+              "durationInSeconds" : 127.23904585838318,
+              "name" : "stashApplyRestoresExactIndexAndPopKeepsOtherEntries()",
+              "nodeIdentifier" : "stashApplyRestoresExactIndexAndPopKeepsOtherEntries()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/stashApplyRestoresExactIndexAndPopKeepsOtherEntries()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 37s",
+              "durationInSeconds" : 97.95923089981079,
+              "name" : "stashRoundTripKeepsStashAndUntrackedFiles()",
+              "nodeIdentifier" : "stashRoundTripKeepsStashAndUntrackedFiles()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/stashRoundTripKeepsStashAndUntrackedFiles()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 19s",
+              "durationInSeconds" : 139.98003578186035,
+              "name" : "initialCommitUndoAndRedoAndExternalHeadGuard()",
+              "nodeIdentifier" : "initialCommitUndoAndRedoAndExternalHeadGuard()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/initialCommitUndoAndRedoAndExternalHeadGuard()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 34s",
+              "durationInSeconds" : 154.12350583076477,
+              "name" : "revisionComparisonPinsSnapshotsAndUsesMergeBase()",
+              "nodeIdentifier" : "revisionComparisonPinsSnapshotsAndUsesMergeBase()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/revisionComparisonPinsSnapshotsAndUsesMergeBase()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 55s",
+              "durationInSeconds" : 115.64591407775879,
+              "name" : "patchStalePreviewAndIgnoredDestinationAreProtected()",
+              "nodeIdentifier" : "patchStalePreviewAndIgnoredDestinationAreProtected()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/patchStalePreviewAndIgnoredDestinationAreProtected()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m",
+              "durationInSeconds" : 180.32306504249573,
+              "name" : "forcedBatchCleanupAndPruneRejectReappearingDirectories()",
+              "nodeIdentifier" : "forcedBatchCleanupAndPruneRejectReappearingDirectories()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/forcedBatchCleanupAndPruneRejectReappearingDirectories()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "3m 5s",
+                  "durationInSeconds" : 185.70644783973694,
+                  "name" : "false",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/automaticStashSurvivesConflictReopenAndOperationCompletion(abort:)?args=fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "2m 56s",
+                  "durationInSeconds" : 176.81760382652283,
+                  "name" : "true",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/automaticStashSurvivesConflictReopenAndOperationCompletion(abort:)?args=b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                }
+              ],
+              "duration" : "3m 1s",
+              "durationInSeconds" : 181.26202583312988,
+              "name" : "automaticStashSurvivesConflictReopenAndOperationCompletion(abort:)",
+              "nodeIdentifier" : "automaticStashSurvivesConflictReopenAndOperationCompletion(abort:)",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/automaticStashSurvivesConflictReopenAndOperationCompletion(abort:)",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 13s",
+              "durationInSeconds" : 133.53114104270935,
+              "name" : "lfsLocalActivationTrackingLiteralNamesAndRecoveryPreserveStaging()",
+              "nodeIdentifier" : "lfsLocalActivationTrackingLiteralNamesAndRecoveryPreserveStaging()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/lfsLocalActivationTrackingLiteralNamesAndRecoveryPreserveStaging()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.00023s",
+              "durationInSeconds" : 0.0002300739288330078,
+              "name" : "conflictParserPreservesDiff3CRLFAndUnresolvedRegions()",
+              "nodeIdentifier" : "conflictParserPreservesDiff3CRLFAndUnresolvedRegions()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/conflictParserPreservesDiff3CRLFAndUnresolvedRegions()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 42s",
+              "durationInSeconds" : 222.28791880607605,
+              "name" : "interactiveConflictCanAbortOrSkipAndUndo()",
+              "nodeIdentifier" : "interactiveConflictCanAbortOrSkipAndUndo()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/interactiveConflictCanAbortOrSkipAndUndo()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 5s",
+              "durationInSeconds" : 125.32741212844849,
+              "name" : "unstageOneLinePreservesOtherStagedChangesAndRejectsStaleDiff()",
+              "nodeIdentifier" : "unstageOneLinePreservesOtherStagedChangesAndRejectsStaleDiff()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/unstageOneLinePreservesOtherStagedChangesAndRejectsStaleDiff()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 3s",
+              "durationInSeconds" : 243.27877593040466,
+              "name" : "gitFlowCanAcceptManualMergeCompletionAndProtectsExternalBranchChanges()",
+              "nodeIdentifier" : "gitFlowCanAcceptManualMergeCompletionAndProtectsExternalBranchChanges()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/gitFlowCanAcceptManualMergeCompletionAndProtectsExternalBranchChanges()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 42s",
+              "durationInSeconds" : 162.5657091140747,
+              "name" : "lfsPatternRemovalNestedAttributesAndStaleChangesAreGuarded()",
+              "nodeIdentifier" : "lfsPatternRemovalNestedAttributesAndStaleChangesAreGuarded()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/lfsPatternRemovalNestedAttributesAndStaleChangesAreGuarded()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "59s",
+              "durationInSeconds" : 59.38784170150757,
+              "name" : "numstatRenamesBinaryAndHistoricTree()",
+              "nodeIdentifier" : "numstatRenamesBinaryAndHistoricTree()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/numstatRenamesBinaryAndHistoricTree()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "3m 9s",
+                  "durationInSeconds" : 189.7107949256897,
+                  "name" : ".cherryPick",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/replayConflictCanAbortAndContinue(_:)?args=24f1e60865b32c0c07963f139c86ace290b1f6cf26fc533f124a36aaf890c22c",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "3m",
+                  "durationInSeconds" : 180.49197006225586,
+                  "name" : ".rebase",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/replayConflictCanAbortAndContinue(_:)?args=1ce0b97997abf6f308acb28c85f6072274458f2c81abeea6f1a3928950703c5c",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                }
+              ],
+              "duration" : "3m 5s",
+              "durationInSeconds" : 185.10138249397278,
+              "name" : "replayConflictCanAbortAndContinue(_:)",
+              "nodeIdentifier" : "replayConflictCanAbortAndContinue(_:)",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/replayConflictCanAbortAndContinue(_:)",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 54s",
+              "durationInSeconds" : 114.43611812591553,
+              "name" : "historicalRestoreUsesWorktreeConversionWhileRawExportDoesNot()",
+              "nodeIdentifier" : "historicalRestoreUsesWorktreeConversionWhileRawExportDoesNot()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/historicalRestoreUsesWorktreeConversionWhileRawExportDoesNot()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 51s",
+              "durationInSeconds" : 291.8005428314209,
+              "name" : "submoduleManagementUsesLinkedWorktreeGitStorage()",
+              "nodeIdentifier" : "submoduleManagementUsesLinkedWorktreeGitStorage()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/submoduleManagementUsesLinkedWorktreeGitStorage()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 45s",
+              "durationInSeconds" : 225.87259602546692,
+              "name" : "lfsConversionRejectsNewFileContentsAttributesAndConcurrentStaging()",
+              "nodeIdentifier" : "lfsConversionRejectsNewFileContentsAttributesAndConcurrentStaging()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/lfsConversionRejectsNewFileContentsAttributesAndConcurrentStaging()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 9s",
+              "durationInSeconds" : 249.28593707084656,
+              "name" : "managementRestoreRemovalKeepsIgnoredAndNewerFilesAndRejectsTampering()",
+              "nodeIdentifier" : "managementRestoreRemovalKeepsIgnoredAndNewerFilesAndRejectsTampering()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/managementRestoreRemovalKeepsIgnoredAndNewerFilesAndRejectsTampering()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 54s",
+              "durationInSeconds" : 234.00804686546326,
+              "name" : "managementBackupRestoreSupportsUnbornParentWithStagedModule()",
+              "nodeIdentifier" : "managementBackupRestoreSupportsUnbornParentWithStagedModule()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/managementBackupRestoreSupportsUnbornParentWithStagedModule()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 26s",
+              "durationInSeconds" : 146.14070987701416,
+              "name" : "discardUnstagedPreservesIndexAndRestoresAfterReopen()",
+              "nodeIdentifier" : "discardUnstagedPreservesIndexAndRestoresAfterReopen()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/discardUnstagedPreservesIndexAndRestoresAfterReopen()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m",
+              "durationInSeconds" : 120.48118901252747,
+              "name" : "partialStagingAndLiteralPathspecs()",
+              "nodeIdentifier" : "partialStagingAndLiteralPathspecs()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/partialStagingAndLiteralPathspecs()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 9s",
+              "durationInSeconds" : 129.82690119743347,
+              "name" : "worktreeIgnoredFilesAndWrongRepairFolderAreProtected()",
+              "nodeIdentifier" : "worktreeIgnoredFilesAndWrongRepairFolderAreProtected()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/worktreeIgnoredFilesAndWrongRepairFolderAreProtected()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 40s",
+              "durationInSeconds" : 160.75138187408447,
+              "name" : "stashLinesCanPartiallyCreateAndDeleteFiles()",
+              "nodeIdentifier" : "stashLinesCanPartiallyCreateAndDeleteFiles()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/stashLinesCanPartiallyCreateAndDeleteFiles()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 42s",
+              "durationInSeconds" : 222.12218976020813,
+              "name" : "interactiveRebaseReordersRewordsSquashesFixesAndDrops()",
+              "nodeIdentifier" : "interactiveRebaseReordersRewordsSquashesFixesAndDrops()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/interactiveRebaseReordersRewordsSquashesFixesAndDrops()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 9s",
+              "durationInSeconds" : 129.92055010795593,
+              "name" : "unbornRepositoryAndUnstagePreserveLaterEdits()",
+              "nodeIdentifier" : "unbornRepositoryAndUnstagePreserveLaterEdits()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/unbornRepositoryAndUnstagePreserveLaterEdits()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 23s",
+              "durationInSeconds" : 83.97170186042786,
+              "name" : "repeatedSnapshotsPreserveWorkingAndIndexContent()",
+              "nodeIdentifier" : "repeatedSnapshotsPreserveWorkingAndIndexContent()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/repeatedSnapshotsPreserveWorkingAndIndexContent()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "3m 5s",
+                  "durationInSeconds" : 185.9762909412384,
+                  "name" : ".cherryPick",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/resolveConflictThenContinueIntegration(_:)?args=24f1e60865b32c0c07963f139c86ace290b1f6cf26fc533f124a36aaf890c22c",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "3m 3s",
+                  "durationInSeconds" : 183.59369707107544,
+                  "name" : ".merge",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/resolveConflictThenContinueIntegration(_:)?args=532f53631c5865a58c44aeb6665e3c39eff9fcb1369e4ff3066568c964adf93f",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "2m 59s",
+                  "durationInSeconds" : 179.9579792022705,
+                  "name" : ".rebase",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/resolveConflictThenContinueIntegration(_:)?args=1ce0b97997abf6f308acb28c85f6072274458f2c81abeea6f1a3928950703c5c",
+                  "nodeType" : "Arguments",
+                  "result" : "Passed"
+                }
+              ],
+              "duration" : "3m 3s",
+              "durationInSeconds" : 183.1759890715281,
+              "name" : "resolveConflictThenContinueIntegration(_:)",
+              "nodeIdentifier" : "resolveConflictThenContinueIntegration(_:)",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/resolveConflictThenContinueIntegration(_:)",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 42s",
+              "durationInSeconds" : 102.95213913917542,
+              "name" : "preparedRecoveryCanRestoreAnInterruptedMultiFileWrite()",
+              "nodeIdentifier" : "preparedRecoveryCanRestoreAnInterruptedMultiFileWrite()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/preparedRecoveryCanRestoreAnInterruptedMultiFileWrite()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 48s",
+              "durationInSeconds" : 228.9189851284027,
+              "name" : "worktreeBatchStopsAtFailurePersistsAndResumesWithoutReplayingSuccesses()",
+              "nodeIdentifier" : "worktreeBatchStopsAtFailurePersistsAndResumesWithoutReplayingSuccesses()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/worktreeBatchStopsAtFailurePersistsAndResumesWithoutReplayingSuccesses()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 14s",
+              "durationInSeconds" : 134.34358620643616,
+              "name" : "worktreeCreateModesPreserveMainAndEnforceBranchOccupancy()",
+              "nodeIdentifier" : "worktreeCreateModesPreserveMainAndEnforceBranchOccupancy()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/worktreeCreateModesPreserveMainAndEnforceBranchOccupancy()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 53s",
+              "durationInSeconds" : 173.17735838890076,
+              "name" : "publishBranchesTagsAndDeleteWithLeaseUsingLocalServer()",
+              "nodeIdentifier" : "publishBranchesTagsAndDeleteWithLeaseUsingLocalServer()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/publishBranchesTagsAndDeleteWithLeaseUsingLocalServer()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 43s",
+              "durationInSeconds" : 163.78016304969788,
+              "name" : "lfsHooksAreLocalExecutableAndCustomScriptsAreNeverReplaced()",
+              "nodeIdentifier" : "lfsHooksAreLocalExecutableAndCustomScriptsAreNeverReplaced()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/lfsHooksAreLocalExecutableAndCustomScriptsAreNeverReplaced()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 19s",
+              "durationInSeconds" : 199.88913202285767,
+              "name" : "gitFlowSupportAndRemoteTrackingPreserveClassicBranchBases()",
+              "nodeIdentifier" : "gitFlowSupportAndRemoteTrackingPreserveClassicBranchBases()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/gitFlowSupportAndRemoteTrackingPreserveClassicBranchBases()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 1s",
+              "durationInSeconds" : 121.3403148651123,
+              "name" : "conflictDetectionAndCommitGuard()",
+              "nodeIdentifier" : "conflictDetectionAndCommitGuard()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/conflictDetectionAndCommitGuard()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 39s",
+              "durationInSeconds" : 219.60340905189514,
+              "name" : "retainedReuseAndArchiveRejectLiveLinkedWorkingTrees()",
+              "nodeIdentifier" : "retainedReuseAndArchiveRejectLiveLinkedWorkingTrees()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/retainedReuseAndArchiveRejectLiveLinkedWorkingTrees()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 55s",
+              "durationInSeconds" : 115.80409789085388,
+              "name" : "patchTraversalGitMetadataAndSymlinkAreRejected()",
+              "nodeIdentifier" : "patchTraversalGitMetadataAndSymlinkAreRejected()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/patchTraversalGitMetadataAndSymlinkAreRejected()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "5m 1s",
+              "durationInSeconds" : 301.25912404060364,
+              "name" : "submoduleMoveURLSyncRepairAndRemoveStageMetadataSafely()",
+              "nodeIdentifier" : "submoduleMoveURLSyncRepairAndRemoveStageMetadataSafely()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/submoduleMoveURLSyncRepairAndRemoveStageMetadataSafely()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 21s",
+              "durationInSeconds" : 261.9174520969391,
+              "name" : "submoduleDirectoryReusePreservesExistingFilesAndRetainedIndexWithoutFetch()",
+              "nodeIdentifier" : "submoduleDirectoryReusePreservesExistingFilesAndRetainedIndexWithoutFetch()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/submoduleDirectoryReusePreservesExistingFilesAndRetainedIndexWithoutFetch()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 31s",
+              "durationInSeconds" : 91.26950120925903,
+              "name" : "selectedFileStashingUsesLiteralPathsAndRetainsOtherWork()",
+              "nodeIdentifier" : "selectedFileStashingUsesLiteralPathsAndRetainsOtherWork()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/selectedFileStashingUsesLiteralPathsAndRetainsOtherWork()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 22s",
+              "durationInSeconds" : 142.005774974823,
+              "name" : "pushLeaseRejectsRemoteChangesAfterPreview()",
+              "nodeIdentifier" : "pushLeaseRejectsRemoteChangesAfterPreview()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/pushLeaseRejectsRemoteChangesAfterPreview()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 10s",
+              "durationInSeconds" : 190.00553965568542,
+              "name" : "mainMigrationRestoreResumesAfterExternalLockAndSavedCopyIsIndependent()",
+              "nodeIdentifier" : "mainMigrationRestoreResumesAfterExternalLockAndSavedCopyIsIndependent()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/mainMigrationRestoreResumesAfterExternalLockAndSavedCopyIsIndependent()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 30s",
+              "durationInSeconds" : 150.42839193344116,
+              "name" : "stashLinesAcrossChunksRejectInvalidOrConflictingSelection()",
+              "nodeIdentifier" : "stashLinesAcrossChunksRejectInvalidOrConflictingSelection()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/stashLinesAcrossChunksRejectInvalidOrConflictingSelection()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "45s",
+              "durationInSeconds" : 45.10708689689636,
+              "name" : "historicalBatchCanReadMoreThanDefaultProcessLimitAndBoundsOversizedFiles()",
+              "nodeIdentifier" : "historicalBatchCanReadMoreThanDefaultProcessLimitAndBoundsOversizedFiles()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/historicalBatchCanReadMoreThanDefaultProcessLimitAndBoundsOversizedFiles()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 39s",
+              "durationInSeconds" : 159.18439030647278,
+              "name" : "discardRecoveryBlocksBranchSwitchAndTracksPinnedIndexObjects()",
+              "nodeIdentifier" : "discardRecoveryBlocksBranchSwitchAndTracksPinnedIndexObjects()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/discardRecoveryBlocksBranchSwitchAndTracksPinnedIndexObjects()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 33s",
+              "durationInSeconds" : 153.5177309513092,
+              "name" : "patchCRLFNoFinalNewlineAndExecutableModeRoundTrip()",
+              "nodeIdentifier" : "patchCRLFNoFinalNewlineAndExecutableModeRoundTrip()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/patchCRLFNoFinalNewlineAndExecutableModeRoundTrip()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 16s",
+              "durationInSeconds" : 136.531662940979,
+              "name" : "fileInspectionDeletionBinaryAndLiteralPathGuards()",
+              "nodeIdentifier" : "fileInspectionDeletionBinaryAndLiteralPathGuards()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/fileInspectionDeletionBinaryAndLiteralPathGuards()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 7s",
+              "durationInSeconds" : 127.32623028755188,
+              "name" : "historicalRestoreDeletedFileAndNewTargetPath()",
+              "nodeIdentifier" : "historicalRestoreDeletedFileAndNewTargetPath()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/historicalRestoreDeletedFileAndNewTargetPath()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 41s",
+              "durationInSeconds" : 161.44628381729126,
+              "name" : "discardAllRestoresStagedRenameBinaryUntrackedAndPermissions()",
+              "nodeIdentifier" : "discardAllRestoresStagedRenameBinaryUntrackedAndPermissions()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/discardAllRestoresStagedRenameBinaryUntrackedAndPermissions()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "46s",
+              "durationInSeconds" : 46.850067138671875,
+              "name" : "historicalSnapshotStaysOnImmutableRevisionAndRejectsMissingSelection()",
+              "nodeIdentifier" : "historicalSnapshotStaysOnImmutableRevisionAndRejectsMissingSelection()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/historicalSnapshotStaysOnImmutableRevisionAndRejectsMissingSelection()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 52s",
+              "durationInSeconds" : 112.91272711753845,
+              "name" : "selectedLinesAcrossHunksKeepCorrectOffsets()",
+              "nodeIdentifier" : "selectedLinesAcrossHunksKeepCorrectOffsets()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/selectedLinesAcrossHunksKeepCorrectOffsets()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 48s",
+              "durationInSeconds" : 168.59924912452698,
+              "name" : "remoteCRUDPreservesURLsRefspecsAndTracking()",
+              "nodeIdentifier" : "remoteCRUDPreservesURLsRefspecsAndTracking()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/remoteCRUDPreservesURLsRefspecsAndTracking()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 4s",
+              "durationInSeconds" : 124.99136900901794,
+              "name" : "individualChunksStageAndUnstageWithoutLosingWork()",
+              "nodeIdentifier" : "individualChunksStageAndUnstageWithoutLosingWork()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/individualChunksStageAndUnstageWithoutLosingWork()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "0.000068s",
+              "durationInSeconds" : 6.818771362304688e-05,
+              "name" : "porcelainPreservesUnusualNamesAndRenamePairs()",
+              "nodeIdentifier" : "porcelainPreservesUnusualNamesAndRenamePairs()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/porcelainPreservesUnusualNamesAndRenamePairs()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 41s",
+              "durationInSeconds" : 161.96021103858948,
+              "name" : "submoduleAdditionRejectsStaleParentAndUnsafeTransportsAndPaths()",
+              "nodeIdentifier" : "submoduleAdditionRejectsStaleParentAndUnsafeTransportsAndPaths()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/submoduleAdditionRejectsStaleParentAndUnsafeTransportsAndPaths()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "33s",
+              "durationInSeconds" : 33.28508901596069,
+              "name" : "historicalZIPIsAcceptedByIndependentUnzipWithModesAndBytes()",
+              "nodeIdentifier" : "historicalZIPIsAcceptedByIndependentUnzipWithModesAndBytes()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/historicalZIPIsAcceptedByIndependentUnzipWithModesAndBytes()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 6s",
+              "durationInSeconds" : 126.90043306350708,
+              "name" : "automaticStashCanRemainSavedWithoutReapplying()",
+              "nodeIdentifier" : "automaticStashCanRemainSavedWithoutReapplying()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/automaticStashCanRemainSavedWithoutReapplying()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 48s",
+              "durationInSeconds" : 168.1913549900055,
+              "name" : "lineStagingNewAndDeletedFilesPreservesWorktreeAndMissingNewline()",
+              "nodeIdentifier" : "lineStagingNewAndDeletedFilesPreservesWorktreeAndMissingNewline()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/lineStagingNewAndDeletedFilesPreservesWorktreeAndMissingNewline()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 45s",
+              "durationInSeconds" : 165.57429885864258,
+              "name" : "lfsSettingRecoveryProtectsNewEditsLocksAndChangedHeads()",
+              "nodeIdentifier" : "lfsSettingRecoveryProtectsNewEditsLocksAndChangedHeads()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/lfsSettingRecoveryProtectsNewEditsLocksAndChangedHeads()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "33s",
+              "durationInSeconds" : 33.55873465538025,
+              "name" : "historicalRawExportPreservesBinaryEmptyExecutableAndLiteralNames()",
+              "nodeIdentifier" : "historicalRawExportPreservesBinaryEmptyExecutableAndLiteralNames()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/historicalRawExportPreservesBinaryEmptyExecutableAndLiteralNames()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 55s",
+              "durationInSeconds" : 295.9464039802551,
+              "name" : "nestedSubmoduleMigrationAndManagementRestorePreserveRepositories()",
+              "nodeIdentifier" : "nestedSubmoduleMigrationAndManagementRestorePreserveRepositories()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/nestedSubmoduleMigrationAndManagementRestorePreserveRepositories()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "16s",
+              "durationInSeconds" : 16.302637100219727,
+              "name" : "workingFilePreviewDoesNotFollowLinksOrReadDirectories()",
+              "nodeIdentifier" : "workingFilePreviewDoesNotFollowLinksOrReadDirectories()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/workingFilePreviewDoesNotFollowLinksOrReadDirectories()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 31s",
+              "durationInSeconds" : 91.22851181030273,
+              "name" : "chunkStagingNewFileRoundTrip()",
+              "nodeIdentifier" : "chunkStagingNewFileRoundTrip()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/chunkStagingNewFileRoundTrip()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 39s",
+              "durationInSeconds" : 159.89487099647522,
+              "name" : "stashPopConflictRetainsOriginalAndCanBeResolved()",
+              "nodeIdentifier" : "stashPopConflictRetainsOriginalAndCanBeResolved()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/stashPopConflictRetainsOriginalAndCanBeResolved()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "57s",
+              "durationInSeconds" : 57.90965008735657,
+              "name" : "forcedCleanupCannotFollowAReplacedWorktreeSymbolicLink()",
+              "nodeIdentifier" : "forcedCleanupCannotFollowAReplacedWorktreeSymbolicLink()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/forcedCleanupCannotFollowAReplacedWorktreeSymbolicLink()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 16s",
+              "durationInSeconds" : 196.72030210494995,
+              "name" : "submoduleIgnoredFilesAndChangedGitmodulesBlockDestructiveActions()",
+              "nodeIdentifier" : "submoduleIgnoredFilesAndChangedGitmodulesBlockDestructiveActions()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/submoduleIgnoredFilesAndChangedGitmodulesBlockDestructiveActions()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 23s",
+              "durationInSeconds" : 143.57795691490173,
+              "name" : "pointerRepairAfterExternalMainMoveAndLinkedMovePreservesData()",
+              "nodeIdentifier" : "pointerRepairAfterExternalMainMoveAndLinkedMovePreservesData()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/pointerRepairAfterExternalMainMoveAndLinkedMovePreservesData()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 45s",
+              "durationInSeconds" : 105.12131714820862,
+              "name" : "fetchOptionsPruneOnlyTrackingRefsAndFetchTags()",
+              "nodeIdentifier" : "fetchOptionsPruneOnlyTrackingRefsAndFetchTags()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/fetchOptionsPruneOnlyTrackingRefsAndFetchTags()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 1s",
+              "durationInSeconds" : 241.70233607292175,
+              "name" : "gitFlowStaleDirtyOccupiedBaseAndVersionCollisionsAreProtected()",
+              "nodeIdentifier" : "gitFlowStaleDirtyOccupiedBaseAndVersionCollisionsAreProtected()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/gitFlowStaleDirtyOccupiedBaseAndVersionCollisionsAreProtected()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 30s",
+              "durationInSeconds" : 150.9743139743805,
+              "name" : "stageRenameUnstageAndDeletion()",
+              "nodeIdentifier" : "stageRenameUnstageAndDeletion()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/stageRenameUnstageAndDeletion()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 9s",
+              "durationInSeconds" : 249.1916332244873,
+              "name" : "worktreeBatchLockMoveAndCancellationRequireFreshPreviews()",
+              "nodeIdentifier" : "worktreeBatchLockMoveAndCancellationRequireFreshPreviews()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/worktreeBatchLockMoveAndCancellationRequireFreshPreviews()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 42s",
+              "durationInSeconds" : 102.68401217460632,
+              "name" : "repositorySettingsAndIgnoreFilesRejectStaleWrites()",
+              "nodeIdentifier" : "repositorySettingsAndIgnoreFilesRejectStaleWrites()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/repositorySettingsAndIgnoreFilesRejectStaleWrites()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 28s",
+              "durationInSeconds" : 88.0932080745697,
+              "name" : "lineStagingPreservesCRLFAndRejectsStructuralModeChanges()",
+              "nodeIdentifier" : "lineStagingPreservesCRLFAndRejectsStructuralModeChanges()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/lineStagingPreservesCRLFAndRejectsStructuralModeChanges()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 58s",
+              "durationInSeconds" : 238.0044391155243,
+              "name" : "gitFlowSigningFailureKeepsTopicAndProductionAndAllowsExplicitStop()",
+              "nodeIdentifier" : "gitFlowSigningFailureKeepsTopicAndProductionAndAllowsExplicitStop()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/gitFlowSigningFailureKeepsTopicAndProductionAndAllowsExplicitStop()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 26s",
+              "durationInSeconds" : 86.58395171165466,
+              "name" : "stashSnapshotAndKeepIndexPreserveStagingSemantics()",
+              "nodeIdentifier" : "stashSnapshotAndKeepIndexPreserveStagingSemantics()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/stashSnapshotAndKeepIndexPreserveStagingSemantics()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 12s",
+              "durationInSeconds" : 192.84030508995056,
+              "name" : "dragRebasePlansReorderAndFoldOnlyCurrentLinearCommits()",
+              "nodeIdentifier" : "dragRebasePlansReorderAndFoldOnlyCurrentLinearCommits()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/dragRebasePlansReorderAndFoldOnlyCurrentLinearCommits()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 2s",
+              "durationInSeconds" : 182.80687880516052,
+              "name" : "revertCreatesNewHistoryAndSupportsUndoRedo()",
+              "nodeIdentifier" : "revertCreatesNewHistoryAndSupportsUndoRedo()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/revertCreatesNewHistoryAndSupportsUndoRedo()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 11s",
+              "durationInSeconds" : 251.62080073356628,
+              "name" : "archiveRetainedThenCloneFreshPreservesOldHistoryAndSavedIndex()",
+              "nodeIdentifier" : "archiveRetainedThenCloneFreshPreservesOldHistoryAndSavedIndex()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/archiveRetainedThenCloneFreshPreservesOldHistoryAndSavedIndex()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 52s",
+              "durationInSeconds" : 172.12501192092896,
+              "name" : "worktreeMoveLockAndRepairRetainRegistrationIdentity()",
+              "nodeIdentifier" : "worktreeMoveLockAndRepairRetainRegistrationIdentity()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/worktreeMoveLockAndRepairRetainRegistrationIdentity()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "54s",
+              "durationInSeconds" : 54.55269193649292,
+              "name" : "checkoutReferencePreservesLocalChangesAndRejectsOperationInProgress()",
+              "nodeIdentifier" : "checkoutReferencePreservesLocalChangesAndRejectsOperationInProgress()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/checkoutReferencePreservesLocalChangesAndRejectsOperationInProgress()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 8s",
+              "durationInSeconds" : 188.76235699653625,
+              "name" : "mergeConflictCanAbortOrContinue()",
+              "nodeIdentifier" : "mergeConflictCanAbortOrContinue()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/mergeConflictCanAbortOrContinue()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 7s",
+              "durationInSeconds" : 247.74527382850647,
+              "name" : "gitFlowConflictPersistsAcrossReopenAndCanContinueAfterStaging()",
+              "nodeIdentifier" : "gitFlowConflictPersistsAcrossReopenAndCanContinueAfterStaging()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/gitFlowConflictPersistsAcrossReopenAndCanContinueAfterStaging()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "31s",
+              "durationInSeconds" : 31.2585391998291,
+              "name" : "errorsAndEmptyCommitAreReported()",
+              "nodeIdentifier" : "errorsAndEmptyCommitAreReported()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/errorsAndEmptyCommitAreReported()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 29s",
+              "durationInSeconds" : 149.07299900054932,
+              "name" : "historicalRestoreRejectsStalePreviewUntrackedIgnoredAndSymlinkTargets()",
+              "nodeIdentifier" : "historicalRestoreRejectsStalePreviewUntrackedIgnoredAndSymlinkTargets()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/historicalRestoreRejectsStalePreviewUntrackedIgnoredAndSymlinkTargets()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 16s",
+              "durationInSeconds" : 196.66800570487976,
+              "name" : "discardDeletedFileAndUnbornStagedAddition()",
+              "nodeIdentifier" : "discardDeletedFileAndUnbornStagedAddition()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/discardDeletedFileAndUnbornStagedAddition()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "26s",
+              "durationInSeconds" : 26.94356393814087,
+              "name" : "historicalEmptyProjectCanExportFolderAndValidEmptyZIP()",
+              "nodeIdentifier" : "historicalEmptyProjectCanExportFolderAndValidEmptyZIP()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/historicalEmptyProjectCanExportFolderAndValidEmptyZIP()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "4m 10s",
+              "durationInSeconds" : 250.79111790657043,
+              "name" : "submoduleAddListDeinitializeAndInitializeKeepGitData()",
+              "nodeIdentifier" : "submoduleAddListDeinitializeAndInitializeKeepGitData()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/submoduleAddListDeinitializeAndInitializeKeepGitData()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "20s",
+              "durationInSeconds" : 20.233609199523926,
+              "name" : "historyReadHonorsCancellationBeforeLaunching()",
+              "nodeIdentifier" : "historyReadHonorsCancellationBeforeLaunching()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/historyReadHonorsCancellationBeforeLaunching()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 9s",
+              "durationInSeconds" : 189.32661199569702,
+              "name" : "reflogUsesEventDatesAndRecoversUnreachableCommits()",
+              "nodeIdentifier" : "reflogUsesEventDatesAndRecoversUnreachableCommits()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/reflogUsesEventDatesAndRecoversUnreachableCommits()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 21s",
+              "durationInSeconds" : 141.6422929763794,
+              "name" : "mainMigrationRejectsMainAndLinkedIndexLocksAtPreviewAndApply()",
+              "nodeIdentifier" : "mainMigrationRejectsMainAndLinkedIndexLocksAtPreviewAndApply()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/mainMigrationRejectsMainAndLinkedIndexLocksAtPreviewAndApply()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "2m 45s",
+              "durationInSeconds" : 165.01604008674622,
+              "name" : "conflictResolutionRejectsMarkersAndStaleWorktreeOrIndex()",
+              "nodeIdentifier" : "conflictResolutionRejectsMarkersAndStaleWorktreeOrIndex()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/conflictResolutionRejectsMarkersAndStaleWorktreeOrIndex()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "52s",
+              "durationInSeconds" : 52.728423833847046,
+              "name" : "externalToolArgumentsAreLiteralAndHeadlessRunnerNeverUsesAShell()",
+              "nodeIdentifier" : "externalToolArgumentsAreLiteralAndHeadlessRunnerNeverUsesAShell()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/externalToolArgumentsAreLiteralAndHeadlessRunnerNeverUsesAShell()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 57s",
+              "durationInSeconds" : 237.61320304870605,
+              "name" : "legacyManagementBackupsRecoverIntoNewTreeWithoutReplacingLiveMetadata()",
+              "nodeIdentifier" : "legacyManagementBackupsRecoverIntoNewTreeWithoutReplacingLiveMetadata()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/legacyManagementBackupsRecoverIntoNewTreeWithoutReplacingLiveMetadata()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "1m 22s",
+              "durationInSeconds" : 82.66845512390137,
+              "name" : "revertRejectsExternallyMovedPreviewHead()",
+              "nodeIdentifier" : "revertRejectsExternallyMovedPreviewHead()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/revertRejectsExternallyMovedPreviewHead()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            },
+            {
+              "duration" : "3m 50s",
+              "durationInSeconds" : 230.2935950756073,
+              "name" : "managementRestoreRejectsIntentToAddBecomingStagedEmptyFile()",
+              "nodeIdentifier" : "managementRestoreRejectsIntentToAddBecomingStagedEmptyFile()",
+              "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests/managementRestoreRejectsIntentToAddBecomingStagedEmptyFile()",
+              "nodeType" : "Test Case",
+              "result" : "Passed"
+            }
+          ],
+          "name" : "GitCoreTests",
+          "nodeIdentifierURL" : "test://com.apple.xcode/GitPico/GitCoreTests",
+          "nodeType" : "Unit test bundle",
+          "result" : "Passed"
+        }
+      ],
+      "name" : "GitPico",
+      "nodeType" : "Test Plan",
+      "result" : "Failed"
+    }
+  ],
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ]
+}

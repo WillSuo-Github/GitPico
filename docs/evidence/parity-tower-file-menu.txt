@@ -1,0 +1,16 @@
+The following is a diff from the previous accessibility tree for Window: "HistoryReview-8zsc58q6" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
++				169 menu Secondary Actions: Cancel
++					170 Open “Welcome.swift” at Revision ”7a6933b3”, ID: openWithDefaultApplication:
++					171 Open “Welcome.swift” at Revision ”7a6933b3” With
++						172 menu Secondary Actions: Cancel
++							173 (disabled) Loading
++					174 Show “Welcome.swift” at Revision “7a6933b3”, ID: rawFileAtRevision:
++					175 Show Blame for “Welcome.swift” at Revision “7a6933b3”, ID: blame:
++					176 Show File History of “Welcome.swift”, ID: showFileHistory:
++					177 Restore “Welcome.swift” at Revision ”7a6933b3” in Working Copy…, ID: resetToRevision:
++					178 Export “Welcome.swift” at Revision ”7a6933b3”…, ID: exportRevision:
++					179 Archive “Welcome.swift” at Revision ”7a6933b3”…, ID: archiveRevision:
+Selected:
+	10 row (selected)
+
+Note: Pay special attention to the content selected by the user. If the user asks a question or refers to the content they are looking at on-screen, they might be referring to the selected content (but they might be referring to something else that's visible, too).

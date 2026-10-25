@@ -1,0 +1,68 @@
+Building for debugging...
+[1 / 1]
+[2 / 20] GitCore
+[5 / 23] GitCore
+[13 / 29] GitCore
+[14 / 28] GitCoreTests-product
+[16 / 30] GitPico
+[20 / 31] GitPico-product
+[21 / 33] GitCoreTests-product
+[26 / 37] GitCoreTests-product
+[28 / 37] GitPico
+[30 / 36] GitPico-product
+[34 / 39] GitPicoTests-product
+[37 / 40] GitPicoTests-product
+[40 / 43] GitPicoTests-product
+Build complete! (6.10 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test extensionMutationRequestsRejectStaleRepositorySessions() started.
+◇ Test lfsStoreEnableRefreshesNativeSettingsStateWithoutOpeningWindows() started.
+◇ Test extensionQuickActionsOpenSettingsAndRequireConfigurationBeforeStartingTopics() started.
+✔ Test extensionMutationRequestsRejectStaleRepositorySessions() passed after 7.276 seconds.
+✔ Test lfsStoreEnableRefreshesNativeSettingsStateWithoutOpeningWindows() passed after 10.155 seconds.
+✔ Test extensionQuickActionsOpenSettingsAndRequireConfigurationBeforeStartingTopics() passed after 15.990 seconds.
+✔ Test run with 3 tests in 0 suites passed after 15.991 seconds.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test lfsRealLocalObjectPushCloneFetchPullAndCheckoutKeepModifiedFiles() started.
+◇ Test lfsLocalActivationTrackingLiteralNamesAndRecoveryPreserveStaging() started.
+◇ Test gitFlowSigningFailureKeepsTopicAndProductionAndAllowsExplicitStop() started.
+◇ Test lfsSettingRecoveryProtectsNewEditsLocksAndChangedHeads() started.
+◇ Test lfsExistingTrackedFilesConvertThroughReviewedIndexAndRecoverOriginalStaging() started.
+◇ Test gitFlowFeatureStartFinishMergesAndPinsBeforeDeletingTopic() started.
+◇ Test lfsHooksAreLocalExecutableAndCustomScriptsAreNeverReplaced() started.
+◇ Test lfsConversionRejectsNewFileContentsAttributesAndConcurrentStaging() started.
+◇ Test gitFlowStaleDirtyOccupiedBaseAndVersionCollisionsAreProtected() started.
+◇ Test gitFlowIgnoredDestinationCannotOverwriteLocalData() started.
+◇ Test gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:) started.
+◇ Test gitFlowStopAbortsOnlyCurrentMergeAndKeepsEarlierProductionAndTag() started.
+◇ Test gitFlowSupportAndRemoteTrackingPreserveClassicBranchBases() started.
+◇ Test lfsTransferRejectsChangedEndpointsAndReportsActualErrors() started.
+◇ Test lfsPatternRemovalNestedAttributesAndStaleChangesAreGuarded() started.
+◇ Test gitFlowCanAcceptManualMergeCompletionAndProtectsExternalBranchChanges() started.
+◇ Test gitFlowConfigurationAdoptsClassicKeysAndCreatesDevelopmentWithoutSwitching() started.
+◇ Test gitFlowConflictPersistsAcrossReopenAndCanContinueAfterStaging() started.
+◇ Test case passing 1 argument kind → .release to gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:) started.
+◇ Test case passing 1 argument kind → .hotfix to gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:) started.
+✔ Test lfsLocalActivationTrackingLiteralNamesAndRecoveryPreserveStaging() passed after 14.122 seconds.
+✔ Test gitFlowConfigurationAdoptsClassicKeysAndCreatesDevelopmentWithoutSwitching() passed after 16.879 seconds.
+✔ Test lfsTransferRejectsChangedEndpointsAndReportsActualErrors() passed after 18.762 seconds.
+✔ Test lfsHooksAreLocalExecutableAndCustomScriptsAreNeverReplaced() passed after 19.288 seconds.
+✔ Test lfsSettingRecoveryProtectsNewEditsLocksAndChangedHeads() passed after 19.307 seconds.
+✔ Test lfsPatternRemovalNestedAttributesAndStaleChangesAreGuarded() passed after 19.500 seconds.
+✔ Test gitFlowIgnoredDestinationCannotOverwriteLocalData() passed after 19.518 seconds.
+✔ Test lfsExistingTrackedFilesConvertThroughReviewedIndexAndRecoverOriginalStaging() passed after 20.331 seconds.
+✔ Test gitFlowSupportAndRemoteTrackingPreserveClassicBranchBases() passed after 26.245 seconds.
+✔ Test lfsConversionRejectsNewFileContentsAttributesAndConcurrentStaging() passed after 33.507 seconds.
+✔ Test gitFlowFeatureStartFinishMergesAndPinsBeforeDeletingTopic() passed after 35.270 seconds.
+✔ Test gitFlowSigningFailureKeepsTopicAndProductionAndAllowsExplicitStop() passed after 36.679 seconds.
+✔ Test gitFlowStaleDirtyOccupiedBaseAndVersionCollisionsAreProtected() passed after 38.584 seconds.
+✔ Test gitFlowCanAcceptManualMergeCompletionAndProtectsExternalBranchChanges() passed after 38.974 seconds.
+✔ Test gitFlowConflictPersistsAcrossReopenAndCanContinueAfterStaging() passed after 40.868 seconds.
+✔ Test gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:) with 2 test cases passed after 41.440 seconds.
+✔ Test gitFlowStopAbortsOnlyCurrentMergeAndKeepsEarlierProductionAndTag() passed after 42.992 seconds.
+✔ Test lfsRealLocalObjectPushCloneFetchPullAndCheckoutKeepModifiedFiles() passed after 50.697 seconds.
+✔ Test run with 18 tests in 0 suites passed after 50.697 seconds.

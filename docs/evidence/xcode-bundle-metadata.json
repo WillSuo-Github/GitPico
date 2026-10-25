@@ -1,0 +1,13 @@
+{
+  "version": "0.01",
+  "build": "20261024220803",
+  "minimumMacOS": "26.0",
+  "bundleIdentifier": "com.willsuo.GitPico",
+  "nativeBundleMatchesStagedBundle": true,
+  "projectAndSourcePlistUnchangedDuringBuild": true,
+  "embeddedGitCore": true,
+  "nativeTests": 239,
+  "testDurationSeconds": 356.55,
+  "host": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0.1\nBuildVersion:\t\t26A434",
+  "xcode": "Xcode 27.1\nBuild version 27A9275"
+}

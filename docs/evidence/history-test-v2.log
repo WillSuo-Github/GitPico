@@ -1,0 +1,17 @@
+Building for debugging...
+[2 / 12] GitCore
+[4 / 14] GitCore
+[7 / 16] GitCore
+[11 / 12] GitCoreTests-product
+[13 / 13] GitPico-product
+Build complete! (1.74 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test branchesTagsScopeAndMergeGraph() started.
+◇ Test numstatRenamesBinaryAndHistoricTree() started.
+◇ Test amendSignOffAndFullMetadata() started.
+✔ Test numstatRenamesBinaryAndHistoricTree() passed after 2.461 seconds.
+✔ Test amendSignOffAndFullMetadata() passed after 2.679 seconds.
+✔ Test branchesTagsScopeAndMergeGraph() passed after 4.928 seconds.
+✔ Test run with 3 tests in 0 suites passed after 4.928 seconds.

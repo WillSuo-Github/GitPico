@@ -1,0 +1,13 @@
+{
+  "Sources/GitPico/Stores/IncrementalRefresh.swift": "b6cc987d67469c3af1093b05b2236218d932a0bdb4056a995964f38c47defa27",
+  "Sources/GitPico/Stores/RepositoryStore.swift": "a73582b16e2496894abc7375c04caf86e8a9f9776f35829e284af491070a2b70",
+  "Sources/GitPico/Stores/RepositoryActions.swift": "ce5f73e840ad9015237c0e2fad898022f8af750ea782695498c8f6adf9ace684",
+  "Sources/GitPico/Stores/ManagementActions.swift": "36ff84a3fb4933722dd97360304be8430c31fe6fe96d286733e7a63509e39265",
+  "Sources/GitPico/Stores/AutomaticStashActions.swift": "6436f664038e4af1139ae05a521cd0f7ff95f1b6b42e1eeea65cfa5a551f8679",
+  "Sources/GitPico/Stores/NavigationState.swift": "ef8926c8ece6e3dacc2cc7b207637e72cb50e6fafdd15a466163274ac8a019a1",
+  "Sources/GitPico/Views/StashSheets.swift": "8cd146a61ffc81b7a28a964e106afda9b7049d6853f4b84e3c6815c1f96e5fc4",
+  "Sources/GitPico/Views/AutomaticStashView.swift": "8ecc1a477d9421964de426be4190244d03b8d245b658cc51e5ec67fc7c2884d4",
+  "Sources/GitPico/Views/BranchTagSheets.swift": "642ee7bee4314ed2b9ca69c0075bbee1b3d9404d2e20f8daae281dbe9100421a",
+  "Tests/GitPicoTests/WorkingTreeRefreshTests.swift": "a3eef631c52a60fd1a2a19c250d363324f6474643bdfd0c762bc26f0bfe10a1a",
+  "Tests/GitPicoTests/WorkingTreeRefreshPerformanceTests.swift": "7f63d849cb24dedf9661b624747ede747d267dea6d2cb4d6160bc9a2034208c2"
+}

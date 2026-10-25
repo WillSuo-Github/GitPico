@@ -1,0 +1,24 @@
+Window: "Unknown", App: Tower.
+0 sheet Secondary Actions: Raise
+	1 image
+	2 text ID: dialogueHeaderTitle, Value: Stash Current Local Changes Your working copy contains uncommitted changes at the moment. Do you want Tower to save them on the Stash for you?
+	3 checkbox Re-Apply Changes After Operation is Finished, Value: 0
+	4 text field (settable) Optional Stash Message
+	5 text Message:
+	6 image warning
+	7 button Help
+	8 button Stash Changes
+	9 button Do Not Stash
+	10 button Abort
+11 menu bar
+	12 Tower
+	13 File
+	14 Edit
+	15 View
+	16 Repository
+	17 Working Copy
+	18 Workflow
+	19 Window
+	20 Help
+
+The focused UI element is 4 text field (settable) Optional Stash Message

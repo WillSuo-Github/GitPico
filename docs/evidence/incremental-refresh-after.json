@@ -1,0 +1,47 @@
+{
+  "branches" : 120,
+  "commits" : 600,
+  "samples" : [
+    {
+      "action" : "stage",
+      "round" : 0,
+      "seconds" : 0.61955729100000001
+    },
+    {
+      "action" : "unstage",
+      "round" : 0,
+      "seconds" : 0.69853566700000003
+    },
+    {
+      "action" : "stage",
+      "round" : 0,
+      "seconds" : 0.60613462500000004
+    },
+    {
+      "action" : "commit",
+      "round" : 0,
+      "seconds" : 2.1930291249999998
+    },
+    {
+      "action" : "stage",
+      "round" : 1,
+      "seconds" : 0.60097620799999996
+    },
+    {
+      "action" : "unstage",
+      "round" : 1,
+      "seconds" : 0.70774454200000003
+    },
+    {
+      "action" : "stage",
+      "round" : 1,
+      "seconds" : 0.60578645799999997
+    },
+    {
+      "action" : "commit",
+      "round" : 1,
+      "seconds" : 2.2173835419999999
+    }
+  ],
+  "untrackedFiles" : 2000
+}

@@ -1,0 +1,53 @@
+Another instance of SwiftPM (PID: 28609) is already running using '/Users/willsuo/files/Github/GitPico/.build', waiting until that process has finished execution...Building for debugging...
+[1 / 1]
+[2 / 20] GitCore
+[5 / 23] GitCore
+[11 / 29] GitCore
+[15 / 31] GitCore
+[19 / 30] GitCoreTests-product
+[21 / 30] GitCoreTests-product
+[23 / 34] GitCoreTests-product
+[27 / 36] GitPico
+[29 / 35] GitPico-product
+[33 / 38] GitPicoTests-product
+[36 / 39] GitPicoTests-product
+[38 / 42] GitPicoTests-product
+Build complete! (5.45 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test archiveRetainedThenCloneFreshPreservesOldHistoryAndSavedIndex() started.
+◇ Test mainMigrationRestoreResumesAfterExternalLockAndSavedCopyIsIndependent() started.
+◇ Test mainRepositoryMigrationReconnectsLinkedAndNestedTreesAndRestoresDirtyState() started.
+◇ Test mainMigrationRejectsStaleSourceAndRestorationCannotOverwriteNewEdits() started.
+◇ Test forcedWorktreeRemovalPreservesIgnoredUntrackedAndConflictedIndexInBackup() started.
+◇ Test forcedBatchCleanupAndPruneRejectReappearingDirectories() started.
+◇ Test mainMigrationRejectsMainAndLinkedIndexLocksAtPreviewAndApply() started.
+◇ Test retainedCleanupProtectsLinkedWorkingTreesOfNestedModules() started.
+◇ Test pointerRepairRelocatedModuleStagesMappingAndSupportsUndoAndStaleGuard() started.
+◇ Test pointerRepairAfterExternalMainMoveAndLinkedMovePreservesData() started.
+◇ Test retainedReuseAndArchiveRejectLiveLinkedWorkingTrees() started.
+◇ Test pointerRepairResumesAfterMetadataLockAndRejectsForeignGitStorage() started.
+◇ Test forcedCleanupCannotFollowAReplacedWorktreeSymbolicLink() started.
+◇ Test archivedUninitializedModuleRecoversSavedIndexFromEmptyWorkingFolder() started.
+◇ Test forceSubmoduleCleanupRetainsConflictStateAndCanRecoverIndependentRepository() started.
+◇ Test submoduleDirectoryReusePreservesExistingFilesAndRetainedIndexWithoutFetch() started.
+◇ Test emptyDirectoryReuseChecksNewFilesAndDoesNotOverwriteOccupiedDestinations() started.
+✔ Test forcedCleanupCannotFollowAReplacedWorktreeSymbolicLink() passed after 4.441 seconds.
+✔ Test mainMigrationRejectsStaleSourceAndRestorationCannotOverwriteNewEdits() passed after 8.102 seconds.
+✔ Test pointerRepairRelocatedModuleStagesMappingAndSupportsUndoAndStaleGuard() passed after 10.685 seconds.
+✔ Test pointerRepairResumesAfterMetadataLockAndRejectsForeignGitStorage() passed after 12.303 seconds.
+✔ Test mainMigrationRejectsMainAndLinkedIndexLocksAtPreviewAndApply() passed after 12.303 seconds.
+✔ Test pointerRepairAfterExternalMainMoveAndLinkedMovePreservesData() passed after 12.568 seconds.
+✔ Test forcedWorktreeRemovalPreservesIgnoredUntrackedAndConflictedIndexInBackup() passed after 14.703 seconds.
+✔ Test emptyDirectoryReuseChecksNewFilesAndDoesNotOverwriteOccupiedDestinations() passed after 15.092 seconds.
+✔ Test forcedBatchCleanupAndPruneRejectReappearingDirectories() passed after 16.770 seconds.
+✔ Test mainMigrationRestoreResumesAfterExternalLockAndSavedCopyIsIndependent() passed after 18.803 seconds.
+✔ Test retainedReuseAndArchiveRejectLiveLinkedWorkingTrees() passed after 25.188 seconds.
+✔ Test forceSubmoduleCleanupRetainsConflictStateAndCanRecoverIndependentRepository() passed after 33.815 seconds.
+✔ Test archiveRetainedThenCloneFreshPreservesOldHistoryAndSavedIndex() passed after 37.450 seconds.
+✔ Test archivedUninitializedModuleRecoversSavedIndexFromEmptyWorkingFolder() passed after 39.488 seconds.
+✔ Test submoduleDirectoryReusePreservesExistingFilesAndRetainedIndexWithoutFetch() passed after 45.807 seconds.
+✔ Test retainedCleanupProtectsLinkedWorkingTreesOfNestedModules() passed after 54.556 seconds.
+✔ Test mainRepositoryMigrationReconnectsLinkedAndNestedTreesAndRestoresDirtyState() passed after 64.698 seconds.
+✔ Test run with 17 tests in 0 suites passed after 64.698 seconds.

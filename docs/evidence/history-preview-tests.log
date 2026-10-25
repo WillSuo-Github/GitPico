@@ -1,0 +1,69 @@
+Building for debugging...
+[1 / 2] GitPicoTests-product
+[2 / 38] GitCore
+[4 / 40] GitCore
+[12 / 42] GitCoreTests-product
+[14 / 44] GitPico
+[23 / 54] GitPico-product
+[24 / 54] GitPico-product
+[25 / 54] GitCoreTests-product
+[29 / 53] GitCoreTests-product
+[32 / 53] GitCoreTests-product
+[32 / 53] GitPico-product
+[32 / 53] GitPico
+[40 / 53] GitPico
+[40 / 55] GitPico-product
+[43 / 54] GitPicoTests-product
+[45 / 56] GitPicoTests-product
+[48 / 54] GitPicoTests-product
+[50 / 54] GitPicoTests-product
+Build complete! (7.36 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test latePreviewFailureCannotOverwriteNewerBranchOrRepository() started.
+➜ Test branchPreviewPerformanceBenchmark() skipped: "Explicit isolated performance run only."
+◇ Test rapidPreviewNavigationOnlyLoadsFinalSelection() started.
+◇ Test previewCacheIsImmediateAndDoesNotRescanWorkingCopy() started.
+◇ Test previewOptionsHaveSeparateCacheEntries() started.
+◇ Test previewCacheRevalidatesMovedTipAndExplicitRefresh() started.
+✔ Test rapidPreviewNavigationOnlyLoadsFinalSelection() passed after 5.431 seconds.
+✔ Test previewCacheIsImmediateAndDoesNotRescanWorkingCopy() passed after 6.194 seconds.
+✔ Test previewOptionsHaveSeparateCacheEntries() passed after 7.096 seconds.
+✔ Test latePreviewFailureCannotOverwriteNewerBranchOrRepository() passed after 8.640 seconds.
+✔ Test previewCacheRevalidatesMovedTipAndExplicitRefresh() passed after 8.970 seconds.
+✔ Test run with 6 tests in 0 suites passed after 8.970 seconds.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test worktreeCreationRejectsExistingDestinationsAndChangedBranchPreview() started.
+◇ Test staleDiscardPreviewRecoveryAndIndexLockProtectNewEdits() started.
+◇ Test historyPageUsesImmutableTipAndBoundedPagination() started.
+◇ Test mainMigrationRejectsMainAndLinkedIndexLocksAtPreviewAndApply() started.
+◇ Test worktreeBatchLockMoveAndCancellationRequireFreshPreviews() started.
+◇ Test patchStalePreviewAndIgnoredDestinationAreProtected() started.
+◇ Test submoduleDirtyAndChangedPreviewCannotOverwriteLocalFiles() started.
+◇ Test historyPageAllReferencesAndFirstParentHandleMergeAndAnnotatedTag() started.
+◇ Test historyPageUnbornAndInvalidInputs() started.
+◇ Test pushLeaseRejectsRemoteChangesAfterPreview() started.
+◇ Test historyReadHonorsCancellationBeforeLaunching() started.
+◇ Test diffNumbersAndPreviewLimit() started.
+◇ Test revertRejectsExternallyMovedPreviewHead() started.
+◇ Test historicalRestoreRejectsStalePreviewUntrackedIgnoredAndSymlinkTargets() started.
+◇ Test workingFilePreviewDoesNotFollowLinksOrReadDirectories() started.
+✔ Test diffNumbersAndPreviewLimit() passed after 0.001 seconds.
+✔ Test historyPageUnbornAndInvalidInputs() passed after 1.078 seconds.
+✔ Test workingFilePreviewDoesNotFollowLinksOrReadDirectories() passed after 1.322 seconds.
+✔ Test historyReadHonorsCancellationBeforeLaunching() passed after 1.434 seconds.
+✔ Test historyPageUsesImmutableTipAndBoundedPagination() passed after 2.271 seconds.
+✔ Test historyPageAllReferencesAndFirstParentHandleMergeAndAnnotatedTag() passed after 2.493 seconds.
+✔ Test worktreeCreationRejectsExistingDestinationsAndChangedBranchPreview() passed after 2.792 seconds.
+✔ Test revertRejectsExternallyMovedPreviewHead() passed after 4.381 seconds.
+✔ Test patchStalePreviewAndIgnoredDestinationAreProtected() passed after 6.487 seconds.
+✔ Test mainMigrationRejectsMainAndLinkedIndexLocksAtPreviewAndApply() passed after 8.351 seconds.
+✔ Test pushLeaseRejectsRemoteChangesAfterPreview() passed after 8.449 seconds.
+✔ Test historicalRestoreRejectsStalePreviewUntrackedIgnoredAndSymlinkTargets() passed after 9.190 seconds.
+✔ Test submoduleDirtyAndChangedPreviewCannotOverwriteLocalFiles() passed after 11.586 seconds.
+✔ Test staleDiscardPreviewRecoveryAndIndexLockProtectNewEdits() passed after 14.793 seconds.
+✔ Test worktreeBatchLockMoveAndCancellationRequireFreshPreviews() passed after 35.011 seconds.
+✔ Test run with 15 tests in 0 suites passed after 35.011 seconds.

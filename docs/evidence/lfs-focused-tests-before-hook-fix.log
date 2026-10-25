@@ -1,0 +1,37 @@
+Building for debugging...
+[1 / 1]
+[2 / 19] GitCore
+[4 / 21] GitCore
+[11 / 19] GitCoreTests-product
+[13 / 20] GitPico-product
+[16 / 17] GitPicoTests-product
+Build complete! (1.95 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test lfsLocalActivationTrackingLiteralNamesAndRecoveryPreserveStaging() started.
+◇ Test lfsSettingRecoveryProtectsNewEditsLocksAndChangedHeads() started.
+◇ Test lfsHooksAreLocalExecutableAndCustomScriptsAreNeverReplaced() started.
+◇ Test lfsTransferRejectsChangedEndpointsAndReportsActualErrors() started.
+◇ Test lfsRealLocalObjectPushCloneFetchPullAndCheckoutKeepModifiedFiles() started.
+◇ Test lfsPatternRemovalNestedAttributesAndStaleChangesAreGuarded() started.
+✘ Test lfsLocalActivationTrackingLiteralNamesAndRecoveryPreserveStaging() recorded an issue at LFSManagementTests.swift:9:2: Caught error: Error Domain=NSCocoaErrorDomain Code=256 "The file “pre-push” couldn’t be opened." UserInfo={NSFilePath=/dev/null/pre-push, NSURL=file:///dev/null/pre-push, NSUnderlyingError=0x7a5f1d0060 {Error Domain=NSPOSIXErrorDomain Code=20 "Not a directory"}}
+✘ Test lfsLocalActivationTrackingLiteralNamesAndRecoveryPreserveStaging() failed after 3.468 seconds with 1 issue.
+✘ Test lfsTransferRejectsChangedEndpointsAndReportsActualErrors() recorded an issue at LFSManagementTests.swift:123:2: Caught error: Error Domain=NSCocoaErrorDomain Code=256 "The file “pre-push” couldn’t be opened." UserInfo={NSFilePath=/dev/null/pre-push, NSURL=file:///dev/null/pre-push, NSUnderlyingError=0x7a5f1d0630 {Error Domain=NSPOSIXErrorDomain Code=20 "Not a directory"}}
+✘ Test lfsTransferRejectsChangedEndpointsAndReportsActualErrors() failed after 3.931 seconds with 1 issue.
+✘ Test lfsPatternRemovalNestedAttributesAndStaleChangesAreGuarded() recorded an issue at LFSManagementTests.swift:30:2: Caught error: Error Domain=NSCocoaErrorDomain Code=256 "The file “pre-push” couldn’t be opened." UserInfo={NSFilePath=/dev/null/pre-push, NSURL=file:///dev/null/pre-push, NSUnderlyingError=0x7a5f1d05d0 {Error Domain=NSPOSIXErrorDomain Code=20 "Not a directory"}}
+✘ Test lfsPatternRemovalNestedAttributesAndStaleChangesAreGuarded() failed after 4.691 seconds with 1 issue.
+✘ Test lfsSettingRecoveryProtectsNewEditsLocksAndChangedHeads() recorded an issue at LFSManagementTests.swift:76:11: Expectation failed: expected error of type GitFailure, but "Error Domain=NSCocoaErrorDomain Code=256 "The file “pre-push” couldn’t be opened." UserInfo={NSFilePath=/dev/null/pre-push, NSURL=file:///dev/null/pre-push, NSUnderlyingError=0x7a5f1d01b0 {Error Domain=NSPOSIXErrorDomain Code=20 "Not a directory"}}" of type NSError was thrown instead
+↳ GitFailure.self → Error Domain=NSCocoaErrorDomain Code=256 "The file “pre-push” couldn’t be opened." UserInfo={NSFilePath=/dev/null/pre-push, NSURL=file:///dev/null/pre-push, NSUnderlyingError=0x7a5f1d01b0 {Error Domain=NSPOSIXErrorDomain Code=20 "Not a directory"}}
+✘ Test lfsSettingRecoveryProtectsNewEditsLocksAndChangedHeads() recorded an issue at LFSManagementTests.swift:69:2: Caught error: Error Domain=NSCocoaErrorDomain Code=256 "The file “pre-push” couldn’t be opened." UserInfo={NSFilePath=/dev/null/pre-push, NSURL=file:///dev/null/pre-push, NSUnderlyingError=0x7a5f1d05d0 {Error Domain=NSPOSIXErrorDomain Code=20 "Not a directory"}}
+✘ Test lfsSettingRecoveryProtectsNewEditsLocksAndChangedHeads() failed after 6.176 seconds with 2 issues.
+✘ Test lfsRealLocalObjectPushCloneFetchPullAndCheckoutKeepModifiedFiles() recorded an issue at LFSManagementTests.swift:89:2: Caught error: Error Domain=NSCocoaErrorDomain Code=256 "The file “pre-push” couldn’t be opened." UserInfo={NSFilePath=/dev/null/pre-push, NSURL=file:///dev/null/pre-push, NSUnderlyingError=0x7a5f1d04e0 {Error Domain=NSPOSIXErrorDomain Code=20 "Not a directory"}}
+✘ Test lfsRealLocalObjectPushCloneFetchPullAndCheckoutKeepModifiedFiles() failed after 6.382 seconds with 1 issue.
+✘ Test lfsHooksAreLocalExecutableAndCustomScriptsAreNeverReplaced() recorded an issue at LFSManagementTests.swift:63:5: Expectation failed: try await f.repo.lfsState().enabled == false
+↳ try await f.repo.lfsState().enabled == false → <not evaluated>
+✘ Test lfsHooksAreLocalExecutableAndCustomScriptsAreNeverReplaced() recorded an issue at LFSManagementTests.swift:66:11: Expectation failed: expected error of type GitFailure, but "Error Domain=NSCocoaErrorDomain Code=256 "The file “pre-push” couldn’t be opened." UserInfo={NSFilePath=/dev/null/pre-push, NSURL=file:///dev/null/pre-push, NSUnderlyingError=0x7a5f1d0540 {Error Domain=NSPOSIXErrorDomain Code=20 "Not a directory"}}" of type NSError was thrown instead
+↳ GitFailure.self → Error Domain=NSCocoaErrorDomain Code=256 "The file “pre-push” couldn’t be opened." UserInfo={NSFilePath=/dev/null/pre-push, NSURL=file:///dev/null/pre-push, NSUnderlyingError=0x7a5f1d0540 {Error Domain=NSPOSIXErrorDomain Code=20 "Not a directory"}}
+✘ Test lfsHooksAreLocalExecutableAndCustomScriptsAreNeverReplaced() failed after 10.387 seconds with 2 issues.
+✘ Test run with 6 tests in 0 suites failed after 10.387 seconds with 8 issues.
+Note: Some test targets reported failures:
+  - GitCoreTests (Swift Testing)

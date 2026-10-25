@@ -1,0 +1,13 @@
+Building for debugging...
+[1 / 1]
+Build complete! (0.34 sec)
+/Users/willsuo/files/Github/GitPico/dist/GitPico.app: replacing existing signature
+58956
+{
+  "backgroundTesting": true,
+  "build": "20261024130700",
+  "frontmostBundle": "com.openai.codex",
+  "isActive": false,
+  "version": "0.01",
+  "visibleWindows": 0
+}

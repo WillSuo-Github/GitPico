@@ -1,0 +1,14 @@
+The following is a diff from the previous accessibility tree for Window: "Unknown" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 0-87, 98-100
++98 sheet Secondary Actions: Raise
++	99 image
++	100 text Value: Apply Stash Reapplies the stashed changes in your working copy., ID: dialogueHeaderTitle
++	101 checkbox Delete Stash After Applying Changes, Value: 0
++	102 text Stash:
++	103 pop up button On main: Review checklist
++	104 checkbox Restore Staging Area Status, Value: 0
++	105 image warning
++	106 button Cancel
++	107 button Apply Stash
++	108 button Help
+The focused UI element is 98 sheet Secondary Actions: Raise

@@ -1,0 +1,105 @@
+Window: "LineReview", App: GitPico.
+0 standard window LineReview – Working Copy (main), ID: main, Secondary Actions: Raise
+	1 container
+		2 image Description: Divide, ID: arrow.triangle.branch
+		3 text main 1 changed files /Users/willsuo/files/Github/GitPico/dist/ReviewDemo-qlxlzojr/LineReview
+		4 split group main, SidebarNavigationSplitView
+			5 container
+				6 scroll area
+					7 list Sidebar
+						8 row (selectable) Workspace
+						9 row (selected) Working Copy
+1
+						10 row (selectable) History
+						11 row (selectable) Stashes
+						12 row (selectable) Pull Requests
+						13 row (selectable) Branches Review
+						14 row (selectable) Settings
+						15 row (selectable) Branches
+						16 row (selectable) main
+HEAD
+						17 row (selectable) Tags
+						18 row (selectable) Remotes
+				19 image Description: Filter, ID: line.3.horizontal.decrease.circle
+				20 text field (settable) Filter
+				21 button Description: Add, Help: Create branch, ID: plus
+				22 button Description: Edit, Help: Repository settings, ID: slider.horizontal.3
+			23 splitter (disabled, settable, float) 359
+			24 container
+				25 image Description: Divide, ID: arrow.triangle.branch
+				26 text main
+				27 image Description: Forward, ID: chevron.right
+				28 text No Tracking
+				29 text field (settable) Commit Subject
+				30 button Description: Go Down, Help: Commit options, ID: chevron.down
+				31 button Stage All
+				32 button (disabled) Commit
+				33 button Status
+				34 button Filename
+				35 menu button Filter
+				36 scroll area
+					37 list
+						38 row (selected) Description: Square
+Plain Text Document, Value: M
+Review.swift
+				39 unknown Description: Content list divider, Details: 310 points, Secondary Actions: Increment, Decrement
+				40 image Description: Plain Text Document, ID: doc.text
+				41 text Review.swift
+				42 Description: Diff layout, Help: Unified / side-by-side diff
+					43 radio button Description: Unified, Value: 0, ID: rectangle
+					44 radio button Description: Side by Side, Value: 1, ID: rectangle.split.2x1
+				45 Diff version
+					46 radio button Description: Staged, Value: 0
+					47 radio button Description: Unstaged, Value: 1
+				48 text Select changed lines in the gutter
+				49 scroll area
+					50 list Secondary Actions: AXScrollToTop, AXScrollToBottom
+						51 text 1 chunk, 2 insertions, 2 deletions Index Working Copy @@ -1,12 +1,12 @@
+						52 button Stage Chunk
+						53 scroll area
+							54 text 1 # Native review 2
+							55 button Description: Select deleted line 3, Help: Select line; Shift-click selects a range, ID: square
+							56 text 3 let title = "Original" 4 let subtitle = "Keep this change separate"
+							57 button Description: Select deleted line 5, Help: Select line; Shift-click selects a range, ID: square
+							58 text 5 let enabled = false 6 7 // Context line 1 8 // Context line 2 9 // Context line 3 10 // Context line 4 11 // Context line 5 12 // Context line 6
+						59 scroll area
+							60 text 1 # Native review 2
+							61 button Description: Select added line 3, Help: Select line; Shift-click selects a range, ID: square
+							62 text 3 let title = "GitPico" 4 let subtitle = "Keep this change separate"
+							63 button Description: Select added line 5, Help: Select line; Shift-click selects a range, ID: square
+							64 text 5 let enabled = true 6 7 // Context line 1 8 // Context line 2 9 // Context line 3 10 // Context line 4 11 // Context line 5 12 // Context line 6
+				65 toggle button Description: Text Formatting, Help: Ignore whitespace changes (partial staging is disabled while active), Value: off
+				66 text 1 chunk, 2 insertions, 2 deletions
+				67 pop up button Context:, Value: 7 lines
+	68 toolbar
+		69 button Description: Hide Sidebar, Secondary Actions: Increment, Decrement, Delete, Cancel
+		70 menu button chevron.pulldown, Help: Open a repository (⌘O), ID: folder
+		71 button (disabled) Description: Previous, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		72 button (disabled) Description: Next, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		73 button (disabled) Description: Fetch, Help: Fetch remotes, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		74 button (disabled) Description: Pull, Help: Pull current branch (fast-forward only), Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		75 button (disabled) Description: Push, Help: Push current branch, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		76 button (disabled) Description: Sync, Help: Fetch, fast-forward pull, then push, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		77 button Description: Merge, Help: Merge a branch into HEAD, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		78 button Description: Rebase, Help: Rebase HEAD onto a branch, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		79 menu button (disabled) chevron.pulldown, Help: Apply a saved stash, ID: tray.and.arrow.down
+		80 button Description: Save Stash, Help: Save local changes to a stash, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		81 button Description: Refresh, Help: Refresh (⌘R), Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		82 container Secondary Actions: Move previous, Remove from toolbar
+			83 image Description: Search, ID: magnifyingglass
+			84 text field (settable) Description: Search, Placeholder: Search for File
+	85 close button
+	86 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	87 minimize button
+	88 text LineReview Working Copy (main)
+89 menu bar
+	90 GitPico
+	91 File
+	92 Edit
+	93 View
+	94 Repository
+	95 Navigate
+	96 Window
+	97 Help
+
+The focused UI element is 0 standard window LineReview – Working Copy (main), ID: main, Secondary Actions: Raise

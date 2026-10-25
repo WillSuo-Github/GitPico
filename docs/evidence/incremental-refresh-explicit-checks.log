@@ -1,0 +1,15 @@
+Building for debugging...
+[1 / 1]
+Build complete! (0.38 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test renderHistoryRowsWithoutWindows() started.
+◇ Test renderWorkingFileAndDiffRowsWithoutWindows() started.
+◇ Test branchPreviewPerformanceBenchmark() started.
+◇ Test writeRefreshPerformanceBenchmark() started.
+✔ Test renderWorkingFileAndDiffRowsWithoutWindows() passed after 0.101 seconds.
+✔ Test renderHistoryRowsWithoutWindows() passed after 0.128 seconds.
+✔ Test branchPreviewPerformanceBenchmark() passed after 4.396 seconds.
+✔ Test writeRefreshPerformanceBenchmark() passed after 14.084 seconds.
+✔ Test run with 4 tests in 0 suites passed after 14.084 seconds.

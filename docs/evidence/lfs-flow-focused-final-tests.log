@@ -1,0 +1,76 @@
+Building for debugging...
+[2 / 20] GitCore
+[5 / 23] GitCore
+[6 / 24] GitCore
+[12 / 30] GitCore
+[15 / 29] GitPico
+[24 / 51] GitCoreTests-product
+[26 / 54] GitCoreTests-product
+[27 / 54] GitPico-product
+[30 / 54] GitPico
+[31 / 54] GitPico
+[32 / 54] GitPico
+[32 / 54] GitPico-product
+[34 / 54] GitPico
+[34 / 54] GitPico-product
+[36 / 54] GitPico
+[38 / 54] GitPico
+[39 / 54] GitPico
+[40 / 54] GitPico
+[43 / 55] GitPico
+[44 / 58] GitPico
+[44 / 58] GitCoreTests-product
+[50 / 63] GitCoreTests-product
+[52 / 63] GitPico
+[52 / 63] GitPico-product
+[55 / 63] GitPico
+[56 / 63] GitPico
+[56 / 65] GitPico-product
+[59 / 64] GitPicoTests-product
+[67 / 72] GitPicoTests-product
+[69 / 72] GitPicoTests-product
+[71 / 75] GitPicoTests-product
+Build complete! (15.32 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test lfsSettingRecoveryProtectsNewEditsLocksAndChangedHeads() started.
+◇ Test gitFlowStaleDirtyOccupiedBaseAndVersionCollisionsAreProtected() started.
+◇ Test gitFlowConfigurationAdoptsClassicKeysAndCreatesDevelopmentWithoutSwitching() started.
+◇ Test lfsPatternRemovalNestedAttributesAndStaleChangesAreGuarded() started.
+◇ Test gitFlowFeatureStartFinishMergesAndPinsBeforeDeletingTopic() started.
+◇ Test gitFlowSupportAndRemoteTrackingPreserveClassicBranchBases() started.
+◇ Test gitFlowIgnoredDestinationAndTamperedResumeCannotOverwriteLocalData() started.
+◇ Test lfsHooksAreLocalExecutableAndCustomScriptsAreNeverReplaced() started.
+◇ Test lfsRealLocalObjectPushCloneFetchPullAndCheckoutKeepModifiedFiles() started.
+◇ Test gitFlowSigningFailureKeepsTopicAndProductionAndAllowsExplicitStop() started.
+◇ Test gitFlowConflictPersistsAcrossReopenAndCanContinueAfterStaging() started.
+◇ Test lfsLocalActivationTrackingLiteralNamesAndRecoveryPreserveStaging() started.
+◇ Test gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:) started.
+◇ Test gitFlowCanAcceptManualMergeCompletionAndProtectsExternalBranchChanges() started.
+◇ Test gitFlowStopAbortsOnlyCurrentMergeAndKeepsEarlierProductionAndTag() started.
+◇ Test lfsTransferRejectsChangedEndpointsAndReportsActualErrors() started.
+◇ Test case passing 1 argument kind → .release to gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:) started.
+◇ Test case passing 1 argument kind → .hotfix to gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:) started.
+✘ Test lfsPatternRemovalNestedAttributesAndStaleChangesAreGuarded() recorded an issue at LFSManagementTests.swift:38:5: Expectation failed: try await f.repo.lfsState().rules.isEmpty
+↳ try await f.repo.lfsState().rules.isEmpty → <not evaluated>
+✔ Test lfsLocalActivationTrackingLiteralNamesAndRecoveryPreserveStaging() passed after 12.146 seconds.
+✔ Test gitFlowConfigurationAdoptsClassicKeysAndCreatesDevelopmentWithoutSwitching() passed after 14.697 seconds.
+✔ Test lfsSettingRecoveryProtectsNewEditsLocksAndChangedHeads() passed after 16.231 seconds.
+✔ Test lfsTransferRejectsChangedEndpointsAndReportsActualErrors() passed after 16.289 seconds.
+✔ Test lfsHooksAreLocalExecutableAndCustomScriptsAreNeverReplaced() passed after 16.482 seconds.
+✘ Test lfsPatternRemovalNestedAttributesAndStaleChangesAreGuarded() failed after 16.602 seconds with 1 issue.
+✔ Test gitFlowIgnoredDestinationAndTamperedResumeCannotOverwriteLocalData() passed after 16.677 seconds.
+✘ Test lfsRealLocalObjectPushCloneFetchPullAndCheckoutKeepModifiedFiles() recorded an issue at LFSManagementTests.swift:89:2: Caught error: GitFailure(message: "Fetching reference 3c86d1406512256ae44683edf007f12a131d0f83\nerror transferring \"631b84027d6b9e52b539c4e8373622d23032dfadc64d60af87339c9037e4f769\": [0] remote missing object 631b84027d6b9e52b539c4e8373622d23032dfadc64d60af87339c9037e4f769\nerror: failed to fetch some objects from \'file:///var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-test-4991D0A1-ACCA-4FF0-B552-DC666AC15E8B-bare\'")
+✘ Test lfsRealLocalObjectPushCloneFetchPullAndCheckoutKeepModifiedFiles() failed after 21.223 seconds with 1 issue.
+✔ Test gitFlowSupportAndRemoteTrackingPreserveClassicBranchBases() passed after 22.655 seconds.
+✔ Test gitFlowFeatureStartFinishMergesAndPinsBeforeDeletingTopic() passed after 32.220 seconds.
+✔ Test gitFlowSigningFailureKeepsTopicAndProductionAndAllowsExplicitStop() passed after 33.777 seconds.
+✔ Test gitFlowStaleDirtyOccupiedBaseAndVersionCollisionsAreProtected() passed after 35.240 seconds.
+✔ Test gitFlowCanAcceptManualMergeCompletionAndProtectsExternalBranchChanges() passed after 35.628 seconds.
+✔ Test gitFlowConflictPersistsAcrossReopenAndCanContinueAfterStaging() passed after 37.386 seconds.
+✔ Test gitFlowReleaseAndHotfixFinishTagProductionAndBackMergeDevelopment(_:) with 2 test cases passed after 38.193 seconds.
+✔ Test gitFlowStopAbortsOnlyCurrentMergeAndKeepsEarlierProductionAndTag() passed after 39.544 seconds.
+✘ Test run with 16 tests in 0 suites failed after 39.545 seconds with 2 issues.
+Note: Some test targets reported failures:
+  - GitCoreTests (Swift Testing)

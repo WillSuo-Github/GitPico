@@ -1,0 +1,60 @@
+Building for debugging...
+[1 / 1]
+[2 / 20] GitCore
+[8 / 26] GitCore
+[15 / 33] GitCore
+[22 / 43] GitCore
+[28 / 54] GitCore
+[29 / 65] GitCore
+[31 / 65] GitPico-product
+[33 / 65] GitPico-product
+[35 / 65] GitPico-product
+[36 / 65] GitPico-product
+[37 / 65] GitPico-product
+[38 / 65] GitPico-product
+[39 / 65] GitPico-product
+[41 / 65] GitPico
+[42 / 65] GitPico
+[45 / 65] GitPico
+[46 / 65] GitPico
+[49 / 66] GitPico-product
+[50 / 66] GitPico-product
+[53 / 67] GitCoreTests-product
+[56 / 78] GitCoreTests-product
+[57 / 78] GitCoreTests-product
+[58 / 78] GitPico-product
+[59 / 78] GitPico
+[61 / 78] GitCoreTests-product
+[63 / 78] GitCoreTests-product
+[63 / 78] GitPico-product
+[65 / 78] GitCoreTests-product
+[66 / 78] GitCoreTests-product
+/Users/willsuo/files/Github/GitPico/Tests/GitCoreTests/ManagementEdgeTests.swift:52:26: warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:)' is unused [#NoUsage]
+50 |     try await f.repo.fetchRemote(remote, tags: true)
+51 |     #expect(try await f.repo.references().contains { $0.fullName == "refs/tags/v1" })
+52 |     try await GitProcess.run(["update-ref", "-d", "refs/heads/temporary"], at: server)
+   |                          `- warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:)' is unused [#NoUsage]
+53 |     try await f.repo.fetchRemote(remote, prune: true)
+54 |     #expect(!(try await f.repo.references().contains { $0.fullName == "refs/remotes/origin/temporary" }))
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[68 / 79] GitPico-product
+[70 / 78] GitCoreTests-product
+[70 / 78] GitPicoTests-product
+[78 / 87] GitPicoTests-product
+[80 / 87] GitPicoTests-product
+[85 / 91] GitCoreTests-product
+[87 / 92] GitPicoTests-product
+[89 / 92] GitPicoTests-product
+[91 / 95] GitPicoTests-product
+Build complete! (12.30 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test managementLeaseBlocksConcurrentMutationAndReleasesWithoutStaleOwnership() started.
+◇ Test nestedEmbeddedRepositoryMigrationRetainsExternalAndEmbeddedPointers() started.
+◇ Test managementBackupRestoreSupportsUnbornParentWithStagedModule() started.
+✔ Test managementLeaseBlocksConcurrentMutationAndReleasesWithoutStaleOwnership() passed after 17.293 seconds.
+✔ Test managementBackupRestoreSupportsUnbornParentWithStagedModule() passed after 22.703 seconds.
+✔ Test nestedEmbeddedRepositoryMigrationRetainsExternalAndEmbeddedPointers() passed after 69.472 seconds.
+✔ Test run with 3 tests in 0 suites passed after 69.472 seconds.

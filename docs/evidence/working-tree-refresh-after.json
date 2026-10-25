@@ -1,0 +1,58 @@
+{
+  "branches" : 122,
+  "commits" : 600,
+  "ignoredFiles" : 2000,
+  "policy" : "incremental",
+  "samples" : [
+    {
+      "action" : "checkout",
+      "round" : 0,
+      "seconds" : 1.971159541
+    },
+    {
+      "action" : "checkout",
+      "round" : 0,
+      "seconds" : 1.9580109999999999
+    },
+    {
+      "action" : "stash-save",
+      "round" : 0,
+      "seconds" : 1.3320733330000001
+    },
+    {
+      "action" : "stash-pop",
+      "round" : 0,
+      "seconds" : 1.972486
+    },
+    {
+      "action" : "merge",
+      "round" : 0,
+      "seconds" : 3.0811716250000001
+    },
+    {
+      "action" : "checkout",
+      "round" : 1,
+      "seconds" : 1.9716113750000002
+    },
+    {
+      "action" : "checkout",
+      "round" : 1,
+      "seconds" : 2.0071370420000001
+    },
+    {
+      "action" : "stash-save",
+      "round" : 1,
+      "seconds" : 1.304944375
+    },
+    {
+      "action" : "stash-pop",
+      "round" : 1,
+      "seconds" : 1.9815694580000001
+    },
+    {
+      "action" : "merge",
+      "round" : 1,
+      "seconds" : 3.0225201249999998
+    }
+  ]
+}

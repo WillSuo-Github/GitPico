@@ -1,0 +1,42 @@
+Building for debugging...
+[2 / 19] GitCore
+[4 / 21] GitCore
+[12 / 24] GitCoreTests-product
+[14 / 25] GitCoreTests-product
+[14 / 25] GitPico
+[18 / 29] GitPico
+[26 / 33] GitPico
+[26 / 35] GitPico-product
+[29 / 34] GitPicoTests-product
+[31 / 36] GitPicoTests-product
+[35 / 38] GitPicoTests-product
+[37 / 41] GitPicoTests-product
+Build complete! (8.43 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test incrementalRefreshRejectsLateResultFromOldRepositorySession() started.
+◇ Test commitUsesBoundedRefreshAndDefersRelatedMetadataUntilRequested() started.
+◇ Test deferredMetadataFailureDoesNotBlockIndependentRemotes() started.
+◇ Test indexWritesSkipUnrelatedMetadataAndPreserveWarmHistory() started.
+◇ Test failedIndexWriteStillUsesIncrementalRefreshAndPreservesState() started.
+✔ Test deferredMetadataFailureDoesNotBlockIndependentRemotes() passed after 4.560 seconds.
+✔ Test incrementalRefreshRejectsLateResultFromOldRepositorySession() passed after 4.847 seconds.
+✔ Test failedIndexWriteStillUsesIncrementalRefreshAndPreservesState() passed after 4.948 seconds.
+✔ Test indexWritesSkipUnrelatedMetadataAndPreserveWarmHistory() passed after 6.153 seconds.
+✔ Test commitUsesBoundedRefreshAndDefersRelatedMetadataUntilRequested() passed after 7.347 seconds.
+✔ Test run with 5 tests in 0 suites passed after 7.347 seconds.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test indexDeltaDetectsExternalCheckoutAndHandlesUnbornAndDetachedHeads() started.
+◇ Test currentOperationUsesLinkedWorktreeAdministrativeDirectory() started.
+◇ Test commitDeltaRefreshesHeadReferencesBoundedHistoryAndDivergence() started.
+◇ Test incrementalBrowserRetainsCleanNewFilesAndFlagsAfterIndexWrites() started.
+◇ Test indexDeltaPreservesHistoryAndUpdatesOnlyWorkingState() started.
+✔ Test currentOperationUsesLinkedWorktreeAdministrativeDirectory() passed after 1.354 seconds.
+✔ Test indexDeltaPreservesHistoryAndUpdatesOnlyWorkingState() passed after 2.025 seconds.
+✔ Test commitDeltaRefreshesHeadReferencesBoundedHistoryAndDivergence() passed after 2.594 seconds.
+✔ Test indexDeltaDetectsExternalCheckoutAndHandlesUnbornAndDetachedHeads() passed after 4.199 seconds.
+✔ Test incrementalBrowserRetainsCleanNewFilesAndFlagsAfterIndexWrites() passed after 4.396 seconds.
+✔ Test run with 5 tests in 0 suites passed after 4.397 seconds.

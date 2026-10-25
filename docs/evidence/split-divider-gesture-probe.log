@@ -1,0 +1,146 @@
+Building for debugging...
+[Provisioning 1 / 6]
+[Planning deferred tasks]
+[1 / 1]
+[8 / 30] GitCoreTests-product
+[8 / 29] GitPico
+[12 / 33] GitPico-product
+[20 / 47] GitPico-product
+[21 / 47] GitPico-product
+[24 / 47] GitPico
+[26 / 47] GitPico-product
+[26 / 47] GitPico
+[32 / 50] GitPico
+[35 / 50] GitPico-product
+[39 / 50] GitPicoTests-product
+[41 / 52] GitPicoTests-product
+[47 / 51] GitPicoTests-product
+Build complete! (12.02 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test splitDividerTracksPointerWhileItsOwnFrameMoves() started.
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 4.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 8.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 12.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 16.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 20.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 24.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 28.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 32.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 36.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 40.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 44.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 48.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 52.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 56.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 60.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 64.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 68.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 72.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 76.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 80.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 84.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 88.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 92.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 96.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 100.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 104.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 108.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 112.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 116.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() recorded an issue at SplitDividerTests.swift:36:9: Expectation failed: abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1
+↳ abs(probe.leadingWidth - (310 + CGFloat(offset))) < 1 → false
+↳   abs(probe.leadingWidth - (310 + CGFloat(offset))) → 120.0
+↳   1 → 1.0
+✘ Test splitDividerTracksPointerWhileItsOwnFrameMoves() failed after 0.534 seconds with 30 issues.
+✘ Test run with 1 test in 0 suites failed after 0.534 seconds with 30 issues.
+Note: Some test targets reported failures:
+  - GitPicoTests (Swift Testing)

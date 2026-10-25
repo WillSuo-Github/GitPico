@@ -1,0 +1,73 @@
+Building for debugging...
+[Planning deferred tasks]
+[1 / 1]
+[8 / 25] GitCore
+[11 / 28] GitCore
+[16 / 34] GitCore
+[29 / 50] GitPico
+/Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RelatedAdministrationActions.swift:23:93: warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+19 |         guard !isBusy, let repository, request.repositoryToken == repositoryToken else { error = "The repository changed. Reopen this batch preview."; return }
+20 |         isBusy = true; activity = plan.report.title + "…"; relatedBatchProgress = plan.report
+21 |         relatedBatchTask = Task {
+   |                                 |- note: 'self' implicitly strongly captured here
+   |                                 `- note: add 'self' as a capture list item to silence
+22 |             do {
+23 |                 relatedBatchProgress = try await repository.applyRelatedBatch(plan) { [weak self] report in
+   |                                                                                             |- warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+   |                                                                                             `- note: explicitly assign the capture list item to silence
+24 |                     await MainActor.run { self?.relatedBatchProgress = report }
+25 |                 }
+
+[#ImplicitStrongCapture]: <https://docs.swift.org/compiler/documentation/diagnostics/implicit-strong-capture>
+[30 / 60] GitPico-product
+[31 / 60] GitPico-product
+[34 / 60] GitPico-product
+[35 / 70] GitPico-product
+[36 / 70] GitPico-product
+[37 / 70] GitPico-product
+[38 / 70] GitPico-product
+[39 / 70] GitPico-product
+[40 / 70] GitPico
+[41 / 70] GitPico
+[42 / 70] GitPico
+[43 / 70] GitPico
+[46 / 70] GitPico
+[47 / 70] GitPico
+[50 / 70] GitPico
+[52 / 70] GitPico
+[53 / 72] GitPico-product
+[57 / 72] GitPico-product
+/Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RelatedAdministrationActions.swift:23:93: warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+19 |         guard !isBusy, let repository, request.repositoryToken == repositoryToken else { error = "The repository changed. Reopen this batch preview."; return }
+20 |         isBusy = true; activity = plan.report.title + "…"; relatedBatchProgress = plan.report
+21 |         relatedBatchTask = Task {
+   |                                 |- note: 'self' implicitly strongly captured here
+   |                                 `- note: add 'self' as a capture list item to silence
+22 |             do {
+23 |                 relatedBatchProgress = try await repository.applyRelatedBatch(plan) { [weak self] report in
+   |                                                                                             |- warning: 'weak' ownership of capture 'self' differs from implicitly-captured strong reference in outer scope [#ImplicitStrongCapture]
+   |                                                                                             `- note: explicitly assign the capture list item to silence
+24 |                     await MainActor.run { self?.relatedBatchProgress = report }
+25 |                 }
+
+[#ImplicitStrongCapture]: <https://docs.swift.org/compiler/documentation/diagnostics/implicit-strong-capture>
+[59 / 73] GitPico-product
+[60 / 73] GitPico-product
+[61 / 73] GitCoreTests-product
+[62 / 73] GitPico
+[65 / 74] GitPico
+[71 / 76] GitPicoTests-product
+[80 / 85] GitPicoTests-product
+[82 / 85] GitPicoTests-product
+[84 / 88] GitPicoTests-product
+Build complete! (10.05 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test nestedWorktreeMoveRemoveAndRestoreRetainModuleGitStorage() started.
+◇ Test managementRestoreGuardsNewFilesStagingAndChangedBackupAndCanResumeLocks() started.
+◇ Test worktreeBatchStopsAtFailurePersistsAndResumesWithoutReplayingSuccesses() started.
+✔ Test worktreeBatchStopsAtFailurePersistsAndResumesWithoutReplayingSuccesses() passed after 22.580 seconds.
+✔ Test managementRestoreGuardsNewFilesStagingAndChangedBackupAndCanResumeLocks() passed after 32.712 seconds.
+✔ Test nestedWorktreeMoveRemoveAndRestoreRetainModuleGitStorage() passed after 81.797 seconds.
+✔ Test run with 3 tests in 0 suites passed after 81.797 seconds.

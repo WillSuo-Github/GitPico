@@ -1,0 +1,29 @@
+Building for debugging...
+[1 / 1]
+[2 / 19] GitCore
+[4 / 21] GitCore
+[11 / 19] GitCoreTests-product
+[13 / 20] GitPico-product
+[16 / 17] GitPicoTests-product
+Build complete! (1.82 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test lfsHooksAreLocalExecutableAndCustomScriptsAreNeverReplaced() started.
+◇ Test lfsTransferRejectsChangedEndpointsAndReportsActualErrors() started.
+◇ Test lfsPatternRemovalNestedAttributesAndStaleChangesAreGuarded() started.
+◇ Test lfsSettingRecoveryProtectsNewEditsLocksAndChangedHeads() started.
+◇ Test lfsLocalActivationTrackingLiteralNamesAndRecoveryPreserveStaging() started.
+◇ Test lfsRealLocalObjectPushCloneFetchPullAndCheckoutKeepModifiedFiles() started.
+✘ Test lfsPatternRemovalNestedAttributesAndStaleChangesAreGuarded() recorded an issue at LFSManagementTests.swift:38:5: Expectation failed: try await f.repo.lfsState().rules.isEmpty
+↳ try await f.repo.lfsState().rules.isEmpty → <not evaluated>
+✔ Test lfsLocalActivationTrackingLiteralNamesAndRecoveryPreserveStaging() passed after 7.513 seconds.
+✔ Test lfsSettingRecoveryProtectsNewEditsLocksAndChangedHeads() passed after 9.996 seconds.
+✔ Test lfsTransferRejectsChangedEndpointsAndReportsActualErrors() passed after 10.050 seconds.
+✘ Test lfsPatternRemovalNestedAttributesAndStaleChangesAreGuarded() failed after 10.407 seconds with 1 issue.
+✔ Test lfsHooksAreLocalExecutableAndCustomScriptsAreNeverReplaced() passed after 10.437 seconds.
+✘ Test lfsRealLocalObjectPushCloneFetchPullAndCheckoutKeepModifiedFiles() recorded an issue at LFSManagementTests.swift:89:2: Caught error: GitFailure(message: "Fetching reference 365188136c19fff5b9f365ce74b5b6f4b96831e9\nerror transferring \"631b84027d6b9e52b539c4e8373622d23032dfadc64d60af87339c9037e4f769\": [0] remote missing object 631b84027d6b9e52b539c4e8373622d23032dfadc64d60af87339c9037e4f769\nerror: failed to fetch some objects from \'file:///var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-test-0EB35725-ABB2-4DD8-8AF7-D5C93C3C56CE-bare\'")
+✘ Test lfsRealLocalObjectPushCloneFetchPullAndCheckoutKeepModifiedFiles() failed after 15.748 seconds with 1 issue.
+✘ Test run with 6 tests in 0 suites failed after 15.748 seconds with 2 issues.
+Note: Some test targets reported failures:
+  - GitCoreTests (Swift Testing)

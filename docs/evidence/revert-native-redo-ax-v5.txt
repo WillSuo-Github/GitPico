@@ -1,0 +1,81 @@
+The following is a diff from the previous accessibility tree for Window: "InspectionReview-9_v01e1h" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+~76 standard window InspectionReview-9_v01e1h – History (main), ID: main, Secondary Actions: Raise
+~		78 image Description: Divide, ID: arrow.triangle.branch
+~		79 text main 0 changed files /Users/willsuo/files/Github/GitPico/dist/InspectionReview-9_v01e1h
+~		80 split group main, SidebarNavigationSplitView
++			81 container
++				82 scroll area
++					83 list Sidebar
++						84 row (selectable) Workspace
++						85 row (selectable) Working Copy
++						86 row (selected) History
++						87 row (selectable) Stashes
++						88 row (selectable) Pull Requests
++						89 row (selectable) Branches Review
++						90 row (selectable) Reflog
++						91 row (selectable) Settings
++						92 row (selectable) Branches
++						93 row (selectable) main
+HEAD
++						94 row (selectable) Tags
++						95 row (selectable) review-base
++						96 row (selectable) Remotes
++				97 image Description: Filter, ID: line.3.horizontal.decrease.circle
++				98 text field (settable) Filter
++				99 button Description: Add, Help: Create branch, ID: plus
++				100 button Description: Edit, Help: Repository settings, ID: slider.horizontal.3
++			101 splitter (disabled, settable, float) 359
++			102 container
++				103 image Description: Clock With A Circular Arrow, ID: clock.arrow.circlepath
++				104 text All Branches, Remotes, Tags
++				105 button Description: Divide, Help: Interactive Rebase…
++				106 menu button Edit, Help: Change viewing options, ID: slider.horizontal.3
++				107 scroll area
++					108 list
++						109 row (selectable) OCTOBER 2026
++						110 row (selectable) Commit graph, lane 1, PT, Pico Team, HEAD, 10/24/26, 2328e672, Revert "Add inspection notes"
++						111 row (selected) Commit graph, lane 1, PT, Pico Team, 10/24/26, 7927570d, Add inspection notes
++						112 row (selectable) Commit graph, lane 1, PT, Pico Team, 10/24/26, 3e5330aa, Polish welcome title
++						113 row (selectable) Commit graph, lane 1, M, Maya, 10/24/26, 4cdf331c, Tune native spacing
++						114 row (selectable) Commit graph, lane 1, PT, Pico Team, 10/24/26, 056a14fb, Move welcome into App
++						115 row (selectable) Commit graph, lane 1, PT, Pico Team, 10/24/26, bf98bc58, Add welcome source
++						116 row (selectable) Commit graph, lane 1, PT, Pico Team, review-base, 10/24/26, 62d71eaa, Prepare file inspection review
++				117 unknown Description: Content list divider, Details: 510 points, Secondary Actions: Increment, Decrement
++				118 text 7927570d
++				119 Description: Diff layout, Help: Unified / side-by-side diff
++					120 radio button Description: Unified, Value: 0, ID: rectangle
++					121 radio button Description: Side by Side, Value: 1, ID: rectangle.split.2x1
++				122 View
++					123 radio button Description: Changeset, Value: 1
++					124 radio button Description: Tree, Value: 0
++				125 scroll area
++					126 text Author Pico Team <hello@example.invalid>
++					127 button Description: Go Down, Help: Show or hide commit details, ID: chevron.down
++					128 text Author Date October 24, 2026 at 12:25:55 AM GMT+8 Committer Pico Team <hello@example.invalid> PT Committer Date October 24, 2026 at 12:25:55 AM GMT+8 Refs Commit Hash 7927570d05b65a65d78d9c99167e69049438c384 Parent Hash 3e5330aab53b709af632ce20e2e34260d40e4c33 Tree Hash 06065d42ebd6f37ff7fed9ac72c78831342595aa Add inspection notes
++					129 button Expand All
++					130 text Showing 1 changed files with 1 additions and 0 deletions
++					131 disclosure triangle Description: added, A, Notes.md, +1 −0, Help: A, Value: off
++						132 text added A Notes.md +1 −0
++	133 toolbar
++		134 button Description: Hide Sidebar, Secondary Actions: Increment, Decrement, Delete, Cancel
++		135 menu button chevron.pulldown, Help: Open a repository (⌘O), ID: folder
++		136 menu button chevron.pulldown, Help: Undo / redo Git history operations, ID: arrow.uturn.backward
++		137 button Description: Previous, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
++		138 button (disabled) Description: Next, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
++		139 button (disabled) Description: Fetch, Help: Fetch remotes, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
++		140 button (disabled) Description: Pull, Help: Pull current branch (fast-forward only), Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
++		141 button (disabled) Description: Push, Help: Push current branch, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
++		142 button (disabled) Description: Sync, Help: Fetch, fast-forward pull, then push, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
++		143 button Description: Merge, Help: Merge a branch into HEAD, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
++		144 button Description: Rebase, Help: Rebase HEAD onto a branch, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
++		145 menu button (disabled) chevron.pulldown, Help: Apply a saved stash, ID: tray.and.arrow.down
++		146 button (disabled) Description: Save Stash, Help: Save local changes to a stash, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
++		147 button Description: Refresh, Help: Refresh (⌘R), Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
++		148 container Secondary Actions: Move previous, Remove from toolbar
++			149 image Description: Search, ID: magnifyingglass
++			150 text field (settable) Description: Search, Placeholder: Search for Message
++	151 close button
++	152 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
++	153 minimize button
++	154 text InspectionReview-9_v01e1h History (main)
+The focused UI element is 76 standard window InspectionReview-9_v01e1h – History (main), ID: main, Secondary Actions: Raise

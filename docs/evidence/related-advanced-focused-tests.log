@@ -1,0 +1,32 @@
+Building for debugging...
+[2 / 19] GitCore
+[5 / 22] GitCore
+[8 / 23] GitCore
+[12 / 20] GitCoreTests-product
+[14 / 21] GitPico-product
+[17 / 18] GitPicoTests-product
+Build complete! (1.54 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test nestedWorktreeMoveRemoveAndRestoreRetainModuleGitStorage() started.
+◇ Test nestedSubmoduleMigrationAndManagementRestorePreserveRepositories() started.
+◇ Test worktreeBatchStopsAtFailurePersistsAndResumesWithoutReplayingSuccesses() started.
+◇ Test submoduleMoveURLSyncRepairAndRemoveStageMetadataSafely() started.
+◇ Test managementRestoreRemovalKeepsIgnoredAndNewerFilesAndRejectsTampering() started.
+◇ Test worktreeMoveLockAndRepairRetainRegistrationIdentity() started.
+◇ Test submoduleBatchRemovalSupportsControlledMetadataChangesAndRestoreInReverse() started.
+◇ Test managementRestoreGuardsNewFilesStagingAndChangedBackupAndCanResumeLocks() started.
+✔ Test worktreeMoveLockAndRepairRetainRegistrationIdentity() passed after 9.724 seconds.
+✘ Test worktreeBatchStopsAtFailurePersistsAndResumesWithoutReplayingSuccesses() recorded an issue at RelatedManagementAdvancedTests.swift:123:2: Caught error: GitFailure(message: "Invalid backup directory scope.")
+✘ Test worktreeBatchStopsAtFailurePersistsAndResumesWithoutReplayingSuccesses() failed after 21.591 seconds with 1 issue.
+✔ Test managementRestoreRemovalKeepsIgnoredAndNewerFilesAndRejectsTampering() passed after 25.788 seconds.
+✔ Test managementRestoreGuardsNewFilesStagingAndChangedBackupAndCanResumeLocks() passed after 31.995 seconds.
+✘ Test nestedWorktreeMoveRemoveAndRestoreRetainModuleGitStorage() recorded an issue at RelatedManagementAdvancedTests.swift:38:2: Caught error: GitFailure(message: "This management backup belongs to another working tree.")
+✘ Test nestedWorktreeMoveRemoveAndRestoreRetainModuleGitStorage() failed after 49.920 seconds with 1 issue.
+✔ Test nestedSubmoduleMigrationAndManagementRestorePreserveRepositories() passed after 63.971 seconds.
+✔ Test submoduleBatchRemovalSupportsControlledMetadataChangesAndRestoreInReverse() passed after 64.649 seconds.
+✔ Test submoduleMoveURLSyncRepairAndRemoveStageMetadataSafely() passed after 68.971 seconds.
+✘ Test run with 8 tests in 0 suites failed after 68.972 seconds with 2 issues.
+Note: Some test targets reported failures:
+  - GitCoreTests (Swift Testing)

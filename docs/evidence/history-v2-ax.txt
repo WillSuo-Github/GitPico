@@ -1,0 +1,96 @@
+Window: "PicoDemo", App: GitPico.
+0 standard window PicoDemo – History (feature/ui-verified), ID: main, Secondary Actions: Raise
+	1 container
+		2 image Description: Divide, ID: arrow.triangle.branch
+		3 text feature/ui-verified 1 changed files /Users/willsuo/files/Github/GitPico/dist/PicoDemo
+		4 split group main, SidebarNavigationSplitView
+			5 container
+				6 scroll area
+					7 list Sidebar
+						8 row (selectable) Workspace
+						9 row (selectable) Working Copy
+1
+						10 row (selected) History
+						11 row (selectable) Stashes
+						12 row (selectable) Pull Requests
+						13 row (selectable) Branches Review
+						14 row (selectable) Settings
+						15 row (selectable) Branches
+						16 row (selectable) main
+						17 row (selectable, collapsed) Description: feature, Secondary Actions: Expand
+							18 disclosure triangle 0
+						19 row (selectable) Tags
+						20 row (selectable) v0.1.0
+						21 row (selectable) Remotes
+				22 image Description: Filter, ID: line.3.horizontal.decrease.circle
+				23 text field (settable) Filter
+				24 button Description: Add, Help: Create branch, ID: plus
+				25 button Description: Edit, Help: Repository settings, ID: slider.horizontal.3
+			26 splitter (disabled, settable, float) 359
+			27 container
+				28 image Description: Clock With A Circular Arrow, ID: clock.arrow.circlepath
+				29 text All Branches, Remotes, Tags
+				30 menu button Edit, Help: Change viewing options, ID: slider.horizontal.3
+				31 scroll area
+					32 list
+						33 row (selectable) OCTOBER 2026
+						34 row (selected) Commit graph, lane 1, PT, Pico Team, HEAD, …, 10/23/26, d4153818, Verify native staging workflow
+						35 row (selectable) Commit graph, lane 1, PT, Pico Team, 10/23/26, 839d5607, Write down native interface conventions
+						36 row (selectable) Commit graph, lane 1, PT, Pico Team, v0.1.0, …, 10/23/26, a74e82c2, Merge the welcome screen
+						37 row (selectable) Commit graph, lane 2, PT, Pico Team, feature/welcome, 10/23/26, ede1cb99, Build a native welcome screen
+						38 row (selectable) Commit graph, lane 1, PT, Pico Team, 10/23/26, 37aed902, Document our contribution workflow
+						39 row (selectable) Commit graph, lane 1, PT, Pico Team, 10/23/26, bacf6698, Add a friendly greeting
+						40 row (selectable) Commit graph, lane 1, PT, Pico Team, 10/23/26, 15420b27, Start a little home for our next idea
+				41 unknown Description: Content list divider, Details: 320 points, Secondary Actions: Increment, Decrement
+				42 text d4153818
+				43 View
+					44 radio button Description: Changeset, Value: 1
+					45 radio button Description: Tree, Value: 0
+				46 scroll area
+					47 text Author Pico Team <hello@example.invalid>
+					48 button Description: Go Down, Help: Show or hide commit details, ID: chevron.down
+					49 text Author Date October 23, 2026 at 8:43:05 PM GMT+8 Committer Pico Team <hello@example.invalid> PT Committer Date October 23, 2026 at 8:43:05 PM GMT+8 Refs HEAD feature/ui-verified feature/polish Commit Hash d4153818d77bae8ae587992332878371226667aa Parent Hash 839d5607b3f887f7c9525c683290640ece08becb Tree Hash b020f4192e5fef1f414858874409fbffd3115fee Verify native staging workflow
+					50 button Collapse All
+					51 text Showing 2 changed files with 3 additions and 1 deletions
+					52 disclosure triangle Description: modified, M, README.md, +2 −0, Help: M, Value: on
+						53 text modified M README.md +2 −0
+					54 text @@ -1,6 +1,8 @@
+					55 scroll area
+						56 text 1 1  # Pico Demo 2 2 3 3  A local playground for exploring GitPico. 4 4 5 5  This is a real Git repository. Try staging a file, writing a commit, 6 6  and browsing the history. Changes here only affect this demo. 7 + 8 +Built with SwiftUI for macOS 26.
+					57 disclosure triangle Description: modified, M, Sources/Greeting.swift, +1 −1, Help: M, Value: on
+						58 text modified M Sources/Greeting.swift +1 −1
+					59 text @@ -1,9 +1,9 @@
+					60 scroll area
+						61 text 1 1  import Foundation 2 2 3 3  struct Greeting { 4 4      let name: String 5 5 6 6      var message: String { 7 -        "Hello, \(name)!" 7 +        "Welcome back, \(name)!" 8 8      } 9 9  }
+	62 toolbar
+		63 button Description: Hide Sidebar, Secondary Actions: Increment, Decrement, Delete, Cancel
+		64 menu button chevron.pulldown, Help: Open a repository (⌘O), ID: folder
+		65 button Description: Previous, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		66 button (disabled) Description: Next, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		67 button (disabled) Description: Fetch, Help: Fetch remotes, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		68 button (disabled) Description: Pull, Help: Pull current branch (fast-forward only), Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		69 button (disabled) Description: Push, Help: Push current branch, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		70 button (disabled) Description: Sync, Help: Fetch, fast-forward pull, then push, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		71 button Description: Merge, Help: Merge a branch into HEAD, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		72 button Description: Rebase, Help: Rebase HEAD onto a branch, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		73 menu button (disabled) chevron.pulldown, Help: Apply a saved stash, ID: tray.and.arrow.down
+		74 button Description: Save Stash, Help: Save local changes to a stash, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		75 button Description: Refresh, Help: Refresh (⌘R), Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		76 container Secondary Actions: Move previous, Remove from toolbar
+			77 image Description: Search, ID: magnifyingglass
+			78 text field (settable) Description: Search, Placeholder: Search for Message
+	79 close button
+	80 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	81 minimize button
+	82 text PicoDemo History (feature/ui-verified)
+83 menu bar
+	84 GitPico
+	85 File
+	86 Edit
+	87 View
+	88 Repository
+	89 Navigate
+	90 Window
+	91 Help
+
+The focused UI element is 0 standard window PicoDemo – History (feature/ui-verified), ID: main, Secondary Actions: Raise

@@ -1,0 +1,26 @@
+Building for debugging...
+[3 / 14] GitPico-product
+[14 / 26] GitPico-product
+[15 / 26] GitPico
+[15 / 26] GitPico-product
+[17 / 28] GitPico
+[17 / 28] GitPico-product
+[26 / 33] GitPico
+[26 / 35] GitPico-product
+[29 / 34] GitPicoTests-product
+[31 / 36] GitPicoTests-product
+[35 / 38] GitPicoTests-product
+[37 / 41] GitPicoTests-product
+Build complete! (8.58 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test successfulCommitWithUndoFailureClearsDraftAndReportsWarning() started.
+◇ Test workingMultiselectionStagesOnlyTargetsAndKeepsActiveFile() started.
+◇ Test indexWritePreservesPreviewWhenBranchTipIsUnchanged() started.
+◇ Test workingSelectedLinesStageAndUnstageAcrossDiffSides() started.
+✔ Test indexWritePreservesPreviewWhenBranchTipIsUnchanged() passed after 4.900 seconds.
+✔ Test workingMultiselectionStagesOnlyTargetsAndKeepsActiveFile() passed after 5.890 seconds.
+✔ Test workingSelectedLinesStageAndUnstageAcrossDiffSides() passed after 6.463 seconds.
+✔ Test successfulCommitWithUndoFailureClearsDraftAndReportsWarning() passed after 7.236 seconds.
+✔ Test run with 4 tests in 0 suites passed after 7.237 seconds.

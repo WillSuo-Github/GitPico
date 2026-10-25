@@ -1,0 +1,15 @@
+Building for debugging...
+[2 / 5] GitPico-product
+[4 / 7] GitPico-product
+[7 / 9] GitPico-product
+Build complete! (2.69 sec)
+/Users/willsuo/files/Github/GitPico/dist/GitPico.app: replacing existing signature
+97045
+{
+  "backgroundTesting": true,
+  "build": "20261024171620",
+  "frontmostBundle": "com.tencent.xinWeChat",
+  "isActive": false,
+  "version": "0.01",
+  "visibleWindows": 0
+}

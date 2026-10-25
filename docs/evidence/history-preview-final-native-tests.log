@@ -1,0 +1,82 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project GitPico.xcodeproj -scheme GitPico -configuration Debug -destination platform=macOS -derivedDataPath .build/xcode -parallel-testing-enabled YES -parallel-testing-worker-count 1 "-only-testing:GitPicoTests" "-only-testing:GitCoreTests/historyReadHonorsCancellationBeforeLaunching()" -resultBundlePath .build/xcode/HistoryPreviewFinalTests.xcresult test-without-building
+
+Writing result bundle at path:
+	/Users/willsuo/files/Github/GitPico/.build/xcode/HistoryPreviewFinalTests.xcresult
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:macOS, arch:arm64, id:00008132-000C284E0205001C, name:My Mac }
+{ platform:macOS, arch:x86_64, id:00008132-000C284E0205001C, name:My Mac }
+2026-10-24 23:01:43.762 xcodebuild[78022:2778867]  DVTAssertions: Warning in IDEFrameworks/IDEFoundation/Execution/LaunchSystem/IDELaunchSession.m:395
+Details:  setRunnablePIDWithDiagnostics:logSection:andCompletionHandler: called without a completion handler - blocking until diagnostics setup completes. Callers should migrate to using a completion handler for better performance.
+Object:   <IDELaunchSession: 0x78404e7300>
+Method:   -setRunnablePIDWithDiagnostics:logSection:andCompletionHandler:
+Thread:   <NSThread: 0x7840463e00>{number = 5, name = (null)}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+Testing started
+Test case 'historyReadHonorsCancellationBeforeLaunching()' passed on 'My Mac - xctest (78026)' (0.790 seconds)
+Test case 'branchPreviewPerformanceBenchmark()' skipped on 'My Mac - GitPico (78044)' (0.000 seconds)
+Test case 'sidebarOutlineRetainsNestedRemotesPinnedAndFilteredBranches()' passed on 'My Mac - GitPico (78044)' (0.000 seconds)
+Test case 'exportedPatchWriterPreservesBytesAndExistingFiles()' passed on 'My Mac - GitPico (78044)' (0.004 seconds)
+Test case 'libraryMainMigrationRelocatesNestedEntriesAtomicallyAndPreservesMetadata()' passed on 'My Mac - GitPico (78044)' (0.014 seconds)
+Test case 'libraryRelocateKeepsIdentityAndRejectsExistingRegistration()' passed on 'My Mac - GitPico (78044)' (0.022 seconds)
+Test case 'nativeXcodeTestHostSuppressesWindowsAndUsesActualBundleMetadata()' passed on 'My Mac - GitPico (78044)' (0.023 seconds)
+Test case 'librarySearchRankingKeyboardSelectionAndRecentOrdering()' passed on 'My Mac - GitPico (78044)' (0.032 seconds)
+Test case 'libraryGroupCyclesAreRejectedAndRemovalKeepsContents()' passed on 'My Mac - GitPico (78044)' (0.098 seconds)
+Test case 'libraryCorruptFutureAndSymlinkStorageAreNeverReplaced()' passed on 'My Mac - GitPico (78044)' (0.097 seconds)
+Test case 'libraryMigratesLegacyRecentsOnceAndKeepsAllBeyondTwelve()' passed on 'My Mac - GitPico (78044)' (0.097 seconds)
+Test case 'libraryMultiDropSortAndStaleSessionGuard()' passed on 'My Mac - GitPico (78044)' (0.097 seconds)
+Test case 'libraryImportSanitizesDisplayNameButPreservesUnusualPath()' passed on 'My Mac - GitPico (78044)' (0.097 seconds)
+Test case 'libraryCanonicalizesAliasesAndPreservesMetadataWhenReopened()' passed on 'My Mac - GitPico (78044)' (0.097 seconds)
+Test case 'libraryCrossInstanceEditsAndLockCannotOverwriteNewState()' passed on 'My Mac - GitPico (78044)' (0.097 seconds)
+Test case 'toolPreferencesPersistAndRejectStaleInvalidAndCorruptEdits()' passed on 'My Mac - GitPico (78044)' (0.097 seconds)
+Test case 'libraryPersistsBookmarksGroupsFavoritesAndNameAcrossRestart()' passed on 'My Mac - GitPico (78044)' (0.097 seconds)
+Test case 'historicalStoreExportsFrozenSnapshotInBackgroundWithoutWindows()' passed on 'My Mac - GitPico (78044)' (4.614 seconds)
+Test case 'rebasePlanReloadRejectsTokensFromEarlierPlan()' passed on 'My Mac - GitPico (78044)' (8.993 seconds)
+Test case 'nativeDropRejectsInvalidDataAndClearsTargetOnExitOrCancel()' passed on 'My Mac - GitPico (78044)' (9.303 seconds)
+Test case 'nativeDropRevalidatesBusyStatePayloadAndSourceOperation()' passed on 'My Mac - GitPico (78044)' (10.351 seconds)
+Test case 'quickActionCanSelectCleanFileWithAllFilesEnabled()' passed on 'My Mac - GitPico (78044)' (10.560 seconds)
+Test case 'localChangeRoutesSelectionAndRejectsOldRepositoryRequests()' passed on 'My Mac - GitPico (78044)' (11.224 seconds)
+Test case 'historicalRequestsRetainSelectionRevisionAndRepositorySession()' passed on 'My Mac - GitPico (78044)' (11.919 seconds)
+Test case 'dragTokensRejectOtherRepositoriesUnsupportedTargetsAndBusyState()' passed on 'My Mac - GitPico (78044)' (12.090 seconds)
+Test case 'branchAndCommitDropsCreateReviewedOperations()' passed on 'My Mac - GitPico (78044)' (13.078 seconds)
+Test case 'quickActionsExposeContextSearchAndKeepDangerousActionsReviewed()' passed on 'My Mac - GitPico (78044)' (13.591 seconds)
+Test case 'libraryOpenSurvivesMetadataConflictWithoutLosingExistingLibrary()' passed on 'My Mac - GitPico (78044)' (13.819 seconds)
+Test case 'browseStoreSeparatesCleanIgnoredAndChangedFilesWithoutFakeStaging()' passed on 'My Mac - GitPico (78044)' (15.451 seconds)
+Test case 'nativeWholeStashDropNegotiatesMoveAndDeliversExactlyOneReview()' passed on 'My Mac - GitPico (78044)' (15.896 seconds)
+Test case 'nativeDropCombinesAllSelectedWorkingFilesAndRejectsMixedPayloads()' passed on 'My Mac - GitPico (78044)' (16.420 seconds)
+Test case 'previewCacheEvictsOldPagesWithinCountAndCommitBudget()' passed on 'My Mac - GitPico (78044)' (17.923 seconds)
+Test case 'malformedSubmoduleConfigurationKeepsRepositoryUsable()' passed on 'My Mac - GitPico (78044)' (18.290 sec2026-10-24 23:02:23.760 xcodebuild[78022:2778842] [MT] IDETestOperationsObserverDebug: 40.025 elapsed -- Testing started completed.
+2026-10-24 23:02:23.760 xcodebuild[78022:2778842] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-24 23:02:23.760 xcodebuild[78022:2778842] [MT] IDETestOperationsObserverDebug: 40.025 sec, +40.025 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/willsuo/files/Github/GitPico/.build/xcode/HistoryPreviewFinalTests.xcresult
+
+** TEST EXECUTE SUCCEEDED **
+
+onds)
+Test case 'relatedRepositoryActionsReviewBeforeWritingAndRejectOldTokens()' passed on 'My Mac - GitPico (78044)' (18.613 seconds)
+Test case 'stashDropRoutesWholeFilesChunksAndLinesWithoutMutatingGit()' passed on 'My Mac - GitPico (78044)' (19.235 seconds)
+Test case 'cancelledDetailIsReloadedForPreservedHistorySelection()' passed on 'My Mac - GitPico (78044)' (19.504 seconds)
+Test case 'infrastructureReviewsWorkFromWelcomeAndRejectStaleMigrationRequests()' passed on 'My Mac - GitPico (78044)' (20.117 seconds)
+Test case 'rapidPreviewNavigationOnlyLoadsFinalSelection()' passed on 'My Mac - GitPico (78044)' (20.218 seconds)
+Test case 'administrationRoutesRequireReviewAndRejectOldRepositoryTokens()' passed on 'My Mac - GitPico (78044)' (21.874 seconds)
+Test case 'previewCacheIsImmediateAndDoesNotRescanWorkingCopy()' passed on 'My Mac - GitPico (78044)' (21.972 seconds)
+Test case 'nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:)' passed on 'My Mac - GitPico (78044)' (22.164 seconds)
+Test case 'nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:)' passed on 'My Mac - GitPico (78044)' (22.262 seconds)
+Test case 'nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:)' passed on 'My Mac - GitPico (78044)' (22.364 seconds)
+Test case 'nativeCommitDropUsesEdgesForReorderAndCenterForFold(_:)' passed on 'My Mac - GitPico (78044)' (22.561 seconds)
+Test case 'libraryStoreOpensRealRepositoryAndRejectsStaleRelocation()' passed on 'My Mac - GitPico (78044)' (22.686 seconds)
+Test case 'nativeCommitDropRejectsBranchChangesBeforePlanPreparation()' passed on 'My Mac - GitPico (78044)' (22.765 seconds)
+Test case 'extensionMutationRequestsRejectStaleRepositorySessions()' passed on 'My Mac - GitPico (78044)' (23.132 seconds)
+Test case 'previewOptionsHaveSeparateCacheEntries()' passed on 'My Mac - GitPico (78044)' (23.518 seconds)
+Test case 'nativeHeadDropPinsDestinationAndRejectsExternalBranchSwitch()' passed on 'My Mac - GitPico (78044)' (24.379 seconds)
+Test case 'gitWriteInvalidatesPreviewEvenWhenBranchTipIsUnchanged()' passed on 'My Mac - GitPico (78044)' (24.840 seconds)
+Test case 'relatedRepositoryListsAndQuickOpenReuseCurrentStore()' passed on 'My Mac - GitPico (78044)' (24.935 seconds)
+Test case 'previewCacheRevalidatesMovedTipAndExplicitRefresh()' passed on 'My Mac - GitPico (78044)' (24.977 seconds)
+Test case 'latePreviewFailureCannotOverwriteNewerBranchOrRepository()' passed on 'My Mac - GitPico (78044)' (25.004 seconds)
+Test case 'lfsStoreEnableRefreshesNativeSettingsStateWithoutOpeningWindows()' passed on 'My Mac - GitPico (78044)' (25.984 seconds)
+Test case 'extensionQuickActionsOpenSettingsAndRequireConfigurationBeforeStartingTopics()' passed on 'My Mac - GitPico (78044)' (29.158 seconds)
+Test case 'administrationBatchPublishesProgressAndReloadsInBackground()' passed on 'My Mac - GitPico (78044)' (29.653 seconds)
+Test case 'administrationRestoreValidatesTokenAndRepopulatesWorktreeList()' passed on 'My Mac - GitPico (78044)' (32.034 seconds)

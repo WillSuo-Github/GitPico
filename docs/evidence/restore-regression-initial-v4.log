@@ -1,0 +1,26 @@
+Building for debugging...
+[1 / 10]
+[1 / 13]
+[2 / 14] GitCore
+[4 / 16] GitCore
+[9 / 20] GitCore
+[13 / 24] GitPico-product
+[17 / 28] GitCore
+[20 / 27] GitCoreTests-product
+[22 / 29] GitPico-product
+[26 / 32] GitPico-product
+[29 / 32] GitPico-product
+[31 / 35] GitCoreTests-product
+[35 / 35] GitPico-product
+Build complete! (3.36 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test interactiveRebaseReordersRewordsSquashesFixesAndDrops() started.
+◇ Test restoringHistoryNeverOverwritesIgnoredFiles() started.
+✘ Test restoringHistoryNeverOverwritesIgnoredFiles() recorded an issue at HistoryRecoveryTests.swift:170:2: Caught error: GitFailure(message: "fatal: pathspec \'private.secret\' did not match any files")
+✘ Test restoringHistoryNeverOverwritesIgnoredFiles() failed after 3.721 seconds with 1 issue.
+✔ Test interactiveRebaseReordersRewordsSquashesFixesAndDrops() passed after 18.518 seconds.
+✘ Test run with 2 tests in 0 suites failed after 18.518 seconds with 1 issue.
+Note: Some test targets reported failures:
+  - GitCoreTests (Swift Testing)

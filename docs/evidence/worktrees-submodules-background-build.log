@@ -1,0 +1,14 @@
+Building for debugging...
+[Planning deferred tasks]
+[1 / 8]
+Build complete! (0.44 sec)
+/Users/willsuo/files/Github/GitPico/dist/GitPico.app: replacing existing signature
+53054
+{
+  "backgroundTesting": true,
+  "build": "20261024175436",
+  "frontmostBundle": "com.openai.codex",
+  "isActive": false,
+  "version": "0.01",
+  "visibleWindows": 0
+}

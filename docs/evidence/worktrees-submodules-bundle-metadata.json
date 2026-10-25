@@ -1,0 +1,14 @@
+{
+  "version": "0.01",
+  "build": "20261024175436",
+  "minimumOS": "26.0",
+  "hostOS": "27.0.1",
+  "background": {
+    "backgroundTesting": true,
+    "build": "20261024175436",
+    "frontmostBundle": "com.openai.codex",
+    "isActive": false,
+    "version": "0.01",
+    "visibleWindows": 0
+  }
+}

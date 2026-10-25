@@ -1,0 +1,32 @@
+Building for debugging...
+[Planning deferred tasks]
+[11 / 31] GitCoreTests-product
+[13 / 33] GitPicoTests-product
+[15 / 35] GitPicoTests-product
+[19 / 34] GitCoreTests-product
+[19 / 34] GitPicoTests-product
+[27 / 33] GitCoreTests-product
+[29 / 33] GitPicoTests-product
+Build complete! (1.68 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test branchPreviewAndCheckoutRemainSeparateAndBusyCommandsAreDisabled() started.
+◇ Test navigationCancelsPendingSearchFocusAndBoundsBookmarks() started.
+◇ Test warmTipRevalidationDoesNotResetNewUserSelection() started.
+◇ Test backForwardRestoresQueryPageOptionsAndSelectedCommit() started.
+✔ Test navigationCancelsPendingSearchFocusAndBoundsBookmarks() passed after 4.182 seconds.
+✔ Test warmTipRevalidationDoesNotResetNewUserSelection() passed after 5.065 seconds.
+✔ Test backForwardRestoresQueryPageOptionsAndSelectedCommit() passed after 9.499 seconds.
+✔ Test branchPreviewAndCheckoutRemainSeparateAndBusyCommandsAreDisabled() passed after 9.530 seconds.
+✔ Test run with 4 tests in 0 suites passed after 9.530 seconds.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test checkoutReferencePreservesLocalChangesAndRejectsOperationInProgress() started.
+◇ Test checkoutReferenceRejectsMovedTargetAndPreservesHead() started.
+◇ Test checkoutReferenceRejectsBranchOccupiedByAnotherWorktree() started.
+✔ Test checkoutReferenceRejectsMovedTargetAndPreservesHead() passed after 2.124 seconds.
+✔ Test checkoutReferenceRejectsBranchOccupiedByAnotherWorktree() passed after 2.124 seconds.
+✔ Test checkoutReferencePreservesLocalChangesAndRejectsOperationInProgress() passed after 2.515 seconds.
+✔ Test run with 3 tests in 0 suites passed after 2.515 seconds.

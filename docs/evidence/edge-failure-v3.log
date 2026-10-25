@@ -1,0 +1,22 @@
+Building for debugging...
+[3 / 10] GitCoreTests-product
+[8 / 15] GitCoreTests-product
+[12 / 18] GitPico-product
+[21 / 28] GitPico-product
+[22 / 28] GitPico-product
+[23 / 28] GitPico-product
+[25 / 31] GitCoreTests-product
+[27 / 29] GitPico-product
+[29 / 31] GitPico-product
+Build complete! (4.17 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test conflictResolutionPreservesExecutableModeAndRefusesSymlinkWrites() started.
+◇ Test lineStagingPreservesCRLFAndRejectsStructuralModeChanges() started.
+✘ Test lineStagingPreservesCRLFAndRejectsStructuralModeChanges() recorded an issue at LineAndConflictTests.swift:196:2: Caught error: GitFailure(message: "Select changed lines from a text diff without rename or mode changes.")
+✘ Test lineStagingPreservesCRLFAndRejectsStructuralModeChanges() failed after 2.677 seconds with 1 issue.
+✔ Test conflictResolutionPreservesExecutableModeAndRefusesSymlinkWrites() passed after 7.291 seconds.
+✘ Test run with 2 tests in 0 suites failed after 7.291 seconds with 1 issue.
+Note: Some test targets reported failures:
+  - GitCoreTests (Swift Testing)

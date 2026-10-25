@@ -1,0 +1,13 @@
+Building for debugging...
+[Planning deferred tasks]
+[1 / 23] GitPico
+[4 / 32]
+[8 / 19] GitPicoTests-product
+[10 / 21] GitPicoTests-product
+[16 / 20] GitPicoTests-product
+Build complete! (2.50 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+➜ Test nativeXcodeTestHostSuppressesWindowsAndUsesActualBundleMetadata() skipped: "Requires the native Xcode test host."
+✔ Test run with 1 test in 0 suites passed after 0.001 seconds.

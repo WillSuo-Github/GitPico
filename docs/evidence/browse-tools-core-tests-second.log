@@ -1,0 +1,30 @@
+Building for debugging...
+[2 / 28] GitCore
+[4 / 30] GitCore
+[7 / 29] GitCore
+[11 / 27] GitCoreTests-product
+[13 / 29] GitPico-product
+[16 / 26] GitCoreTests-product
+[20 / 25] GitPicoTests-product
+[24 / 28] GitCoreTests-product
+Build complete! (1.93 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test ignoredForceAddUsesReviewedIndexBackupAndRejectsNewContent() started.
+◇ Test externalMergeRejectsMarkersNewEditsChangedOperationAndLinks() started.
+◇ Test externalCommitComparisonSupportsRootAndBinaryCopies() started.
+◇ Test workingFileBrowserIncludesCleanDeletedIgnoredLiteralAndIndexFlags() started.
+◇ Test externalMergeResultRequiresExplicitApplyAndSurvivesReopen() started.
+◇ Test externalDiffSnapshotsPreserveIndexWorkingBytesAndRenameSources() started.
+◇ Test externalToolArgumentsAreLiteralAndHeadlessRunnerNeverUsesAShell() started.
+◇ Test workingFilePreviewDoesNotFollowLinksOrReadDirectories() started.
+✔ Test workingFilePreviewDoesNotFollowLinksOrReadDirectories() passed after 0.840 seconds.
+✔ Test workingFileBrowserIncludesCleanDeletedIgnoredLiteralAndIndexFlags() passed after 1.756 seconds.
+✔ Test externalToolArgumentsAreLiteralAndHeadlessRunnerNeverUsesAShell() passed after 2.482 seconds.
+✔ Test externalCommitComparisonSupportsRootAndBinaryCopies() passed after 3.693 seconds.
+✔ Test externalDiffSnapshotsPreserveIndexWorkingBytesAndRenameSources() passed after 4.921 seconds.
+✔ Test externalMergeResultRequiresExplicitApplyAndSurvivesReopen() passed after 7.170 seconds.
+✔ Test externalMergeRejectsMarkersNewEditsChangedOperationAndLinks() passed after 8.730 seconds.
+✔ Test ignoredForceAddUsesReviewedIndexBackupAndRejectsNewContent() passed after 11.226 seconds.
+✔ Test run with 8 tests in 0 suites passed after 11.226 seconds.

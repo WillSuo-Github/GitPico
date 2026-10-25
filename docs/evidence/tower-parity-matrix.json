@@ -1,0 +1,897 @@
+{
+  "auditDate": "2026-10-24",
+  "referenceVersion": "Tower 18.0 (564)",
+  "gitPicoVersion": "0.01",
+  "counts": {
+    "covered": 40,
+    "partial": 26,
+    "missing": 29,
+    "unverified": 3
+  },
+  "notAPercentage": "Checklist units have different size; counts are not a product completion percentage.",
+  "items": [
+    {
+      "id": "TP-001",
+      "area": "Repository",
+      "feature": "Open, clone and initialize",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "RepositoryCreation.swift; RepositoryStore.swift",
+      "remaining": "Existing local workflows; hosted creation is separate."
+    },
+    {
+      "id": "TP-002",
+      "area": "Repository",
+      "feature": "Recent repositories",
+      "status": "covered",
+      "priority": "P2",
+      "evidence": "RepositoryLibrary.swift; RepositoryStore.swift; RepositoryLibraryTests.swift",
+      "remaining": "Twelve recents share the persistent repository library; legacy recent paths migrate once. Removing a registration does not delete its working directory."
+    },
+    {
+      "id": "TP-003",
+      "area": "Repository",
+      "feature": "Bookmarks, groups and repository search",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "RepositoryLibrary.swift; RepositoryLibraryView.swift; RepositoryLibraryTests.swift",
+      "remaining": "Persistent repository registrations, favorites, nested groups, custom names, group moves/sort/reorder, multi-selection moves/removal, search and validated relocation. Bounded 5000 repositories/500 groups/4 MB metadata. Drop routing is covered; native mouse/List and visual parity remain unverified. Group drag reorder is not implemented."
+    },
+    {
+      "id": "TP-004",
+      "area": "Repository",
+      "feature": "Quick Open",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "QuickOpenSheet.swift; RepositoryLibraryActions.swift; RepositoryLibraryTests.swift",
+      "remaining": "Cmd-Shift-O searches saved names, paths and group breadcrumbs with diacritic folding, favorites/recent ranking and bounded keyboard selection. Opens validated saved entries in the existing window. Real keyboard/IME/focus acceptance remains unverified."
+    },
+    {
+      "id": "TP-005",
+      "area": "Repository",
+      "feature": "Quick Actions",
+      "status": "partial",
+      "priority": "P1",
+      "evidence": "QuickActions.swift; QuickActionsSheet.swift; BrowseToolActionsTests.swift; RelatedRepositoryActions.swift; RelatedRepositoryRoutingTests.swift",
+      "remaining": "Cmd-Shift-A palette: views, context-sensitive reviewed commands, working files/history, refs/checkout, remotes, stashes and loaded/on-demand hash commits. Stale repository guards and keyboard selection tested. Includes worktree/submodule open/init, reviewed creation and Management Backups routes. Hierarchical Tab options and real native keyboard/IME acceptance remain missing/unverified."
+    },
+    {
+      "id": "TP-006",
+      "area": "Repository",
+      "feature": "Multiple windows and tabs",
+      "status": "missing",
+      "priority": "P2",
+      "evidence": "GitPicoApp single Window scene",
+      "remaining": "Independent repository sessions and restoration."
+    },
+    {
+      "id": "TP-007",
+      "area": "Repository",
+      "feature": "Back/forward navigation",
+      "status": "partial",
+      "priority": "P2",
+      "evidence": "RepositoryActions.swift",
+      "remaining": "Destinations persist in-session; selection/search restoration incomplete."
+    },
+    {
+      "id": "TP-008",
+      "area": "Repository",
+      "feature": "Global user profiles",
+      "status": "missing",
+      "priority": "P2",
+      "evidence": "Tower preferences User Profiles",
+      "remaining": "Reusable identities and repo assignment."
+    },
+    {
+      "id": "TP-009",
+      "area": "Working copy",
+      "feature": "Tracked and untracked status",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "GitRepository.swift; GitCoreTests.swift",
+      "remaining": "Porcelain status with literal paths."
+    },
+    {
+      "id": "TP-010",
+      "area": "Working copy",
+      "feature": "All-files and ignored-files browsing",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "WorkingFileBrowser.swift; WorkingCopyView.swift; BrowserFileRow.swift; WorkingFileBrowserTests.swift",
+      "remaining": "All tracked/untracked files plus opt-in ignored enumeration, unmodified previews, assume-unchanged/skip-worktree labels, pathname filtering and reviewed recoverable force-add for ignored files. Ignored entries never join Stage All implicitly. 50000-entry default cap; foreground UI/layout acceptance remains unverified."
+    },
+    {
+      "id": "TP-011",
+      "area": "Working copy",
+      "feature": "Text unified and split diff",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "DiffView.swift; SplitDiff.swift",
+      "remaining": "Bounded text preview; image diff separate."
+    },
+    {
+      "id": "TP-012",
+      "area": "Working copy",
+      "feature": "Hunk context and whitespace controls",
+      "status": "covered",
+      "priority": "P2",
+      "evidence": "ChunkDiffView.swift; FileInspection.swift",
+      "remaining": "3/7/15/30 context; whitespace-aware view."
+    },
+    {
+      "id": "TP-013",
+      "area": "Working copy",
+      "feature": "Whole-file, chunk and line staging",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "GitPatch.swift; GitLinePatch.swift; LineAndConflictTests.swift",
+      "remaining": "Stale patch checks and index/worktree preservation."
+    },
+    {
+      "id": "TP-014",
+      "area": "Working copy",
+      "feature": "Discard file, chunk or selected lines",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "LocalChangeRecovery.swift; PatchTransfer.swift; LocalChangesSheet.swift; LocalChangeTests.swift",
+      "remaining": "Regular-file discard by selection/all, index-preserving unstaged scope or staged+unstaged HEAD scope, and unstaged chunks/lines. Durable guarded recovery. Links, gitlinks, sparse/split indexes and conversion-dependent partial patches are rejected; foreground UI remains unverified."
+    },
+    {
+      "id": "TP-015",
+      "area": "Working copy",
+      "feature": "Image diff and binary preview",
+      "status": "missing",
+      "priority": "P2",
+      "evidence": "Tower diff image resource; Feature Overview",
+      "remaining": "Image panes, image metadata and unavailable preview states."
+    },
+    {
+      "id": "TP-016",
+      "area": "Working copy",
+      "feature": "Syntax coloring and text search",
+      "status": "missing",
+      "priority": "P2",
+      "evidence": "Feature Overview; Tower Text preferences",
+      "remaining": "Current text is monospaced without syntax tokens or in-file find."
+    },
+    {
+      "id": "TP-017",
+      "area": "Working copy",
+      "feature": "Open file, reveal and copy path",
+      "status": "covered",
+      "priority": "P2",
+      "evidence": "WorkingCopyView.swift",
+      "remaining": "Existing default-editor/Finder integration."
+    },
+    {
+      "id": "TP-018",
+      "area": "Working copy",
+      "feature": "External diff and merge tools",
+      "status": "partial",
+      "priority": "P1",
+      "evidence": "ExternalTools.swift; ExternalToolRunner.swift; ExternalToolSheet.swift; ExternalToolSettingsView.swift; ExternalToolTests.swift",
+      "remaining": "Configurable separate diff/merge CLI commands, FileMerge preset, literal argument expansion, private persistent side/result files, revision/binary/rename comparisons, explicit reviewed merge apply/stale guards, session resume/delete and diagnostic exit status. Headless helper process proven. Real vendor GUIs, directory diff, additional presets and binary/modify-delete/symlink/submodule merge remain unverified or missing."
+    },
+    {
+      "id": "TP-019",
+      "area": "Working copy",
+      "feature": "Ignore and exclude editors",
+      "status": "covered",
+      "priority": "P2",
+      "evidence": "GitInspection.swift; RepositorySettingsView.swift",
+      "remaining": "Shared .gitignore and local info/exclude with stale guards."
+    },
+    {
+      "id": "TP-020",
+      "area": "Working copy",
+      "feature": "Ignore selected file from context menu",
+      "status": "missing",
+      "priority": "P2",
+      "evidence": "Tower guide Ignoring Files",
+      "remaining": "Escape patterns correctly and preserve manual rules."
+    },
+    {
+      "id": "TP-021",
+      "area": "Commits",
+      "feature": "Subject/body, Amend and Sign Off",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "RepositoryStore.swift; ExtendedWorkflowTests.swift",
+      "remaining": "Existing drafts and Amend restoration."
+    },
+    {
+      "id": "TP-022",
+      "area": "Commits",
+      "feature": "Commit templates",
+      "status": "missing",
+      "priority": "P2",
+      "evidence": "Tower Templates preferences; Commit Templates guide",
+      "remaining": "Manage templates and insert into composer."
+    },
+    {
+      "id": "TP-023",
+      "area": "Commits",
+      "feature": "AI generation and rephrasing",
+      "status": "missing",
+      "priority": "P2",
+      "evidence": "Tower Working Copy menu; AI preferences",
+      "remaining": "Provider/agent setup, preview and explicit data transmission flow."
+    },
+    {
+      "id": "TP-024",
+      "area": "Commits",
+      "feature": "Fixup commit creation and autosquash entry",
+      "status": "partial",
+      "priority": "P2",
+      "evidence": "InteractiveRebase.swift; Tower Fixup resources",
+      "remaining": "Rebase Fixup supported; fixup! creation/autocomplete missing."
+    },
+    {
+      "id": "TP-025",
+      "area": "Commits",
+      "feature": "Hooks and signing feedback",
+      "status": "partial",
+      "priority": "P1",
+      "evidence": "GitProcess.swift; repository signing settings",
+      "remaining": "Git invokes configured hooks/signing; actionable output and key UX incomplete."
+    },
+    {
+      "id": "TP-026",
+      "area": "History",
+      "feature": "Commit graph and display preferences",
+      "status": "partial",
+      "priority": "P2",
+      "evidence": "HistoryView.swift; CommitGraph.swift",
+      "remaining": "Order/density options exist; tied dates and graph styling differ."
+    },
+    {
+      "id": "TP-027",
+      "area": "History",
+      "feature": "Paging and full-message search",
+      "status": "partial",
+      "priority": "P1",
+      "evidence": "RepositoryActions.swift; HistoryOptions",
+      "remaining": "Missing Tower author/date/hash/file search modes and autocomplete."
+    },
+    {
+      "id": "TP-028",
+      "area": "History",
+      "feature": "Commit metadata, changeset and tree",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "CommitDetailView.swift; GitInspection.swift",
+      "remaining": "Metadata, stats, file diff and historical tree."
+    },
+    {
+      "id": "TP-029",
+      "area": "History",
+      "feature": "File history following renames",
+      "status": "partial",
+      "priority": "P1",
+      "evidence": "FileInspection.swift; HistoricalFiles.swift; FileHistoryView.swift; HistoricalFileTests.swift",
+      "remaining": "Pinned single-tip rename lineage, 500/page up to 10000, selected-revision guarded restore/raw/ZIP export including explicit pre-deletion source. All-ref scope and richer revision navigation remain missing."
+    },
+    {
+      "id": "TP-030",
+      "area": "History",
+      "feature": "Blame authors, dates and commit inspection",
+      "status": "partial",
+      "priority": "P1",
+      "evidence": "FileHistoryView.swift; FileInspectionTests.swift (0.5)",
+      "remaining": "UTF-8 up to 2 MB; right attribution; full Tower revision navigation/syntax pending."
+    },
+    {
+      "id": "TP-031",
+      "area": "History",
+      "feature": "Compare arbitrary revisions",
+      "status": "partial",
+      "priority": "P1",
+      "evidence": "RevisionComparisonView.swift; FileInspectionTests.swift (0.5)",
+      "remaining": "Immutable trees and merge-base diff; external tools and multi-selection pending."
+    },
+    {
+      "id": "TP-032",
+      "area": "History",
+      "feature": "Checkout any revision detached",
+      "status": "missing",
+      "priority": "P1",
+      "evidence": "Tower Working Copy Checkout Revision menu",
+      "remaining": "Existing branch checkout does not expose detached revision checkout."
+    },
+    {
+      "id": "TP-033",
+      "area": "History",
+      "feature": "Cherry-pick",
+      "status": "partial",
+      "priority": "P1",
+      "evidence": "GitOperations.swift; ExtendedWorkflowTests.swift",
+      "remaining": "Single commit; multi-select series, mainline and no-commit options missing."
+    },
+    {
+      "id": "TP-034",
+      "area": "History",
+      "feature": "Revert",
+      "status": "partial",
+      "priority": "P1",
+      "evidence": "GitOperations.swift; FileInspectionTests.swift (0.5)",
+      "remaining": "Single commit incl. explicit merge parent, conflicts and Undo/Redo; multi-commit batch missing."
+    },
+    {
+      "id": "TP-035",
+      "area": "History",
+      "feature": "Reset/restore HEAD",
+      "status": "partial",
+      "priority": "P1",
+      "evidence": "GitRecovery.swift; HistoryRecoverySheet.swift",
+      "remaining": "Soft and guarded keep; Tower reset variants and local discard not equivalent."
+    },
+    {
+      "id": "TP-036",
+      "area": "History",
+      "feature": "Export files, ZIP and commit patches",
+      "status": "partial",
+      "priority": "P1",
+      "evidence": "HistoricalFiles.swift; HistoricalExport.swift; HistoricalFilesSheet.swift; HistoricalFileTests.swift; PatchTransfer.swift",
+      "remaining": "Original regular-file or new-folder export, selected file/folder and entire commit/branch/tag ZIP, exact binary bytes and modes, safe relative links, immutable source, no-overwrite destination; single non-merge/root commit patches. Merge-commit patch variants remain missing. Exports: 16 MB/file, 64 MB/10000 entries; submodules are declared empty directories."
+    },
+    {
+      "id": "TP-037",
+      "area": "History",
+      "feature": "Create and apply patches",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "PatchTransfer.swift; LocalChangeActions.swift; LocalChangesSheet.swift; PatchTransferTests.swift",
+      "remaining": "Reviewed patch import/export, working/index/both targets, reverse apply, binary/rename handling and preflight checks. Conflict rejection keeps the live tree unchanged; no git-am metadata/commit replay or three-way partial application. Conversion-dependent worktree imports require Index Only."
+    },
+    {
+      "id": "TP-038",
+      "area": "Rebase",
+      "feature": "Interactive linear commit actions",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "InteractiveRebase.swift; HistoryRecoveryTests.swift",
+      "remaining": "Pick/Reword/Edit/Squash/Fixup/Drop/reorder/onto; 200 commit boundary."
+    },
+    {
+      "id": "TP-039",
+      "area": "Rebase",
+      "feature": "Root and merge-preserving plans",
+      "status": "missing",
+      "priority": "P2",
+      "evidence": "InteractiveRebase.swift explicit rejection",
+      "remaining": "Need merge topology and root handling before exposing controls."
+    },
+    {
+      "id": "TP-040",
+      "area": "Rebase",
+      "feature": "Pause, Amend, Continue, Skip and Abort",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "WorkingOperationPanel.swift; HistoryRecoveryTests.swift",
+      "remaining": "Generated editor files persist across app relaunch."
+    },
+    {
+      "id": "TP-041",
+      "area": "Recovery",
+      "feature": "History Undo/Redo",
+      "status": "partial",
+      "priority": "P1",
+      "evidence": "GitRecovery.swift; HistoryRecoveryTests.swift",
+      "remaining": "Commit/Amend/integration/Revert/Restore; not arbitrary actions."
+    },
+    {
+      "id": "TP-042",
+      "area": "Recovery",
+      "feature": "Undo checkout, stash, stage and discard",
+      "status": "partial",
+      "priority": "P1",
+      "evidence": "LocalChangeRecovery.swift; HistoricalFiles.swift; LocalChangeTests.swift; HistoricalFileTests.swift",
+      "remaining": "Persistent backups restore discard, patch and historic-file restoration after restart, with stale-file/HEAD/index guards and pinned index objects. Unified checkout/stash/stage Undo/Redo remains missing."
+    },
+    {
+      "id": "TP-043",
+      "area": "Recovery",
+      "feature": "Reflog and branch recovery",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "GitReflog.swift; HistoryRecoverySheet.swift",
+      "remaining": "Actual event dates, immutable target, event paging and recovery."
+    },
+    {
+      "id": "TP-044",
+      "area": "Conflicts",
+      "feature": "Text three-way block/manual resolution",
+      "status": "partial",
+      "priority": "P1",
+      "evidence": "GitConflicts.swift; ConflictResolverView.swift",
+      "remaining": "Regular UTF-8 <=1 MB; syntax/inline highlighting differs."
+    },
+    {
+      "id": "TP-045",
+      "area": "Conflicts",
+      "feature": "Whole-file binary and modify/delete",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "GitConflicts.swift; LineAndConflictTests.swift",
+      "remaining": "Guarded regular-file version selection."
+    },
+    {
+      "id": "TP-046",
+      "area": "Conflicts",
+      "feature": "Symlink and submodule conflicts",
+      "status": "missing",
+      "priority": "P1",
+      "evidence": "GitConflicts.swift explicit rejection",
+      "remaining": "Mode-aware resolver and submodule revision chooser."
+    },
+    {
+      "id": "TP-047",
+      "area": "Conflicts",
+      "feature": "Persist unfinished resolution drafts",
+      "status": "missing",
+      "priority": "P1",
+      "evidence": "RepositoryStore conflictDrafts",
+      "remaining": "Current drafts survive navigation only, not process termination."
+    },
+    {
+      "id": "TP-048",
+      "area": "Conflicts",
+      "feature": "Merge-conflict prediction",
+      "status": "missing",
+      "priority": "P2",
+      "evidence": "Comparing Branches & Revisions guide",
+      "remaining": "Read-only merge-tree preview and branch warning."
+    },
+    {
+      "id": "TP-049",
+      "area": "Branches",
+      "feature": "Create and checkout local branches",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "ReferenceManagement.swift; BranchTagSheets.swift; ManagementTests.swift",
+      "remaining": "Create at a resolved revision; optional checkout/upstream; remote tracking checkout."
+    },
+    {
+      "id": "TP-050",
+      "area": "Branches",
+      "feature": "Rename and delete branches",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "ReferenceManagement.swift; ManagementTests.swift; native 0.6 walkthrough",
+      "remaining": "Expected-tip deletion, merged/force review, checked-out-worktree guards and recovery; native branch rename updates upstream config."
+    },
+    {
+      "id": "TP-051",
+      "area": "Branches",
+      "feature": "Tracking branch creation and upstream editing",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "ReferenceManagement.swift; RemoteManagement.swift; ManagementTests.swift",
+      "remaining": "Remote-ref checkout, set/unset upstream and reviewed publication; authenticated provider acceptance remains separate."
+    },
+    {
+      "id": "TP-052",
+      "area": "Branches",
+      "feature": "Archive and restore branches",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "ReferenceManagement.swift; SidebarView.swift; ManagementTests.swift; native 0.6 walkthrough",
+      "remaining": "Archive/unarchive and pin metadata shared across linked worktrees; rename/delete maintain organization."
+    },
+    {
+      "id": "TP-053",
+      "area": "Branches",
+      "feature": "Automatic stale/merged cleanup",
+      "status": "missing",
+      "priority": "P2",
+      "evidence": "Tower General preferences; Automatic Branch Management guide",
+      "remaining": "Policies, exclude rules, age and explicit review."
+    },
+    {
+      "id": "TP-054",
+      "area": "Branches",
+      "feature": "Branches Review",
+      "status": "partial",
+      "priority": "P2",
+      "evidence": "BranchesReviewView.swift; GitInspection.swift",
+      "remaining": "Ancestry comparison exists; PR merge detection and cleanup actions missing."
+    },
+    {
+      "id": "TP-055",
+      "area": "Branches",
+      "feature": "Branch dependency and native stacked branches",
+      "status": "missing",
+      "priority": "P2",
+      "evidence": "Stacked Branches guide; dependency resources",
+      "remaining": "Dependency persistence, reparent, sync/rebase dependents."
+    },
+    {
+      "id": "TP-056",
+      "area": "Remotes",
+      "feature": "Basic fetch, fast-forward pull, push, sync",
+      "status": "partial",
+      "priority": "P1",
+      "evidence": "GitRepository.swift; RemoteManagement.swift; ManagementTests.swift",
+      "remaining": "Local bare server workflows tested; Pull remains fast-forward only and real authentication pending."
+    },
+    {
+      "id": "TP-057",
+      "area": "Remotes",
+      "feature": "Add, edit, rename and remove remotes",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "RemoteManagement.swift; RemoteSheets.swift; RemoteSettingsPane.swift; ManagementTests.swift",
+      "remaining": "Fetch/push URL arrays; rename/remove/recover local config; custom refspecs preserved and displayed, not edited."
+    },
+    {
+      "id": "TP-058",
+      "area": "Remotes",
+      "feature": "Select remote/ref, publish branch/repository/tag",
+      "status": "partial",
+      "priority": "P1",
+      "evidence": "RemoteManagement.swift; RemoteSheets.swift; ManagementTests.swift; native publish evidence",
+      "remaining": "Choose remote, one push URL, branch/tag/destination and upstream. Whole-repository multi-ref publication and real hosting acceptance pending."
+    },
+    {
+      "id": "TP-059",
+      "area": "Remotes",
+      "feature": "Pull merge/rebase and fetch options",
+      "status": "partial",
+      "priority": "P1",
+      "evidence": "RemoteManagement.swift; FetchRemoteSheet; ManagementEdgeTests.swift",
+      "remaining": "Selected/all remote fetch with prune/tags; custom refspec editor and Pull merge/rebase policies missing."
+    },
+    {
+      "id": "TP-060",
+      "area": "Remotes",
+      "feature": "Force push with explicit lease",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "RemoteManagement.swift; RemoteSheets.swift; ManagementTests.swift",
+      "remaining": "Exact remote-object lease, local-preview validation and selected push URL; local bare server rejects a changed lease."
+    },
+    {
+      "id": "TP-061",
+      "area": "Remotes",
+      "feature": "Automatic background fetch",
+      "status": "missing",
+      "priority": "P2",
+      "evidence": "Tower General preferences Every 30 Minutes",
+      "remaining": "Per-repo scheduling, coalescing and foreground operation coordination."
+    },
+    {
+      "id": "TP-062",
+      "area": "Remotes",
+      "feature": "Auto-stash and restore after operations",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "AutomaticStash.swift; AutomaticStashView.swift; AutomaticStashTests.swift",
+      "remaining": "Offer before checkout/create-and-checkout, pull/sync and integrations/rebase. Optional exact-index restore; conflict/paused-operation persistence and recovery. Cross-process mutation is not an app-level transaction."
+    },
+    {
+      "id": "TP-063",
+      "area": "Remotes",
+      "feature": "Remote activity review",
+      "status": "missing",
+      "priority": "P2",
+      "evidence": "Remote Activity guide; resources",
+      "remaining": "Previous fetch baseline, incoming updates and unread state."
+    },
+    {
+      "id": "TP-064",
+      "area": "Tags",
+      "feature": "View tag refs/history",
+      "status": "covered",
+      "priority": "P2",
+      "evidence": "SidebarView.swift; GitParser.swift",
+      "remaining": "Existing tags displayed in source list."
+    },
+    {
+      "id": "TP-065",
+      "area": "Tags",
+      "feature": "Create lightweight, annotated or signed tags",
+      "status": "partial",
+      "priority": "P1",
+      "evidence": "ReferenceManagement.swift; BranchTagSheets.swift; ManagementTests.swift",
+      "remaining": "Lightweight/annotated creation and existing-key signing path; real GPG/SSH signing acceptance and signature verification pending."
+    },
+    {
+      "id": "TP-066",
+      "area": "Tags",
+      "feature": "Rename, delete and publish tags",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "ReferenceManagement.swift; RemoteManagement.swift; ManagementTests.swift",
+      "remaining": "Rename preserves the tag object, annotation/signature and embedded original tag name; reviewed delete/recover and explicit remote publication."
+    },
+    {
+      "id": "TP-067",
+      "area": "Stash",
+      "feature": "Save, inspect and apply",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "StashManagement.swift; StashesView.swift; StashManagementTests.swift",
+      "remaining": "Tracked/untracked, keep-index and selected-file save; file previews and full apply; Stash tree-tab/drag UI remain separate."
+    },
+    {
+      "id": "TP-068",
+      "area": "Stash",
+      "feature": "Apply with index restoration and pop",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "StashManagement.swift; StashSheets.swift; StashManagementTests.swift; native pop evidence",
+      "remaining": "Restore index optional; delete only after successful apply. Conflicts preserve the stash; ambiguous stale duplicate entries are rejected."
+    },
+    {
+      "id": "TP-069",
+      "area": "Stash",
+      "feature": "Rename, delete and recover stash",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "StashManagement.swift; ManagementRecoverySheet.swift; StashManagementTests.swift",
+      "remaining": "Rename moves to top with same content/parents but new commit identity; delete/clear retain recovery refs. Native rename/delete/recover checked."
+    },
+    {
+      "id": "TP-070",
+      "area": "Stash",
+      "feature": "Selected files or parts of stash",
+      "status": "covered",
+      "priority": "P2",
+      "evidence": "StashManagement.swift; StashFileDisclosure.swift; StashLineTests.swift; native selected-line drop",
+      "remaining": "File/chunk/selected-line apply retains index and stash; unified/split gutter selection, Shift ranges and guarded text patches. Structural/binary changes remain whole-file operations."
+    },
+    {
+      "id": "TP-071",
+      "area": "Stash",
+      "feature": "Snapshots",
+      "status": "covered",
+      "priority": "P2",
+      "evidence": "StashManagement.swift; StashSheets.swift; ManagementEdgeTests.swift; native snapshot evidence",
+      "remaining": "Save then reapply with index restoration; repeated-identical snapshot tested. Not a cross-process filesystem transaction; recovery stash retained on failure."
+    },
+    {
+      "id": "TP-072",
+      "area": "Worktrees",
+      "feature": "List, add and switch worktrees",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "WorktreeManagement.swift; RelatedRepositoriesView.swift; RelatedRepositorySheets.swift; RelatedRepositoryRoutingTests.swift; WorktreeManagementTests.swift",
+      "remaining": "NUL-delimited list, branch/HEAD/current/locked/missing status, new/existing/detached checkout previews and same-window opening. Existing branch occupancy and destination/state guards are exercised in disposable repositories. Native layout/mouse acceptance remains unverified."
+    },
+    {
+      "id": "TP-073",
+      "area": "Worktrees",
+      "feature": "Move, repair and remove worktrees",
+      "status": "covered",
+      "priority": "P2",
+      "evidence": "WorktreeManagement.swift; MainRepositoryMigration.swift; MainRepositoryRecovery.swift; RepositoryPointerRepair.swift; PointerRepairBuilder.swift; RelatedRepositoryBatch.swift; RepositoryInfrastructureTests.swift; RepositoryInfrastructureSheet.swift; VALIDATION-REPOSITORY-INFRASTRUCTURE-2026-10-24.md",
+      "remaining": "Main-directory/shared-storage migration reconnects linked trees and nested modules, with external full-copy journals, guarded/resumable restore and independent saved-copy recovery. Reviewed bulk offline pointer repair, forced/locked removal, selected missing-registration cleanup and empty-directory creation reuse are covered by disposable-repository tests. New-only migration destinations, embedded main .git and 2 GB/100000-entry directory limits apply. Submodules with their own additional external linked registrations require manual handling. Arbitrary external hook/include/alternate path rewriting and foreground Tower/native UI acceptance remain outside verified scope."
+    },
+    {
+      "id": "TP-074",
+      "area": "Submodules",
+      "feature": "List, add, init and clone recursively",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "SubmoduleManagement.swift; RepositoryCreation.swift; RelatedRepositoriesView.swift; SubmoduleManagementTests.swift",
+      "remaining": "Bounded direct module listing, status/config/gitlink diagnostics, reviewed add/init and opt-in recursive clone. Nested modules are managed by opening their parent module; recursive updates/clones cover nested initialization. Maximum 256 direct definitions and 16-level cleanliness traversal; partial clone/update failures keep existing data. Native UI acceptance remains unverified."
+    },
+    {
+      "id": "TP-075",
+      "area": "Submodules",
+      "feature": "Fetch, update, checkout and open",
+      "status": "covered",
+      "priority": "P1",
+      "evidence": "SubmoduleManagement.swift; RelatedRepositoryActions.swift; RelatedRepositorySheets.swift; SubmoduleManagementTests.swift",
+      "remaining": "Per-module Fetch, exact recorded-version update, immutable detached revision checkout and same-window open. Recursive update/init/sync and on-demand recursive Fetch options, local/ignored/nested-change and stale-parent guards; explicit local-file transport opt-in. Parent gitlinks require explicit staging; no automatic parent commit. Tracked-branch remote-update policy remains outside this bounded row. Multiselect reviewed/persisted batches now expose all existing per-module operations."
+    },
+    {
+      "id": "TP-076",
+      "area": "Submodules",
+      "feature": "Edit URL/path, sync, repair and remove",
+      "status": "covered",
+      "priority": "P2",
+      "evidence": "SubmoduleManagement.swift; SubmoduleDirectoryReuse.swift; SavedModuleRepositoryRecovery.swift; RepositoryPointerRepair.swift; PointerRepairBuilder.swift; RelatedManagementRecovery.swift; ManagementIndexPins.swift; RepositoryInfrastructureTests.swift; RelatedRepositorySheets.swift; VALIDATION-REPOSITORY-INFRASTRUCTURE-2026-10-24.md",
+      "remaining": "URL/path/sync, recursive pointer relocation, bulk repair and staged path mappings, force deinitialize/remove and retained-storage archive are implemented. Addition distinguishes new/empty/existing/retained/fresh-clone-after-backup modes. Complete saved Git storage can recover independently with index/conflict state; live linked users, foreign storage, stale previews and occupied folders are protected. Parent operations must be idle; arbitrary corrupted graphs and foreground Tower/native UI acceptance remain unverified. Directory/object-size caps and unknown native-interruption recovery limits remain explicit."
+    },
+    {
+      "id": "TP-077",
+      "area": "Hosting",
+      "feature": "GitHub/GitLab/Bitbucket/Azure accounts",
+      "status": "missing",
+      "priority": "P1",
+      "evidence": "Tower Services toolbar; provider resources; Hosting guides",
+      "remaining": "Account adapters, tokens/keychain, org and repo lists."
+    },
+    {
+      "id": "TP-078",
+      "area": "Hosting",
+      "feature": "Self-hosted services and teams",
+      "status": "missing",
+      "priority": "P2",
+      "evidence": "Tower provider resources; Self-hosted feature",
+      "remaining": "Instance URL validation and account-specific capabilities."
+    },
+    {
+      "id": "TP-079",
+      "area": "Hosting",
+      "feature": "SSH key and 1Password setup",
+      "status": "missing",
+      "priority": "P1",
+      "evidence": "Tower Integration settings; guides",
+      "remaining": "Use existing agents today; native key/account onboarding absent."
+    },
+    {
+      "id": "TP-080",
+      "area": "Pull requests",
+      "feature": "List, search, inspect and checkout",
+      "status": "missing",
+      "priority": "P1",
+      "evidence": "Tower Pull Requests; PR guide/resources",
+      "remaining": "Current source-list row disabled; no implementation."
+    },
+    {
+      "id": "TP-081",
+      "area": "Pull requests",
+      "feature": "Create, review, comment and merge",
+      "status": "missing",
+      "priority": "P1",
+      "evidence": "PR guides/resources",
+      "remaining": "Provider endpoints, permissions and explicit outbound actions."
+    },
+    {
+      "id": "TP-082",
+      "area": "Pull requests",
+      "feature": "Detect PR merges in branch review",
+      "status": "missing",
+      "priority": "P2",
+      "evidence": "Tower Merge Detection feature",
+      "remaining": "Provider merge metadata for squash/rebase merged branches."
+    },
+    {
+      "id": "TP-083",
+      "area": "Extensions",
+      "feature": "Git LFS tracking and transfers",
+      "status": "covered",
+      "priority": "P2",
+      "evidence": "LFSManagement.swift; LFSStaging.swift; LFSTransfers.swift; LFSModels.swift; GitExtensionPersistence.swift; RepositoryCreation.swift; LFSSettingsPane.swift; LFSManagementSheet.swift; LFSManagementTests.swift; RelatedRepositoryRoutingTests.swift; VALIDATION-LFS-FLOW-2026-10-24.md",
+      "remaining": "Installed git-lfs detection and GUI PATH resolution, local filters/protected hooks, root/nested literal/pattern tracking, real recoverable renormalization, object/cache/status overview, immutable-revision Fetch/Pull/Push/Checkout, explicit reachable-history transfer, native progress/history and full/pointer cloning. Disposable local object transport and new-edit/index/endpoint guards are tested. Requires a compatible installed Git LFS (3.8.1 tested); bundled distribution, hosted auth/quotas/locks, history migrate/prune, immediate transfer cancellation and foreground UI acceptance remain absent or unverified."
+    },
+    {
+      "id": "TP-084",
+      "area": "Extensions",
+      "feature": "Classic Git Flow",
+      "status": "covered",
+      "priority": "P2",
+      "evidence": "GitFlowConfiguration.swift; GitFlowExecution.swift; GitFlowModels.swift; GitFlowSettingsPane.swift; GitFlowManagementSheet.swift; ExtensionActions.swift; GitFlowTests.swift; RelatedRepositoryRoutingTests.swift; VALIDATION-LFS-FLOW-2026-10-24.md",
+      "remaining": "Native classic Git Flow with gitflow.* branch/prefix compatibility, Feature/Release/Hotfix/Support start and remote tracking; reviewed feature/release/hotfix finish, annotated tag/signing options, production/development merges and deferred topic deletion. Persisted conflict/restart/manual-merge continuation, protected Stop, checkpoints, ownership/stale/worktree guards and separate publish routes are covered. CLI hooks/AVH extensions, bugfix and alternative workflow engines, real signing keys, remote auth and foreground Tower/UI acceptance remain outside verified scope. Stop preserves earlier completed history; Support is long-lived."
+    },
+    {
+      "id": "TP-085",
+      "area": "Extensions",
+      "feature": "Custom/GitHub/GitLab workflows",
+      "status": "missing",
+      "priority": "P2",
+      "evidence": "Workflows guide; Tower Workflow toolbar",
+      "remaining": "Base/topic configuration and safe start/finish flows."
+    },
+    {
+      "id": "TP-086",
+      "area": "Extensions",
+      "feature": "Graphite stacked PR workflow",
+      "status": "missing",
+      "priority": "P2",
+      "evidence": "Tower Integration Graphite field; Graphite guides",
+      "remaining": "CLI detection/auth state, commands and stack synchronization."
+    },
+    {
+      "id": "TP-087",
+      "area": "Extensions",
+      "feature": "Git SVN and Gerrit",
+      "status": "missing",
+      "priority": "P3",
+      "evidence": "Tower Add New SVN Remote; Integration Gerrit; guides",
+      "remaining": "Separate feature contracts and real test servers required."
+    },
+    {
+      "id": "TP-088",
+      "area": "Integration",
+      "feature": "Signing preferences",
+      "status": "partial",
+      "priority": "P1",
+      "evidence": "GitInspection.swift; BranchTagSheets.swift; RepositorySettingsView.swift",
+      "remaining": "Existing signing configuration and per-tag sign/key input; key onboarding, real signing acceptance and verification pending."
+    },
+    {
+      "id": "TP-089",
+      "area": "Integration",
+      "feature": "Commit/tag signature verification",
+      "status": "missing",
+      "priority": "P1",
+      "evidence": "Signing guide; bundle resources",
+      "remaining": "Trust/unknown/invalid states with actionable diagnostics."
+    },
+    {
+      "id": "TP-090",
+      "area": "Integration",
+      "feature": "CLI, URL schemes and terminal opening",
+      "status": "missing",
+      "priority": "P2",
+      "evidence": "Tower Integration prefs; bundle URL schemes; CLI guides",
+      "remaining": "Command routing, argument encoding and repo/view targets."
+    },
+    {
+      "id": "TP-091",
+      "area": "Integration",
+      "feature": "Issue tracker links",
+      "status": "missing",
+      "priority": "P3",
+      "evidence": "Tower Integration Issue Tracker URL",
+      "remaining": "Repository templates and safe issue links."
+    },
+    {
+      "id": "TP-092",
+      "area": "Appearance",
+      "feature": "Dark/light native system styling",
+      "status": "partial",
+      "priority": "P2",
+      "evidence": "Native dark evidence through 0.6; light automatic-stash/line-selection screenshots on 2026-10-24",
+      "remaining": "New light appearance routes visually checked; full contrast, accessibility and theme coverage remain incomplete."
+    },
+    {
+      "id": "TP-093",
+      "area": "Appearance",
+      "feature": "Custom themes and editor preferences",
+      "status": "missing",
+      "priority": "P3",
+      "evidence": "Tower Themes/Text/Editor preferences",
+      "remaining": "Theme tokens, syntax font, tab/whitespace rules."
+    },
+    {
+      "id": "TP-094",
+      "area": "Appearance",
+      "feature": "Toolbar, source-list and commit-row parity",
+      "status": "partial",
+      "priority": "P2",
+      "evidence": "parity-tower-overview.png; parity-gitpico-before.png",
+      "remaining": "Toolbar grouping, badges, density, selected colors and attribution alignment differ."
+    },
+    {
+      "id": "TP-095",
+      "area": "Appearance",
+      "feature": "Keyboard and drag/drop workflows",
+      "status": "partial",
+      "priority": "P2",
+      "evidence": "NativePicoDropView.swift; DragActions.swift; NativeDropTests.swift; RebaseDropTests.swift; 100-test full run",
+      "remaining": "Windowless AppKit enter/update/prepare/perform/cancel, copy/move, multi-file and stale destination HEAD/plan-preparation/plan guards tested. Real OS mouse/List/layout acceptance remains incomplete. PR/committed-file drops and multi-commit series remain missing."
+    },
+    {
+      "id": "TP-096",
+      "area": "Quality",
+      "feature": "VoiceOver and full keyboard review",
+      "status": "unverified",
+      "priority": "P1",
+      "evidence": "Native AX tree inspected only",
+      "remaining": "Full assistive-technology journeys not tested; AX presence is insufficient."
+    },
+    {
+      "id": "TP-097",
+      "area": "Quality",
+      "feature": "Large repository and large diff performance",
+      "status": "unverified",
+      "priority": "P1",
+      "evidence": "Process 16 MB cap; bounded previews",
+      "remaining": "Benchmark real large repositories, cancellation and virtualized text/blame."
+    },
+    {
+      "id": "TP-098",
+      "area": "Quality",
+      "feature": "Runtime on macOS 26",
+      "status": "unverified",
+      "priority": "P1",
+      "evidence": "Package macOS26 and bundle minimum26",
+      "remaining": "Current checks on macOS27.0.1; dedicated macOS26 host needed."
+    }
+  ],
+  "developmentBuildPolicy": "Asia/Shanghai yyyyMMddHHmmss, monotonic; marketing version fixed until release."
+}

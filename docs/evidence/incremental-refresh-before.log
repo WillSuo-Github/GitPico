@@ -1,0 +1,13 @@
+Building for debugging...
+[Planning deferred tasks]
+[1 / 2] GitPicoTests-product
+[8 / 19] GitPicoTests-product
+[10 / 21] GitPicoTests-product
+[16 / 20] GitPicoTests-product
+Build complete! (1.86 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test writeRefreshPerformanceBenchmark() started.
+✔ Test writeRefreshPerformanceBenchmark() passed after 33.793 seconds.
+✔ Test run with 1 test in 0 suites passed after 33.793 seconds.

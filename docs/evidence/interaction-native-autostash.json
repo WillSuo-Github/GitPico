@@ -1,0 +1,9 @@
+{
+  "branch": "feature/sidebar",
+  "status": "M  Notes.txt\n?? Draft.txt\n",
+  "notesIndex": "Automatic stash local draft.\n",
+  "notesWorking": "Automatic stash local draft.\n",
+  "draft": "Keep this untracked draft.\n",
+  "stashes": "stash@{0}: On main: Line and drag review\n",
+  "journalExists": false
+}

@@ -1,0 +1,117 @@
+Building for debugging...
+[1 / 1]
+[2 / 13] GitCore
+[4 / 15] GitCore
+[8 / 19] GitCore
+[14 / 21] GitCoreTests-product
+[16 / 23] GitCoreTests-product
+[20 / 26] GitPico-product
+[23 / 26] GitPico-product
+[25 / 29] GitCoreTests-product
+Build complete! (2.74 sec)
+Test Suite 'All tests' started at 2026-10-23 23:46:22.298.
+Test Suite 'All tests' passed at 2026-10-23 23:46:22.299.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test branchComparisonUsesActualAncestry() started.
+◇ Test linkedWorktreeAndNestedFolderResolveRoot() started.
+◇ Test interactiveConflictCanAbortOrSkipAndUndo() started.
+◇ Test rebaseAndCherryPick() started.
+◇ Test restoringHistoryNeverOverwritesIgnoredFiles() started.
+◇ Test lineStagingNewAndDeletedFilesPreservesWorktreeAndMissingNewline() started.
+◇ Test completedConflictIntegrationCanBeUndoneAfterRestart() started.
+◇ Test modifyDeleteConflictCanAcceptDeletion() started.
+◇ Test replayConflictCanAbortAndContinue(_:) started.
+◇ Test selectedLinesAcrossHunksKeepCorrectOffsets() started.
+◇ Test undoRedoCommitPreservesStagedUnstagedAndUntrackedContents() started.
+◇ Test conflictResolutionPreservesExecutableModeAndRefusesSymlinkWrites() started.
+◇ Test stageRenameUnstageAndDeletion() started.
+◇ Test mergeAndDirtyGuard() started.
+◇ Test repositorySettingsAndIgnoreFilesRejectStaleWrites() started.
+◇ Test amendSignOffAndFullMetadata() started.
+◇ Test unstageOneLinePreservesOtherStagedChangesAndRejectsStaleDiff() started.
+◇ Test createAndCloneNeverOverwriteExistingFolders() started.
+◇ Test reflogUsesEventDatesAndRecoversUnreachableCommits() started.
+◇ Test resolveConflictThenContinueIntegration(_:) started.
+◇ Test chunkStagingNewFileRoundTrip() started.
+◇ Test partialStagingAndLiteralPathspecs() started.
+◇ Test numstatRenamesBinaryAndHistoricTree() started.
+◇ Test interactiveEditStopAmendContinueSurvivesRepositoryReopen() started.
+◇ Test branchesTagsScopeAndMergeGraph() started.
+◇ Test interactiveRebaseValidatesDirtyStaleAndInvalidPlans() started.
+◇ Test historyPagingAndSearchBeyondLoadedPage() started.
+◇ Test lineStagingPreservesCRLFAndRejectsStructuralModeChanges() started.
+◇ Test binaryConflictAcceptsExactIncomingBytes() started.
+◇ Test errorsAndEmptyCommitAreReported() started.
+◇ Test interactiveRebaseReordersRewordsSquashesFixesAndDrops() started.
+◇ Test porcelainPreservesUnusualNamesAndRenamePairs() started.
+◇ Test unbornRepositoryAndUnstagePreserveLaterEdits() started.
+◇ Test initialCommitUndoAndRedoAndExternalHeadGuard() started.
+◇ Test individualChunksStageAndUnstageWithoutLosingWork() started.
+◇ Test localRemoteFetchPullAndPush() started.
+◇ Test diffNumbersAndPreviewLimit() started.
+◇ Test mergeConflictCanAbortOrContinue() started.
+◇ Test stashRoundTripKeepsStashAndUntrackedFiles() started.
+◇ Test checkoutFailurePreservesDirtyWorktree() started.
+◇ Test conflictParserPreservesDiff3CRLFAndUnresolvedRegions() started.
+◇ Test conflictResolutionRejectsMarkersAndStaleWorktreeOrIndex() started.
+◇ Test conflictDetectionAndCommitGuard() started.
+◇ Test selectedLinesApplyOnlyTheChosenChanges(_:) started.
+◇ Test splitRowsAlignReplacementsWithoutLosingLines() started.
+◇ Test case passing 1 argument action → .cherryPick to replayConflictCanAbortAndContinue(_:) started.
+◇ Test case passing 1 argument action → .merge to resolveConflictThenContinueIntegration(_:) started.
+◇ Test case passing 1 argument action → .rebase to resolveConflictThenContinueIntegration(_:) started.
+◇ Test case passing 1 argument action → .cherryPick to resolveConflictThenContinueIntegration(_:) started.
+◇ Test case passing 1 argument action → .rebase to replayConflictCanAbortAndContinue(_:) started.
+◇ Test case passing 1 argument chosen → ["-old"] to selectedLinesApplyOnlyTheChosenChanges(_:) started.
+◇ Test case passing 1 argument chosen → ["-old", "+new"] to selectedLinesApplyOnlyTheChosenChanges(_:) started.
+◇ Test case passing 1 argument chosen → ["+new", "+extra"] to selectedLinesApplyOnlyTheChosenChanges(_:) started.
+✔ Test conflictParserPreservesDiff3CRLFAndUnresolvedRegions() passed after 0.007 seconds.
+✔ Test splitRowsAlignReplacementsWithoutLosingLines() passed after 0.007 seconds.
+◇ Test case passing 1 argument chosen → ["+new"] to selectedLinesApplyOnlyTheChosenChanges(_:) started.
+✔ Test porcelainPreservesUnusualNamesAndRenamePairs() passed after 0.007 seconds.
+✔ Test diffNumbersAndPreviewLimit() passed after 0.008 seconds.
+✔ Test errorsAndEmptyCommitAreReported() passed after 9.135 seconds.
+✔ Test linkedWorktreeAndNestedFolderResolveRoot() passed after 11.163 seconds.
+✔ Test numstatRenamesBinaryAndHistoricTree() passed after 14.231 seconds.
+✔ Test createAndCloneNeverOverwriteExistingFolders() passed after 14.330 seconds.
+✔ Test stashRoundTripKeepsStashAndUntrackedFiles() passed after 14.869 seconds.
+✔ Test amendSignOffAndFullMetadata() passed after 21.659 seconds.
+✔ Test chunkStagingNewFileRoundTrip() passed after 22.090 seconds.
+✔ Test lineStagingPreservesCRLFAndRejectsStructuralModeChanges() passed after 23.097 seconds.
+✔ Test branchComparisonUsesActualAncestry() passed after 23.105 seconds.
+✔ Test checkoutFailurePreservesDirtyWorktree() passed after 23.171 seconds.
+✔ Test repositorySettingsAndIgnoreFilesRejectStaleWrites() passed after 26.356 seconds.
+✔ Test selectedLinesAcrossHunksKeepCorrectOffsets() passed after 28.804 seconds.
+✔ Test partialStagingAndLiteralPathspecs() passed after 28.878 seconds.
+✔ Test selectedLinesApplyOnlyTheChosenChanges(_:) with 4 test cases passed after 29.263 seconds.
+✔ Test localRemoteFetchPullAndPush() passed after 30.235 seconds.
+✔ Test unbornRepositoryAndUnstagePreserveLaterEdits() passed after 30.615 seconds.
+✔ Test individualChunksStageAndUnstageWithoutLosingWork() passed after 31.102 seconds.
+✔ Test unstageOneLinePreservesOtherStagedChangesAndRejectsStaleDiff() passed after 31.192 seconds.
+✔ Test conflictDetectionAndCommitGuard() passed after 31.601 seconds.
+✔ Test mergeAndDirtyGuard() passed after 33.433 seconds.
+✔ Test branchesTagsScopeAndMergeGraph() passed after 33.987 seconds.
+✔ Test initialCommitUndoAndRedoAndExternalHeadGuard() passed after 34.471 seconds.
+✔ Test restoringHistoryNeverOverwritesIgnoredFiles() passed after 34.761 seconds.
+✔ Test binaryConflictAcceptsExactIncomingBytes() passed after 35.529 seconds.
+✔ Test stageRenameUnstageAndDeletion() passed after 36.022 seconds.
+✔ Test modifyDeleteConflictCanAcceptDeletion() passed after 37.798 seconds.
+✔ Test historyPagingAndSearchBeyondLoadedPage() passed after 38.187 seconds.
+✔ Test lineStagingNewAndDeletedFilesPreservesWorktreeAndMissingNewline() passed after 38.790 seconds.
+✔ Test undoRedoCommitPreservesStagedUnstagedAndUntrackedContents() passed after 38.962 seconds.
+✔ Test conflictResolutionRejectsMarkersAndStaleWorktreeOrIndex() passed after 39.638 seconds.
+✔ Test conflictResolutionPreservesExecutableModeAndRefusesSymlinkWrites() passed after 41.433 seconds.
+✔ Test rebaseAndCherryPick() passed after 42.100 seconds.
+✔ Test resolveConflictThenContinueIntegration(_:) with 3 test cases passed after 43.651 seconds.
+✔ Test mergeConflictCanAbortOrContinue() passed after 43.841 seconds.
+✔ Test completedConflictIntegrationCanBeUndoneAfterRestart() passed after 43.935 seconds.
+✔ Test replayConflictCanAbortAndContinue(_:) with 2 test cases passed after 44.127 seconds.
+✔ Test reflogUsesEventDatesAndRecoversUnreachableCommits() passed after 44.417 seconds.
+✔ Test interactiveRebaseValidatesDirtyStaleAndInvalidPlans() passed after 48.299 seconds.
+✔ Test interactiveEditStopAmendContinueSurvivesRepositoryReopen() passed after 50.598 seconds.
+✔ Test interactiveRebaseReordersRewordsSquashesFixesAndDrops() passed after 51.474 seconds.
+✔ Test interactiveConflictCanAbortOrSkipAndUndo() passed after 52.255 seconds.
+✔ Test run with 45 tests in 0 suites passed after 52.255 seconds.

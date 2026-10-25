@@ -1,0 +1,60 @@
+Window: "General", App: Tower.
+0 standard window General, Secondary Actions: Raise
+	1 container
+		2 text Default directory for cloned repositories: Number of commits in history: Terminal application:
+		3 pop up button willsuo
+		4 pop up button 100 commits
+		5 pop up button Every 30 Minutes
+		6 pop up button Terminal
+		7 text Double-click on file in working copy:
+		8 pop up button Open with default application
+		9 text Date format for commits: Show diffs for merge commits:
+		10 pop up button 10/21/26
+		11 pop up button First parent
+		12 checkbox Always offer to stash local changes, Value: 1
+		13 checkbox Always update submodules automatically, Value: 0
+		14 checkbox Warn when discarding changes in a chunk, Value: 1
+		15 checkbox Automatically convert ref names into valid format while typing, Value: 1
+		16 checkbox Automatically archive stale and fully merged branches, Value: 0
+		17 text Automatically fetch remote repositories:
+		18 checkbox Always open submodules in Tower, Value: 1
+		19 pop up button Medium
+		20 pop up button Truncate beginning
+		21 text Spacebar for file in working copy:
+		22 pop up button Toggle staging
+		23 text Font size for working copy items: Truncate long file names in working copy:
+		24 combo box (settable) Value: 20, Secondary Actions: Confirm
+			25 button
+		26 text Show warning for diffs larger than (kB): Window Restoration:
+		27 pop up button Always
+		28 checkbox Show Quick Start Window on Launch, Value: 0
+	29 toolbar
+		30 button General, Secondary Actions: Move next, Remove from toolbar
+		31 button Appearance, Secondary Actions: Move previous, Move next, Remove from toolbar
+		32 button Git Config, Secondary Actions: Move previous, Move next, Remove from toolbar
+		33 button Text, Secondary Actions: Move previous, Move next, Remove from toolbar
+		34 button Editor, Secondary Actions: Move previous, Move next, Remove from toolbar
+		35 button AI, Secondary Actions: Move previous, Move next, Remove from toolbar
+		36 button Themes, Secondary Actions: Move previous, Move next, Remove from toolbar
+		37 button User Profiles, Secondary Actions: Move previous, Move next, Remove from toolbar
+		38 button Templates, Secondary Actions: Move previous, Move next, Remove from toolbar
+		39 button Integration, Secondary Actions: Move previous, Move next, Remove from toolbar
+		40 button Environment, Secondary Actions: Move previous, Move next, Remove from toolbar
+		41 button Updates, Secondary Actions: Move previous, Move next, Remove from toolbar
+		42 button Advanced, Secondary Actions: Move previous, Remove from toolbar
+	43 close button
+	44 zoom button (disabled)
+	45 minimize button
+	46 text General
+47 menu bar
+	48 Tower
+	49 File
+	50 Edit
+	51 View
+	52 Repository
+	53 Working Copy
+	54 Workflow
+	55 Window
+	56 Help
+
+The focused UI element is 0 standard window General, Secondary Actions: Raise

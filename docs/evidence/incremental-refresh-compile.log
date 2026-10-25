@@ -1,0 +1,71 @@
+Building for debugging...
+[Planning deferred tasks]
+[11 / 31] GitCore
+[16 / 36] GitCore
+[25 / 46] GitCore
+[26 / 46] GitCore
+[32 / 48] GitPico
+[32 / 48] GitCore
+[32 / 48] GitPico
+[41 / 70] GitPico
+[42 / 70] GitPico-product
+[43 / 70] GitPico-product
+[44 / 70] GitPico-product
+[45 / 70] GitPico
+[46 / 70] GitPico
+[47 / 70] GitPico
+[48 / 70] GitPico
+[49 / 70] GitPico
+[51 / 70] GitPico
+[53 / 70] GitPico
+[55 / 72] GitPico
+[57 / 72] GitPico
+[59 / 73] GitPico-product
+[61 / 76] GitCoreTests-product
+[63 / 76] GitCoreTests-product
+[65 / 76] GitPico
+[68 / 87] GitCoreTests-product
+[68 / 87] GitPico-product
+[70 / 87] GitCoreTests-product
+[71 / 87] GitCoreTests-product
+[71 / 87] GitPico
+[73 / 87] GitCoreTests-product
+[74 / 87] GitCoreTests-product
+[75 / 87] GitCoreTests-product
+/Users/willsuo/files/Github/GitPico/Tests/GitCoreTests/ManagementEdgeTests.swift:52:26: warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:lfsEnvironment:cancellable:)' is unused [#NoUsage]
+50 |     try await f.repo.fetchRemote(remote, tags: true)
+51 |     #expect(try await f.repo.references().contains { $0.fullName == "refs/tags/v1" })
+52 |     try await GitProcess.run(["update-ref", "-d", "refs/heads/temporary"], at: server)
+   |                          `- warning: result of call to 'run(_:at:allowed:timeout:acceptGeneratedMessage:sequenceEditor:input:identityEnvironment:indexFile:maxOutputBytes:lfsEnvironment:cancellable:)' is unused [#NoUsage]
+53 |     try await f.repo.fetchRemote(remote, prune: true)
+54 |     #expect(!(try await f.repo.references().contains { $0.fullName == "refs/remotes/origin/temporary" }))
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[76 / 87] GitCoreTests-product
+[76 / 87] GitPico
+[76 / 87] GitCoreTests-product
+[76 / 87] GitPico
+[78 / 87] GitPico
+[82 / 90] GitPicoTests-product
+[89 / 101] GitPicoTests-product
+[90 / 101] GitPicoTests-product
+[91 / 101] GitPicoTests-product
+[92 / 101] GitPicoTests-product
+[94 / 101] GitPicoTests-product
+[96 / 103] GitCoreTests-product
+[97 / 103] GitPicoTests-product
+[97 / 103] GitCoreTests-product
+[99 / 103] GitCoreTests-product
+[101 / 104] GitPicoTests-product
+[103 / 107] GitPicoTests-product
+Build complete! (26.21 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test partialCheckboxStagesRemainingChangesAndCommitKeepsUnstagedContent() started.
+◇ Test successfulCommitWithUndoFailureClearsDraftAndReportsWarning() started.
+◇ Test workingMultiselectionStagesOnlyTargetsAndKeepsActiveFile() started.
+✔ Test workingMultiselectionStagesOnlyTargetsAndKeepsActiveFile() passed after 5.943 seconds.
+✔ Test successfulCommitWithUndoFailureClearsDraftAndReportsWarning() passed after 7.280 seconds.
+✔ Test partialCheckboxStagesRemainingChangesAndCommitKeepsUnstagedContent() passed after 9.311 seconds.
+✔ Test run with 3 tests in 0 suites passed after 9.312 seconds.

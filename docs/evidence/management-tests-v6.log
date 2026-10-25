@@ -1,0 +1,27 @@
+Building for debugging...
+[Planning deferred tasks]
+[6 / 17] GitCoreTests-product
+[13 / 24] GitCoreTests-product
+[17 / 23] GitCoreTests-product
+[19 / 23] GitCoreTests-product
+Build complete! (2.18 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test branchManagementRetainsTrackingAndRejectsStaleReferences() started.
+◇ Test branchManagementProtectsOtherWorktreesAndSharesOrganization() started.
+◇ Test pushLeaseRejectsRemoteChangesAfterPreview() started.
+◇ Test publishBranchesTagsAndDeleteWithLeaseUsingLocalServer() started.
+◇ Test tagCreationRenameAndRecoveryPreserveAnnotatedObject() started.
+◇ Test remoteConfigLockAndValidationDoNotOverwriteData() started.
+◇ Test branchDeletionIsGuardedAndRecoverable() started.
+◇ Test remoteCRUDPreservesURLsRefspecsAndTracking() started.
+✔ Test remoteConfigLockAndValidationDoNotOverwriteData() passed after 1.525 seconds.
+✔ Test branchManagementProtectsOtherWorktreesAndSharesOrganization() passed after 4.564 seconds.
+✔ Test tagCreationRenameAndRecoveryPreserveAnnotatedObject() passed after 7.132 seconds.
+✔ Test pushLeaseRejectsRemoteChangesAfterPreview() passed after 7.234 seconds.
+✔ Test branchDeletionIsGuardedAndRecoverable() passed after 8.577 seconds.
+✔ Test remoteCRUDPreservesURLsRefspecsAndTracking() passed after 10.250 seconds.
+✔ Test branchManagementRetainsTrackingAndRejectsStaleReferences() passed after 10.252 seconds.
+✔ Test publishBranchesTagsAndDeleteWithLeaseUsingLocalServer() passed after 11.518 seconds.
+✔ Test run with 8 tests in 0 suites passed after 11.518 seconds.

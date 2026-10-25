@@ -1,0 +1,53 @@
+Building for debugging...
+[2 / 20] GitCore
+[5 / 23] GitCore
+[10 / 27] GitCore
+[13 / 26] GitCoreTests-product
+[19 / 32] GitCoreTests-product
+[25 / 37] GitPico-product
+[27 / 37] GitCoreTests-product
+[27 / 37] GitPico
+[35 / 43] GitPico-product
+[38 / 39] GitPicoTests-product
+Build complete! (3.06 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test historicalRequestsRetainSelectionRevisionAndRepositorySession() started.
+◇ Test historicalStoreExportsFrozenSnapshotInBackgroundWithoutWindows() started.
+✔ Test historicalStoreExportsFrozenSnapshotInBackgroundWithoutWindows() passed after 0.946 seconds.
+✔ Test historicalRequestsRetainSelectionRevisionAndRepositorySession() passed after 2.850 seconds.
+✔ Test run with 2 tests in 0 suites passed after 2.850 seconds.
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test historicalRawExportPreservesBinaryEmptyExecutableAndLiteralNames() started.
+◇ Test historicalExportRejectsEscapingSymlinksAndDeclaresSubmoduleBoundary() started.
+◇ Test historicalRestoreUsesWorktreeConversionWhileRawExportDoesNot() started.
+◇ Test historicalFolderExportKeepsExactObjectsDespiteArchiveAttributes() started.
+◇ Test historicalZIPIsAcceptedByIndependentUnzipWithModesAndBytes() started.
+◇ Test historicalRestoreRejectsStalePreviewUntrackedIgnoredAndSymlinkTargets() started.
+◇ Test historicalRestorePreservesStagingAndCanRecoverAfterRestart() started.
+◇ Test historicalRestoreRenamedDestinationBinaryModeAndBothTarget() started.
+◇ Test historicalRestoreDeletedFileAndNewTargetPath() started.
+◇ Test historicalEmptyProjectCanExportFolderAndValidEmptyZIP() started.
+◇ Test historicalBatchCanReadMoreThanDefaultProcessLimitAndBoundsOversizedFiles() started.
+◇ Test historicalSnapshotStaysOnImmutableRevisionAndRejectsMissingSelection() started.
+✘ Test historicalZIPIsAcceptedByIndependentUnzipWithModesAndBytes() recorded an issue at HistoricalFileTests.swift:114:2: Caught error: Error Domain=NSCocoaErrorDomain Code=260 "The file “中文 [1]
+file.txt” couldn’t be opened because there is no such file." UserInfo={NSFilePath=/var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-test-55F1B206-3D3B-4794-A200-DB1CD94CB136/extracted/folder/中文 [1]
+file.txt, NSURL=file:///var/folders/4s/yz_cg8d91fs2f9r7sl175yl40000gn/T/GitPico-test-55F1B206-3D3B-4794-A200-DB1CD94CB136/extracted/folder/%E4%B8%AD%E6%96%87%20%5B1%5D%0Afile.txt, NSUnderlyingError=0x7c991d0330 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+✘ Test historicalZIPIsAcceptedByIndependentUnzipWithModesAndBytes() failed after 1.852 seconds with 1 issue.
+✔ Test historicalRawExportPreservesBinaryEmptyExecutableAndLiteralNames() passed after 1.862 seconds.
+✔ Test historicalFolderExportKeepsExactObjectsDespiteArchiveAttributes() passed after 1.867 seconds.
+✔ Test historicalEmptyProjectCanExportFolderAndValidEmptyZIP() passed after 1.946 seconds.
+✔ Test historicalSnapshotStaysOnImmutableRevisionAndRejectsMissingSelection() passed after 2.566 seconds.
+✔ Test historicalBatchCanReadMoreThanDefaultProcessLimitAndBoundsOversizedFiles() passed after 2.670 seconds.
+✔ Test historicalExportRejectsEscapingSymlinksAndDeclaresSubmoduleBoundary() passed after 2.890 seconds.
+✔ Test historicalRestoreUsesWorktreeConversionWhileRawExportDoesNot() passed after 6.528 seconds.
+✔ Test historicalRestoreDeletedFileAndNewTargetPath() passed after 7.458 seconds.
+✔ Test historicalRestoreRejectsStalePreviewUntrackedIgnoredAndSymlinkTargets() passed after 9.407 seconds.
+✔ Test historicalRestorePreservesStagingAndCanRecoverAfterRestart() passed after 9.516 seconds.
+✔ Test historicalRestoreRenamedDestinationBinaryModeAndBothTarget() passed after 10.068 seconds.
+✘ Test run with 12 tests in 0 suites failed after 10.069 seconds with 1 issue.
+Note: Some test targets reported failures:
+  - GitCoreTests (Swift Testing)

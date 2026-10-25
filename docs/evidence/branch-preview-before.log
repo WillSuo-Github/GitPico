@@ -1,0 +1,14 @@
+Building for debugging...
+[Planning deferred tasks]
+[1 / 1]
+[7 / 18] GitPicoTests-product
+[9 / 20] GitPicoTests-product
+[13 / 19] GitPicoTests-product
+[15 / 19] GitPicoTests-product
+Build complete! (1.90 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test branchPreviewPerformanceBenchmark() started.
+✔ Test branchPreviewPerformanceBenchmark() passed after 23.490 seconds.
+✔ Test run with 1 test in 0 suites passed after 23.490 seconds.
