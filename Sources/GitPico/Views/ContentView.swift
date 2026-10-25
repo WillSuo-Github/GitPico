@@ -11,6 +11,9 @@ struct ContentView: View {
                 NavigationSplitView {
                     SidebarView(store: store)
                         .navigationSplitViewColumnWidth(min: 220, ideal: 359, max: 450)
+                        .toolbar {
+                            ToolbarItem { RepositoryMenu(store: store) }
+                        }
                 } detail: {
                     switch store.destination {
                     case .worktrees: WorktreesView(store: store)
@@ -80,7 +83,15 @@ struct ContentView: View {
             } else { Text("Ready to open a repository").foregroundStyle(.secondary) }
             Spacer()
             if let data = store.snapshot {
-                Text(data.root.path).lineLimit(1).truncationMode(.middle).foregroundStyle(.tertiary)
+                Button {
+                    NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: data.root.path)
+                } label: {
+                    Text(data.root.path).lineLimit(1).truncationMode(.middle).foregroundStyle(.tertiary)
+                }
+                .buttonStyle(.plain)
+                .help("Open Repository in Finder\n" + data.root.path)
+                .accessibilityLabel("Open Repository in Finder")
+                .accessibilityValue(data.root.path)
             }
         }
         .font(.system(size: 11)).padding(.horizontal, 14).frame(height: 29)

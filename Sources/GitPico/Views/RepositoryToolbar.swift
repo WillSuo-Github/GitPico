@@ -5,26 +5,8 @@ import SwiftUI
 struct RepositoryToolbar: ToolbarContent {
     @Bindable var store: RepositoryStore
     var body: some ToolbarContent {
-        ToolbarItem(placement: .navigation) {
-            Menu {
-                Section {
-                    Button("Repositories…") { store.showingRepositoryLibrary = true }
-                    Button("Quick Open…") { store.showingQuickOpen = true }
-                }
-                Section {
-                    Button("Open Repository…", action: store.chooseRepository)
-                    Button("Clone Git Repository…") { store.creationRequest = RepositoryCreationRequest(clone: true) }
-                    Button("New Repository…") { store.creationRequest = RepositoryCreationRequest(clone: false) }
-                }
-                if !store.recentPaths.isEmpty {
-                    Section("Recent Repositories") {
-                        ForEach(store.recentPaths, id: \.self) { path in
-                            Button(store.library.displayName(for: path)) { Task { await store.open(URL(fileURLWithPath: path)) } }
-                        }
-                    }
-                }
-            } label: { Label("Repositories", systemImage: "folder") }
-            .help("Open a repository (⌘O)")
+        if store.snapshot == nil {
+            ToolbarItem(placement: .navigation) { RepositoryMenu(store: store) }
         }
         if let snapshot = store.snapshot {
             ToolbarItemGroup(placement: .navigation) {

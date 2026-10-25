@@ -109,41 +109,21 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8D10202DF3DEE6CDAEA46A01 /* GitCoreTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			name = GitCoreTests;
 			path = GitCoreTests;
 			sourceTree = "<group>";
 		};
 		9B11ED1689853F07EE4AE0FB /* GitPicoTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			name = GitPicoTests;
 			path = GitPicoTests;
 			sourceTree = "<group>";
 		};
 		AD29611DDD7777B1770F39FA /* GitPico */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			name = GitPico;
 			path = GitPico;
 			sourceTree = "<group>";
 		};
 		D1AEE0EE9C0AE2B9473D6188 /* GitCore */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			name = GitCore;
 			path = GitCore;
 			sourceTree = "<group>";
 		};
@@ -542,7 +522,10 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "$(DERIVED_FILE_DIR)/GitPico-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MARKETING_VERSION = 0.01;
 				PRODUCT_BUNDLE_IDENTIFIER = com.willsuo.GitPico;
 				SDKROOT = macosx;
@@ -736,7 +719,10 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "$(DERIVED_FILE_DIR)/GitPico-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MARKETING_VERSION = 0.01;
 				PRODUCT_BUNDLE_IDENTIFIER = com.willsuo.GitPico;
 				SDKROOT = macosx;

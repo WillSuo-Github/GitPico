@@ -1,0 +1,11 @@
+{
+  "CFBundleShortVersionString": "0.01",
+  "CFBundleVersion": "20261025125807",
+  "LSMinimumSystemVersion": "26.0",
+  "sidebarToolbar": "RepositoryMenu",
+  "welcomeToolbar": "RepositoryMenu",
+  "menuActionsPreserved": true,
+  "foregroundUIInspection": false,
+  "isActive": false,
+  "visibleWindows": 0
+}
