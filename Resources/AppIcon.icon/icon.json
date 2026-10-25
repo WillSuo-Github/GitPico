@@ -36,11 +36,11 @@
       "specular": true
     },
     {
-      "name": "Commits",
+      "name": "Parents",
       "layers": [
         {
-          "name": "commits",
-          "image-name": "commits.svg",
+          "name": "parents",
+          "image-name": "parents.svg",
           "glass": true
         }
       ],
@@ -55,13 +55,12 @@
       "specular": true
     },
     {
-      "name": "Rails",
+      "name": "Lanes",
       "layers": [
         {
-          "name": "rails",
-          "image-name": "rails.svg",
-          "glass": true,
-          "opacity": 0.9
+          "name": "lanes",
+          "image-name": "lanes.svg",
+          "glass": true
         }
       ],
       "shadow": {
@@ -69,8 +68,8 @@
         "opacity": 0.4
       },
       "translucency": {
-        "enabled": true,
-        "value": 0.45
+        "enabled": false,
+        "value": 0.5
       },
       "specular": true
     }
