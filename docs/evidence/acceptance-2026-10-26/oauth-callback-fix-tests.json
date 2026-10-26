@@ -1,0 +1,21 @@
+{
+  "build": "20261026161052",
+  "version": "0.01",
+  "baseline": "b92ba430335e095e4cc3fd2953196fccbd25a975",
+  "resultLines": [
+    "\u2714 Test oauthBrowserCompletionAcceptsBackgroundSuccessAndCancellation() passed after 0.001 seconds.",
+    "\u2714 Test gitlabBrowserLoginVerifiesBearerIdentityBeforeSavingSecretsAndCapturedAssignment() passed after 0.002 seconds.",
+    "\u2714 Test githubDeviceLoginUsesRegisteredPublicClientAndVerifiesIdentityBeforeSaving() passed after 0.001 seconds.",
+    "\u2714 Test declinedMismatchedOrCancelledOAuthLoginNeverSavesAnAccount() passed after 0.002 seconds.",
+    "\u2714 Test invalidOAuthIdentityAndPartialPermissionsAreRejectedBeforeKeychainSave() passed after 0.001 seconds.",
+    "\u2714 Test oauthReconnectKeepsBindingsAndRejectsDifferentAccountsOrPATReplacement() passed after 0.001 seconds.",
+    "\u2714 Test existingPersonalTokenProfilesDecodeWithoutOAuthMetadata() passed after 0.001 seconds.",
+    "\u2714 Test run with 7 tests in 0 suites passed after 0.011 seconds.",
+    "** TEST SUCCEEDED **"
+  ],
+  "sourceSHA256": {
+    "Sources/GitPico/Support/OAuthBrowserSession.swift": "f1b9a1bc86c92887bdca7da8dac48f8af16f5989e3a179aea4c6c950e5c46087",
+    "Tests/GitPicoTests/OAuthLoginTests.swift": "4fa3d5ef53ff10b86ab6495cb429308ad5f00fac6f5c039cdbcdb5fe4a394352"
+  },
+  "initialEmptyFilterRun": "The first file-name filter selected zero tests; excluded from validation."
+}

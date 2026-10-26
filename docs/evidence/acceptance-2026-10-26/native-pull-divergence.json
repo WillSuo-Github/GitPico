@@ -1,0 +1,7 @@
+{
+  "headUnchanged": true,
+  "indexMatchesSameHead": true,
+  "cleanWorkingCopy": true,
+  "aheadBehind": "1\t1",
+  "byteForByteNativeIndexComparison": "Not captured; native step checks semantic index equality against the same HEAD."
+}

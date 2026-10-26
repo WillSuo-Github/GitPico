@@ -1,0 +1,59 @@
+{
+  "scope": "b92ba43 implementation inventory; native checks recorded separately",
+  "items": {
+    "pull_policy": {
+      "result": "Only fast-forward policy is exposed by the sync implementation; merge/rebase selection is missing.",
+      "evidence": [
+        {
+          "path": "Sources/GitCore/GitRepository.swift",
+          "line": 135,
+          "text": "case .pull: arguments = [\"pull\", \"--ff-only\"]"
+        }
+      ]
+    },
+    "session_restore": {
+      "result": "Startup only handles an explicit repository argument; no full workspace session is loaded.",
+      "evidence": [
+        {
+          "path": "Sources/GitPico/Stores/RepositoryWorkspace.swift",
+          "line": 117,
+          "text": "func startup() async {"
+        },
+        {
+          "path": "Sources/GitPico/Stores/RepositoryWorkspace.swift",
+          "line": 120,
+          "text": "if let index = args.firstIndex(of: \"--repository\"), args.indices.contains(index + 1) {"
+        }
+      ]
+    },
+    "hosted_reviews": {
+      "result": "OAuth exists. PR/MR integration remains outside the implemented navigation.",
+      "evidence": []
+    },
+    "conflict_kinds": {
+      "result": "Nonregular-file conflict resolution remains an external-tool path.",
+      "evidence": [
+        {
+          "path": "README.md",
+          "line": 126,
+          "text": "The conflict text editor accepts UTF-8 regular files up to 1 MB. Complete-version selection supports regular files up to the 16 MB process/file limit; symlinks and submodules require an external tool. Conflict drafts persist across normal app termination/reopening (300 ms autosave plus a close/quit flush); a crash before the debounce expires can lose the latest keystrokes. Up to 128 drafts and 64 MB of archive data are retained per repository; storage failures are visible and block closing unsaved edits. If Git staging fails after saving (for example, a clean filter fails), the edited file remains on disk for recovery. During rebase, Current is Git's stage 2 (the branch being rebased onto), and Incoming is stage 3 (the replayed commit)."
+        }
+      ]
+    },
+    "image_binary": {
+      "result": "Binary/text fallback exists; image comparison is not implemented.",
+      "evidence": [
+        {
+          "path": "Sources/GitCore/GitInspection.swift",
+          "line": 80,
+          "text": "guard !output.data.contains(0) else { return \"Binary file \u2014 text preview unavailable.\" }"
+        },
+        {
+          "path": "README.md",
+          "line": 130,
+          "text": "Outstanding work includes Enterprise/self-managed OAuth onboarding and Pull Requests, image/binary diff rendering, all-reference file history, remaining drag variants/native acceptance, Pull merge/rebase policies, merge-commit patch variants, arbitrary broken-pointer recovery, hosted LFS locking/history migration, broader workflow extensions, tab-session restoration and broader multiwindow acceptance, expanded Quick Actions, localization, and distribution signing/notarization. A Pull Requests source-list entry is visibly unavailable until implemented."
+        }
+      ]
+    }
+  }
+}

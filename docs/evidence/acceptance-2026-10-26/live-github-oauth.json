@@ -1,0 +1,42 @@
+{
+  "provider": "GitHub",
+  "account": "WillSuo-Github",
+  "method": "OAuth",
+  "build": "20261026161052",
+  "nativeAccountVerifyBeforeAndAfterRestart": true,
+  "nativeOperations": {
+    "push": "Succeeded",
+    "fetch": "Succeeded",
+    "testRemote": "Read access to origin verified"
+  },
+  "privateProject": {
+    "default_branch": "main",
+    "full_name": "WillSuo-Github/gitpico-acceptance-20261026-ml2ft350",
+    "private": true
+  },
+  "serverCommit": {
+    "files": [
+      "Acceptance.txt"
+    ],
+    "message": "Verify private GitHub OAuth push",
+    "sha": "34a37531a24a0be97086d26882dfb47f971ddf7c"
+  },
+  "assignedProfile": {
+    "provider": "GitHub",
+    "host": "github.com",
+    "username": "WillSuo-Github",
+    "method": "oauth"
+  },
+  "head": "34a37531a24a0be97086d26882dfb47f971ddf7c",
+  "trackingHead": "34a37531a24a0be97086d26882dfb47f971ddf7c",
+  "cleanWorkingCopy": true,
+  "aheadBehind": "0\t0",
+  "fixtureSetup": "Local CLI initialization/commit only. Remote writes and Fetch executed through native GitPico with selected OAuth. Repository-local push.autoSetupRemote=true supports the first push to the empty remote.",
+  "serverConfirmation": "Connected GitHub fetch_commit returned 404 for this private fixture. Existing gh CLI was used only for read-only private/commit metadata confirmation, not for acceptance Push/Fetch.",
+  "limits": [
+    "No real expiry/renewal or revoked-grant test",
+    "Earlier TLS errors retained as intermittent failure evidence",
+    "No expanded organization access requested",
+    "Unresolved upstream open failure recorded separately"
+  ]
+}

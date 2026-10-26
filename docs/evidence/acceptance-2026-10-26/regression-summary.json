@@ -1,0 +1,24 @@
+{
+  "command": "TEST_RUNNER_GITPICO_VERIFY_KEYCHAIN_HELPER=1 xcodebuild test -project GitPico.xcodeproj -scheme GitPico -derivedDataPath .build/xcode -destination platform=macOS,arch=arm64 -parallel-testing-enabled NO",
+  "summaries": [
+    "Test run with 228 tests in 0 suites passed after 339.123 seconds.",
+    "Test run with 144 tests in 0 suites passed after 83.351 seconds."
+  ],
+  "skipped": [
+    "Test branchPreviewPerformanceBenchmark() skipped: \"Explicit isolated performance run only.\"",
+    "Test branchPreviewRenderPerformanceBenchmark() skipped: \"Explicit suppressed history rendering benchmark only.\"",
+    "Test renderCurrentBranchSyncBadgesWithoutWindows() skipped: \"Explicit offscreen component capture only.\"",
+    "Test renderDesignGalleryWithoutActivation() skipped: \"Explicit suppressed design gallery capture only.\"",
+    "Test renderHistoryRowsWithoutWindows() skipped: \"Explicit offscreen component capture only.\"",
+    "Test writeRefreshPerformanceBenchmark() skipped: \"Explicit isolated write-refresh benchmark only.\"",
+    "Test renderMaturityPanelsWithoutActivation() skipped: \"Explicit suppressed settings/activity/draft capture only.\"",
+    "Test renderNativeWindowTabsWithoutActivation() skipped: \"Explicit suppressed native tab rendering only.\"",
+    "Test registeredGitHubOAuthClientCanRequestADeviceCodeWithoutAuthorizingAnAccount() skipped: \"Explicit unauthenticated public-client registration probe; no browser or account grant.\"",
+    "Test repositoryOpenPerformanceBenchmark() skipped: \"Explicit isolated repository-open timing only.\"",
+    "Test renderUnifiedSearchSuggestionsWithoutWindows() skipped: \"Explicit offscreen component capture only.\"",
+    "Test renderWorkingFileAndDiffRowsWithoutWindows() skipped: \"Explicit windowless working component capture only.\"",
+    "Test workingTreeRefreshPerformanceBenchmark() skipped: \"Explicit isolated checkout, stash and merge refresh benchmark only.\""
+  ],
+  "xcodeResult": "TEST SUCCEEDED",
+  "foregroundInterference": "Hosted app tests overlapped the first GitLab browser flow and likely restarted the same-bundle app; that attempt is invalid and must be repeated serially."
+}

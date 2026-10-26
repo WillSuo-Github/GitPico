@@ -1,0 +1,55 @@
+{
+  "records": [
+    {
+      "report": "GitPico-2026-10-26-154310.ips",
+      "exception": {
+        "codes": "0x0000000000000001, 0x00000001896f6a84",
+        "rawCodes": [
+          1,
+          6600747652
+        ],
+        "type": "EXC_BREAKPOINT",
+        "signal": "SIGTRAP"
+      },
+      "queue": "com.apple.NSXPCConnection.m-user.com.apple.SafariLaunchAgent",
+      "symbols": [
+        "_dispatch_assert_queue_fail",
+        "dispatch_assert_queue$V2.cold.1",
+        "dispatch_assert_queue",
+        "_swift_task_checkIsolatedSwift",
+        "swift_task_isCurrentExecutorWithFlagsImpl(swift::SerialExecutorRef, swift::swift_task_is_current_executor_flag)",
+        "closure #1 in closure #1 in closure #1 in OAuthBrowserSession.authenticate(_:callbackScheme:)",
+        "thunk for @escaping @callee_guaranteed (@in_guaranteed URL?, @guaranteed Error?) -> ()",
+        "__102-[ASWebAuthenticationSession initWithURL:callback:usingEphemeralSession:jitEnabled:completionHandler:]_block_invoke",
+        "-[ASWebAuthenticationSession _endSessionWithCallbackURL:error:]",
+        "__43-[ASWebAuthenticationSession _startDryRun:]_block_invoke_2"
+      ]
+    },
+    {
+      "report": "GitPico-2026-10-26-160817.ips",
+      "exception": {
+        "codes": "0x0000000000000001, 0x00000001896f6a84",
+        "rawCodes": [
+          1,
+          6600747652
+        ],
+        "type": "EXC_BREAKPOINT",
+        "signal": "SIGTRAP"
+      },
+      "queue": "com.apple.NSXPCConnection.m-user.com.apple.SafariLaunchAgent",
+      "symbols": [
+        "_dispatch_assert_queue_fail",
+        "dispatch_assert_queue$V2.cold.1",
+        "dispatch_assert_queue",
+        "_swift_task_checkIsolatedSwift",
+        "swift_task_isCurrentExecutorWithFlagsImpl(swift::SerialExecutorRef, swift::swift_task_is_current_executor_flag)",
+        "closure #1 in closure #1 in closure #1 in OAuthBrowserSession.authenticate(_:callbackScheme:)",
+        "thunk for @escaping @callee_guaranteed (@in_guaranteed URL?, @guaranteed Error?) -> ()",
+        "__102-[ASWebAuthenticationSession initWithURL:callback:usingEphemeralSession:jitEnabled:completionHandler:]_block_invoke",
+        "-[ASWebAuthenticationSession _endSessionWithCallbackURL:error:]",
+        "__43-[ASWebAuthenticationSession _startDryRun:]_block_invoke_2"
+      ]
+    }
+  ],
+  "correction": "Both attempts contain the same OAuthBrowserSession callback executor assertion. The earlier attribution to concurrent hosted tests was premature; the serialized reproduction establishes a product defect."
+}

@@ -1,0 +1,21 @@
+{
+  "version": "0.01",
+  "build": "20261026152411",
+  "minimumOS": "26.0",
+  "hostOS": "27.0.1",
+  "commit": "b92ba430335e095e4cc3fd2953196fccbd25a975",
+  "signature": {
+    "exitCode": 0,
+    "output": "Executable=/Users/willsuo/files/Github/GitPico/dist/GitPico.app/Contents/MacOS/GitPico\nIdentifier=com.willsuo.GitPico\nFormat=app bundle with Mach-O thin (arm64)\nCodeDirectory v=20400 size=428 flags=0x2(adhoc) hashes=3+7 location=embedded\nVersionPlatform=1\nVersionMin=1703936\nVersionSDK=1769472\nHash type=sha256 size=32\nCandidateCDHash sha256=9a780e28533a1f46bca2610bafbceaa953d9f904\nCandidateCDHashFull sha256=9a780e28533a1f46bca2610bafbceaa953d9f904f6132af54f117d3933b82e2a\nHash choices=sha256\nCMSDigest=9a780e28533a1f46bca2610bafbceaa953d9f904f6132af54f117d3933b82e2a\nCMSDigestType=2\nExecutable Segment base=0\nExecutable Segment limit=16384\nExecutable Segment flags=0x1\nPage size=16384\nCDHash=9a780e28533a1f46bca2610bafbceaa953d9f904\nSignature=adhoc\nInfo.plist entries=26\nTeamIdentifier=not set\nSealed Resources version=2 rules=13 files=5\nInternal requirements count=0 size=12\nTotal signatures=1\nChosen signature=1\n"
+  },
+  "signatureIntegrity": {
+    "exitCode": 0,
+    "output": ""
+  },
+  "notarizationTicket": {
+    "exitCode": 65,
+    "output": "Processing: /Users/willsuo/files/Github/GitPico/dist/GitPico.app\nGitPico.app does not have a ticket stapled to it.\n"
+  },
+  "ciFiles": [],
+  "updateFrameworkFiles": []
+}

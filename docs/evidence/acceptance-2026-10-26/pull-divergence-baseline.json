@@ -1,0 +1,11 @@
+{
+  "repository": "/Users/willsuo/files/Github/GitPico/dist/Acceptance-20261026-ml2ft350/Diverged",
+  "operation": "git pull --ff-only",
+  "exitCode": 128,
+  "headBefore": "62b5f22cf1b4eb99643ab7e9954ab0dff09ecd49",
+  "headAfter": "62b5f22cf1b4eb99643ab7e9954ab0dff09ecd49",
+  "headUnchanged": true,
+  "indexUnchanged": true,
+  "output": "From /Users/willsuo/files/Github/GitPico/dist/Acceptance-20261026-ml2ft350/Origin\n   6bd2549..6d084fa  main       -> origin/main\nhint: Diverging branches can't be fast-forwarded, you need to either:\nhint:\nhint: \tgit merge --no-ff\nhint:\nhint: or:\nhint:\nhint: \tgit rebase\nhint:\nhint: Disable this message with \"git config set advice.diverging false\"\nfatal: Not possible to fast-forward, aborting.\n",
+  "scope": "Disposable local baseline; separate native UI check remains required."
+}

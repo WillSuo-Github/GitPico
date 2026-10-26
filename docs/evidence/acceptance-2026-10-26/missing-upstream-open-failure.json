@@ -1,0 +1,7 @@
+{
+  "fixture": "dist/Acceptance-20261026-ml2ft350/GitHubOAuth",
+  "trigger": "A branch upstream was preconfigured to an as-yet nonexistent origin/main in the empty remote fixture.",
+  "nativeResult": "Opening the repository failed: fatal: no such branch: 'HEAD...'",
+  "acceptance": "Unresolved-upstream recovery is not accepted. Recorded separately from OAuth transport.",
+  "fixtureAdjustment": "Unset the premature branch.main tracking configuration and enable repository-local push.autoSetupRemote for its first native push."
+}

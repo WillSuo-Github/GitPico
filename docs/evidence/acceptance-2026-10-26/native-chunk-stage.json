@@ -1,0 +1,6 @@
+{
+  "firstChunkStaged": true,
+  "secondChunkNotStaged": true,
+  "secondChunkStillInWorktree": true,
+  "status": " M Binary.dat\n M Image.png\nMM Review.swift\n?? Draft.txt\n"
+}

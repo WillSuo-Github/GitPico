@@ -1,0 +1,11 @@
+{
+  "phase": "Idle authentication sheet waiting for manual browser sign-in, after native large-fixture browsing",
+  "samples": [
+    {
+      "cpuPercent": 0.0,
+      "residentKiB": 205568,
+      "elapsed": "14:11"
+    }
+  ],
+  "limitations": "Short ps observations only; no frame timing, leak analysis, energy measurement or soak acceptance."
+}

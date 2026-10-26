@@ -4,6 +4,24 @@ import Synchronization
 import Testing
 @testable import GitPico
 
+@Test @MainActor func oauthBrowserCompletionAcceptsBackgroundSuccessAndCancellation() async {
+    let url = URL(string: "gitpico://oauth/gitlab/callback?code=fixture&state=fixture")!
+    for cancelled in [false, true] {
+        let returned: URL? = await withCheckedContinuation { continuation in
+            let completion = OAuthBrowserSession.mainActorCompletion { callback, error in
+                MainActor.preconditionIsolated()
+                if cancelled { #expect(error is CancellationError) }
+                else { #expect(error == nil) }
+                continuation.resume(returning: callback)
+            }
+            DispatchQueue.global().async {
+                completion(cancelled ? nil : url, cancelled ? CancellationError() : nil)
+            }
+        }
+        #expect(returned == (cancelled ? nil : url))
+    }
+}
+
 private final class LoginVault: CredentialStoring, Sendable {
     let values = Mutex<[UUID: GitStoredCredential]>([:])
     func read(_ id: UUID) throws -> GitStoredCredential { guard let value = values.withLock({ $0[id] }) else { throw GitFailure("Missing fixture credential") }; return value }

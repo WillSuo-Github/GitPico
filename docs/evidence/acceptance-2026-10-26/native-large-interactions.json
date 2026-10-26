@@ -1,0 +1,30 @@
+{
+  "checks": [
+    {
+      "branch": "branch-10",
+      "previewVisible": true,
+      "automationRoundTripMs": 1824
+    },
+    {
+      "branch": "branch-11",
+      "previewVisible": true,
+      "automationRoundTripMs": 1521
+    },
+    {
+      "branch": "branch-12",
+      "previewVisible": true,
+      "automationRoundTripMs": 1516
+    },
+    {
+      "branch": "branch-13",
+      "previewVisible": true,
+      "automationRoundTripMs": 1494
+    },
+    {
+      "branch": "branch-14",
+      "previewVisible": true,
+      "automationRoundTripMs": 1520
+    }
+  ],
+  "limitation": "Automation round trips include input and accessibility capture overhead; these are not rendering latency or frame rate measurements."
+}

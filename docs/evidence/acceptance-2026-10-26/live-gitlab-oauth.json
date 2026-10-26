@@ -1,0 +1,28 @@
+{
+  "provider": "GitLab",
+  "account": "willsuosuo",
+  "method": "OAuth",
+  "build": "20261026161052",
+  "nativeAccountVerifyBeforeAndAfterRestart": true,
+  "privateProject": "https://gitlab.com/willsuosuo/gitpico-acceptance-20261026-ml2ft350",
+  "projectID": 88095642,
+  "visibility": "Private, verified in creation form and project heading",
+  "nativeOperations": {
+    "clone": "Succeeded",
+    "push": "Succeeded",
+    "fetch": "Succeeded",
+    "testRemote": "Read access to origin verified"
+  },
+  "remote": "https://gitlab.com/willsuosuo/gitpico-acceptance-20261026-ml2ft350.git",
+  "localHead": "e1ca67e840bef82016cfed29efafc41aa1be3263",
+  "trackingHead": "e1ca67e840bef82016cfed29efafc41aa1be3263",
+  "serverHeadObservedInBrowser": "e1ca67e840bef82016cfed29efafc41aa1be3263",
+  "subject": "Verify private GitLab OAuth push",
+  "cleanWorkingCopy": true,
+  "aheadBehind": "0\t0",
+  "limits": [
+    "No real expiry/renewal or revocation test",
+    "No organization SSO policy matrix",
+    "No credentials exported; native app selected its saved OAuth profile for clone and subsequent operations"
+  ]
+}

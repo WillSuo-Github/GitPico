@@ -1,0 +1,8 @@
+{
+  "subject": "验收：只提交第一处修改",
+  "firstChangeCommitted": true,
+  "secondChangeNotCommitted": true,
+  "workingChangePreserved": true,
+  "indexClean": true,
+  "status": "M Binary.dat\n M Image.png\n M Review.swift\n?? Draft.txt"
+}

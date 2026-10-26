@@ -20,13 +20,12 @@ import GitCore
         return try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { continuation in
                 self.continuation = continuation
-                let session = ASWebAuthenticationSession(url: url, callbackURLScheme: callbackScheme) { [weak self] callback, error in
-                    Task { @MainActor in
-                        if let callback { self?.finish(.success(callback), generation: generation) }
-                        else if let error = error as? ASWebAuthenticationSessionError, error.code == .canceledLogin { self?.finish(.failure(CancellationError()), generation: generation) }
-                        else { self?.finish(.failure(GitFailure("Browser sign-in could not finish. Start sign-in again.")), generation: generation) }
-                    }
+                let completion = Self.mainActorCompletion { [weak self] callback, error in
+                    if let callback { self?.finish(.success(callback), generation: generation) }
+                    else if let error = error as? ASWebAuthenticationSessionError, error.code == .canceledLogin { self?.finish(.failure(CancellationError()), generation: generation) }
+                    else { self?.finish(.failure(GitFailure("Browser sign-in could not finish. Start sign-in again.")), generation: generation) }
                 }
+                let session = ASWebAuthenticationSession(url: url, callbackURLScheme: callbackScheme, completionHandler: completion)
                 session.presentationContextProvider = self
                 session.prefersEphemeralWebBrowserSession = true
                 self.session = session
@@ -37,6 +36,13 @@ import GitCore
                 }
             }
         } onCancel: { Task { @MainActor [weak self] in self?.finish(.failure(CancellationError()), generation: generation) } }
+    }
+    // AuthenticationServices may invoke its completion on a Safari XPC queue.
+    // Construct the entry closure outside MainActor before hopping to UI state.
+    nonisolated static func mainActorCompletion(_ completion: @escaping @MainActor @Sendable (URL?, Error?) -> Void) -> @Sendable (URL?, Error?) -> Void {
+        { callback, error in
+            Task { @MainActor in completion(callback, error) }
+        }
     }
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor { NSApp.keyWindow ?? NSApp.windows.first(where: \.isVisible) ?? ASPresentationAnchor() }
     func cancel() { finish(.failure(CancellationError())) }
