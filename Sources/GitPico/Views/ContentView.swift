@@ -46,6 +46,15 @@ struct ContentView: View {
         .sheet(isPresented: $store.showingExternalToolSettings) { VStack { ExternalToolSettingsView(preferences: store.toolPreferences); Button("Close") { store.showingExternalToolSettings = false }.padding(.bottom) } }
         .sheet(isPresented: $store.showingRepositoryLibrary) { RepositoryLibraryView(store: store) }
         .sheet(isPresented: $store.showingQuickOpen) { QuickOpenSheet(store: store) }
+        .sheet(isPresented: $store.showingConflictDrafts) { ConflictDraftsSheet(store: store) }
+        .sheet(isPresented: $store.showingNetworkActivity, onDismiss: {
+            if store.authenticationAfterNetwork { store.authenticationAfterNetwork = false; store.showingAuthentication = true }
+        }) { NetworkActivityView(store: store) }
+        .sheet(isPresented: $store.showingAuthentication, onDismiss: {
+            if store.networkAfterAuthentication { store.networkAfterAuthentication = false; store.showingNetworkActivity = true }
+        }) {
+            AuthenticationPanel(store: store)
+        }
         .sheet(item: $store.historicalRequest) { HistoricalFilesSheet(store: store, request: $0) }
         .sheet(item: $store.localChangeRequest) { LocalChangesSheet(store: store, request: $0) }
         .sheet(item: $store.stashRequest) { StashManagementSheet(store: store, request: $0) }

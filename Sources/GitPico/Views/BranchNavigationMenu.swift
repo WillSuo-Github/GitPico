@@ -47,7 +47,7 @@ struct BranchNavigationMenu: View {
         }
         .menuStyle(.borderlessButton)
         .help("Current branch: " + branch + syncText + ". Switch, create, merge or rebase branches.")
-        .disabled(!store.canUseRepository)
+        .disabled(!store.canUseRepository && !store.isBackgroundFetching)
     }
     var syncText: String {
         guard let snapshot = store.snapshot, snapshot.ahead > 0 || snapshot.behind > 0 else { return "" }

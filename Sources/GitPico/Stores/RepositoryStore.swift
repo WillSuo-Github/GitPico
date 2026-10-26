@@ -3,7 +3,7 @@ import Foundation
 import GitCore
 import Observation
 
-struct ConflictDraft {
+struct ConflictDraft: Codable, Sendable {
     let snapshot: ConflictSnapshot
     let text: String
 }
@@ -143,7 +143,22 @@ final class RepositoryStore {
     var selectedStash: Stash?
     var diff = ""
     var isLoadingDiff = false
-    var isBusy = false
+    var isBusy = false {
+        didSet {
+            if isBusy { automaticRefreshEpoch = UUID() }
+            else if automaticRefreshPending { requestAutomaticRefresh() }
+        }
+    }
+    var isAutomaticallyRefreshing = false
+    var isBackgroundFetching = false
+    var automaticRefreshError: String?
+    @ObservationIgnored var fileMonitor: RepositoryFileMonitor?
+    @ObservationIgnored var automaticMonitorTask: Task<Void, Never>?
+    @ObservationIgnored var automaticRefreshTask: Task<Void, Never>?
+    @ObservationIgnored var automaticRefreshPending = false
+    @ObservationIgnored var automaticRefreshEpoch = UUID()
+    @ObservationIgnored var backgroundFetchTask: Task<Void, Never>?
+    @ObservationIgnored var lastBackgroundFetch = Date.distantPast
     var activity = ""
     var error: String?
     var search = ""
@@ -151,7 +166,22 @@ final class RepositoryStore {
     var searchActionsRequest: UUID?
     var commitSubject = "" { didSet { if !commitSubject.isEmpty { commitFeedback = nil; commitWarning = nil }; if oldValue != commitSubject { workspace?.recordDraft(self) } } }
     var commitBody = "" { didSet { if !commitBody.isEmpty { commitFeedback = nil; commitWarning = nil }; if oldValue != commitBody { workspace?.recordDraft(self) } } }
-    var conflictDrafts: [String: ConflictDraft] = [:]
+    var conflictDrafts: [String: ConflictDraft] = [:] { didSet { scheduleConflictDraftSave() } }
+    var conflictDraftSaveError: String?
+    var showingConflictDrafts = false
+    var showingNetworkActivity = false
+    var showingAuthentication = false
+    var authenticationAfterNetwork = false
+    var networkAfterAuthentication = false
+    var connectionTestMessage: String?
+    var authentication: AuthenticationStore
+    var networkActivity: NetworkActivityStore?
+    @ObservationIgnored let networkContextOwner = UUID()
+    @ObservationIgnored var networkRegisteredRoot: URL?
+    @ObservationIgnored var conflictDraftArchive: ConflictDraftArchive?
+    @ObservationIgnored var conflictDraftSaveTask: Task<Void, Never>?
+    @ObservationIgnored var conflictDraftRevision: UInt64 = 0
+    @ObservationIgnored var loadingConflictDrafts = false
     var showingBranchSheet = false
     var showingStashSheet = false
     var creationRequest: RepositoryCreationRequest?
@@ -159,13 +189,22 @@ final class RepositoryStore {
     var recentPaths: [String] { library.recentPaths }
     var showingRepositoryLibrary = false
     var showingQuickOpen = false
-    init(library: RepositoryLibrary? = nil, historyReader: any HistoryReading = GitHistoryReader(), workingDiffReader: any WorkingDiffReading = GitWorkingDiffReader(), mutationRefreshReader: any MutationRefreshReading = GitMutationRefreshReader()) { self.library = library ?? RepositoryLibrary(); self.historyReader = historyReader; self.workingDiffReader = workingDiffReader; self.mutationRefreshReader = mutationRefreshReader }
+    init(library: RepositoryLibrary? = nil, historyReader: any HistoryReading = GitHistoryReader(), workingDiffReader: any WorkingDiffReading = GitWorkingDiffReader(), mutationRefreshReader: any MutationRefreshReading = GitMutationRefreshReader(), authentication: AuthenticationStore? = nil, networkActivity: NetworkActivityStore? = nil) {
+        let library = library ?? RepositoryLibrary()
+        self.library = library; self.authentication = authentication ?? AuthenticationStore(file: library.file.deletingLastPathComponent().appendingPathComponent("authentication.json"))
+        self.networkActivity = networkActivity ?? NetworkActivityStore(directory: library.file.deletingLastPathComponent())
+        self.historyReader = historyReader; self.workingDiffReader = workingDiffReader; self.mutationRefreshReader = mutationRefreshReader
+    }
     @ObservationIgnored var lastOpenReport: RepositoryOpenReport?
     var lastUpdated: Date?
     @ObservationIgnored var repository: GitRepository?
     @ObservationIgnored var detailToken = UUID()
     @ObservationIgnored var repositoryToken = UUID()
     @ObservationIgnored var draftBeforeAmend: (String, String)?
+    deinit {
+        automaticMonitorTask?.cancel(); automaticRefreshTask?.cancel(); backgroundFetchTask?.cancel(); conflictDraftSaveTask?.cancel()
+        if let root = networkRegisteredRoot { GitNetworkContexts.remove(root: root, owner: networkContextOwner) }
+    }
 
     var title: String { snapshot?.root.lastPathComponent ?? "GitPico" }
     var changes: [FileChange] { snapshot?.changes ?? [] }
@@ -214,6 +253,7 @@ final class RepositoryStore {
 
     func openInPlace(_ url: URL, openedRepository: GitRepository? = nil) async {
         guard !isBusy else { return }
+        do { try flushConflictDrafts() } catch { self.error = error.localizedDescription; return }
         isBusy = true; activity = "Opening repository…"
         let timing = RepositoryOpenTiming(); var succeeded = false
         defer { isBusy = false; activity = ""; lastOpenReport = timing.finish(succeeded: succeeded) }
@@ -227,7 +267,9 @@ final class RepositoryStore {
             managementRequest = nil; stashRequest = nil; localChangeRequest = nil; historicalRequest = nil; worktreeRequest = nil; submoduleRequest = nil; relatedAdministrationRequest = nil; infrastructureRequest = nil; relatedBatchProgress = nil; worktrees = []; submodules = []; externalToolRequest = nil; showingBranchSheet = false; showingStashSheet = false
             automaticStashRequest = nil; pendingAutomaticStashRequest = nil
             automaticStash = try await timing.measure("automatic-stash") { try await repo.automaticStashRecord() }
+            disconnectNetworkContext()
             repository = repo; snapshot = data
+            configureNetworkContext()
             managedRemotes = try await timing.measure("remotes") { try await repo.remoteConfigurations() }
             organization = try await timing.measure("organization") { try await repo.referenceOrganization() }
             undoAvailability = try await timing.measure("undo") { try await repo.undoAvailability() }
@@ -237,13 +279,15 @@ final class RepositoryStore {
             selectedChange = nil; selectedCommit = nil; selectedStash = nil
             commitDetail = nil; selectedCommitPath = nil; diff = ""
             commitSubject = ""; commitBody = ""
-            conflictDrafts = [:]
+            conflictDraftArchive = nil; conflictDrafts = [:]
+            await loadConflictDrafts(at: data.root)
             do { try library.recordOpened(data.root) }
             catch { self.error = "Repository opened, but the library could not be saved: " + error.localizedDescription }
             await timing.measure("related") { await loadRelatedRepositories() }
             await timing.measure("workflow") { await loadWorkflowState() }
             await timing.measure("working-list") { await rebuildWorkingList() }
             lastUpdated = Date(); succeeded = true
+            if workspace?.monitoringEnabled == true { startAutomaticRefresh() }
         } catch { self.error = error.localizedDescription }
     }
 
@@ -271,8 +315,6 @@ final class RepositoryStore {
         }
         undoAvailability = try await repository.undoAvailability(); rebaseProgress = try await repository.rebaseProgress()
         await loadRelatedRepositories(); await loadWorkflowState()
-        let conflicts = Set(changes.filter(\.isConflicted).map(\.path))
-        conflictDrafts = conflictDrafts.filter { conflicts.contains($0.key) }
         if showAllFiles || showIgnoredFiles || showAssumeUnchanged { workingFileEntries = try await repository.workingFiles(includeIgnored: showIgnoredFiles) }
         if snapshot?.operation == RepositoryOperation.none { workingOnlyConflicts = false }
         await rebuildWorkingList()
@@ -295,7 +337,7 @@ final class RepositoryStore {
     }
 
     func navigate(_ value: Destination, record: Bool = true) {
-        guard !isBusy, value != destination else { return }
+        guard (!isBusy || isBackgroundFetching), value != destination else { return }
         rememberNavigation()
         if record { backStack.append(destination); if backStack.count > 100 { backStack.removeFirst() }; forwardStack = [] }
         cancelPreviewWork(); searchFocusRequest = nil; detailToken = UUID(); destination = value; restoreNavigation(value)

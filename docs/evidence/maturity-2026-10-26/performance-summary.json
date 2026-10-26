@@ -1,0 +1,27 @@
+{
+  "previous_branch_batch": {
+    "fixture": {
+      "commits": 3000,
+      "branches": 120,
+      "changedFiles": 500
+    },
+    "cold_detail_median_ms": 152.837375,
+    "repeat_detail_median_ms": 48.419437499999994,
+    "repeat_selection_median_ms": 0.12562500000000001,
+    "repeat_main_actor_gap_median_ms": 36.129625499999996,
+    "maximum_main_actor_gap_ms": 49.754292
+  },
+  "current_batch": {
+    "fixture": {
+      "commits": 3000,
+      "branches": 120,
+      "changedFiles": 500
+    },
+    "cold_detail_median_ms": 138.604083,
+    "repeat_detail_median_ms": 43.39975,
+    "repeat_selection_median_ms": 0.115042,
+    "repeat_main_actor_gap_median_ms": 30.487479,
+    "maximum_main_actor_gap_ms": 69.89075
+  },
+  "limitations": "Sequential suppressed-window runs; machine load is uncontrolled. Task timings and scheduling gaps are not foreground FPS or macOS 26 runtime acceptance."
+}

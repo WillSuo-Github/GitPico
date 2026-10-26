@@ -32,12 +32,15 @@ import Observation
     private(set) var tabs: [RepositoryTab]
     private(set) var selectedID: UUID
     let library: RepositoryLibrary
+    let authentication: AuthenticationStore
+    let networkActivity: NetworkActivityStore
     var error: String?
     var draftSaveWarning: String?
     @ObservationIgnored let drafts: RepositoryDraftStore
     @ObservationIgnored private let makeStore: (RepositoryLibrary) -> RepositoryStore
     @ObservationIgnored private var draftTask: Task<Void, Never>?
     @ObservationIgnored private var didStartup = false
+    @ObservationIgnored private(set) var monitoringEnabled = false
     @ObservationIgnored weak var windowRouting: (any RepositoryWindowRouting)?
     var activeTab: RepositoryTab { tabs.first { $0.id == selectedID } ?? tabs[0] }
     var activeStore: RepositoryStore { activeTab.store }
@@ -46,9 +49,14 @@ import Observation
     init(library: RepositoryLibrary? = nil, draftsFile: URL? = nil, storeFactory: ((RepositoryLibrary) -> RepositoryStore)? = nil) {
         let library = library ?? RepositoryLibrary()
         self.library = library
-        self.makeStore = storeFactory ?? { RepositoryStore(library: $0) }
+        let authentication = AuthenticationStore(file: library.file.deletingLastPathComponent().appendingPathComponent("authentication.json"))
+        self.authentication = authentication
+        let networkActivity = NetworkActivityStore(directory: library.file.deletingLastPathComponent())
+        self.networkActivity = networkActivity
+        let factory = storeFactory ?? { RepositoryStore(library: $0, authentication: authentication, networkActivity: networkActivity) }
+        self.makeStore = factory
         drafts = RepositoryDraftStore(file: draftsFile ?? library.file.deletingLastPathComponent().appendingPathComponent("repository-drafts.json"))
-        let first = RepositoryTab(store: (storeFactory ?? { RepositoryStore(library: $0) })(library))
+        let first = RepositoryTab(store: factory(library))
         tabs = [first]; selectedID = first.id; first.store.workspace = self
         draftSaveWarning = drafts.error
     }
@@ -93,11 +101,13 @@ import Observation
         let tab = tabs[index]
         guard !tab.isBusy else { error = "Wait for this tab's repository operation to finish before closing it."; return false }
         if tab.root != nil {
+            do { try tab.store.flushConflictDrafts() }
+            catch { self.error = "The tab was kept open because its conflict drafts could not be saved. " + error.localizedDescription; return false }
             recordDraft(tab.store)
             do { try drafts.flush(); draftSaveWarning = nil }
             catch { self.error = "The tab was kept open because its commit draft could not be saved. " + error.localizedDescription; return false }
         }
-        tab.store.cancelPreviewWork(); tab.store.metadataTask?.cancel()
+        tab.store.disconnectNetworkContext(); tab.store.stopAutomaticRefresh(); tab.store.cancelPreviewWork(); tab.store.metadataTask?.cancel()
         tabs.remove(at: index)
         if tabs.isEmpty { newTab() }
         else if selectedID == id { select(tabs[min(index, tabs.count - 1)].id) }
@@ -174,7 +184,19 @@ import Observation
         catch { draftSaveWarning = error.localizedDescription }
     }
     func shutdown() {
-        for tab in tabs { recordDraft(tab.store) }
+        for tab in tabs {
+            do { try tab.store.flushConflictDrafts() }
+            catch { draftSaveWarning = error.localizedDescription; return }
+        }
+        for tab in tabs { tab.store.disconnectNetworkContext(); tab.store.stopAutomaticRefresh(); recordDraft(tab.store) }
         flushDrafts()
+        networkActivity.flush()
+    }
+    func startMonitoring() {
+        monitoringEnabled = true
+        for tab in tabs where tab.root != nil { tab.store.startAutomaticRefresh() }
+    }
+    func refreshExternalChanges() {
+        for tab in tabs where tab.root != nil { tab.store.requestAutomaticRefresh() }
     }
 }

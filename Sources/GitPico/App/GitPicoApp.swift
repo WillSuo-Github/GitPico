@@ -7,7 +7,7 @@ struct GitPicoApp: App {
     private var workspace: RepositoryWorkspace { appDelegate.workspace }
 
     var body: some Scene {
-        Settings { SettingsView(tools: workspace.activeStore.toolPreferences) }
+        Settings { SettingsView(tools: workspace.activeStore.toolPreferences, store: workspace.activeStore) }
             .commands { RepositoryCommands(store: workspace.activeStore) }
     }
 }
@@ -25,6 +25,7 @@ struct GitPicoApp: App {
         if NativeStartupVerification.enabled {
             Task { await NativeStartupVerification.finish(repositoryWindows) }
         } else {
+            workspace.startMonitoring()
             Task { await workspace.startup() }
             NSApp.activate(ignoringOtherApps: true)
         }
@@ -33,15 +34,18 @@ struct GitPicoApp: App {
         if !flag { repositoryWindows.reopen() }
         return true
     }
+    func applicationDidBecomeActive(_ notification: Notification) {
+        if !NativeStartupVerification.enabled { workspace.refreshExternalChanges() }
+    }
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         if NativeStartupVerification.enabled { return .terminateNow }
-        if workspace.tabs.contains(where: \.isBusy) {
+        if workspace.tabs.contains(where: \.isBusy) || workspace.networkActivity.runningCount > 0 {
             workspace.error = "Wait for repository operations to finish before quitting GitPico."
             return .terminateCancel
         }
         workspace.shutdown()
         if workspace.draftSaveWarning != nil {
-            workspace.error = "Commit drafts could not be saved. Resolve the draft storage error before quitting."
+            workspace.error = "Drafts could not be saved. Resolve the draft storage error before quitting."
             return .terminateCancel
         }
         return .terminateNow
@@ -51,6 +55,7 @@ struct GitPicoApp: App {
 
 struct SettingsView: View {
     let tools: ExternalToolPreferences
+    let store: RepositoryStore
     @State private var preferences = AppPreferences.shared
     var version: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.01" }
     var build: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "Development" }
@@ -70,6 +75,8 @@ struct SettingsView: View {
             }
             Section("Workflow") {
                 Toggle("Always offer to stash local changes", isOn: $preferences.offerAutomaticStash)
+                Toggle("Fetch remote updates in the background", isOn: $preferences.backgroundFetch)
+                Text("Every five minutes while an open repository is idle. Uses connected HTTPS accounts or unlocked SSH keys, never Pulls or Pushes, and reports failures in Network Activity without prompting.").font(.caption).foregroundStyle(.secondary)
             }
             Section("Diffs") {
                 LabeledContent("Font size") {
@@ -81,7 +88,7 @@ struct SettingsView: View {
                 Text("The quick brown fox jumps over the lazy dog").font(.system(size: preferences.diffFontSize, design: .monospaced)).foregroundStyle(.secondary).lineLimit(1)
             }
             Section {
-                Label("GitPico uses your system Git identity, SSH agent, signing and repository configuration. Configure credentials with Git before synchronizing.", systemImage: "info.circle")
+                Label("Connect HTTPS accounts in Authentication, or use your existing system Git credentials and SSH agent. Signing continues to use your repository configuration.", systemImage: "info.circle")
                     .font(.callout).foregroundStyle(.secondary)
             }
             if let error = preferences.lastSaveError { Text(error).foregroundStyle(Pico.deletion).font(.caption) }
@@ -89,6 +96,7 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .tabItem { Label("General", systemImage: "gearshape") }
         ExternalToolSettingsView(preferences: tools).tabItem { Label("External Tools", systemImage: "arrow.left.arrow.right") }
+        AuthenticationSettingsView(store: store).tabItem { Label("Authentication", systemImage: "person.badge.key") }
         }.frame(width: 740, height: 570)
     }
 }

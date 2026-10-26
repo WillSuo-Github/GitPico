@@ -22,6 +22,17 @@ struct RepositoryStatusBar: View {
                 Text(data.changes.isEmpty ? "Clean working copy" : "\(data.changes.count) changed \(data.changes.count == 1 ? "file" : "files")").foregroundStyle(.secondary)
             } else { Text("Ready to open a repository").foregroundStyle(.secondary) }
             Spacer(minLength: 12)
+            Button { store.showingNetworkActivity = true } label: {
+                Label(store.networkActivity?.runningCount ?? 0 > 0 ? "Network (\(store.networkActivity?.runningCount ?? 0))" : "Network", systemImage: store.networkActivity?.records.first?.phase == .failed ? "exclamationmark.icloud" : "network")
+            }.buttonStyle(.borderless).help("Network progress, recent operations and authentication")
+            if !store.conflictDrafts.isEmpty || store.conflictDraftSaveError != nil {
+                Button { store.showingConflictDrafts = true } label: { Label("\(store.conflictDrafts.count) drafts", systemImage: store.conflictDraftSaveError == nil ? "doc.badge.clock" : "exclamationmark.triangle") }
+                    .buttonStyle(.borderless).help(store.conflictDraftSaveError ?? "Recover saved conflict edits")
+            }
+            if let error = store.automaticRefreshError {
+                Button { store.requestAutomaticRefresh() } label: { Image(systemName: "exclamationmark.arrow.circlepath") }
+                    .buttonStyle(.borderless).help("Automatic refresh paused: " + error + "\nClick to retry.")
+            }
             if let data = store.snapshot, !store.isChoosingRepository {
                 Button {
                     NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: data.root.path)

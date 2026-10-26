@@ -1,0 +1,35 @@
+maturity-final-full.log
+✔ Test run with 216 tests in 0 suites passed after 205.593 seconds.
+✔ Test fileEventsRefreshExternalEditsAndRefsWithoutLosingDraftOrSelection() passed after 1.868 seconds.
+✔ Test automaticRefreshDefersDuringWritesAndRetainsWarmHistoryForFileChanges() passed after 0.345 seconds.
+✘ Test linkedWorktreeMonitorRefreshesSharedReferencesAndLocalFiles() recorded an issue at AutomaticRefreshAndDraftTests.swift:53:5: Expectation failed: paths.contains(await f.repository.root.appendingPathComponent(".git").path)
+✔ Test backgroundFetchAllowsBrowsingAndNeverChangesWorkingFiles() passed after 0.798 seconds.
+✔ Test conflictDraftsSurviveRestartAndKeepStaleSourceGuards() passed after 0.744 seconds.
+✔ Test conflictDraftWritesRejectExternalChangesAndOlderAutosaves() passed after 0.584 seconds.
+✔ Test corruptedConflictDraftArchiveIsPreservedAndDoesNotTrapUneditedReopen() passed after 0.660 seconds.
+✔ Test branchPreviewRenderPerformanceBenchmark() passed after 2.147 seconds.
+✔ Test renderMaturityPanelsWithoutActivation() passed after 3.571 seconds.
+✘ Test run with 136 tests in 0 suites failed after 63.642 seconds with 1 issue.
+
+maturity-final-regression.log
+✔ Test run with 5 tests in 0 suites passed after 0.341 seconds.
+✔ Test fileEventsRefreshExternalEditsAndRefsWithoutLosingDraftOrSelection() passed after 2.004 seconds.
+✔ Test automaticRefreshDefersDuringWritesAndRetainsWarmHistoryForFileChanges() passed after 0.378 seconds.
+✔ Test linkedWorktreeMonitorRefreshesSharedReferencesAndLocalFiles() passed after 1.649 seconds.
+✔ Test backgroundFetchAllowsBrowsingAndNeverChangesWorkingFiles() passed after 0.803 seconds.
+✔ Test conflictDraftsSurviveRestartAndKeepStaleSourceGuards() passed after 0.742 seconds.
+✔ Test conflictDraftWritesRejectExternalChangesAndOlderAutosaves() passed after 0.495 seconds.
+✔ Test corruptedConflictDraftArchiveIsPreservedAndDoesNotTrapUneditedReopen() passed after 0.607 seconds.
+✔ Test renderMaturityPanelsWithoutActivation() passed after 3.524 seconds.
+✔ Test run with 136 tests in 0 suites passed after 61.615 seconds.
+
+maturity-final-app-tests.log
+◇ Test actualCredentialHelperReadsAndDeletesItsOwnTemporaryKeychainItem() started.
+✔ Test actualCredentialHelperReadsAndDeletesItsOwnTemporaryKeychainItem() passed after 0.400 seconds.
+✔ Test fileEventsRefreshExternalEditsAndRefsWithoutLosingDraftOrSelection() passed after 1.881 seconds.
+✔ Test automaticRefreshDefersDuringWritesAndRetainsWarmHistoryForFileChanges() passed after 0.341 seconds.
+✔ Test backgroundFetchAllowsBrowsingAndNeverChangesWorkingFiles() passed after 0.801 seconds.
+✔ Test conflictDraftsSurviveRestartAndKeepStaleSourceGuards() passed after 0.764 seconds.
+✔ Test conflictDraftWritesRejectExternalChangesAndOlderAutosaves() passed after 0.519 seconds.
+✔ Test renderMaturityPanelsWithoutActivation() passed after 3.568 seconds.
+✔ Test run with 134 tests in 0 suites passed after 59.944 seconds.

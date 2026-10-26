@@ -5,6 +5,7 @@ import Observation
 final class AppPreferences {
     static let shared = AppPreferences()
     var offerAutomaticStash = true { didSet { save() } }
+    var backgroundFetch = false { didSet { save() } }
     var diffFontSize = 12.0 { didSet { save() } }
     var splitDiff = false { didSet { save() } }
     var historyShowGraph = true { didSet { save() } }
@@ -21,6 +22,7 @@ final class AppPreferences {
             .appendingPathComponent("GitPico", isDirectory: true).appendingPathComponent("preferences.json")
         if let data = try? Data(contentsOf: file), let values = try? JSONDecoder().decode([String: Double].self, from: data) {
             offerAutomaticStash = values["offerAutomaticStash"] != 0
+            backgroundFetch = values["backgroundFetch"] == 1
             diffFontSize = min(18, max(10, values["fontSize"] ?? 12))
             splitDiff = values["splitDiff"] == 1
             historyShowGraph = values["graph"] != 0
@@ -40,6 +42,7 @@ final class AppPreferences {
     private func save() {
         guard !isLoading else { return }
         var values = widths
+        values["backgroundFetch"] = backgroundFetch ? 1 : 0
         values["offerAutomaticStash"] = offerAutomaticStash ? 1 : 0
         values["fontSize"] = diffFontSize
         values["splitDiff"] = splitDiff ? 1 : 0

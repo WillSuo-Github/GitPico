@@ -19,8 +19,9 @@ public enum GitProcess {
         if cancellable { try Task.checkCancellation() }
         guard (1...128 * 1024 * 1024).contains(maxOutputBytes) else { throw GitFailure("Invalid Git output limit.") }
         let trace = GitCommandTrace.current, phase = GitCommandTrace.phase, started = ContinuousClock.now
+        let networkContext = GitNetworkContexts.context(at: root)
         let worker = Task.detached(priority: .userInitiated) {
-            try execute(arguments, root: root, allowed: allowed, timeout: timeout, acceptGeneratedMessage: acceptGeneratedMessage, sequenceEditor: sequenceEditor, input: input, identityEnvironment: identityEnvironment, indexFile: indexFile, maxOutputBytes: maxOutputBytes, lfsEnvironment: lfsEnvironment, cancellable: cancellable)
+            try execute(arguments, root: root, allowed: allowed, timeout: timeout, acceptGeneratedMessage: acceptGeneratedMessage, sequenceEditor: sequenceEditor, input: input, identityEnvironment: identityEnvironment, indexFile: indexFile, maxOutputBytes: maxOutputBytes, lfsEnvironment: lfsEnvironment, cancellable: cancellable, networkContext: networkContext)
         }
         // Write operations retain their existing finish-current-step semantics.
         do {
@@ -35,8 +36,10 @@ public enum GitProcess {
         }
     }
 
-    private static func execute(_ arguments: [String], root: URL, allowed: Set<Int32>, timeout: TimeInterval, acceptGeneratedMessage: Bool, sequenceEditor: URL?, input: Data?, identityEnvironment: [String: String], indexFile: URL?, maxOutputBytes: Int, lfsEnvironment: [String: String], cancellable: Bool) throws -> GitOutput {
+    private static func execute(_ arguments: [String], root: URL, allowed: Set<Int32>, timeout: TimeInterval, acceptGeneratedMessage: Bool, sequenceEditor: URL?, input: Data?, identityEnvironment: [String: String], indexFile: URL?, maxOutputBytes: Int, lfsEnvironment: [String: String], cancellable: Bool, networkContext: GitNetworkContext?) throws -> GitOutput {
             if cancellable { try Task.checkCancellation() }
+            let network = GitNetworkObservation(arguments: arguments, context: networkContext, root: root)
+            defer { network?.finish(succeeded: false, message: "Git did not finish successfully. Review the output before retrying.") }
             let fm = FileManager.default
             let directory = fm.temporaryDirectory.appendingPathComponent("GitPico-process-\(UUID().uuidString)")
             try fm.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -55,7 +58,16 @@ public enum GitProcess {
             // Apple Git 2.54 leaves untracked files behind during stash cleanup in that mode.
             let pathCommands = ["status", "diff", "diff-tree", "show", "log", "blame", "add", "rm", "restore", "ls-files", "ls-tree"]
             let pathOptions = pathCommands.contains(arguments.first ?? "") ? ["--literal-pathspecs"] : []
-            process.arguments = ["--no-pager"] + pathOptions + ["-c", "color.ui=false"] + arguments
+            let authentication = (networkContext?.nonInteractive == true ? ["-c", "credential.helper="] : []) + (networkContext?.credential.map { ["-c", "credential.https://" + $0.host + ".helper=", "-c", "credential.https://" + $0.host + ".helper=" + $0.helper] } ?? [])
+            var commandArguments = arguments
+            if network != nil {
+                var index = 0
+                while index + 1 < commandArguments.count, commandArguments[index] == "-c" { index += 2 }
+                if index < commandArguments.count, ["fetch", "pull", "push", "clone"].contains(commandArguments[index]), !commandArguments.contains("--progress") {
+                    commandArguments.insert("--progress", at: index + 1)
+                }
+            }
+            process.arguments = ["--no-pager"] + pathOptions + ["-c", "color.ui=false"] + authentication + commandArguments
             var environment = ProcessInfo.processInfo.environment
             environment["PATH"] = extensionSearchPath(environment["PATH"])
             for (key, value) in lfsEnvironment {
@@ -66,6 +78,19 @@ public enum GitProcess {
             // Only explicitly owned scratch indexes may override the process index.
             if let indexFile { environment["GIT_INDEX_FILE"] = indexFile.path }
             environment["GIT_TERMINAL_PROMPT"] = "0"
+            if network != nil {
+                for key in ["GIT_TRACE", "GIT_TRACE_PACKET", "GIT_TRACE_CURL", "GIT_CURL_VERBOSE"] { environment.removeValue(forKey: key) }
+                environment["GIT_TRACE_REDACT"] = "1"
+            }
+            if networkContext?.nonInteractive == true {
+                environment["GIT_ASKPASS"] = "/usr/bin/false"; environment["SSH_ASKPASS"] = "/usr/bin/false"
+                environment["SSH_ASKPASS_REQUIRE"] = "never"; environment["GCM_INTERACTIVE"] = "Never"
+                environment["GIT_SSH_COMMAND"] = (networkContext?.sshCommand ?? "/usr/bin/ssh") + " -o BatchMode=yes -o StrictHostKeyChecking=yes"
+            }
+            if let credential = networkContext?.credential {
+                environment["GITPICO_CREDENTIAL_ID"] = credential.id.uuidString
+                environment["GITPICO_CREDENTIAL_HOST"] = credential.host
+            }
             environment["GIT_OPTIONAL_LOCKS"] = "0"
             environment["GIT_PAGER"] = "cat"
             environment["GIT_EDITOR"] = acceptGeneratedMessage ? "/usr/bin/true" : "/usr/bin/false"
@@ -90,10 +115,15 @@ public enum GitProcess {
             try process.run()
             let deadline = ContinuousClock.now.advanced(by: .seconds(timeout))
             let completed: Bool
-            if cancellable {
+            if cancellable || network != nil {
                 var exited = false
-                while !Task.isCancelled && ContinuousClock.now < deadline {
+                var nextProgress = ContinuousClock.now
+                while !(cancellable && Task.isCancelled) && network?.cancellation.isCancelled != true && ContinuousClock.now < deadline {
                     if completion.wait(timeout: .now() + .milliseconds(10)) == .success { exited = true; break }
+                    if ContinuousClock.now >= nextProgress {
+                        network?.progress(stdout: outURL, stderr: errURL)
+                        nextProgress = ContinuousClock.now.advanced(by: .milliseconds(100))
+                    }
                 }
                 completed = exited
             } else {
@@ -105,7 +135,9 @@ public enum GitProcess {
                 while process.isRunning && Date() < grace { Thread.sleep(forTimeInterval: 0.025) }
                 if process.isRunning { kill(process.processIdentifier, SIGKILL) }
                 process.waitUntilExit()
-                if cancellable && Task.isCancelled { throw CancellationError() }
+                network?.progress(stdout: outURL, stderr: errURL)
+                if network?.cancellation.isCancelled == true { throw GitFailure("Network operation cancelled. The server or working copy may already have changed; review the refreshed state before retrying.") }
+                if cancellable && Task.isCancelled { network?.cancellation.cancel(); throw CancellationError() }
                 throw GitFailure("Git timed out after \(Int(timeout)) seconds. Check SSH, signing, hooks, or network access.")
             }
             // The termination callback already observed exit; waitUntilExit would pump
@@ -119,6 +151,8 @@ public enum GitProcess {
             defer { try? errorReader.close() }
             let error = String(decoding: try errorReader.read(upToCount: 64 * 1024) ?? Data(), as: UTF8.self)
             let result = GitOutput(data: data, error: error, status: process.terminationStatus)
+            network?.progress(stdout: outURL, stderr: errURL)
+            network?.finish(succeeded: allowed.contains(result.status))
             guard allowed.contains(result.status) else {
                 throw GitFailure(error.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Git exited with status \(result.status)." : error.trimmingCharacters(in: .whitespacesAndNewlines))
             }

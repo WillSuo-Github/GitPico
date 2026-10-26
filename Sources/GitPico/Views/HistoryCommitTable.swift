@@ -135,7 +135,7 @@ struct HistoryCommitTable: NSViewRepresentable {
             switch rows[row] { case .month: 26; case .commit: input?.compact == true ? 32 : 50 }
         }
         func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
-            guard input?.store.isBusy == false else { return false }
+            guard let store = input?.store, !store.isBusy || store.isBackgroundFetching else { return false }
             if case .commit = rows[row] { return true }
             return false
         }
@@ -144,7 +144,7 @@ struct HistoryCommitTable: NSViewRepresentable {
             return false
         }
         func tableViewSelectionDidChange(_ notification: Notification) {
-            guard !updating, let input, !input.store.isBusy, rows.indices.contains(table.selectedRow), case .commit(let commit) = rows[table.selectedRow] else { return }
+            guard !updating, let input, (!input.store.isBusy || input.store.isBackgroundFetching), rows.indices.contains(table.selectedRow), case .commit(let commit) = rows[table.selectedRow] else { return }
             input.store.selectCommit(commit)
         }
         func tableView(_ tableView: NSTableView, pasteboardWriterForRow row: Int) -> (any NSPasteboardWriting)? {

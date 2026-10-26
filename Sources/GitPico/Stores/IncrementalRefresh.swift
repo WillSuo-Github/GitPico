@@ -54,8 +54,6 @@ extension RepositoryStore {
             } catch { refreshErrors.append(error.localizedDescription) }
         }
         guard token == repositoryToken else { return }
-        let conflicts = Set(changes.filter(\.isConflicted).map(\.path))
-        conflictDrafts = conflictDrafts.filter { conflicts.contains($0.key) }
         if snapshot?.operation == RepositoryOperation.none { workingOnlyConflicts = false }
         await rebuildWorkingList()
         if let file = currentChange { selectChange(file, staged: file.isStaged && (!file.isUnstaged || stagedDiff)) }

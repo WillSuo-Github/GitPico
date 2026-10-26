@@ -11,6 +11,7 @@ struct RepositoryCreationSheet: View {
     var store: RepositoryStore
     let request: RepositoryCreationRequest
     @State private var source = ""
+    @State private var profileID: UUID?
     @State private var name = ""
     @State private var recursive = false
     @State private var enableLFS = false
@@ -23,6 +24,13 @@ struct RepositoryCreationSheet: View {
         VStack(alignment: .leading, spacing: 18) {
             SheetTitle(request.clone ? "Clone Git Repository" : "Create Git Repository")
             if request.clone { TextField("Repository URL or local path", text: $source).textFieldStyle(.roundedBorder) }
+            if request.clone {
+                Picker("Authentication", selection: $profileID) {
+                    Text("System Git / SSH").tag(nil as UUID?)
+                    ForEach(store.authentication.profiles) { profile in Text(profile.label).tag(Optional(profile.id)) }
+                }
+                Text("Manage HTTPS accounts in Settings → Authentication. SSH uses your existing agent and host verification.").font(.caption).foregroundStyle(.secondary)
+            }
             if request.clone {
                 Toggle("Initialize submodules recursively", isOn: $recursive).toggleStyle(.checkbox)
                 Toggle("Enable Git LFS for this clone", isOn: $enableLFS).toggleStyle(.checkbox)
@@ -39,7 +47,7 @@ struct RepositoryCreationSheet: View {
             }
             if !name.isEmpty { Text(parent.appendingPathComponent(name).path).font(.caption).foregroundStyle(.secondary).textSelection(.enabled) }
             HStack { Spacer(); Button("Cancel") { dismiss() }.keyboardShortcut(.cancelAction)
-                Button(request.clone ? "Clone" : "Create") { store.createRepository(at: parent.appendingPathComponent(name, isDirectory: true), source: request.clone ? source : nil, recursive: recursive, allowLocalTransport: allowLocalTransport, lfs: enableLFS ? (downloadLFS ? .download : .pointersOnly) : .inherit); dismiss() }
+                Button(request.clone ? "Clone" : "Create") { store.createRepository(at: parent.appendingPathComponent(name, isDirectory: true), source: request.clone ? source : nil, recursive: recursive, allowLocalTransport: allowLocalTransport, lfs: enableLFS ? (downloadLFS ? .download : .pointersOnly) : .inherit, profileID: profileID); dismiss() }
                     .keyboardShortcut(.defaultAction).disabled(!valid || store.isBusy)
             }
         }.padding(24).frame(width: 510)

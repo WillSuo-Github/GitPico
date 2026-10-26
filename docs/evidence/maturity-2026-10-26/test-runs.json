@@ -1,0 +1,67 @@
+{
+  "maturity-final-full.log": {
+    "summaries": [
+      "\u2714 Test run with 216 tests in 0 suites passed after 205.593 seconds.",
+      "\u2718 Test run with 136 tests in 0 suites failed after 63.642 seconds with 1 issue."
+    ],
+    "skipped": [
+      "actualCredentialHelperReadsAndDeletesItsOwnTemporaryKeychainItem()",
+      "branchPreviewPerformanceBenchmark()",
+      "renderCurrentBranchSyncBadgesWithoutWindows()",
+      "renderDesignGalleryWithoutActivation()",
+      "renderHistoryRowsWithoutWindows()",
+      "writeRefreshPerformanceBenchmark()",
+      "renderNativeWindowTabsWithoutActivation()",
+      "repositoryOpenPerformanceBenchmark()",
+      "renderUnifiedSearchSuggestionsWithoutWindows()",
+      "renderWorkingFileAndDiffRowsWithoutWindows()",
+      "workingTreeRefreshPerformanceBenchmark()"
+    ],
+    "issues": [
+      "\u2718 Test linkedWorktreeMonitorRefreshesSharedReferencesAndLocalFiles() recorded an issue at AutomaticRefreshAndDraftTests.swift:53:5: Expectation failed: paths.contains(await f.repository.root.appendingPathComponent(\".git\").path)"
+    ],
+    "test_success": false
+  },
+  "maturity-final-regression.log": {
+    "summaries": [
+      "\u2714 Test run with 5 tests in 0 suites passed after 0.341 seconds.",
+      "\u2714 Test run with 136 tests in 0 suites passed after 61.615 seconds."
+    ],
+    "skipped": [
+      "actualCredentialHelperReadsAndDeletesItsOwnTemporaryKeychainItem()",
+      "branchPreviewPerformanceBenchmark()",
+      "branchPreviewRenderPerformanceBenchmark()",
+      "renderCurrentBranchSyncBadgesWithoutWindows()",
+      "renderDesignGalleryWithoutActivation()",
+      "renderHistoryRowsWithoutWindows()",
+      "writeRefreshPerformanceBenchmark()",
+      "renderNativeWindowTabsWithoutActivation()",
+      "repositoryOpenPerformanceBenchmark()",
+      "renderUnifiedSearchSuggestionsWithoutWindows()",
+      "renderWorkingFileAndDiffRowsWithoutWindows()",
+      "workingTreeRefreshPerformanceBenchmark()"
+    ],
+    "issues": [],
+    "test_success": true
+  },
+  "maturity-final-app-tests.log": {
+    "summaries": [
+      "\u2714 Test run with 134 tests in 0 suites passed after 59.944 seconds."
+    ],
+    "skipped": [
+      "branchPreviewPerformanceBenchmark()",
+      "branchPreviewRenderPerformanceBenchmark()",
+      "renderCurrentBranchSyncBadgesWithoutWindows()",
+      "renderDesignGalleryWithoutActivation()",
+      "renderHistoryRowsWithoutWindows()",
+      "writeRefreshPerformanceBenchmark()",
+      "renderNativeWindowTabsWithoutActivation()",
+      "repositoryOpenPerformanceBenchmark()",
+      "renderUnifiedSearchSuggestionsWithoutWindows()",
+      "renderWorkingFileAndDiffRowsWithoutWindows()",
+      "workingTreeRefreshPerformanceBenchmark()"
+    ],
+    "issues": [],
+    "test_success": true
+  }
+}

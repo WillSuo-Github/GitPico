@@ -116,13 +116,13 @@ Open existing repositories; inspect status/diffs; stage/unstage/commit; browse a
 
 ## Remaining
 
-- Hosted-account authentication and Pull Requests.
-- Image/binary diff rendering, external tool GUI/directory-diff acceptance, symlink/submodule conflict handling and durable conflict drafts across app termination.
+- OAuth browser login, in-app SSH-key onboarding and Pull Requests; hosted-provider authentication acceptance remains pending.
+- Image/binary diff rendering, external tool GUI/directory-diff acceptance, symlink/submodule conflict handling.
 - Rebase merge/root ranges, a broader undo model for non-history actions, all-ref file lineage, merge-commit patch export and richer Blame navigation.
 - Remaining drag variants and native acceptance, real tag signing and remote authentication acceptance; expanded patch conversion/link support, external-main-Git storage migration and arbitrary corrupted-pointer reconstruction, hosted LFS authentication/locking, LFS history migration/pruning, external Git Flow CLI extensions/hooks, custom workflows, stacked branches and Graphite.
-- Expanded Quick Actions (hierarchical Tab options), tabs/multiple windows, automatic branch cleanup, background fetch, commit templates and user profiles.
+- Expanded Quick Actions (hierarchical Tab options), tabs/multiple windows, automatic branch cleanup, commit templates and user profiles.
 - Further matching of toolbar groups, typography, selection appearance, density and tied-date graph ordering against Tower.
-- macOS 26 runtime execution, large-repository profiling, light appearance and VoiceOver audits.
+- macOS 26 runtime execution, broader large-repository/foreground profiling and VoiceOver audits; bounded history benchmarks and suppressed light/dark captures are available.
 - Icon, localization and distribution signing/notarization.
 
 Do not represent unimplemented controls as working. Verify write operations in disposable repositories before exercising them on personal projects.
@@ -166,3 +166,11 @@ Do not represent unimplemented controls as working. Verify write operations in d
 - Reload bounded history/refs/upstream only on an actual HEAD change; retain stable pages after stash-only writes and no-op/rejected operations. Stale Worktree indicators no longer override backend occupancy validation.
 - Conflict redirection cancels the old history request, clears incompatible search and selects the actual conflicted file.
 - Background validation and timings: [working-tree refresh report](VALIDATION-WORKING-TREE-REFRESH-2026-10-25.md).
+
+## Refresh, drafts, authentication and network activity — 2026-10-26
+
+- FSEvents watches working and actual/common Git storage; coalesced reads defer across writes, revalidate after foregrounding and retain unchanged history. Git metadata/HEAD moves refresh recovery state. Pure working-file events skip history log/count subprocesses.
+- Conflict edits persist in private archives, with source/index stale guards, recovered-draft review, Copy/Export and explicit Discard. Closing and quitting synchronously flush edited drafts; corrupt or externally modified archives are not overwritten.
+- GitHub/GitLab/other HTTPS PAT profiles live in Keychain, with per-repository assignment, identity verification, exact-host Git credential helper, token rotation and remote read tests. System SSH remains supported; OAuth and SSH-key creation/unlocking are outside this batch.
+- Shared network activity records running/completed Git transports, phase progress/output, failures and explicit cancellation, with redacted bounded local history. Retrying Fetch is scoped to its original repository; Push/Pull are not automatically retried. Opt-in five-minute background Fetch avoids prompts and preserves worktree/index/HEAD.
+- Immutable commit-detail reads run concurrently. Background branch-render measurements, disposable Git integration, temporary Keychain helper acceptance and suppressed light/dark panel captures are recorded in [validation](VALIDATION-MATURITY-2026-10-26.md). Foreground mouse/keyboard/VoiceOver, real hosted authentication and macOS 26 runtime remain unverified.

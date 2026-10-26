@@ -26,6 +26,10 @@ struct RepositoryCommands: Commands {
                 }.disabled(store.isBusy || store.isOpeningRepository)
             }
             CommandMenu("Repository") {
+                Button("Network Activity…") { store.showingNetworkActivity = true }.keyboardShortcut("n", modifiers: [.command, .option])
+                Button("Authentication…") { store.showingAuthentication = true }
+                Button("Saved Conflict Drafts…") { store.showingConflictDrafts = true }.disabled(store.conflictDrafts.isEmpty && store.conflictDraftSaveError == nil)
+                Divider()
                 Button("Refresh", action: store.refresh).keyboardShortcut("r").disabled(!store.canUseRepository)
                 Divider()
                 Group {

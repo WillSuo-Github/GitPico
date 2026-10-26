@@ -10,6 +10,7 @@ struct ConflictResolverView: View {
     @State private var generation = 0
     @State private var showBase = false
     @State private var showReloadConfirmation = false
+    @State private var restoredWarning: String?
     var document: ConflictDocument { ConflictDocument(result) }
 
     var body: some View {
@@ -20,6 +21,8 @@ struct ConflictResolverView: View {
                 Button { showReloadConfirmation = true } label: { Image(systemName: "arrow.clockwise") }.buttonStyle(.borderless).help("Reload the conflict from Git").disabled(store.isBusy)
             }
             if let snapshot {
+                if let restoredWarning { Text(restoredWarning).font(.caption).foregroundStyle(Pico.warning).padding(10) }
+                if let error = store.conflictDraftSaveError { Text("Draft not saved: " + error).font(.caption).foregroundStyle(Pico.deletion).padding(8) }
                 if snapshot.operation == .rebase {
                     Label("During a rebase, Current is the branch being rebased onto and Incoming is the commit being replayed.", systemImage: "info.circle")
                         .font(.caption).foregroundStyle(.secondary).padding(.horizontal, 14).padding(.vertical, 7).frame(maxWidth: .infinity, alignment: .leading)
@@ -70,14 +73,22 @@ struct ConflictResolverView: View {
                             .buttonStyle(.borderedProminent).disabled(document.hasMarkers).keyboardShortcut("s", modifiers: .command)
                     }
                 }.font(.system(size: 11)).controlSize(.small).padding(12).disabled(store.isBusy || !snapshot.versions.allSatisfy(\.isRegular))
-                Text("Saving also stages this file. Draft edits stay available while switching files.").font(.caption2).foregroundStyle(.secondary).padding(.bottom, 8)
+                Text("Saving also stages this file. Draft edits are automatically saved for recovery after restarting.").font(.caption2).foregroundStyle(.secondary).padding(.bottom, 8)
             } else if let loadError {
                 EmptyPane(title: "Unable to load conflict", subtitle: loadError, icon: "exclamationmark.triangle")
             } else { ProgressView("Loading conflict versions…").frame(maxWidth: .infinity, maxHeight: .infinity) }
         }
         .task(id: generation) {
             guard let repository = store.repository else { return }
-            if let draft = store.conflictDrafts[path] { snapshot = draft.snapshot; result = draft.text; return }
+            if let draft = store.conflictDrafts[path] {
+                snapshot = draft.snapshot; result = draft.text
+                let current = try? await repository.conflict(path)
+                guard !Task.isCancelled else { return }
+                restoredWarning = current?.indexSignature == draft.snapshot.indexSignature && current?.workingData == draft.snapshot.workingData && current?.operation == draft.snapshot.operation
+                    ? "Recovered saved draft. Review it before marking the conflict resolved."
+                    : "Git or this file changed since the draft was saved. Copy or export the draft before reloading; saving over changed content is blocked."
+                return
+            }
             do {
                 let loaded = try await repository.conflict(path)
                 guard !Task.isCancelled else { return }
@@ -85,10 +96,10 @@ struct ConflictResolverView: View {
             } catch { guard !Task.isCancelled else { return }; loadError = error.localizedDescription }
         }
         .onChange(of: result) {
-            if let snapshot { store.conflictDrafts[path] = ConflictDraft(snapshot: snapshot, text: result) }
+            if let snapshot { store.updateConflictDraft(snapshot, text: result) }
         }
         .confirmationDialog("Reload the conflict and discard edits in this result?", isPresented: $showReloadConfirmation) {
-            Button("Reload Conflict", role: .destructive) { store.conflictDrafts.removeValue(forKey: path); snapshot = nil; generation += 1 }
+            Button("Reload Conflict", role: .destructive) { store.conflictDrafts.removeValue(forKey: path); snapshot = nil; restoredWarning = nil; loadError = nil; generation += 1 }
         }
     }
 }

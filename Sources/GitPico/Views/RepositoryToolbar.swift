@@ -12,8 +12,8 @@ struct RepositoryToolbar: ToolbarContent {
         }
         if let snapshot = store.snapshot, !store.isChoosingRepository {
             ToolbarItemGroup(placement: .navigation) {
-                Button(action: store.goBack) { Label("Back", systemImage: "chevron.left") }.disabled(store.backStack.isEmpty || store.isBusy).help("Back (⌘[)")
-                Button(action: store.goForward) { Label("Forward", systemImage: "chevron.right") }.disabled(store.forwardStack.isEmpty || store.isBusy).help("Forward (⌘])")
+                Button(action: store.goBack) { Label("Back", systemImage: "chevron.left") }.disabled(store.backStack.isEmpty || (store.isBusy && !store.isBackgroundFetching)).help("Back (⌘[)")
+                Button(action: store.goForward) { Label("Forward", systemImage: "chevron.right") }.disabled(store.forwardStack.isEmpty || (store.isBusy && !store.isBackgroundFetching)).help("Forward (⌘])")
             }
             ToolbarSpacer(.flexible, placement: .primaryAction)
             ToolbarItemGroup(placement: .primaryAction) {

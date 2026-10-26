@@ -9,24 +9,33 @@ struct IntegrationRequest: Identifiable {
 }
 
 extension RepositoryStore {
-    func createRepository(at url: URL, source: String?, recursive: Bool = false, allowLocalTransport: Bool = false, lfs: LFSCloneMode = .inherit) {
+    func createRepository(at url: URL, source: String?, recursive: Bool = false, allowLocalTransport: Bool = false, lfs: LFSCloneMode = .inherit, profileID: UUID? = nil) {
         guard !isBusy else { return }
         isBusy = true; activity = source == nil ? "Creating repository…" : "Cloning repository…"
         Task {
             do {
-                _ = try await GitRepository.create(at: url, source: source, recursive: recursive, allowLocalTransport: allowLocalTransport, lfs: lfs)
+                let context = networkContext(profileID: profileID, useAssignment: false)
+                let created = try await GitNetworkContexts.$current.withValue(context) {
+                    try await GitRepository.create(at: url, source: source, recursive: recursive, allowLocalTransport: allowLocalTransport, lfs: lfs)
+                }
+                var assignmentWarning: String?
+                if let profileID {
+                    do { try authentication.assign(profileID, to: await created.root) }
+                    catch { assignmentWarning = "Repository created, but the authentication assignment could not be saved. Choose the account again in Authentication. " + error.localizedDescription }
+                }
                 isBusy = false; activity = ""
                 await open(url)
+                if let assignmentWarning { self.error = assignmentWarning }
             } catch { isBusy = false; activity = ""; self.error = error.localizedDescription }
         }
     }
 
     func goBack() {
-        guard !isBusy, let target = backStack.popLast() else { return }
+        guard (!isBusy || isBackgroundFetching), let target = backStack.popLast() else { return }
         forwardStack.append(destination); navigate(target, record: false)
     }
     func goForward() {
-        guard !isBusy, let target = forwardStack.popLast() else { return }
+        guard (!isBusy || isBackgroundFetching), let target = forwardStack.popLast() else { return }
         backStack.append(destination); navigate(target, record: false)
     }
     func syncAll() {
@@ -67,8 +76,12 @@ extension RepositoryStore {
     }
 
     func resolveConflict(_ snapshot: ConflictSnapshot, resolution: ConflictResolution) {
-        perform("Saving resolved file…", refresh: .workingTree) { try await $0.resolveConflict(snapshot, resolution: resolution) }
+        perform("Saving resolved file…", refresh: .workingTree) { [weak self] repository in
+            try await repository.resolveConflict(snapshot, resolution: resolution)
+            await self?.removeResolvedDraft(snapshot.path)
+        }
     }
+    private func removeResolvedDraft(_ path: String) { conflictDrafts.removeValue(forKey: path) }
 
     func updateAmend() {
         if !amend {

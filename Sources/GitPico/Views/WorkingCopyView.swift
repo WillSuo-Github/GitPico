@@ -29,7 +29,7 @@ struct WorkingCopyView: View {
                             else { BrowserFileRow(store: store, file: file) }
                         }.tag(file.path).listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
                     }
-                }.listStyle(.plain).disabled(store.isBusy)
+                }.listStyle(.plain).disabled(store.isBusy && !store.isBackgroundFetching)
                 .overlay {
                     if files.isEmpty && (store.isLoadingWorkingFiles || store.isBusy) { ProgressView("Loading files…") }
                     else if files.isEmpty { EmptyPane(title: isFiltered ? "No matching files" : "Nothing to commit", subtitle: isFiltered ? "Change the file filter or refresh." : "Your working copy matches HEAD. Show All Files to browse the tree.", icon: isFiltered ? "line.3.horizontal.decrease.circle" : "checkmark.seal") }
@@ -183,7 +183,7 @@ struct CommitComposer: View {
         }
         .padding(12)
         .background(.bar).overlay(alignment: .top) { Divider() }
-        .disabled(store.isBusy).onChange(of: store.amend) { store.updateAmend() }
+        .disabled(store.isBusy && !store.isBackgroundFetching).onChange(of: store.amend) { store.updateAmend() }
     }
     var identityLine: String {
         guard let identity = store.snapshot?.identity, !identity.name.isEmpty else { return "No Git identity configured" }

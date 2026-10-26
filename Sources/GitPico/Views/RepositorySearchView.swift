@@ -10,7 +10,7 @@ struct RepositorySearchView: View {
     }
     var body: some View {
         ToolbarSearchField(text: Binding(get: { session.text }, set: { session.updateText($0) }), placeholder: store.destination.searchPlaceholder.map { $0 + " or actions" } ?? "Search files, branches or actions", focusRequest: $store.searchFocusRequest, selectAllOnFocus: !session.actionsOnly, session: session, presentation: session.presentation)
-            .disabled(!store.canUseRepository)
+            .disabled(!store.canUseRepository && !store.isBackgroundFetching)
             .help("Search this view, files, branches, commits and actions. Type > for actions. ⌘F to search; ⌘⇧A for actions.")
             .onChange(of: store.searchActionsRequest, initial: true) {
                 guard store.searchActionsRequest != nil, store.canUseRepository else { return }
@@ -27,6 +27,6 @@ struct RepositorySearchView: View {
             .onChange(of: store.lastUpdated) { session.invalidate() }
             .onChange(of: store.showIgnoredFiles) { session.invalidate() }
             .onChange(of: store.repositoryToken) { session.invalidate() }
-            .onChange(of: store.canUseRepository) { if !store.canUseRepository { session.endEditing() } }
+            .onChange(of: store.canUseRepository) { if !store.canUseRepository && !store.isBackgroundFetching { session.endEditing() } }
     }
 }

@@ -1,8 +1,13 @@
 import AppKit
 import Foundation
+import GitCore
 
 @main struct GitPicoLauncher {
     @MainActor static func main() {
+        if ProcessInfo.processInfo.arguments.contains("--gitpico-credential-helper") {
+            GitCredentialHelper.run(arguments: ProcessInfo.processInfo.arguments, environment: ProcessInfo.processInfo.environment)
+            return
+        }
         if ProcessInfo.processInfo.arguments.contains("--background-testing") {
             // Verification deliberately bypasses SwiftUI scene construction and restoration.
             let application = NSApplication.shared
