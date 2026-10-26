@@ -8,6 +8,7 @@ public struct RebaseStep: Identifiable, Sendable {
     public let originalMessage: String
     public var action: RebaseAction = .pick
     public var message: String
+    public var isMerge: Bool = false
 }
 
 public struct InteractiveRebasePlan: Sendable {
@@ -16,6 +17,8 @@ public struct InteractiveRebasePlan: Sendable {
     public let originalHashes: [String]
     public var onto: String
     public var steps: [RebaseStep]
+    public var preserveMerges: Bool = false
+    public var autosquash: Bool = false
 }
 
 public struct RebaseProgress: Sendable {
@@ -31,22 +34,25 @@ extension GitRepository {
         guard try await currentOperation() == .none else { throw GitFailure("Finish or abort the active operation first.") }
         let position = try await headPosition()
         guard position.branch != "HEAD", let head = position.hash else { throw GitFailure("Check out a branch with commits before rebasing.") }
-        let base = try await verifiedCommit(revision)
-        let ancestor = try await GitProcess.run(["merge-base", "--is-ancestor", base, head], at: root, allowed: [0, 1])
-        guard ancestor.status == 0 else { throw GitFailure("The starting commit must be an ancestor of HEAD.") }
-        let merges = try await GitProcess.run(["rev-list", "--merges", base + ".." + head, "--"], at: root)
-        guard merges.data.isEmpty else { throw GitFailure("This range contains merges. Choose a linear range after the last merge.") }
-        let output = try await GitProcess.run(["log", "--reverse", "--max-count=201", "--format=%H%x00%B%x00", base + ".." + head, "--"], at: root)
+        let base = revision == "--root" ? "--root" : try await verifiedCommit(revision)
+        if base != "--root" {
+            let ancestor = try await GitProcess.run(["merge-base", "--is-ancestor", base, head], at: root, allowed: [0, 1])
+            guard ancestor.status == 0 else { throw GitFailure("The starting commit must be an ancestor of HEAD.") }
+        }
+        let range = base == "--root" ? head : base + ".." + head
+        let merges = try await GitProcess.run(["rev-list", "--merges", range, "--"], at: root)
+        let mergeHashes = Set(merges.text.split(separator: "\n").map(String.init))
+        let output = try await GitProcess.run(["log", "--reverse", "--topo-order", "--max-count=201", "--format=%H%x00%B%x00", range, "--"], at: root)
         let values = output.text.components(separatedBy: "\0")
         var steps: [RebaseStep] = []; var index = 0
         while index + 1 < values.count {
             let hash = values[index].trimmingCharacters(in: .newlines)
             let message = values[index + 1].trimmingCharacters(in: .newlines)
-            steps.append(RebaseStep(hash: hash, originalMessage: message, message: message)); index += 2
+            steps.append(RebaseStep(hash: hash, originalMessage: message, message: message, isMerge: mergeHashes.contains(hash))); index += 2
         }
         guard !steps.isEmpty else { throw GitFailure("There are no commits after the selected starting point.") }
         guard steps.count <= 200 else { throw GitFailure("Choose a shorter range (up to 200 commits).") }
-        return InteractiveRebasePlan(position: position, base: base, originalHashes: steps.map(\.hash), onto: base, steps: steps)
+        return InteractiveRebasePlan(position: position, base: base, originalHashes: steps.map(\.hash), onto: base == "--root" ? "" : base, steps: steps, preserveMerges: !mergeHashes.isEmpty)
     }
 
     public func startInteractiveRebase(_ plan: InteractiveRebasePlan) async throws {
@@ -54,8 +60,12 @@ extension GitRepository {
         try await requireCleanHistoryWorktree()
         let fresh = try await rebasePlan(after: plan.base)
         guard fresh.originalHashes == plan.originalHashes, Set(plan.steps.map(\.hash)) == Set(plan.originalHashes), plan.steps.count == plan.originalHashes.count else { throw GitFailure("The rebase plan must contain every original commit exactly once. Use Drop to remove commits.") }
-        let onto = try await verifiedCommit(plan.onto)
-        for target in Set(plan.originalHashes + [plan.base, onto]) { try await protectUntrackedDestinations(target) }
+        guard plan.preserveMerges == fresh.preserveMerges else { throw GitFailure("The merge topology changed. Reload the plan.") }
+        if plan.preserveMerges {
+            guard plan.steps.map(\.hash) == plan.originalHashes, plan.steps.allSatisfy({ step in step.isMerge == fresh.steps.first(where: { $0.hash == step.hash })?.isMerge && (!step.isMerge || step.action == .pick) && ![.squash, .fixup].contains(step.action) }) else { throw GitFailure("Merge-preserving plans retain topology and merge messages. Use Pick, Reword, Edit or Drop on ordinary commits without reordering; merge rows are retained.") }
+        }
+        let onto = plan.onto.isEmpty && plan.base == "--root" ? "" : try await verifiedCommit(plan.onto)
+        for target in Set(plan.originalHashes + [plan.base, onto]).filter({ !$0.isEmpty && $0 != "--root" }) { try await protectUntrackedDestinations(target) }
         var preceding = false
         for step in plan.steps {
             if step.action == .drop { continue }
@@ -72,22 +82,44 @@ extension GitRepository {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         var todo: [String] = []
         for (index, step) in plan.steps.enumerated() {
+            if step.isMerge { continue }
+            var replacement: [String] = []
             let command = step.action == .squash ? "fixup" : step.action == .reword ? "pick" : step.action.rawValue
-            todo.append("\(command) \(step.hash)")
+            replacement.append("\(command) \(step.hash)")
             if step.action == .reword || step.action == .squash {
                 let message = directory.appendingPathComponent("message-\(index).txt")
                 try Data(step.message.utf8).write(to: message, options: .atomic)
-                todo.append("exec /usr/bin/git commit --amend --cleanup=verbatim --file " + shellQuote(message.path))
+                replacement.append("exec /usr/bin/git commit --amend --cleanup=verbatim --file " + shellQuote(message.path))
             }
+            todo += replacement
+            try Data((replacement.joined(separator: "\n") + "\n").utf8).write(to: directory.appendingPathComponent(step.hash))
         }
         let planURL = directory.appendingPathComponent("todo")
         try Data((todo.joined(separator: "\n") + "\n").utf8).write(to: planURL, options: .atomic)
         let editor = directory.appendingPathComponent("sequence-editor.sh")
-        try Data(("#!/bin/sh\nexec /bin/cp " + shellQuote(planURL.path) + " \"$1\"\n").utf8).write(to: editor, options: .atomic)
+        let editorText: String
+        if plan.preserveMerges {
+            editorText = """
+            #!/bin/sh
+            set -eu
+            output=\(shellQuote(directory.appendingPathComponent("edited-todo").path))
+            while IFS= read -r line; do
+              case "$line" in
+                'pick '*) key="${line#pick }"; key="${key%% *}"; replacement=\(shellQuote(directory.path))/"$key"; test -f "$replacement"; /bin/cat "$replacement" ;;
+                *) printf '%s\\n' "$line" ;;
+              esac
+            done < "$1" > "$output"
+            exec /bin/cp "$output" "$1"
+            """
+        } else { editorText = "#!/bin/sh\nexec /bin/cp " + shellQuote(planURL.path) + " \"$1\"\n" }
+        try Data(editorText.utf8).write(to: editor, options: .atomic)
         try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: editor.path)
         try await beginHistoryAction("Interactive Rebase", operation: .rebase)
         do {
-            _ = try await GitProcess.run(["rebase", "--interactive", "--force-rebase", "--no-autosquash", "--no-autostash", "--no-update-refs", "--no-rebase-merges", "--reschedule-failed-exec", "--empty=stop", "--onto", onto, plan.base], at: root, timeout: 120, sequenceEditor: editor)
+            let range = plan.base == "--root" ? ["--root"] : [plan.base]
+            let destination = onto.isEmpty ? [] : ["--onto", onto]
+            // Autosquash is applied to the reviewed linear plan, preserving explicit edits.
+            _ = try await GitProcess.run(["-c", "core.abbrev=\(plan.position.hash?.count ?? 40)", "-c", "rebase.abbreviateCommands=false", "rebase", "--interactive", "--force-rebase", "--no-autosquash", "--no-autostash", "--no-update-refs", plan.preserveMerges ? "--rebase-merges=no-rebase-cousins" : "--no-rebase-merges", "--reschedule-failed-exec", "--empty=stop"] + destination + range, at: root, timeout: 120, sequenceEditor: editor)
             try await finishHistoryAction()
         } catch {
             if try await currentOperation() == .none { try await clearPendingHistory() }
@@ -119,6 +151,29 @@ extension GitRepository {
         _ = try await GitProcess.run(["rebase", "--skip"], at: root, timeout: 120, acceptGeneratedMessage: true)
         try await finishHistoryAction()
         try await finishAutomaticStashIfReady()
+    }
+}
+
+extension InteractiveRebasePlan {
+    public mutating func applyAutosquash() throws {
+        guard !preserveMerges else { throw GitFailure("Autosquash is available for linear plans. Merge-preserving plans keep their topology.") }
+        var retained: [RebaseStep] = []
+        for var step in steps {
+            let subject = step.originalMessage.components(separatedBy: "\n").first ?? ""
+            let prefix = subject.hasPrefix("fixup! ") ? "fixup! " : subject.hasPrefix("squash! ") ? "squash! " : ""
+            if !prefix.isEmpty {
+                let target = String(subject.dropFirst(prefix.count))
+                if let index = retained.firstIndex(where: { $0.hash.hasPrefix(target) || $0.originalMessage.components(separatedBy: "\n").first == target }) {
+                    step.action = prefix == "fixup! " ? .fixup : .squash
+                    if step.action == .squash { step.message = retained[index].message + "\n\n" + step.originalMessage.components(separatedBy: "\n").dropFirst().joined(separator: "\n").trimmingCharacters(in: .newlines) }
+                    var insertion = index + 1
+                    while insertion < retained.count && [.fixup, .squash].contains(retained[insertion].action) { insertion += 1 }
+                    retained.insert(step, at: insertion); continue
+                }
+            }
+            retained.append(step)
+        }
+        steps = retained; autosquash = true
     }
 }
 

@@ -7,9 +7,10 @@ Usage: script/package_release.sh
 Required environment:
   GITPICO_SIGNING_IDENTITY       Developer ID Application identity
   GITPICO_TEAM_ID                Apple Developer team identifier
-  GITPICO_NOTARY_PROFILE         Existing notarytool Keychain profile
+  GITPICO_NOTARY_PROFILE         Existing notarytool Keychain profile, or set GITPICO_ASC_PROFILE
+  GITPICO_ASC_PROFILE            Existing asc authentication profile (alternative to notarytool)
   GITPICO_UPDATE_FEED_URL        Optional HTTPS appcast URL (defaults to GitHub Releases)
-  GITPICO_UPDATE_PUBLIC_KEY      Base64 Ed25519 update verification key
+  GITPICO_UPDATE_PUBLIC_KEY      Base64 Ed25519 key (defaults to Configuration/SparklePublicKey.txt)
   GITPICO_UPDATE_DOWNLOAD_PREFIX Optional HTTPS download directory (defaults to this build's GitHub Release)
 Optional:
   GITPICO_SPARKLE_BIN            Sparkle tools directory
@@ -20,15 +21,19 @@ HELP
   exit 0
 fi
 
-: "${GITPICO_SIGNING_IDENTITY:?Set a Developer ID Application identity}"
-: "${GITPICO_TEAM_ID:?Set the Apple Developer team identifier}"
-: "${GITPICO_NOTARY_PROFILE:?Set an existing notarytool Keychain profile}"
-: "${GITPICO_UPDATE_PUBLIC_KEY:?Set the public Ed25519 verification key}"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+publisher_setting() { python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get(sys.argv[2], ""))' "$ROOT_DIR/Configuration/Distribution.json" "$1"; }
+GITPICO_SIGNING_IDENTITY="${GITPICO_SIGNING_IDENTITY:-$(publisher_setting signingIdentity)}"
+GITPICO_TEAM_ID="${GITPICO_TEAM_ID:-$(publisher_setting teamID)}"
+if [[ -z "${GITPICO_NOTARY_PROFILE:-}" && -z "${GITPICO_ASC_PROFILE:-}" ]]; then GITPICO_ASC_PROFILE="$(publisher_setting ascProfile)"; fi
+[[ -n "$GITPICO_SIGNING_IDENTITY" && -n "$GITPICO_TEAM_ID" ]] || { echo 'Configure the publisher signing identity and team.' >&2; exit 1; }
+[[ -n "${GITPICO_NOTARY_PROFILE:-}" || -n "${GITPICO_ASC_PROFILE:-}" ]] || { echo 'Set GITPICO_NOTARY_PROFILE or GITPICO_ASC_PROFILE.' >&2; exit 1; }
 GITPICO_UPDATE_FEED_URL="${GITPICO_UPDATE_FEED_URL:-https://github.com/WillSuo-Github/GitPico/releases/latest/download/appcast.xml}"
 export GITPICO_UPDATE_FEED_URL
 [[ "$GITPICO_SIGNING_IDENTITY" == "Developer ID Application:"* ]] || { echo 'A Developer ID Application signing identity is required.' >&2; exit 1; }
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$ROOT_DIR"
+GITPICO_UPDATE_PUBLIC_KEY="${GITPICO_UPDATE_PUBLIC_KEY:-$(cat "$ROOT_DIR/Configuration/SparklePublicKey.txt")}"
+export GITPICO_UPDATE_PUBLIC_KEY
 [[ -z "$(git status --porcelain)" ]] || { echo 'Commit reviewed source changes before packaging a release.' >&2; exit 1; }
 python3 - <<'PY'
 import base64, os
@@ -59,7 +64,11 @@ mkdir -p "$OUTPUT_DIR"
 codesign --verify --deep --strict "$APP"
 lipo -verify_arch arm64 x86_64 "$APP/Contents/MacOS/GitPico"
 ditto -c -k --sequesterRsrc --keepParent "$APP" "$ARCHIVE_DIR/notarization.zip"
-xcrun notarytool submit "$ARCHIVE_DIR/notarization.zip" --keychain-profile "$GITPICO_NOTARY_PROFILE" --wait --output-format json > "$OUTPUT_DIR/notarization.json"
+if [[ -n "${GITPICO_ASC_PROFILE:-}" ]]; then
+  asc --profile "$GITPICO_ASC_PROFILE" notarization submit --file "$ARCHIVE_DIR/notarization.zip" --wait --output json > "$OUTPUT_DIR/notarization.json"
+else
+  xcrun notarytool submit "$ARCHIVE_DIR/notarization.zip" --keychain-profile "$GITPICO_NOTARY_PROFILE" --wait --output-format json > "$OUTPUT_DIR/notarization.json"
+fi
 python3 - "$OUTPUT_DIR/notarization.json" <<'PY'
 import json, sys
 record = json.load(open(sys.argv[1]))

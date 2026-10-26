@@ -33,6 +33,9 @@ public actor GitRepository {
         let reusable = previous.flatMap { ref == nil && !countHistory && options == HistoryOptions() && $0.root == root && $0.head == position && $0.references == references ? $0 : nil }
         if let reusable {
             commits = reusable.commits; historyCount = reusable.historyCount
+        } else if !options.query.isEmpty, hasHEAD || !references.isEmpty {
+            let page = try await historyPage(at: resolveHistory(ref), options: options)
+            commits = page.commits; historyCount = commits.count
         } else if hasHEAD || !references.isEmpty {
             let output = try await GitProcess.run(["log", "--no-show-signature", options.sortByDate ? "--date-order" : "--topo-order", "--max-count=\(options.limit)", "--format=%H%x00%P%x00%an%x00%ae%x00%at%x00%s%x00%D%x00"] + filters + selectors, at: root)
             commits = GitParser.commits(output.data)
@@ -48,7 +51,7 @@ public actor GitRepository {
         if hasHEAD, references.contains(where: { $0.isCurrent && !$0.upstream.isEmpty }) {
             (ahead, behind) = try await upstreamDivergence()
         }
-        return RepositorySnapshot(root: root, branch: branchOutput.status == 0 ? branchOutput.text.trimmingCharacters(in: .newlines).replacingOccurrences(of: "^refs/heads/", with: "", options: .regularExpression) : "Detached HEAD", changes: GitParser.status(statusOutput.data), commits: commits, references: references, stashes: stashOutput, remotes: remotesOutput.text.split(separator: "\n").map(String.init), ahead: ahead, behind: behind, hasHEAD: hasHEAD, identity: try await identity, operation: try await operation, historyCount: historyCount, head: position, historyCountIsExact: reusable?.historyCountIsExact ?? (countHistory || commits.count < options.limit))
+        return RepositorySnapshot(root: root, branch: branchOutput.status == 0 ? branchOutput.text.trimmingCharacters(in: .newlines).replacingOccurrences(of: "^refs/heads/", with: "", options: .regularExpression) : "Detached HEAD", changes: GitParser.status(statusOutput.data), commits: commits, references: references, stashes: stashOutput, remotes: remotesOutput.text.split(separator: "\n").map(String.init), ahead: ahead, behind: behind, hasHEAD: hasHEAD, identity: try await identity, operation: try await operation, historyCount: historyCount, head: position, historyCountIsExact: reusable?.historyCountIsExact ?? ((countHistory && options.query.isEmpty) || commits.count < options.limit))
     }
 
     public func diff(_ change: FileChange, staged: Bool, context: Int = 7, ignoreWhitespace: Bool = false, cancellable: Bool = false) async throws -> String {

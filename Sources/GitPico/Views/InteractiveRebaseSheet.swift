@@ -23,23 +23,34 @@ struct InteractiveRebaseSheet: View {
                     ForEach(store.isHistoryDestination ? store.visibleCommits : (store.snapshot?.commits ?? [])) { commit in Button("\(commit.shortHash) · \(commit.subject)") { base = commit.hash; Task { await load() } } }
                 }.fixedSize()
                 Button("Load Plan") { Task { await load() } }.disabled(loading || base.isEmpty)
+                Button("Include Root") { base = "--root"; Task { await load() } }.disabled(loading)
             }.font(.system(size: 12))
             if plan != nil {
-                HStack { Text("Replay onto"); TextField("Commit or ref", text: $onto).textFieldStyle(.roundedBorder); Text("Oldest first · drag or use arrows to reorder").foregroundStyle(.secondary) }.font(.system(size: 11))
+                HStack {
+                    Text("Replay onto"); TextField(base == "--root" ? "Optional new parent" : "Commit or ref", text: $onto).textFieldStyle(.roundedBorder)
+                    if plan?.preserveMerges == true { Text("Merge topology retained").foregroundStyle(.secondary) }
+                    else {
+                        Button("Autosquash") {
+                            guard var value = plan else { return }; value.steps = steps
+                            do { try value.applyAutosquash(); steps = value.steps; plan = value } catch { self.error = error.localizedDescription }
+                        }
+                    }
+                }.font(.system(size: 11))
                 List(selection: $selected) {
                     ForEach($steps) { $step in
                         HStack(spacing: 10) {
                             Image(systemName: "line.3.horizontal").foregroundStyle(.tertiary)
-                            Text(step.action.rawValue.capitalized).font(.system(size: 11, weight: .medium)).frame(width: 75, alignment: .leading)
+                            Text(step.isMerge ? "Merge" : step.action.rawValue.capitalized).font(.system(size: 11, weight: .medium)).frame(width: 75, alignment: .leading)
                                 .foregroundStyle(step.action == .drop ? Color.red : step.action == .pick ? Color.secondary : Color.purple)
                             Text(String(step.hash.prefix(8))).font(.system(size: 11, design: .monospaced)).foregroundStyle(.secondary)
                             Text(step.message.components(separatedBy: "\n").first ?? "").lineLimit(1).strikethrough(step.action == .drop).foregroundStyle(step.action == .drop ? .secondary : .primary)
                             Spacer()
-                            Button { move(step.id, by: -1) } label: { Image(systemName: "chevron.up") }.help("Move commit earlier").disabled(steps.first?.id == step.id)
-                            Button { move(step.id, by: 1) } label: { Image(systemName: "chevron.down") }.help("Move commit later").disabled(steps.last?.id == step.id)
+                            Button { move(step.id, by: -1) } label: { Image(systemName: "chevron.up") }.help("Move commit earlier").disabled(plan?.preserveMerges == true || steps.first?.id == step.id)
+                            Button { move(step.id, by: 1) } label: { Image(systemName: "chevron.down") }.help("Move commit later").disabled(plan?.preserveMerges == true || steps.last?.id == step.id)
                         }.font(.system(size: 12)).buttonStyle(.borderless).padding(.vertical, 4).tag(step.id)
                             .picoDrag(store, .rebaseStep(step.id, planID))
                             .picoRebaseDrop(store, planID: planID) { hash, after in
+                                guard plan?.preserveMerges != true else { return false }
                                 guard RebaseStepEditing.move(hash, relativeTo: step.id, after: after, steps: &steps) else { return false }
                                 selected = hash; return true
                             }
@@ -53,7 +64,7 @@ struct InteractiveRebaseSheet: View {
                 }.listStyle(.inset).frame(minHeight: 200)
                 if let index = steps.firstIndex(where: { $0.id == selected }) {
                     HStack {
-                        Picker("Action", selection: $steps[index].action) { ForEach(RebaseAction.allCases, id: \.self) { Text($0.rawValue.capitalized).tag($0) } }.frame(width: 180)
+                        Picker("Action", selection: $steps[index].action) { ForEach(RebaseAction.allCases.filter { plan?.preserveMerges != true || ![.squash, .fixup].contains($0) }, id: \.self) { Text($0.rawValue.capitalized).tag($0) } }.frame(width: 180).disabled(steps[index].isMerge)
                         Button { move(steps[index].id, by: -1) } label: { Image(systemName: "chevron.up") }.accessibilityLabel("Move Selected Commit Earlier").disabled(index == 0)
                         Button { move(steps[index].id, by: 1) } label: { Image(systemName: "chevron.down") }.accessibilityLabel("Move Selected Commit Later").disabled(index == steps.count - 1)
                         Text("Commit message").fontWeight(.medium)
@@ -63,7 +74,7 @@ struct InteractiveRebaseSheet: View {
                     TextEditor(text: $steps[index].message).font(.system(size: 12, design: .monospaced)).frame(height: 100).padding(6).background(.quaternary.opacity(0.15), in: RoundedRectangle(cornerRadius: 5))
                         .disabled(steps[index].action != .reword && steps[index].action != .squash).accessibilityLabel("Rebase commit message")
                 }
-            } else { EmptyPane(title: loading ? "Loading commits…" : "Choose the starting point", subtitle: "Only commits after this point are rewritten. Linear ranges of up to 200 commits are supported.", icon: "arrow.triangle.branch") }
+            } else { EmptyPane(title: loading ? "Loading commits…" : "Choose the starting point", subtitle: "Rewrite up to 200 commits, including the root. Merge ranges preserve Git's topology; ordinary commits support Pick, Reword, Edit and Drop.", icon: "arrow.triangle.branch") }
             if let error { Text(error).font(.callout).foregroundStyle(.red) }
             if !store.changes.isEmpty { Text(AppPreferences.shared.offerAutomaticStash ? "You will be offered to stash local changes before starting." : "Commit or stash local changes before starting.").foregroundStyle(.orange).font(.callout) }
             HStack {
@@ -74,7 +85,7 @@ struct InteractiveRebaseSheet: View {
                     guard var plan else { return }
                     plan.steps = steps; plan.onto = onto
                     store.startInteractiveRebase(plan); dismiss()
-                }.keyboardShortcut(.defaultAction).disabled(plan == nil || loading || (!store.changes.isEmpty && !AppPreferences.shared.offerAutomaticStash) || onto.isEmpty)
+                }.keyboardShortcut(.defaultAction).disabled(plan == nil || loading || (!store.changes.isEmpty && !AppPreferences.shared.offerAutomaticStash) || (onto.isEmpty && base != "--root"))
             }
         }.padding(24).frame(width: 850, height: 640)
              .task {
@@ -90,6 +101,7 @@ struct InteractiveRebaseSheet: View {
         catch { self.error = error.localizedDescription }
     }
     func move(_ id: String, by offset: Int) {
+        guard plan?.preserveMerges != true else { return }
         guard let index = steps.firstIndex(where: { $0.id == id }), steps.indices.contains(index + offset) else { return }
         steps.swapAt(index, index + offset); selected = id
     }

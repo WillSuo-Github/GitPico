@@ -29,7 +29,7 @@ struct SplitDiffView: View {
     }
     func pane(_ rows: [SplitDiffRow], right: Bool) -> some View {
         ScrollView(.horizontal) {
-            VStack(alignment: .leading, spacing: 0) {
+            LazyVStack(alignment: .leading, spacing: 0) {
                 ForEach(rows) { row in
                     let line = right ? row.right : row.left
                     HStack(spacing: 0) {

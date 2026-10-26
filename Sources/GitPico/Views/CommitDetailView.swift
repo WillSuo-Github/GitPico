@@ -51,6 +51,7 @@ struct CommitDetailView: View {
                                     }.buttonStyle(.borderless).help("Show committer, dates and tree")
                                 }.font(.system(size: 11))
                                 if metadataExpanded {
+                                    if let repository = store.repository { SignatureVerificationView(repository: repository, revision: commit.hash).id(commit.hash) }
                                     Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 6) {
                                         MetadataRow(label: "Author", value: "\(detail.metadata.author) <\(detail.metadata.authorEmail)>")
                                         MetadataRow(label: "Authored", value: detail.metadata.authorDate.formatted(date: .long, time: .standard))

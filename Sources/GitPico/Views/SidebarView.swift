@@ -197,12 +197,7 @@ struct SidebarRepositoryHeader: View {
                     RepositoryGlyph(name: name, size: 32)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(name).font(.system(size: 13, weight: .semibold)).lineLimit(1).truncationMode(.middle)
-                        HStack(spacing: 4) {
-                            Image(systemName: "arrow.triangle.branch").imageScale(.small)
-                            Text(snapshot.branch).lineLimit(1).truncationMode(.middle)
-                            if snapshot.ahead > 0 { Text("↑\(snapshot.ahead)").monospacedDigit() }
-                            if snapshot.behind > 0 { Text("↓\(snapshot.behind)").monospacedDigit() }
-                        }.font(.system(size: 11)).foregroundStyle(.secondary)
+                        SidebarHeadSummary(branch: snapshot.branch, ahead: snapshot.ahead, behind: snapshot.behind)
                     }
                     Spacer(minLength: 4)
                     Image(systemName: "chevron.up.chevron.down").font(.system(size: 10, weight: .semibold)).foregroundStyle(.tertiary)
@@ -214,7 +209,7 @@ struct SidebarRepositoryHeader: View {
             .buttonStyle(.plain)
             .disabled(store.isBusy || store.isOpeningRepository)
             .help("Switch repository\n" + snapshot.root.path)
-            .accessibilityLabel("Repository " + name + ", branch " + snapshot.branch + ". Switch repository")
+            .accessibilityLabel(Text("Repository \(name), branch \(snapshot.branch). Switch repository"))
             .contextMenu {
                 Button("Switch Repository…", action: store.showRepositories)
                 Button("Repository Settings") { store.navigate(.repositorySettings) }
@@ -224,5 +219,19 @@ struct SidebarRepositoryHeader: View {
             }
             .padding(.horizontal, 10).padding(.top, 6).padding(.bottom, 4)
         }
+    }
+}
+
+private struct SidebarHeadSummary: View {
+    let branch: String
+    let ahead: Int
+    let behind: Int
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "arrow.triangle.branch").imageScale(.small)
+            Text(branch).lineLimit(1).truncationMode(.middle)
+            if ahead > 0 { Text("↑\(ahead)").monospacedDigit() }
+            if behind > 0 { Text("↓\(behind)").monospacedDigit() }
+        }.font(.system(size: 11)).foregroundStyle(.secondary)
     }
 }

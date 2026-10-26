@@ -40,6 +40,8 @@ public struct HostedReview: Identifiable, Sendable, Equatable {
     public let head: String
     public let state: String
     public let url: URL
+    public var diffBase: String = ""
+    public var diffStart: String = ""
 }
 public struct HostedReviewFile: Identifiable, Sendable {
     public var id: String { path }
@@ -60,9 +62,10 @@ public struct HostedReviewComment: Identifiable, Sendable {
 }
 public enum HostedJSON: Encodable, Sendable {
     case text(String), flag(Bool), number(Int)
+    indirect case object([String: HostedJSON])
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        switch self { case .text(let value): try container.encode(value); case .flag(let value): try container.encode(value); case .number(let value): try container.encode(value) }
+        switch self { case .text(let value): try container.encode(value); case .flag(let value): try container.encode(value); case .number(let value): try container.encode(value); case .object(let value): try container.encode(value) }
     }
 }
 
@@ -77,8 +80,8 @@ public struct HostedReviewClient: Sendable {
         }
         self.repository = repository; self.credential = credential; self.transport = transport
     }
-    private var reviews: String { repository.route + (repository.provider == .github ? "/pulls" : "/merge_requests") }
-    private func send(_ method: String = "GET", path: String, query: [URLQueryItem] = [], body: [String: HostedJSON]? = nil) async throws -> Data {
+    var reviews: String { repository.route + (repository.provider == .github ? "/pulls" : "/merge_requests") }
+    func send(_ method: String = "GET", path: String, query: [URLQueryItem] = [], body: [String: HostedJSON]? = nil) async throws -> Data {
         try Task.checkCancellation()
         var components = URLComponents(string: repository.apiBase + path)!
         if !query.isEmpty { components.queryItems = query }
@@ -97,10 +100,10 @@ public struct HostedReviewClient: Sendable {
         }
         return response.data
     }
-    private func object(_ data: Data) throws -> [String: Any] {
+    func object(_ data: Data) throws -> [String: Any] {
         guard let result = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { throw GitFailure("Invalid hosting API response.") }; return result
     }
-    private func array(_ data: Data) throws -> [[String: Any]] {
+    func array(_ data: Data) throws -> [[String: Any]] {
         guard let result = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] else { throw GitFailure("Invalid hosting list response.") }; return result
     }
     private func review(_ value: [String: Any]) throws -> HostedReview {
@@ -113,7 +116,8 @@ public struct HostedReviewClient: Sendable {
               (url.host ?? "").lowercased() == repository.host.split(separator: ":").first.map(String.init) else { throw GitFailure("The review response did not match this host.") }
         return HostedReview(number: number, title: title, body: value[github ? "body" : "description"] as? String ?? "", author: author,
             source: (github ? head?["ref"] : value["source_branch"]) as? String ?? "", target: (github ? base?["ref"] : value["target_branch"]) as? String ?? "",
-            head: (github ? head?["sha"] : value["sha"]) as? String ?? "", state: value["merged_at"] is String ? "merged" : value["state"] as? String ?? "unknown", url: url)
+            head: (github ? head?["sha"] : value["sha"]) as? String ?? "", state: value["merged_at"] is String ? "merged" : value["state"] as? String ?? "unknown", url: url,
+            diffBase: (value["diff_refs"] as? [String: Any])?["base_sha"] as? String ?? "", diffStart: (value["diff_refs"] as? [String: Any])?["start_sha"] as? String ?? "")
     }
     public func list(state: String = "open", page: Int = 1) async throws -> [HostedReview] {
         let state = repository.provider == .gitlab && state == "open" ? "opened" : state
@@ -121,10 +125,26 @@ public struct HostedReviewClient: Sendable {
         return try array(data).map(review)
     }
     public func detail(_ number: Int) async throws -> HostedReview { try review(object(await send(path: reviews + "/\(number)"))) }
-    public func create(title: String, body: String, source: String, target: String, draft: Bool = true) async throws -> HostedReview {
-        guard !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, !source.isEmpty, !target.isEmpty, source != target, title.count <= 250, body.utf8.count <= 100_000 else { throw GitFailure("Enter a title and two different published branches (description up to 100 KB).") }
-        let fields: [String: HostedJSON] = repository.provider == .github ? ["title": .text(title), "body": .text(body), "head": .text(source), "base": .text(target), "draft": .flag(draft)] : ["title": .text(draft ? "Draft: " + title : title), "description": .text(body), "source_branch": .text(source), "target_branch": .text(target)]
-        return try review(object(await send("POST", path: reviews, body: fields)))
+    public func create(title: String, body: String, source: String, target: String, draft: Bool = true, sourceProject: String? = nil) async throws -> HostedReview {
+        let fork = try sourceProject.flatMap { value -> HostedRepository? in
+            guard !value.isEmpty else { return nil }
+            return try HostedRepository(remote: "https://" + repository.host + "/" + value + ".git", provider: repository.provider)
+        }
+        guard !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, !source.isEmpty, !target.isEmpty, source != target || (fork != nil && fork != repository), title.count <= 250, body.utf8.count <= 100_000 else { throw GitFailure("Enter a title and different published branches/projects (description up to 100 KB).") }
+        var route = reviews
+        var fields: [String: HostedJSON] = repository.provider == .github ? ["title": .text(title), "body": .text(body), "head": .text(source), "base": .text(target), "draft": .flag(draft)] : ["title": .text(draft ? "Draft: " + title : title), "description": .text(body), "source_branch": .text(source), "target_branch": .text(target)]
+        if let fork, fork != repository {
+            if repository.provider == .github {
+                let parts = fork.project.split(separator: "/").map(String.init)
+                fields["head"] = .text(parts[0] + ":" + source); fields["head_repo"] = .text(parts[1])
+            } else {
+                let project = try object(await send(path: repository.route))
+                guard let targetID = project["id"] as? Int, targetID > 0 else { throw GitFailure("The server did not identify the target project.") }
+                fields["target_project_id"] = .number(targetID)
+                route = fork.route + "/merge_requests"
+            }
+        }
+        return try review(object(await send("POST", path: route, body: fields)))
     }
     public func files(_ number: Int, page: Int = 1) async throws -> [HostedReviewFile] {
         let github = repository.provider == .github

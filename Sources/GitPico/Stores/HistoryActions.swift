@@ -14,6 +14,16 @@ struct RecoveryRequest: Identifiable {
 }
 
 extension RepositoryStore {
+    func prepareFixup(_ commit: Commit) {
+        guard canIntegrate else { return }
+        amend = false; draftBeforeAmend = nil
+        // Preserve existing prose in the description instead of silently discarding a draft.
+        let existing = commitSubject + (commitBody.isEmpty ? "" : "\n\n" + commitBody)
+        commitSubject = "fixup! " + commit.subject
+        if !existing.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { commitBody = existing }
+        navigate(.workingCopy)
+        commitFeedback = "Fixup message prepared. Stage the correction and commit, then use Autosquash in Interactive Rebase."
+    }
     func startInteractiveRebase(_ plan: InteractiveRebasePlan) {
         protectedPerform("Interactive Rebase…") { try await $0.startInteractiveRebase(plan) }
     }

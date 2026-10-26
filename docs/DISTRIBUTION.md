@@ -8,10 +8,13 @@ Keep marketing version `0.01` until release preparation is explicitly requested.
 
 Set these values locally, using the intended Apple Developer account:
 
+`Configuration/Distribution.json` now supplies the personal publisher team `NT9VR9C9HY`, its matching Developer ID identity and local ASC profile `Mac mini`. The certificate serial returned by that ASC profile matched the installed personal certificate; its Notary API history was readable. Environment variables override these nonsecret defaults. `Configuration/SparklePublicKey.txt` contains only GitPico's dedicated public verification key; the private key stays in the `com.willsuo.GitPico.updates` Keychain account. Do not regenerate/replace this key for subsequent updates.
+
 - `GITPICO_SIGNING_IDENTITY`: matching `Developer ID Application:` identity.
 - `GITPICO_TEAM_ID`: the identity's Apple Developer team.
 - `GITPICO_NOTARY_PROFILE`: an existing `notarytool` Keychain profile.
-- `GITPICO_UPDATE_PUBLIC_KEY`: public Ed25519 key from a dedicated Sparkle Keychain account.
+- `GITPICO_ASC_PROFILE`: an existing ASC CLI profile as an alternative notarization route, without exporting its API key.
+- `GITPICO_UPDATE_PUBLIC_KEY`: public Ed25519 key, defaulting to the committed public key file.
 - Optional `GITPICO_SPARKLE_ACCOUNT`: default `com.willsuo.GitPico.updates`.
 
 The Sparkle tools are downloaded by Xcode's pinned Sparkle 2.10.1 dependency. To create the dedicated signing key, run the vendor `generate_keys --help` and use its `--account` option with that dedicated account. Keep the private key in Keychain and retain a secure backup. Never commit or paste the private key or GitHub tokens into configuration, feeds, logs or release notes. The public key is compiled into the distributed app.

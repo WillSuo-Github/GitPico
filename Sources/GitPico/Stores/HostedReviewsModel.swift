@@ -18,6 +18,10 @@ enum HostedReviewAction: String, Identifiable {
     var files: [HostedReviewFile] = []
     var checks: [HostedReviewCheck] = []
     var comments: [HostedReviewComment] = []
+    var threads: [HostedReviewThread] = []
+    var threadsError: String?
+    var threadPage = 1
+    var moreThreads = false
     var checksError: String?
     var error: String?
     var busy = false
@@ -51,7 +55,7 @@ enum HostedReviewAction: String, Identifiable {
         let previous = selected
         if !append {
             generation = UUID(); client = nil; detail = nil
-            files = []; checks = []; comments = []; reviews = []
+            files = []; checks = []; comments = []; reviews = []; threads = []; moreThreads = false; threadsError = nil
             more = false; moreFiles = false; moreComments = false
         }
         busy = true; error = nil
@@ -75,7 +79,7 @@ enum HostedReviewAction: String, Identifiable {
     }
     func loadDetail() async {
         let token = UUID(); generation = token
-        detail = nil; files = []; checks = []; comments = []; checksError = nil; error = nil
+        detail = nil; files = []; checks = []; comments = []; threads = []; moreThreads = false; threadsError = nil; checksError = nil; error = nil
         guard let number = selected, let client else { return }
         do {
             let review = try await client.detail(number)
@@ -85,6 +89,10 @@ enum HostedReviewAction: String, Identifiable {
             try Task.checkCancellation(); guard token == generation else { return }
             self.detail = review; self.files = files; self.comments = comments
             filePage = 1; commentPage = 1; moreFiles = files.count == 100; moreComments = comments.count == 100
+            do {
+                let page = try await client.threadPage(review)
+                try Task.checkCancellation(); if token == generation { threads = page.items; moreThreads = page.hasMore; threadPage = 1 }
+            } catch { if token == generation && !Task.isCancelled { threadsError = GitLogRedaction.clean(error.localizedDescription) } }
             do { let checks = try await client.checks(review); try Task.checkCancellation(); if token == generation { self.checks = checks } }
             catch { if token == generation && !Task.isCancelled { checksError = GitLogRedaction.clean(error.localizedDescription) } }
             do { let statuses = try await client.legacyChecks(review); try Task.checkCancellation(); if token == generation { self.checks += statuses } }
@@ -112,16 +120,50 @@ enum HostedReviewAction: String, Identifiable {
             commentPage += 1; moreComments = items.count == 100 && commentPage < 10
         } catch { self.error = GitLogRedaction.clean(error.localizedDescription) }
     }
-    func create(title: String, body: String, source: String, target: String, draft: Bool) async -> Bool {
+    func create(title: String, body: String, source: String, target: String, draft: Bool, sourceProject: String = "") async -> Bool {
         guard !busy, let client else { return false }
         busy = true; error = nil
         defer { busy = false }
         do {
             try validateRoot()
-            let result = try await client.create(title: title, body: body, source: source, target: target, draft: draft)
+            let result = try await client.create(title: title, body: body, source: source, target: target, draft: draft, sourceProject: sourceProject.isEmpty ? nil : sourceProject)
             reviews.insert(result, at: 0); selected = result.number
             return true
         } catch { self.error = GitLogRedaction.clean(error.localizedDescription); return false }
+    }
+    func loadMoreThreads() async {
+        guard !busy, let detail, let client, threadPage < 10 else { return }
+        let token = generation
+        busy = true; defer { busy = false }
+        do {
+            let page = try await client.threadPage(detail, page: threadPage + 1)
+            guard generation == token else { return }
+            for item in page.items {
+                if let index = threads.firstIndex(where: { $0.id == item.id }) {
+                    let known = Set(threads[index].comments.map(\.id)); threads[index].comments += item.comments.filter { !known.contains($0.id) }
+                } else { threads.append(item) }
+            }
+            threadPage += 1; moreThreads = page.hasMore && threadPage < 10
+        } catch { threadsError = GitLogRedaction.clean(error.localizedDescription) }
+    }
+    func postInline(review: HostedReview, file: HostedReviewFile, line: Int, side: HostedDiffSide, text: String, project: HostedRepository) async -> Bool {
+        await threadAction(review: review, project: project) { try await $0.commentInline(review, file: file, line: line, side: side, text: text) }
+    }
+    func reply(review: HostedReview, thread: HostedReviewThread, text: String, project: HostedRepository) async -> Bool {
+        await threadAction(review: review, project: project) { try await $0.reply(review, thread: thread, text: text) }
+    }
+    func resolve(review: HostedReview, thread: HostedReviewThread, project: HostedRepository) async -> Bool {
+        await threadAction(review: review, project: project) { try await $0.resolve(review, thread: thread, resolved: !thread.resolved) }
+    }
+    private func threadAction(review: HostedReview, project: HostedRepository, action: (HostedReviewClient) async throws -> Void) async -> Bool {
+        guard !busy, let client else { return false }
+        busy = true; error = nil
+        do {
+            try validateRoot()
+            guard client.repository == project, detail?.number == review.number, detail?.head == review.head else { throw GitFailure("The selected review changed. Reopen this action.") }
+            try await action(client)
+            busy = false; await loadDetail(); return true
+        } catch { busy = false; self.error = GitLogRedaction.clean(error.localizedDescription); return false }
     }
     func execute(_ action: HostedReviewAction, review: HostedReview, text: String, repository: HostedRepository) async -> Bool {
         guard !busy, let client else { return false }

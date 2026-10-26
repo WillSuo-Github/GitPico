@@ -33,9 +33,20 @@ extension GitRepository {
     public func historyPage(at revision: HistoryRevision, options: HistoryOptions = HistoryOptions()) async throws -> CommitHistoryPage {
         guard (1...20_000).contains(options.limit), revision.hashes.allSatisfy({ [40,64].contains($0.count) && $0.allSatisfy(\.isHexDigit) }) else { throw GitFailure("Invalid history revision or page size.") }
         guard !revision.hashes.isEmpty else { return CommitHistoryPage(commits: [], hasMore: false, totalCount: 0) }
-        let filters = (options.firstParent ? ["--first-parent"] : []) + (options.query.isEmpty ? [] : ["--regexp-ignore-case", "--fixed-strings", "--grep=" + options.query])
-        let args = ["log", "--no-show-signature", options.sortByDate ? "--date-order" : "--topo-order", "--max-count=\(options.limit + 1)", "--format=%H%x00%P%x00%an%x00%ae%x00%at%x00%s%x00%D%x00"] + filters + ["--stdin", "--"]
-        let output = try await GitProcess.run(args, at: root, input: Data((revision.hashes.joined(separator: "\n") + "\n").utf8), cancellable: true)
+        let query = try HistoryQuery(options.query)
+        var tips = revision.hashes
+        if let prefix = query.hash {
+            let resolved = try await GitProcess.run(["rev-parse", "--verify", "--quiet", prefix + "^{commit}"], at: root, allowed: [0, 1, 128], cancellable: true)
+            guard resolved.status == 0 else { return CommitHistoryPage(commits: [], hasMore: false) }
+            let hash = resolved.text.trimmingCharacters(in: .newlines)
+            // A hash query must remain within the selected branch/reference scope.
+            let containing = try await GitProcess.run(["rev-list", "--max-count=1", "--ancestry-path=" + hash, "--stdin"], at: root, input: Data((tips.joined(separator: "\n") + "\n^" + hash + "\n").utf8), cancellable: true)
+            guard tips.contains(hash) || !containing.data.isEmpty else { return CommitHistoryPage(commits: [], hasMore: false) }
+            tips = [hash]
+        }
+        let filters = (query.hash == nil ? [] : ["--no-walk=unsorted"]) + (options.firstParent ? ["--first-parent"] : []) + query.arguments
+        let args = ["log", "--no-show-signature", options.sortByDate ? "--date-order" : "--topo-order", "--max-count=\(query.hash == nil ? options.limit + 1 : 1)", "--format=%H%x00%P%x00%an%x00%ae%x00%at%x00%s%x00%D%x00"] + filters + ["--stdin", "--"] + query.paths
+        let output = try await GitProcess.run(args, at: root, input: Data((tips.joined(separator: "\n") + "\n").utf8), cancellable: true)
         let commits = GitParser.commits(output.data), hasMore = commits.count > options.limit
         return CommitHistoryPage(commits: Array(commits.prefix(options.limit)), hasMore: hasMore, totalCount: hasMore ? nil : commits.count)
     }

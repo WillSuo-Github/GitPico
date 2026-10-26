@@ -114,16 +114,14 @@ Open existing repositories; inspect status/diffs; stage/unstage/commit; browse a
 - Native classic Git Flow configuration, feature/release/hotfix/support start, remote tracking, reviewed completion with annotated/signed-tag options, production/development integration and deferred topic deletion.
 - Persisted step history, merge-source ownership, restart/conflict/manual-merge continuation, protected Stop and signing-failure retention. External git-flow scripts/hooks and custom/stacked workflow engines are separate scope. See [LFS / Flow validation](VALIDATION-LFS-FLOW-2026-10-24.md).
 
-## Remaining
+## Current remaining acceptance and expansion
 
-- Enterprise/self-managed OAuth onboarding, in-app SSH-key onboarding and Pull Requests; user-authorized hosted-provider acceptance remains pending.
-- Image/binary diff rendering, external tool GUI/directory-diff acceptance, symlink/submodule conflict handling.
-- Rebase merge/root ranges, a broader undo model for non-history actions, all-ref file lineage, merge-commit patch export and richer Blame navigation.
-- Remaining drag variants and native acceptance, real tag signing and remote authentication acceptance; expanded patch conversion/link support, external-main-Git storage migration and arbitrary corrupted-pointer reconstruction, hosted LFS authentication/locking, LFS history migration/pruning, external Git Flow CLI extensions/hooks, custom workflows, stacked branches and Graphite.
-- Expanded Quick Actions (hierarchical Tab options), tabs/multiple windows, automatic branch cleanup, commit templates and user profiles.
-- Further matching of toolbar groups, typography, selection appearance, density and tied-date graph ordering against Tower.
-- macOS 26 runtime execution, broader large-repository/foreground profiling and VoiceOver audits; bounded history benchmarks and suppressed light/dark captures are available.
-- Icon, localization and distribution signing/notarization.
+The maturity completion work supersedes the old missing-feature inventory. See [completion](COMPLETION-2026-10-26.md) for current results and [parity delta](PARITY-DELTA-2026-10-26.md) for the historical Tower checklist mapping.
+
+- Complete live PR/MR/fork/inline/API-grant and enterprise permission acceptance; provider LFS quotas/locking and hardware/encrypted SSH integrations.
+- Complete native keyboard, real Chinese IME, VoiceOver, multi-display/session restoration and prolonged physical sleep/network/memory/energy acceptance.
+- Establish passing macOS 26 arm64/Intel CI and runtime evidence, notarized installation and the authenticated signed update/install/relaunch loop.
+- Further product expansion includes richer blame, combined merge patches, LFS history migration/pruning, additional drag/Quick Action variants, automatic branch management, workflow/Graphite/SVN/Gerrit integrations, syntax coloring and localization. These are distinct from the six-area maturity completion scope and full Tower parity remains incomplete.
 
 Do not represent unimplemented controls as working. Verify write operations in disposable repositories before exercising them on personal projects.
 

@@ -264,4 +264,20 @@ extension RepositoryWindowRouting {
     func refreshExternalChanges() {
         for tab in tabs where tab.root != nil { tab.store.requestAutomaticRefresh() }
     }
+    func prepareForSleep() {
+        var conflictErrors: [String] = []
+        for tab in tabs where tab.root != nil {
+            recordDraft(tab.store)
+            do { try tab.store.flushConflictDrafts() }
+            catch { conflictErrors.append(error.localizedDescription) }
+        }
+        flushDrafts(); saveSession(); networkActivity.flush()
+        if !conflictErrors.isEmpty { draftSaveWarning = ([draftSaveWarning].compactMap { $0 } + conflictErrors).joined(separator: "\n") }
+    }
+    func resumeAfterWake() {
+        for tab in tabs where tab.root != nil {
+            if monitoringEnabled { tab.store.startAutomaticRefresh() }
+            tab.store.requestAutomaticRefresh()
+        }
+    }
 }

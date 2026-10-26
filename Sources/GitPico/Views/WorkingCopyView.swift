@@ -131,6 +131,8 @@ struct WorkingFileRow: View {
 /// Bottom-anchored composer: subject, optional description, identity/options and the primary Commit button.
 struct CommitComposer: View {
     @Bindable var store: RepositoryStore
+    @State private var workflows = CommitWorkflowLibrary.shared
+    @State private var insertion: CommitTemplateInsertion?
     @State private var showBody = false
     @FocusState private var subjectFocused: Bool
     var commitTitle: String {
@@ -142,14 +144,14 @@ struct CommitComposer: View {
         VStack(alignment: .leading, spacing: 8) {
             VStack(spacing: 0) {
                 HStack(spacing: 6) {
-                    TextField("Summary", text: $store.commitSubject).textFieldStyle(.plain).font(.system(size: 13, weight: .medium)).focused($subjectFocused)
+                    TextField("Summary", text: $store.commitSubject).textFieldStyle(.plain).font(.system(size: 13, weight: .medium)).focused($subjectFocused).accessibilityLabel("Commit summary")
                     if !store.commitSubject.isEmpty { Text("\(store.commitSubject.count)").font(.system(size: 10).monospacedDigit()).foregroundStyle(store.commitSubject.count > 72 ? Pico.warning : Color.secondary.opacity(0.6)).help("Summary length; 50–72 characters reads best in logs") }
                     Button { showBody.toggle() } label: { Image(systemName: "text.alignleft").foregroundStyle(showBody || !store.commitBody.isEmpty ? Color.accentColor : .secondary) }
                         .buttonStyle(.plain).help(showBody ? "Hide description" : "Add a description")
                 }.padding(.horizontal, 10).frame(height: 32)
                 if showBody || !store.commitBody.isEmpty {
                     Divider().padding(.horizontal, 8)
-                    TextEditor(text: $store.commitBody).font(.system(size: 12)).frame(height: 76).scrollContentBackground(.hidden).padding(.horizontal, 5).padding(.vertical, 4)
+                    TextEditor(text: $store.commitBody).font(.system(size: 12)).frame(height: 76).scrollContentBackground(.hidden).padding(.horizontal, 5).padding(.vertical, 4).accessibilityLabel("Commit description")
                         .overlay(alignment: .topLeading) { if store.commitBody.isEmpty { Text("Description").font(.system(size: 12)).foregroundStyle(.tertiary).padding(.horizontal, 10).padding(.vertical, 4).allowsHitTesting(false) } }
                 }
             }
@@ -166,6 +168,22 @@ struct CommitComposer: View {
                 Toggle("Amend", isOn: $store.amend).toggleStyle(.checkbox).font(.system(size: 11)).disabled(store.snapshot?.hasHEAD != true).help("Replace the last commit with the staged changes")
                 Menu {
                     Toggle("Add Signed-off-by Trailer", isOn: $store.signOff)
+                    Menu("Insert Template") {
+                        ForEach(workflows.templates) { template in
+                            Button(template.name) { insertion = CommitTemplateInsertion(name: template.name, text: template.text, root: store.snapshot?.root) }
+                        }
+                        Button("Repository Git Template…") {
+                            guard let repository = store.repository else { return }
+                            let root = store.snapshot?.root
+                            Task {
+                                do { let text = try await repository.configuredCommitTemplate(); guard root == store.snapshot?.root else { return }; insertion = CommitTemplateInsertion(name: "Repository Git Template", text: text, root: root) }
+                                catch { store.error = error.localizedDescription }
+                            }
+                        }
+                    }
+                    Menu("Use Identity") {
+                        ForEach(workflows.identities) { identity in Button(identity.label + " · " + identity.email) { store.saveIdentity(name: identity.name, email: identity.email) } }
+                    }.disabled(workflows.identities.isEmpty)
                     Button("Edit Identity…") { store.navigate(.repositorySettings) }
                 } label: { Image(systemName: store.signOff ? "signature" : "ellipsis.circle") }
                     .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help(store.signOff ? "Signed-off-by will be added" : "Commit options")
@@ -184,6 +202,7 @@ struct CommitComposer: View {
         .padding(12)
         .background(.bar).overlay(alignment: .top) { Divider() }
         .disabled(store.isBusy && !store.isBackgroundFetching).onChange(of: store.amend) { store.updateAmend() }
+        .sheet(item: $insertion) { CommitTemplateInsertionView(store: store, insertion: $0) }
     }
     var identityLine: String {
         guard let identity = store.snapshot?.identity, !identity.name.isEmpty else { return "No Git identity configured" }

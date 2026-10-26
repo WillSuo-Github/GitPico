@@ -1,5 +1,7 @@
 # Tower parity audit — 2026-10-24
 
+**Historical capture:** this table retains the original audit evidence. For subsequently implemented maturity features and current acceptance limits, use the [2026-10-26 parity delta](PARITY-DELTA-2026-10-26.md) and [completion record](COMPLETION-2026-10-26.md); do not treat old missing rows as current source inventory.
+
 GitPico is not feature-complete relative to Tower. This is the observed baseline and implementation backlog for the installed **Tower 18.0 (564)**, compared with GitPico **0.01** (date-based development builds). All missing and partial items remain in scope; the first implementation batch does not close the overall parity request.
 
 ## Method and evidence

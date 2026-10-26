@@ -3,6 +3,44 @@ import GitCore
 import Testing
 @testable import GitPico
 
+@Test @MainActor func sleepWakeReconciliationPreservesDraftsSelectionAndExternalEdits() async throws {
+    let t = try await TabFixture.make(); defer { t.clean() }
+    let workspace = t.workspace
+    await workspace.open(await t.f.repository.root)
+    let store = workspace.activeStore
+    store.commitSubject = "Before sleeping"; store.commitBody = "Keep this draft"
+    workspace.prepareForSleep()
+    try await t.f.write("a.txt", "external edit while asleep\n")
+    workspace.resumeAfterWake(); await store.refreshAutomatically(); await store.detailTask?.value
+    #expect(store.changes.contains { $0.path == "a.txt" })
+    #expect(store.commitSubject == "Before sleeping" && store.commitBody == "Keep this draft")
+    #expect(workspace.draftSaveWarning == nil && workspace.sessionSaveWarning == nil)
+    let reopened = RepositoryDraftStore(file: workspace.drafts.file)
+    #expect(reopened.values[store.snapshot!.root.path]?.subject == "Before sleeping")
+}
+
+@Test(.enabled(if: ProcessInfo.processInfo.environment["GITPICO_RUN_SESSION_STRESS"] == "1", "Explicit repeated workspace/draft/refresh stress; not physical sleep or an energy soak."))
+@MainActor func repeatedSessionSavesAndRefreshesKeepIndependentDrafts() async throws {
+    let t = try await TabFixture.make(); defer { t.clean() }
+    let workspace = t.workspace
+    await workspace.open(await t.f.repository.root)
+    let first = workspace.activeTab
+    workspace.newTab(); await workspace.open(t.second)
+    let second = workspace.activeTab
+    for round in 0..<40 {
+        first.store.commitSubject = "First \(round)"; second.store.commitSubject = "Second \(round)"
+        try await t.f.write("a.txt", "round \(round)\n")
+        workspace.prepareForSleep(); workspace.resumeAfterWake()
+        await first.store.refreshAutomatically()
+        workspace.select(round.isMultiple(of: 2) ? first.id : second.id)
+        workspace.saveSession()
+        #expect(workspace.draftSaveWarning == nil && workspace.sessionSaveWarning == nil)
+        #expect(first.store.commitSubject == "First \(round)" && second.store.commitSubject == "Second \(round)")
+        #expect(first.store.historyCache.count <= 16)
+    }
+    #expect(WorkspaceSessionStore(file: workspace.session.file).saved?.tabs.count == 2)
+}
+
 @Test @MainActor func workspaceSessionRestoresRepositoriesNavigationSelectionAndDrafts() async throws {
     let t = try await TabFixture.make(); defer { t.clean() }
     let w = t.workspace

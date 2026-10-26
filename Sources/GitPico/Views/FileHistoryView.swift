@@ -36,20 +36,21 @@ struct FileHistoryView: View {
                 else if isLoading && history == nil { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
                 else if path.isEmpty { EmptyPane(title: "File History", subtitle: "Choose a tracked file to inspect its commits, including earlier names.", icon: "doc.text.magnifyingglass") }
                 else {
-                    ScrollView {
-                        LazyVStack(spacing: 0) {
+                    List(selection: $selected) {
                             ForEach(filtered) { entry in
                                 CommitRow(commit: entry.commit, graph: nil, graphWidth: 0, selected: selected == entry.id, fileActions: sourceRevision(entry).map { HistoricalFileMenu(store: store, revision: $0, paths: [entry.path], destination: path) })
-                                    .background(selected == entry.id ? Color(nsColor: .selectedContentBackgroundColor) : .clear, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                    .tag(entry.id)
                                     .padding(.horizontal, 6)
                                     .contentShape(Rectangle())
                                     .onTapGesture(count: 2) { showCommit(entry.commit) }
-                                    .onTapGesture { selected = entry.id }
                             }
                             if history?.hasMore == true {
                                 Button("Load 500 More Commits") { limit += 500 }.controlSize(.small).padding(14).disabled(isLoading || limit >= 10_000)
                             }
-                        }
+                    }.listStyle(.plain).accessibilityLabel("File history commits")
+                    .onKeyPress(.return) {
+                        guard let entry = filtered.first(where: { $0.id == selected }) else { return .ignored }
+                        showCommit(entry.commit); return .handled
                     }
                     if filtered.isEmpty { Text("No matching commits").font(.caption).foregroundStyle(.secondary).padding() }
                 }

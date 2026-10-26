@@ -8,6 +8,7 @@ extension GitRepository {
         guard source.hash != target.hash, let sourceParent = source.parents.first, let targetParent = target.parents.first else { throw GitFailure("Choose two different non-root commits on the current linear branch.") }
         let sourceOlder = try await GitProcess.run(["merge-base", "--is-ancestor", source.hash, target.hash], at: root, allowed: [0, 1]).status == 0
         var plan = try await rebasePlan(after: sourceOlder ? sourceParent : targetParent)
+        guard !plan.preserveMerges else { throw GitFailure("Use the merge-preserving Interactive Rebase sheet for this range; drag reordering requires a linear range.") }
         guard let from = plan.steps.firstIndex(where: { $0.hash == source.hash }), plan.steps.contains(where: { $0.hash == target.hash }) else { throw GitFailure("Drag commits within the current linear branch to reorder or combine them. Use the HEAD branch to cherry-pick other commits.") }
         var moved = plan.steps.remove(at: from)
         guard let to = plan.steps.firstIndex(where: { $0.hash == target.hash }) else { throw GitFailure("The target commit is no longer in the plan.") }

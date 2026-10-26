@@ -27,6 +27,9 @@ struct GitPicoApp: App {
         } else {
             UpdateController.shared.startIfConfigured(authentication: workspace.authentication)
             workspace.startMonitoring()
+            let notifications = NSWorkspace.shared.notificationCenter
+            notifications.addObserver(self, selector: #selector(systemWillSleep(_:)), name: NSWorkspace.willSleepNotification, object: nil)
+            notifications.addObserver(self, selector: #selector(systemDidWake(_:)), name: NSWorkspace.didWakeNotification, object: nil)
             Task { await workspace.startup() }
             NSApp.activate(ignoringOtherApps: true)
         }
@@ -37,6 +40,12 @@ struct GitPicoApp: App {
     }
     func applicationDidBecomeActive(_ notification: Notification) {
         if !NativeStartupVerification.enabled { workspace.refreshExternalChanges() }
+    }
+    @objc nonisolated private func systemWillSleep(_ notification: Notification) {
+        Task { @MainActor [weak self] in self?.workspace.prepareForSleep() }
+    }
+    @objc nonisolated private func systemDidWake(_ notification: Notification) {
+        Task { @MainActor [weak self] in self?.workspace.resumeAfterWake() }
     }
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         if NativeStartupVerification.enabled { return .terminateNow }
@@ -101,6 +110,7 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .tabItem { Label("General", systemImage: "gearshape") }
+        CommitWorkflowSettingsView().tabItem { Label("Commits", systemImage: "doc.text") }
         ExternalToolSettingsView(preferences: tools).tabItem { Label("External Tools", systemImage: "arrow.left.arrow.right") }
         AuthenticationSettingsView(store: store).tabItem { Label("Authentication", systemImage: "person.badge.key") }
         SSHKeysSettingsView().tabItem { Label("SSH Keys", systemImage: "key") }

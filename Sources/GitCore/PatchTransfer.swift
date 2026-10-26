@@ -40,7 +40,7 @@ extension GitRepository {
 
     public func previewPatch(_ data: Data, destination: PatchDestination, reverse: Bool = false) async throws -> LocalChangePlan {
         let paths = try await patchPaths(data)
-        try await requireLocalChangeSupport(paths)
+        try await requireLocalChangeSupport(paths, allowStructural: true)
         if destination != .index {
             let autocrlf = try await GitProcess.run(["config", "--get", "core.autocrlf"], at: root, allowed: [0, 1]).text.trimmingCharacters(in: .newlines)
             let attributes = try await GitProcess.run(["check-attr", "-z", "--stdin", "filter", "working-tree-encoding", "text", "eol"], at: root, input: Data((paths.joined(separator: "\0") + "\0").utf8)).text.components(separatedBy: "\0")
@@ -61,10 +61,11 @@ extension GitRepository {
             _ = try await GitProcess.run(["apply", "--cached", "--check"] + options + ["-"], at: root, input: data, indexFile: temporaryIndex)
             _ = try await GitProcess.run(["apply", "--cached"] + options + ["-"], at: root, input: data, indexFile: temporaryIndex)
             let entries = try await GitProcess.run(["ls-files", "--stage", "-z", "--"] + paths, at: root, indexFile: temporaryIndex).text.components(separatedBy: "\0")
-            guard !entries.contains(where: { $0.hasPrefix("120000 ") || $0.hasPrefix("160000 ") }) else { throw GitFailure("Patches that create links or submodules are not supported.") }
+            if destination != .index, entries.contains(where: { $0.hasPrefix("160000 ") }) { throw GitFailure("Submodule patches update recorded commits. Choose Index Only to preserve nested working files, then update submodules separately.") }
         }
         var after = before
         if destination != .index {
+            guard !before.contains(where: { $0.directory == true }) else { throw GitFailure("Choose Index Only for a patch affecting a submodule directory.") }
             let worktree = directory.appendingPathComponent("worktree")
             try FileManager.default.createDirectory(at: worktree, withIntermediateDirectories: true)
             _ = try await GitProcess.run(["init", "-q", "-b", "main"], at: worktree)

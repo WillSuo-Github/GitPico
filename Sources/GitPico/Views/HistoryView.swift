@@ -22,6 +22,8 @@ struct HistoryView: View {
                     }
                     if store.isLoadingHistory { ProgressView().controlSize(.mini).help("Loading history…") }
                     Menu {
+                        Text("Search: author:\"Name\" after:2026-01-01 before:2026-12-31 path:\"Sources/File.swift\" hash:abcd message:\"fix\"")
+                        Divider()
                         Toggle("Show Graph", isOn: $preferences.historyShowGraph)
                         Toggle("Show First Parent Only", isOn: $store.historyOptions.firstParent)
                         Divider()
@@ -62,9 +64,8 @@ struct HistoryCommitActions: View {
             Button("Cherry-Pick Commit…") { store.integrationRequest = IntegrationRequest(action: .cherryPick, revision: commit.hash) }
             Button("Revert Commit…") { store.integrationRequest = IntegrationRequest(action: .revert, revision: commit.hash) }
             Button("Compare with Revision…") { store.navigate(.comparison(commit.hash)) }
-            if !commit.parents.isEmpty {
-                Button("Interactively Rebase from Here…") { store.rebaseRequest = RebaseRequest(base: commit.parents.first) }
-            }
+            Button("Prepare Fixup for This Commit") { store.prepareFixup(commit) }
+            Button("Interactively Rebase from Here…") { store.rebaseRequest = RebaseRequest(base: commit.parents.first ?? "--root") }
             Button("Restore HEAD Here…") { store.recoveryRequest = RecoveryRequest(action: .restore(commit.hash)) }
             Button("Create Branch Here…") { store.recoveryRequest = RecoveryRequest(action: .branch(commit.hash)) }
         }.disabled(!canModifyHistory)

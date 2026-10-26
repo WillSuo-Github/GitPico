@@ -14,6 +14,7 @@ struct HostedReviewDetailView: View {
     @State private var selectedFile: String?
     @State private var comment = ""
     @State private var confirmation: HostedReviewConfirmation?
+    @State private var inline: HostedInlineRequest?
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             if let review = model.detail {
@@ -24,7 +25,7 @@ struct HostedReviewDetailView: View {
                     }
                     Spacer(); Link("Open on Web", destination: review.url)
                 }
-                Picker("Review detail", selection: $tab) { ForEach(["Overview", "Files", "Checks"], id: \.self) { Text($0).tag($0) } }.pickerStyle(.segmented)
+                Picker("Review detail", selection: $tab) { ForEach(["Overview", "Files", "Discussions", "Checks"], id: \.self) { Text($0).tag($0) } }.pickerStyle(.segmented)
                 if tab == "Files" {
                     HSplitView {
                         VStack {
@@ -32,9 +33,14 @@ struct HostedReviewDetailView: View {
                             if model.moreFiles { Button("Load More Files") { Task { await model.loadMoreFiles() } } }
                         }
                         if let file = model.files.first(where: { $0.path == selectedFile }) {
-                            DiffView(text: file.patch ?? "The server did not return a text patch. Open the review on the web for binary, oversized or truncated differences.", title: file.path)
+                            VStack {
+                                HStack { Text(file.path).font(.caption).lineLimit(1); Spacer(); Button("Comment on Line…") { if let project = model.client?.repository { inline = HostedInlineRequest(review: review, file: file, project: project) } }.disabled(file.patch == nil || model.busy) }
+                                DiffView(text: file.patch ?? "The server did not return a text patch. Open the review on the web for binary, oversized or truncated differences.", title: file.path)
+                            }
                         } else { Text("Select a file").foregroundStyle(.secondary).frame(maxWidth: .infinity, maxHeight: .infinity) }
                     }
+                } else if tab == "Discussions" {
+                    HostedReviewThreadsView(model: model)
                 } else if tab == "Checks" {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 10) {
@@ -71,6 +77,7 @@ struct HostedReviewDetailView: View {
                 }.disabled(model.busy)
             } else { ContentUnavailableView("Select a Review", systemImage: "arrow.triangle.pull") }
         }.padding(12)
+        .sheet(item: $inline) { HostedInlineCommentView(model: model, request: $0) }
         .onChange(of: model.selected) { selectedFile = nil; comment = "" }
         .confirmationDialog(confirmation?.action.rawValue ?? "Review Action", isPresented: Binding(get: { confirmation != nil }, set: { if !$0 { confirmation = nil } })) {
             if let captured = confirmation {

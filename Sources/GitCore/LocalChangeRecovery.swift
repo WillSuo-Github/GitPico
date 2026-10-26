@@ -10,6 +10,8 @@ struct LocalFileState: Codable, Equatable, Sendable {
     let path: String
     let data: Data?
     let permissions: Int?
+    var symbolicLink: String? = nil
+    var directory: Bool? = nil
 }
 
 public struct LocalChangePlan: Sendable, Identifiable {
@@ -72,7 +74,7 @@ extension GitRepository {
         return try Data(contentsOf: url)
     }
 
-    func validateLocalPath(_ path: String, in directory: URL? = nil) throws -> URL {
+    func validateLocalPath(_ path: String, in directory: URL? = nil, allowLeafLink: Bool = false) throws -> URL {
         try validateInspectionPath(path)
         let components = path.components(separatedBy: "/")
         guard components.allSatisfy({ !$0.isEmpty && $0.precomposedStringWithCanonicalMapping.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) != ".git" }) else {
@@ -84,7 +86,7 @@ extension GitRepository {
             url.appendPathComponent(component)
             if let attributes = try localAttributes(url) {
                 let type = attributes[.type] as? FileAttributeType
-                guard type != .typeSymbolicLink, index == components.count - 1 || type == .typeDirectory else {
+                guard (type != .typeSymbolicLink || (allowLeafLink && index == components.count - 1)), index == components.count - 1 || type == .typeDirectory else {
                     throw GitFailure("A path contains a symbolic link or a non-directory parent: \(path)")
                 }
             }
@@ -95,10 +97,16 @@ extension GitRepository {
     func localFiles(_ paths: [String], in directory: URL? = nil) throws -> [LocalFileState] {
         var total = 0
         return try paths.map { path in
-            let url = try validateLocalPath(path, in: directory)
+            let url = try validateLocalPath(path, in: directory, allowLeafLink: true)
             guard let attributes = try localAttributes(url) else {
                 return LocalFileState(path: path, data: nil, permissions: nil)
             }
+            if attributes[.type] as? FileAttributeType == .typeSymbolicLink {
+                let target = try FileManager.default.destinationOfSymbolicLink(atPath: url.path)
+                guard !target.isEmpty, target.utf8.count <= 4096, !target.utf8.contains(0) else { throw GitFailure("Invalid symbolic-link target: " + path) }
+                return LocalFileState(path: path, data: nil, permissions: nil, symbolicLink: target)
+            }
+            if attributes[.type] as? FileAttributeType == .typeDirectory { return LocalFileState(path: path, data: nil, permissions: nil, directory: true) }
             guard attributes[.type] as? FileAttributeType == .typeRegular,
                   (attributes[.referenceCount] as? NSNumber)?.intValue ?? 1 <= 1 else {
                 throw GitFailure("Local change recovery supports regular files, not directories, links or submodules: \(path)")
@@ -113,7 +121,17 @@ extension GitRepository {
     }
 
     func writeLocalFile(_ state: LocalFileState, in directory: URL? = nil) throws {
-        let url = try validateLocalPath(state.path, in: directory)
+        let url = try validateLocalPath(state.path, in: directory, allowLeafLink: true)
+        guard state.directory != true, try localAttributes(url)?[.type] as? FileAttributeType != .typeDirectory else { throw GitFailure("Patch and recovery operations preserve submodule directories. Update them separately.") }
+        if let target = state.symbolicLink {
+            guard state.data == nil, !target.isEmpty, target.utf8.count <= 4096, !target.utf8.contains(0) else { throw GitFailure("Invalid symbolic-link recovery record.") }
+            try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            let temporary = url.deletingLastPathComponent().appendingPathComponent(".gitpico-link-" + UUID().uuidString)
+            defer { try? FileManager.default.removeItem(at: temporary) }
+            try FileManager.default.createSymbolicLink(atPath: temporary.path, withDestinationPath: target)
+            guard Darwin.rename(temporary.path, url.path) == 0 else { throw GitFailure("Unable to install the symbolic link: " + state.path) }
+            return
+        }
         if let data = state.data {
             try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
             let temporary = url.deletingLastPathComponent().appendingPathComponent(".gitpico-" + UUID().uuidString)
@@ -124,7 +142,7 @@ extension GitRepository {
             try handle.write(contentsOf: data); try handle.synchronize()
             try FileManager.default.setAttributes([.posixPermissions: state.permissions ?? 0o644], ofItemAtPath: temporary.path)
             guard Darwin.rename(temporary.path, url.path) == 0 else { throw GitFailure("Unable to replace " + state.path) }
-        } else if FileManager.default.fileExists(atPath: url.path) { try FileManager.default.removeItem(at: url) }
+        } else if try localAttributes(url) != nil { try FileManager.default.removeItem(at: url) }
     }
 
     func validateLocalStates(_ before: [LocalFileState], _ after: [LocalFileState]) throws {
@@ -132,23 +150,32 @@ extension GitRepository {
             throw GitFailure("Invalid local recovery file records.")
         }
         for states in [before, after] {
+            guard states.allSatisfy({ state in
+                (state.symbolicLink == nil || (state.data == nil && state.directory != true && !state.symbolicLink!.isEmpty && state.symbolicLink!.utf8.count <= 4096 && !state.symbolicLink!.utf8.contains(0))) && (state.directory != true || (state.data == nil && state.symbolicLink == nil))
+            }) else { throw GitFailure("Invalid structural recovery state.") }
             guard states.allSatisfy({ ($0.data?.count ?? 0) <= 16 * 1024 * 1024 }),
                   states.reduce(0, { $0 + ($1.data?.count ?? 0) }) <= 32 * 1024 * 1024 else { throw GitFailure("Recovery exceeds the 16 MB file or 32 MB selection limit.") }
         }
     }
 
-    func requireLocalChangeSupport(_ paths: [String]) async throws {
+    func requireLocalChangeSupport(_ paths: [String], allowStructural: Bool = false) async throws {
         guard !paths.isEmpty, paths.count <= 512, Set(paths.map { $0.precomposedStringWithCanonicalMapping.lowercased() }).count == paths.count else {
             throw GitFailure("Choose between 1 and 512 distinct file paths without case aliases.")
         }
         try await requireIdleManagement()
-        for path in paths { _ = try validateLocalPath(path) }
+        for path in paths {
+            let url = try validateLocalPath(path, allowLeafLink: allowStructural)
+            if !allowStructural, let attributes = try localAttributes(url) {
+                guard attributes[.type] as? FileAttributeType == .typeRegular else { throw GitFailure("Choose regular files for this operation: " + path) }
+            }
+            guard !paths.contains(where: { $0 != path && $0.hasPrefix(path + "/") }) else { throw GitFailure("Select paths without nested destinations for patch/recovery operations.") }
+        }
         let shared = try await GitProcess.run(["rev-parse", "--shared-index-path"], at: root).text.trimmingCharacters(in: .newlines)
         guard shared.isEmpty else { throw GitFailure("Disable the split index before using local change recovery.") }
         let sparse = try await GitProcess.run(["config", "--bool", "core.sparseCheckout"], at: root, allowed: [0, 1])
         guard sparse.text.trimmingCharacters(in: .newlines) != "true" else { throw GitFailure("Expand the sparse checkout before discarding or importing patches.") }
         let entries = try await GitProcess.run(["ls-files", "--stage", "-z", "--"] + paths, at: root).text.components(separatedBy: "\0")
-        guard !entries.contains(where: { $0.hasPrefix("120000 ") || $0.hasPrefix("160000 ") || (!$0.isEmpty && !$0.components(separatedBy: "\t")[0].hasSuffix(" 0")) }) else {
+        guard !entries.contains(where: { (!allowStructural && ($0.hasPrefix("120000 ") || $0.hasPrefix("160000 "))) || (!$0.isEmpty && !$0.components(separatedBy: "\t")[0].hasSuffix(" 0")) }) else {
             throw GitFailure("Resolve conflicts and handle symbolic links or submodules with Git before continuing.")
         }
         let flags = try await GitProcess.run(["ls-files", "-v", "-z", "--"] + paths, at: root).data.split(separator: 0)
@@ -234,7 +261,7 @@ extension GitRepository {
         guard plan.repository == root.path, try await headPosition() == plan.head else { throw GitFailure("The repository or HEAD changed. Reopen the preview.") }
         try validateLocalStates(plan.before, plan.after)
         guard plan.paths == plan.before.map(\.path) else { throw GitFailure("Invalid local change plan.") }
-        try await requireLocalChangeSupport(plan.paths)
+        try await requireLocalChangeSupport(plan.paths, allowStructural: true)
         let indexURL = try await localIndexURL()
         guard try readLocalIndex(indexURL) == plan.beforeIndex, try localFiles(plan.paths) == plan.before else {
             throw GitFailure("Files or staging changed after the preview. Reopen it before continuing.")
@@ -322,7 +349,7 @@ extension GitRepository {
         }
         try validateLocalStates(record.before, record.after)
         guard ["prepared", "applied"].contains(record.state) else { throw GitFailure("Invalid local recovery state.") }
-        try await requireLocalChangeSupport(record.paths)
+        try await requireLocalChangeSupport(record.paths, allowStructural: true)
         guard try await headPosition() == record.head else { throw GitFailure("HEAD changed since this backup. Return to the original branch and commit before restoring.") }
         let indexURL = try await localIndexURL(), index = try readLocalIndex(indexURL), current = try localFiles(record.paths)
         let matches = record.state == "prepared"

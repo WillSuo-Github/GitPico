@@ -61,16 +61,22 @@ import Testing
     await #expect(throws: GitFailure.self) { try await f.repo.previewPatch(data, destination: .both) }
 }
 
-@Test func patchTraversalGitMetadataAndSymlinkAreRejected() async throws {
+@Test func patchTraversalGitMetadataAndSymlinkParentAreRejected() async throws {
     let f = try await Fixture.make(); defer { f.clean() }
     for path in ["../outside", ".git/config", "a/.GIT/config", "/tmp/GitPico-escape"] {
         let patch = Data("diff --git a/\(path) b/\(path)\nnew file mode 100644\n--- /dev/null\n+++ b/\(path)\n@@ -0,0 +1 @@\n+malicious\n".utf8)
         await #expect(throws: (any Error).self) { try await f.repo.previewPatch(patch, destination: .workingCopy) }
     }
-    let link = Data("diff --git a/link b/link\nnew file mode 120000\nindex 0000000..0000000\n--- /dev/null\n+++ b/link\n@@ -0,0 +1 @@\n+/tmp/outside\n".utf8)
-    await #expect(throws: (any Error).self) { try await f.repo.previewPatch(link, destination: .workingCopy) }
-    #expect(!FileManager.default.fileExists(atPath: f.url.appendingPathComponent("link").path))
-    #expect(try await f.repo.snapshot().changes.isEmpty)
+    let outside = FileManager.default.temporaryDirectory.appendingPathComponent("GitPico-patch-outside-" + UUID().uuidString)
+    try FileManager.default.createDirectory(at: outside, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: outside) }
+    let sentinel = outside.appendingPathComponent("escape.txt")
+    try Data("outside unchanged\n".utf8).write(to: sentinel)
+    try FileManager.default.createSymbolicLink(atPath: f.url.appendingPathComponent("link").path, withDestinationPath: outside.path)
+    let traversal = Data("diff --git a/link/escape.txt b/link/escape.txt\n--- a/link/escape.txt\n+++ b/link/escape.txt\n@@ -1 +1 @@\n-outside unchanged\n+malicious\n".utf8)
+    await #expect(throws: (any Error).self) { try await f.repo.previewPatch(traversal, destination: .workingCopy) }
+    #expect(try String(contentsOf: sentinel, encoding: .utf8) == "outside unchanged\n")
+    #expect(try await f.repo.localChangeBackups().isEmpty)
 }
 
 @Test func selectedLinePatchAndReverseImportPreserveOtherChanges() async throws {

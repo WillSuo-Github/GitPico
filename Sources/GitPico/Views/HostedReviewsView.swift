@@ -50,17 +50,20 @@ struct HostedReviewCreateView: View {
     @State private var source = ""
     @State private var target = "main"
     @State private var draft = true
+    @State private var sourceProject = ""
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             SheetTitle("Create Review", icon: "arrow.triangle.pull")
             TextField("Title", text: $title)
             HStack { TextField("Published source branch", text: $source); Text("→"); TextField("Target branch", text: $target) }
+            TextField("Source fork project (optional, owner/repository)", text: $sourceProject)
+            Text("Target project: " + (model.client?.repository.project ?? "")).font(.caption).textSelection(.enabled)
             Text("Push the source branch before creating the review. This action creates a review on the selected remote; it does not push commits.").font(.caption).foregroundStyle(.secondary)
             TextEditor(text: $bodyText).font(.body).frame(height: 160).border(.separator)
             Toggle("Create as draft", isOn: $draft)
             if let error = model.error { Text(error).foregroundStyle(Pico.deletion).font(.caption) }
-            HStack { Spacer(); Button("Cancel") { dismiss() }; Button("Create") { Task { if await model.create(title: title, body: bodyText, source: source, target: target, draft: draft) { dismiss() } } }.disabled(model.busy || title.isEmpty || source.isEmpty || target.isEmpty || source == target) }
+            HStack { Spacer(); Button("Cancel") { dismiss() }; Button("Create") { Task { if await model.create(title: title, body: bodyText, source: source, target: target, draft: draft, sourceProject: sourceProject) { dismiss() } } }.disabled(model.busy || title.isEmpty || source.isEmpty || target.isEmpty || (source == target && sourceProject.isEmpty)) }
         }.padding(24).frame(width: 600).onAppear { source = model.store.snapshot?.branch ?? "" }
     }
 }

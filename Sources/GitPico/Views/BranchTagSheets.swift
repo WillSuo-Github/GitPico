@@ -129,6 +129,7 @@ struct TagInformationSheet: View {
         VStack(alignment: .leading, spacing: 14) {
             SheetTitle(reference.name, icon: "tag")
             Text(reference.hash).font(.system(size: 11, design: .monospaced)).textSelection(.enabled)
+            if let repository = store.repository { SignatureVerificationView(repository: repository, revision: reference.hash, tag: true) }
             ScrollView { Text(text).font(.system(size: 12, design: .monospaced)).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading) }
             HStack { Spacer(); Button("Close") { dismiss() }.keyboardShortcut(.cancelAction) }
         }.padding(24).frame(width: 680, height: 450)

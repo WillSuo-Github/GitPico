@@ -59,11 +59,11 @@ struct ConflictResolverView: View {
                     TextEditor(text: $result).font(.system(size: 12, design: .monospaced)).scrollContentBackground(.hidden)
                         .padding(8).accessibilityLabel("Conflict resolution result")
                 } else {
-                    EmptyPane(title: "Choose a complete version", subtitle: "Binary or large files cannot be edited here. Symbolic links and submodules require an external Git tool.", icon: "doc.badge.gearshape")
+                    EmptyPane(title: "Choose a complete version", subtitle: snapshot.versions.contains(where: { $0.mode == "160000" }) ? "Accepting stages the selected Git object only. Nested directories and working files are preserved, including file/submodule type conflicts. Update the working copy separately after resolving." : "Choose Current or Incoming for binary files and symbolic links. Link targets are preserved without reading the target file.", icon: "doc.badge.gearshape")
                 }
                 Divider()
                 HStack(spacing: 10) {
-                    Menu("Accept Entire File") {
+                    Menu(snapshot.versions.contains(where: { $0.mode == "160000" }) ? "Accept Index Version Only" : "Accept Entire File") {
                         Button(snapshot.version(2) == nil ? "Accept Current Deletion" : "Accept Current File") { store.resolveConflict(snapshot, resolution: .version(2)) }
                         Button(snapshot.version(3) == nil ? "Accept Incoming Deletion" : "Accept Incoming File") { store.resolveConflict(snapshot, resolution: .version(3)) }
                     }.fixedSize()
@@ -72,7 +72,7 @@ struct ConflictResolverView: View {
                         Button("Save & Mark Resolved") { store.resolveConflict(snapshot, resolution: .edited(result)) }
                             .buttonStyle(.borderedProminent).disabled(document.hasMarkers).keyboardShortcut("s", modifiers: .command)
                     }
-                }.font(.system(size: 11)).controlSize(.small).padding(12).disabled(store.isBusy || !snapshot.versions.allSatisfy(\.isRegular))
+                }.font(.system(size: 11)).controlSize(.small).padding(12).disabled(store.isBusy)
                 Text("Saving also stages this file. Draft edits are automatically saved for recovery after restarting.").font(.caption2).foregroundStyle(.secondary).padding(.bottom, 8)
             } else if let loadError {
                 EmptyPane(title: "Unable to load conflict", subtitle: loadError, icon: "exclamationmark.triangle")
