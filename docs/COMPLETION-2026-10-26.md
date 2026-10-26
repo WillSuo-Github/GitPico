@@ -9,8 +9,8 @@ Scope: the six remaining areas in the latest maturity assessment. Keep marketing
 - [x] Root/merge-aware interactive rebase, structural conflicts and structural patch handling.
 - [x] Simplify hosted collaboration to browser links. The user explicitly removed native PR/MR creation, comments, discussions and merge; its API client, sheets and optional API authorization were deleted.
 - [x] Add repeatable reliability/performance checks for refresh, persistence and repeated sessions; physical long-running acceptance remains external.
-- [ ] Validate signing/update prerequisites and distribution tooling; record external acceptance requirements.
-- [ ] Reconcile current README/roadmap/parity claims and record exact final validation.
+- [x] Validate signing/update prerequisites and distribution tooling; actual published update/install/relaunch remains an acceptance gate.
+- [x] Reconcile current README/roadmap/parity scope and preserve exact validation results.
 
 ## Acceptance still requiring external evidence
 
@@ -37,3 +37,12 @@ The user selected their personal developer team. ASC profile `Mac mini` returned
 The user explicitly rejected in-app PR/MR creation as unnecessary complexity. Native creation, files/checks/comments/feedback/merge, inline threads and their hosting write API were removed. Sidebar and Repository menu links open the hosting website without API authentication. GitLab sign-in requests only `read_user write_repository`; legacy saved configuration still decodes without re-requesting `api`. The GitLab OAuth registration was restored to those basic scopes. Changing registration is not claimed to revoke every previously issued server token.
 
 Before this correction, the user-authorized synthetic GitHub PR #1 and GitLab MR #1 were both created and merged through GitPico OAuth. Both retain their synthetic file, ordinary comment, line-2 comment and reply; GitLab discussion resolution was re-read as Resolved. GitHub additionally exercised close/reopen. These are historical service evidence, not features in the final product. No further review writes are needed.
+
+## Simplified product validation
+
+- Source `543b06d`: `.build/CompletionSimplifiedRegression.xcresult` passed **403 test definitions: 386 passed, 17 intentionally skipped, 0 failed**. Core log reports 247 definitions and App log 156; parameter expansions are not added to the headline definition count. The opt-in stress/performance/capture/Keychain cases were skipped in this invocation. Prior stress/performance results remain separate evidence. [Result summary](evidence/completion-2026-10-26/simplified-regression.json).
+- That run reported an existing undeclared exported drag UTI. `Configuration/GitPico-Info.plist` now exports `com.willsuo.GitPico.drag` conforming to `public.data`; the built bundle preserves marketing `0.01` and minimum `26.0`. All three drag-routing regression cases passed with no repeated UTI warning. [Focused result](evidence/completion-2026-10-26/drag-metadata-regression.json).
+- CI now captures native process stacks and fails after 180 seconds without Swift Testing progress, in addition to Xcode's test limits. This preserves diagnosis if an AppKit hang prevents cooperative test timeouts. Newest macOS 26 arm64/Intel source acceptance is pending.
+- Simplified universal build `20261026234538` received Accepted notarization (`cbf8712d-861c-4a46-924e-b5b0e577f2d3`), passed stapling and Gatekeeper, and launched from the dedicated `dist/CompletionInstall-20261026234538/GitPico.app` installation. Settings showed the actual build, its authentication page had no MR API controls, and its sidebar opened the default browser instead of an in-app review sheet. The provider redirected the private page to browser login; no CAPTCHA was completed. [Package provenance](evidence/completion-2026-10-26/signed-package-20261026234538.json).
+- Before publication, native Check for Updates correctly displayed that no published readable release was available. Creating draft assets is not an accepted update loop. Publication remains a separate step.
+- Re-generating a private appcast after editing its asset URL replaced that URL with a public download-prefix address. The publisher now signs the edited XML directly with `sign_update`, verifies its embedded feed signature and retains its exact authenticated resource ID before upload. The release ZIP signature is unchanged.

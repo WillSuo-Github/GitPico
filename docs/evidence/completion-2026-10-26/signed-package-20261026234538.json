@@ -1,0 +1,18 @@
+{
+  "manifest": {
+    "build": "20261026234538",
+    "commit": "543b06de651d44c96deebdc44735ac8d2b9d2d61",
+    "sha256": "494ee72367a3c7b5fb8f6b7985a57c3f8d267d2e861002d463e3fd7b4d87db1e"
+  },
+  "notarization": {
+    "id": "cbf8712d-861c-4a46-924e-b5b0e577f2d3",
+    "status": "Accepted"
+  },
+  "checks": {
+    "universalArchitecture": true,
+    "developerIDExport": true,
+    "stapler": true,
+    "gatekeeper": true
+  },
+  "actualUpdateLoopAccepted": false
+}

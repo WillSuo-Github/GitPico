@@ -62,7 +62,10 @@ PY
 )"
 python3 "$ROOT_DIR/script/prepare_github_appcast.py" "$OUTPUT_DIR/appcast.xml" "$BUILD_ID" "$REPOSITORY" "$ASSET_ID"
 SPARKLE_BIN="${GITPICO_SPARKLE_BIN:-$ROOT_DIR/.build/distribution-derived/SourcePackages/artifacts/sparkle/Sparkle/bin}"
-"$SPARKLE_BIN/generate_appcast" --account "${GITPICO_SPARKLE_ACCOUNT:-com.willsuo.GitPico.updates}" "$OUTPUT_DIR"
+# Re-generating the appcast replaces private asset IDs with download-prefix URLs.
+# Sign the edited XML directly so the authenticated asset binding is preserved.
+"$SPARKLE_BIN/sign_update" --account "${GITPICO_SPARKLE_ACCOUNT:-com.willsuo.GitPico.updates}" "$OUTPUT_DIR/appcast.xml"
+"$SPARKLE_BIN/sign_update" --account "${GITPICO_SPARKLE_ACCOUNT:-com.willsuo.GitPico.updates}" --verify "$OUTPUT_DIR/appcast.xml"
 python3 "$ROOT_DIR/script/validate_appcast.py" "$OUTPUT_DIR/appcast.xml" "$BUILD_ID"
 python3 - "$OUTPUT_DIR/appcast.xml" "$REPOSITORY" "$ASSET_ID" <<'PY'
 import sys,xml.etree.ElementTree as E

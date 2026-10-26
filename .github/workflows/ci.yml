@@ -37,16 +37,7 @@ jobs:
           git lfs version
       - name: Test saved Xcode project without regeneration
         run: |
-          mkdir -p .build/ci
-          xcodebuild test -project GitPico.xcodeproj -scheme GitPico \
-            -derivedDataPath .build/ci-derived \
-            -destination 'platform=macOS,arch=${{ matrix.arch }}' \
-            -parallel-testing-enabled NO \
-            -test-timeouts-enabled YES \
-            -default-test-execution-time-allowance 120 \
-            -maximum-test-execution-time-allowance 180 \
-            -resultBundlePath .build/ci/Tests.xcresult \
-            > .build/ci/xcodebuild.log 2>&1
+          python3 script/run_ci_tests.py '${{ matrix.arch }}'
       - name: Validate packaging scripts and development metadata
         run: |
           python3 -m unittest discover -s script/tests -p 'test_*.py'
