@@ -54,8 +54,8 @@ import Testing
     let item = try #require(f.store.quickActionItems(files: []).first { $0.id == "worktree:" + record.id })
     let oldToken = f.store.repositoryToken
     f.store.runQuickAction(item, repositoryToken: oldToken)
-    let deadline = Date().addingTimeInterval(10)
-    while f.store.isBusy && Date() < deadline { try await Task.sleep(for: .milliseconds(20)) }
+    await f.store.operationTask?.value
+    #expect(!f.store.isBusy)
     #expect(f.store.snapshot?.root.path == record.path && f.store.snapshot?.branch == "feature")
     #expect(f.store.repositoryToken != oldToken && f.store.worktrees.count == 2)
     #expect(f.store.destination == .workingCopy && f.store.error == nil)

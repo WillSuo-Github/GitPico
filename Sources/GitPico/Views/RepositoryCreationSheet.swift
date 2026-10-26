@@ -21,7 +21,7 @@ struct RepositoryCreationSheet: View {
     var valid: Bool { !name.isEmpty && !name.contains("/") && name != "." && name != ".." && (!request.clone || !source.isEmpty) }
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text(request.clone ? "Clone Git Repository" : "Create Git Repository").font(.title2.bold())
+            SheetTitle(request.clone ? "Clone Git Repository" : "Create Git Repository")
             if request.clone { TextField("Repository URL or local path", text: $source).textFieldStyle(.roundedBorder) }
             if request.clone {
                 Toggle("Initialize submodules recursively", isOn: $recursive).toggleStyle(.checkbox)

@@ -1,0 +1,31 @@
+Building for debugging...
+[Computing dependencies]
+[1 / 1]
+[1 / 14] GitPicoTests-product
+[3 / 15] GitPico
+[14 / 33] GitPico-product
+[15 / 33] GitPico-product
+[16 / 33] GitPico-product
+[17 / 33] GitPico-product
+[18 / 33] GitPico-product
+[19 / 33] GitPico-product
+[19 / 33] GitPico
+[21 / 33] GitPico-product
+[21 / 33] GitPico
+[28 / 36] GitPico-product
+[29 / 38] GitPico-product
+[31 / 38] GitPico-product
+[32 / 37] GitPicoTests-product
+[34 / 39] GitPicoTests-product
+[38 / 41] GitPicoTests-product
+[40 / 44] GitPicoTests-product
+[42 / 44] GitPicoTests-product
+Build complete! (15.23 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test infrastructureReopenUpdatesMovedTabButKeepsOtherRepositoriesSeparate() started.
+◇ Test concurrentCanonicalRepositoryOpenCreatesOnlyOneWorkspace() started.
+✔ Test concurrentCanonicalRepositoryOpenCreatesOnlyOneWorkspace() passed after 5.619 seconds.
+✔ Test infrastructureReopenUpdatesMovedTabButKeepsOtherRepositoriesSeparate() passed after 9.158 seconds.
+✔ Test run with 2 tests in 0 suites passed after 9.158 seconds.

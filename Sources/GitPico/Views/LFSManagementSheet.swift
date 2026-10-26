@@ -21,7 +21,7 @@ struct LFSManagementSheet: View {
     var reviewed: Bool { change != nil || transfer != nil || staging != nil || reviewedRestore }
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Label("Git LFS", systemImage: "externaldrive").font(.title2.bold())
+            SheetTitle("Git LFS", icon: "externaldrive")
             if let staging {
                 Text("Stage LFS Conversion").font(.headline)
                 List(staging.paths, id: \.self) { Text($0).font(.caption) }.frame(height: 180)

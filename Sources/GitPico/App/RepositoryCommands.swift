@@ -6,16 +6,24 @@ struct RepositoryCommands: Commands {
     @Bindable var store: RepositoryStore
     var body: some Commands {
             CommandGroup(replacing: .newItem) {
-                Button("Repositories…") { store.showingRepositoryLibrary = true }.disabled(store.isBusy)
-                Button("Quick Open…") { store.showingQuickOpen = true }.keyboardShortcut("o", modifiers: [.command, .shift]).disabled(store.isBusy)
-                Button("Open Repository…", action: store.chooseRepository).keyboardShortcut("o").disabled(store.isBusy)
-                Button("Clone Git Repository…") { store.creationRequest = RepositoryCreationRequest(clone: true) }.keyboardShortcut("o", modifiers: [.command, .option]).disabled(store.isBusy)
-                Button("New Repository…") { store.creationRequest = RepositoryCreationRequest(clone: false) }.disabled(store.isBusy)
+                if let workspace = store.workspace {
+                    Button("New Tab") { workspace.newTab() }.keyboardShortcut("t")
+                    Button("Close Tab") {
+                        if workspace.windowRouting != nil, let window = NSApp.keyWindow { window.performClose(nil) }
+                        else if workspace.windowRouting == nil || workspace.windowRouting?.hasRepositoryWindows == true { _ = workspace.close(workspace.selectedID) }
+                    }.keyboardShortcut("w")
+                    Divider()
+                }
+                Button("Repositories", action: store.showRepositories).disabled(store.isBusy || store.isOpeningRepository)
+                Button("Quick Open…") { store.showingQuickOpen = true }.keyboardShortcut("o", modifiers: [.command, .shift]).disabled(store.isBusy || store.isOpeningRepository)
+                Button("Open Repository…", action: store.chooseRepository).keyboardShortcut("o").disabled(store.isBusy || store.isOpeningRepository)
+                Button("Clone Git Repository…") { if let workspace = store.workspace { workspace.prepareCreation(clone: true) } else { store.creationRequest = RepositoryCreationRequest(clone: true) } }.keyboardShortcut("o", modifiers: [.command, .option]).disabled(store.isBusy || store.isOpeningRepository)
+                Button("New Repository…") { if let workspace = store.workspace { workspace.prepareCreation(clone: false) } else { store.creationRequest = RepositoryCreationRequest(clone: false) } }.disabled(store.isBusy || store.isOpeningRepository)
                 Menu("Open Recent") {
                     ForEach(store.recentPaths, id: \.self) { path in
                         Button(store.library.displayName(for: path)) { Task { await store.open(URL(fileURLWithPath: path)) } }
                     }
-                }.disabled(store.isBusy)
+                }.disabled(store.isBusy || store.isOpeningRepository)
             }
             CommandMenu("Repository") {
                 Button("Refresh", action: store.refresh).keyboardShortcut("r").disabled(!store.canUseRepository)
@@ -112,21 +120,26 @@ struct RepositoryCommands: Commands {
             }
             CommandGroup(after: .textEditing) {
                 Button("Find…") { store.searchFocusRequest = UUID() }.keyboardShortcut("f")
-                    .disabled(!store.canUseRepository || store.destination.searchPlaceholder == nil)
+                    .disabled(!store.canUseRepository)
             }
             CommandGroup(after: .undoRedo) {
                 Divider()
                 Button("Undo Git \(store.undoAvailability?.undo?.title ?? "Operation")…") {
                     if let record = store.undoAvailability?.undo { store.recoveryRequest = RecoveryRequest(action: .undo(record, false)) }
-                }.keyboardShortcut("z", modifiers: [.command, .option]).disabled(store.undoAvailability?.undo == nil || store.isBusy)
+                }.keyboardShortcut("z", modifiers: [.command, .option]).disabled(store.undoAvailability?.undo == nil || !store.canUseRepository)
                 Button("Redo Git \(store.undoAvailability?.redo?.title ?? "Operation")…") {
                     if let record = store.undoAvailability?.redo { store.recoveryRequest = RecoveryRequest(action: .undo(record, true)) }
-                }.keyboardShortcut("z", modifiers: [.command, .option, .shift]).disabled(store.undoAvailability?.redo == nil || store.isBusy)
+                }.keyboardShortcut("z", modifiers: [.command, .option, .shift]).disabled(store.undoAvailability?.redo == nil || !store.canUseRepository)
             }
             CommandMenu("Navigate") {
-                Button("Quick Actions…") { store.showingQuickActions = true }.keyboardShortcut("a", modifiers: [.command, .shift]).disabled(store.isBusy)
+                if let workspace = store.workspace {
+                    Button("Next Tab") { workspace.cycle(1) }.keyboardShortcut(.tab, modifiers: .control)
+                    Button("Previous Tab") { workspace.cycle(-1) }.keyboardShortcut(.tab, modifiers: [.control, .shift])
+                    Divider()
+                }
+                Button("Quick Actions…") { store.searchActionsRequest = UUID() }.keyboardShortcut("a", modifiers: [.command, .shift]).disabled(!store.canUseRepository)
                 Button("External Tool Settings…") { store.showingExternalToolSettings = true }
-                Button("External Tool Sessions…") { store.externalTool(.sessions) }.disabled(store.repository == nil || store.isBusy)
+                Button("External Tool Sessions…") { store.externalTool(.sessions) }.disabled(!store.canUseRepository)
                 Divider()
                 Button("Back", action: store.goBack).keyboardShortcut("[").disabled(store.isBusy || store.backStack.isEmpty)
                 Button("Forward", action: store.goForward).keyboardShortcut("]").disabled(store.isBusy || store.forwardStack.isEmpty)

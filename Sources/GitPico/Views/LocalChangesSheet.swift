@@ -36,7 +36,7 @@ struct LocalChangesSheet: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
                 Image(systemName: isRecovery ? "clock.arrow.circlepath" : isExport ? "doc.badge.arrow.up" : "doc.badge.gearshape").foregroundStyle(.secondary)
-                Text(title).font(.title2.bold())
+                SheetTitle(title)
                 Spacer()
             }
             switch request.action {

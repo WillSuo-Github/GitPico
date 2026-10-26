@@ -1,0 +1,6 @@
+{
+  "Sources/GitPico/App/RepositoryNativeWindow.swift": "09f9bb29f48d6339121d646e49178c42e15738bffbae48a353759157496d7249",
+  "Sources/GitPico/App/NativeRepositoryWindows.swift": "f3806716a3cec311d0468726d8d6c3474b5da22a1cf99320ddd40c8bdaf23f7a",
+  "Sources/GitPico/Views/RepositoryWorkspaceView.swift": "b1ff4111b55ee6a4bf4c669b826bb2005a690ea3e35a695caf11947e577bc3ae",
+  "Tests/GitPicoTests/NativeRepositoryWindowTests.swift": "42b4a45701e18ad9f3c6ff2b26bae304bdfc97689b5622efeb4a62f67b6261af"
+}

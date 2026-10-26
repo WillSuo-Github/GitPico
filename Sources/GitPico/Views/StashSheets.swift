@@ -23,7 +23,7 @@ struct StashSaveSheet: View {
     var candidates: [FileChange] { store.changes.filter { !$0.isConflicted && (includeUntracked || !$0.isUntracked) } }
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(snapshot ? "Create Snapshot" : "Save Stash").font(.title2.bold())
+            SheetTitle(snapshot ? "Create Snapshot" : "Save Stash")
             Text(snapshot ? "Saves your local changes and reapplies them, preserving the staging area." : "Saves local changes temporarily and leaves your working copy clean.").foregroundStyle(.secondary)
             TextField("Stash message", text: $message)
             Toggle("Include Untracked Files", isOn: $includeUntracked)
@@ -89,7 +89,7 @@ struct StashActionSheet: View {
     }
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text(title).font(.title2.bold())
+            SheetTitle(title)
             if let stash {
                 LabeledContent("Stash", value: stash.subject).textSelection(.enabled)
                 Text(stash.hash).font(.system(size: 11, design: .monospaced)).foregroundStyle(.secondary).textSelection(.enabled)

@@ -27,7 +27,7 @@ struct WorktreeManagementSheet: View {
     var isCreate: Bool { if case .create = request.action { true } else { false } }
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Label(title, systemImage: "folder.badge.gearshape").font(.title2.bold())
+            SheetTitle(title, icon: "folder.badge.gearshape")
             if let entry { relatedField("Worktree", entry.path); relatedField("Branch / HEAD", (entry.branch ?? "Detached HEAD") + " · " + String((entry.head ?? "").prefix(12))) }
             if !reviewed {
                 if isCreate {
@@ -129,7 +129,7 @@ struct SubmoduleManagementSheet: View {
     var supportsTransport: Bool { operation.map { [.initialize, .update, .fetch, .setURL].contains($0) } ?? true }
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Label(title, systemImage: "shippingbox").font(.title2.bold())
+            SheetTitle(title, icon: "shippingbox")
             if case .manage(let entry, _) = request.action {
                 relatedField("Submodule", entry.path + " · " + entry.status)
                 relatedField("Parent records", entry.recordedHash ?? "No recorded gitlink")

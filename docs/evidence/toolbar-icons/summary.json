@@ -1,0 +1,49 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64e",
+        "deviceId" : "00008132-000C284E0205001C",
+        "deviceName" : "My Mac",
+        "modelName" : "Mac mini",
+        "osBuildNumber" : "26A434",
+        "osVersion" : "27.0.1",
+        "platform" : "macOS"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 0,
+      "passedTests" : 1,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "GitPico · Built with macOS 27.0.1",
+  "expectedFailures" : 0,
+  "failedTests" : 0,
+  "finishTime" : 1792934452.66,
+  "passedTests" : 1,
+  "result" : "Passed",
+  "runtimeWarnings" : [
+    {
+      "issueType" : "Runtime Warning",
+      "message" : "Type \"com.willsuo.GitPico.drag\" was expected to be declared and exported in the Info.plist of GitPico.app, but it was not found.",
+      "sourceURL" : "file:///Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/NativeRepositoryWindowTests.swift"
+    }
+  ],
+  "skippedTests" : 0,
+  "startTime" : 1792934427.961,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+
+  ],
+  "title" : "Test - GitPico",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 1
+}

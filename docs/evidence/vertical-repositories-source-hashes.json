@@ -1,0 +1,10 @@
+{
+  "Sources/GitPico/Views/RepositoryWorkspaceView.swift": "859d92a24339b0236f3977db23504d75d7f4afd09566b18afbd4ebe07429c5d7",
+  "Sources/GitPico/Views/RepositoryWorkspaceSidebarView.swift": "bc9b6deed0db14bddb7ce35aba622c008b2a0695ddeefd3008dcf0e15bf0cf55",
+  "Sources/GitPico/Views/RepositoryPickerSidebarView.swift": "195e7e629313487c7c2fa23e4af2c6437595f6e909009e6bc72e73cbd1549678",
+  "Sources/GitPico/Views/RepositoryPickerView.swift": "f45b839c6767c5b8549d5dcec5ca9df03670f9d4eeb6ca579b125de420bf65a9",
+  "Sources/GitPico/Views/ContentView.swift": "6b90692bd27ac9a2290d9f6d5953f4a77963fc5130ae8e0cdbee357c126004a7",
+  "Sources/GitPico/Views/RepositoryDetailView.swift": "3bcd2ba5e17a03c9b364672a340bb296853710d4fbc64f22ebc3d65ac7f3f672",
+  "Sources/GitPico/Views/RepositoryStatusBar.swift": "cf885a4d666780e6973ae1ebd311f3b3a922261a773ced58791cb47739d6786e",
+  "Tests/GitPicoTests/RepositoryWorkspaceSidebarRenderTests.swift": "0a6b252b5ab4aca291630267d8cc99363b18c27c1d24775f922097249d43b014"
+}

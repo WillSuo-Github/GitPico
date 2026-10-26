@@ -16,7 +16,7 @@ struct ManagementRecoverySheet: View {
     var visible: [ReferenceBackup] { backups.filter { category == "Stashes" ? $0.isStash : !$0.isStash } }
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Recover Deleted Items").font(.title2.bold())
+            SheetTitle("Recover Deleted Items")
             Text("Recovery records are stored in this repository. Restoring never replaces an existing branch, tag or remote name.").font(.callout).foregroundStyle(.secondary)
             Picker("Kind", selection: $category) { Text("References").tag("References"); Text("Stashes").tag("Stashes"); Text("Remotes").tag("Remotes") }.pickerStyle(.segmented)
             if loading { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }

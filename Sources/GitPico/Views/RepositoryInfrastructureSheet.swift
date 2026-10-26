@@ -28,7 +28,7 @@ struct RepositoryInfrastructureSheet: View {
     var reviewed: Bool { migration != nil || repair != nil || restore != nil || selectedRepair != nil || savedRecovery != nil }
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
-            Label(mode.rawValue, systemImage: "externaldrive.badge.wifi").font(.title2.bold())
+            SheetTitle(mode.rawValue, icon: "externaldrive.badge.wifi")
             if !reviewed {
                 Picker("Manage", selection: $mode) { ForEach(RepositoryInfrastructureMode.allCases, id: \.self) { Text($0.rawValue).tag($0) } }.pickerStyle(.segmented)
                 HStack { TextField("Main repository folder containing .git", text: $rootPath).textFieldStyle(.roundedBorder); Button("Choose…") { chooseFolder() } }

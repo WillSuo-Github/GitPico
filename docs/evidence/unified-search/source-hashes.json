@@ -1,0 +1,14 @@
+{
+  "Sources/GitPico/Stores/QuickActions.swift": "666eeaf4c8024d1ecf5edbac1a142858a6f0cb68a58f8c09ae9deeac4402456a",
+  "Sources/GitPico/Stores/ToolbarSearchSession.swift": "729b7dfe99f9946cf68ba4443814767a976e1fb440208753cdd5f6fefac5135f",
+  "Sources/GitPico/Stores/RepositoryStore.swift": "5a6802f792b19f1eec94e4bbaa7b1e50b491ddde39025f423685bbd05b7f9144",
+  "Sources/GitPico/App/RepositoryCommands.swift": "496224b91beda09460c35cd10467fa5a534ec90f4cb1c0306c0f1e34e73f9279",
+  "Sources/GitPico/App/NativeStartupVerification.swift": "cb449a48d7162eb055ee130f911e4681aff1bf3c24355a5a10ca777d992489df",
+  "Sources/GitPico/Views/ContentView.swift": "01915b0877279a564b4ce81c05dced926d71ea962b8ec8799f3d9b80703f74f4",
+  "Sources/GitPico/Views/RepositoryToolbar.swift": "8139e1262f40f97b1e093c12c5f1d8af342e4a597fb01ca99fb8c93cb2d7bc0c",
+  "Sources/GitPico/Views/RepositorySearchView.swift": "49cefe4e5656cdc1840c83d503bd0ce3403dfb0b72af8109e6252f5427d485d9",
+  "Sources/GitPico/Views/ToolbarSearchField.swift": "bc119e8dcc35d121c24be0f716af0de3752a92b0cae10662d66231e76b42a4ff",
+  "Sources/GitPico/Views/ToolbarSearchSuggestions.swift": "9642afffcb8bb3522f33653a4e58f341d9d22b86ac4962f75fab6c18e4517aa6",
+  "Tests/GitPicoTests/ToolbarSearchSessionTests.swift": "0bdb05dfecc4a30a79b3f40de283f623bfab85744de9ca5436cec93eda19655c",
+  "script/build_and_run.sh": "762492d8efe43b4aa0594183e88d48d51a52b8a00d7b41810b1c48027325b2bf"
+}

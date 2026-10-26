@@ -7,12 +7,12 @@ struct BrowserFileRow: View {
     let file: WorkingFileEntry
     var body: some View {
         HStack(spacing: 8) {
-            Image(systemName: file.isIgnored ? "eye.slash" : "minus.square").foregroundStyle(.tertiary).frame(width: 14)
-            Text(file.isIgnored ? "I" : file.assumeUnchanged ? "A" : file.skipWorktree ? "S" : "·").font(.system(size: 10, design: .monospaced)).foregroundStyle(.secondary).frame(width: 16)
-            Image(systemName: "doc.text").foregroundStyle(.secondary).font(.system(size: 12))
-            Text(file.path).font(.system(size: 12)).foregroundStyle(file.isIgnored ? .secondary : .primary).lineLimit(1).truncationMode(.middle)
+            Image(systemName: file.isIgnored ? "eye.slash" : "doc").foregroundStyle(.tertiary).frame(width: 14)
+            Text(file.isIgnored ? "I" : file.assumeUnchanged ? "A" : file.skipWorktree ? "S" : "·").font(.system(size: 9.5, weight: .heavy, design: .rounded)).foregroundStyle(.secondary).frame(width: 17, height: 17)
+                .background(Color.secondary.opacity(0.1), in: RoundedRectangle(cornerRadius: 4.5, style: .continuous))
+            FilePathLabel(path: file.path).opacity(file.isIgnored ? 0.6 : 1)
             Spacer(minLength: 0)
-        }.frame(height: 22).contentShape(Rectangle()).help(file.status)
+        }.frame(height: 24).contentShape(Rectangle()).help(file.status)
         .contextMenu {
             LFSFileContextMenu(store: store, path: file.path)
             if file.isIgnored { Button("Force Add Ignored Files…") { let paths = store.selectedWorkingFiles.contains(file.path) ? store.selectedWorkingFiles.filter { path in store.workingFileEntries.contains { $0.path == path && $0.isIgnored } }.sorted() : [file.path]; store.localChange(.forceAdd(paths)) } }

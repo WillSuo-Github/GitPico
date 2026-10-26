@@ -15,7 +15,7 @@ struct InteractiveRebaseSheet: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack { Image(systemName: "arrow.triangle.branch").foregroundStyle(.purple); Text("Interactive Rebase").font(.title2.bold()); Spacer(); Text(store.snapshot?.branch ?? "").foregroundStyle(.secondary) }
+            HStack { SheetTitle("Interactive Rebase", icon: "list.bullet.indent"); Spacer(); Text(store.snapshot?.branch ?? "").foregroundStyle(.secondary) }
             HStack {
                 Text("Commits after")
                 TextField("Base commit or ref", text: $base).textFieldStyle(.roundedBorder).onSubmit { Task { await load() } }
@@ -101,7 +101,7 @@ struct RebaseEditSheet: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Amend Paused Commit").font(.title2.bold())
+            SheetTitle("Amend Paused Commit")
             Text("Includes staged changes. Unstaged files remain in the working copy.").foregroundStyle(.secondary)
             TextEditor(text: $message).font(.system(size: 12, design: .monospaced)).frame(height: 180).accessibilityLabel("Paused commit message")
             HStack { Spacer(); Button("Cancel") { dismiss() }.keyboardShortcut(.cancelAction); Button("Amend Commit") { store.amendRebaseStop(message); dismiss() }.disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty).keyboardShortcut(.defaultAction) }

@@ -1,0 +1,7 @@
+{
+  "Sources/GitPico/Views/RepositoryWorkspaceView.swift": "1012e50e11421753ddf5bcd50fef448ce594f6458e9266fe0015bf3bda077e7e",
+  "Sources/GitPico/Views/RepositoryTabBar.swift": "93781f30bc4012fa6f4055eb3e41990db8faa312820b51c3a1dcbc840254919f",
+  "Sources/GitPico/Views/RepositoryToolbar.swift": "8b0a13c60a0eaca49bf2a94ea68cbb21b6df6a848ed78951cd2ae119656380d7",
+  "Sources/GitPico/Views/ContentView.swift": "c3574923ac7f7e25471f57778bf29b8e56dc19a3fef18cbba16d30af4e2ea079",
+  "Tests/GitPicoTests/CompactToolbarRenderTests.swift": "c278a25baa49dfe92d7fcbb36993458cfb3840c4db3c94248b42a76dfb06f0c7"
+}

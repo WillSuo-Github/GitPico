@@ -4,40 +4,27 @@ import SwiftUI
 
 struct ContentView: View {
     @Bindable var store: RepositoryStore
+    var showsSidebar = true
     var body: some View {
         Group {
-            if store.snapshot == nil { WelcomeView(store: store) }
-            else {
+            if store.snapshot == nil || store.isChoosingRepository {
+                if let workspace = store.workspace, let tab = workspace.tab(for: store) {
+                    RepositoryPickerView(workspace: workspace, tab: tab, showsSidebar: showsSidebar)
+                } else { WelcomeView(store: store) }
+            } else if showsSidebar {
                 NavigationSplitView {
                     SidebarView(store: store)
                         .navigationSplitViewColumnWidth(min: 220, ideal: 359, max: 450)
-                        .toolbar {
-                            ToolbarItem { RepositoryMenu(store: store) }
-                        }
-                } detail: {
-                    switch store.destination {
-                    case .worktrees: WorktreesView(store: store)
-                    case .submodules: SubmodulesView(store: store)
-                    case .workingCopy: WorkingCopyView(store: store)
-                    case .history, .reference: HistoryView(store: store)
-                    case .reflog: ReflogView(store: store)
-                    case .stashes: StashesView(store: store)
-                    case .branchesReview: BranchesReviewView(store: store)
-                    case .repositorySettings: RepositorySettingsView(store: store)
-                    case .fileHistory(let path, let revision):
-                        if let repository = store.repository { FileHistoryView(store: store, repository: repository, path: path, revision: revision).id(store.repositoryToken.uuidString + path + revision) }
-                    case .comparison(let left):
-                        if let repository = store.repository { RevisionComparisonView(store: store, repository: repository, initialLeft: left).id(store.repositoryToken.uuidString + left) }
-                    }
-                }
-            }
+                        .toolbar { ToolbarItem { RepositoryMenu(store: store) } }
+                } detail: { RepositoryDetailView(store: store) }
+            } else { RepositoryDetailView(store: store) }
         }
-        .frame(minWidth: 1080, minHeight: 680)
-        .navigationTitle(store.title)
-        .navigationSubtitle(store.navigationSubtitle)
-        .toolbar { RepositoryToolbar(store: store) }
-        .safeAreaInset(edge: .bottom, spacing: 0) { statusBar }
-        .safeAreaInset(edge: .top, spacing: 0) { VStack(spacing: 0) { AutomaticStashBanner(store: store); GitFlowOperationBanner(store: store); if store.destination != .workingCopy { OperationBanner(store: store) } } }
+        .frame(minWidth: showsSidebar ? 1080 : 0, minHeight: showsSidebar ? 680 : 0)
+        .navigationTitle(store.isChoosingRepository ? "Repositories" : store.title)
+        .navigationSubtitle(store.isChoosingRepository ? "Choose a repository" : store.navigationSubtitle)
+        .toolbar { if store.workspace == nil { RepositoryToolbar(store: store) } }
+        .safeAreaInset(edge: .bottom, spacing: 0) { if showsSidebar { RepositoryStatusBar(store: store) } }
+        .safeAreaInset(edge: .top, spacing: 0) { if !store.isChoosingRepository { VStack(spacing: 0) { AutomaticStashBanner(store: store); GitFlowOperationBanner(store: store); if store.destination != .workingCopy { OperationBanner(store: store) } } } }
         .task(id: store.search) { await store.searchHistory() }
         .alert("Git operation failed", isPresented: Binding(get: { store.error != nil }, set: { if !$0 { store.error = nil } })) {
             Button("OK") { store.error = nil }
@@ -55,7 +42,6 @@ struct ContentView: View {
         .sheet(item: $store.recoveryRequest) { HistoryRecoverySheet(store: store, request: $0) }
         .sheet(isPresented: $store.showingRebaseEdit) { RebaseEditSheet(store: store) }
         .sheet(item: $store.managementRequest, onDismiss: store.presentPendingAutomaticStash) { ManagementSheet(store: store, request: $0) }
-        .sheet(isPresented: $store.showingQuickActions) { QuickActionsSheet(store: store) }
         .sheet(item: $store.externalToolRequest) { ExternalToolSheet(store: store, request: $0) }
         .sheet(isPresented: $store.showingExternalToolSettings) { VStack { ExternalToolSettingsView(preferences: store.toolPreferences); Button("Close") { store.showingExternalToolSettings = false }.padding(.bottom) } }
         .sheet(isPresented: $store.showingRepositoryLibrary) { RepositoryLibraryView(store: store) }
@@ -71,32 +57,7 @@ struct ContentView: View {
         }
     }
 
-    var statusBar: some View {
-        HStack(spacing: 9) {
-            if store.isBusy { ProgressView().controlSize(.mini); Text(store.activity) }
-            else if let data = store.snapshot {
-                Image(systemName: "arrow.triangle.branch").foregroundStyle(.secondary)
-                Text("HEAD · " + data.branch)
-                if data.ahead > 0 || data.behind > 0 { Text("↑\(data.ahead)  ↓\(data.behind)").foregroundStyle(.secondary) }
-                Divider().frame(height: 12)
-                Text("\(data.changes.count) changed files").foregroundStyle(.secondary)
-            } else { Text("Ready to open a repository").foregroundStyle(.secondary) }
-            Spacer()
-            if let data = store.snapshot {
-                Button {
-                    NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: data.root.path)
-                } label: {
-                    Text(data.root.path).lineLimit(1).truncationMode(.middle).foregroundStyle(.tertiary)
-                }
-                .buttonStyle(.plain)
-                .help("Open Repository in Finder\n" + data.root.path)
-                .accessibilityLabel("Open Repository in Finder")
-                .accessibilityValue(data.root.path)
-            }
-        }
-        .font(.system(size: 11)).padding(.horizontal, 14).frame(height: 29)
-        .background(.bar).overlay(alignment: .top) { Divider() }
-    }
+
 }
 
 struct InputSheet: View {
@@ -109,7 +70,7 @@ struct InputSheet: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(title).font(.title2.bold())
+            SheetTitle(title)
             Text(caption).foregroundStyle(.secondary)
             TextField(placeholder, text: $value).textFieldStyle(.roundedBorder).onSubmit(submit)
             HStack { Spacer(); Button("Cancel") { dismiss() }.keyboardShortcut(.cancelAction)

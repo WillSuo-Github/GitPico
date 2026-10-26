@@ -19,7 +19,7 @@ struct GitFlowManagementSheet: View {
     @State private var failure: String?
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Label("Git Flow", systemImage: "arrow.triangle.branch").font(.title2.bold())
+            SheetTitle("Git Flow", icon: "arrow.triangle.branch")
             if let plan {
                 Text(plan.action == .configure ? "Configure Classic Git Flow" : plan.action == .finish ? "Finish " + plan.kind.rawValue + " · " + plan.name : "Start " + plan.kind.rawValue + " · " + plan.name).font(.headline)
                 ForEach(plan.targets, id: \.self) { Text($0).font(.system(size: 13, design: .monospaced)) }

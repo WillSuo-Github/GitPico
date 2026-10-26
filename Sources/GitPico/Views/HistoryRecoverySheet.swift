@@ -18,7 +18,7 @@ struct HistoryRecoverySheet: View {
     var requiresClean: Bool { if case .undo(let record, _) = request.action { record.restoresFiles } else { restoreFiles } }
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(title).font(.title2.bold())
+            SheetTitle(title)
             LabeledContent("Current branch", value: store.snapshot?.branch ?? "")
             LabeledContent("Current HEAD", value: expected.map { $0.hash.map { String($0.prefix(12)) } ?? "Unborn branch" } ?? "Loading…")
             LabeledContent("Target", value: target.map { String($0.prefix(12)) } ?? "Before initial commit")

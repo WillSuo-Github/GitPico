@@ -1,14 +1,14 @@
 import Foundation
 import GitCore
 
-enum QuickActionTarget {
+enum QuickActionTarget: Sendable {
     case worktree(ManagedWorktree), submodule(ManagedSubmodule), remote(RemoteConfiguration), destination(Destination), file(String), history(String), checkout(Reference), reference(Reference), stash(Stash), commit(Commit), command(QuickCommand)
 }
-enum QuickCommand: String, CaseIterable {
+enum QuickCommand: String, CaseIterable, Sendable {
     case lfs = "Git LFS", gitFlow = "Git Flow", flowFeature = "Start Git Flow Feature", flowRelease = "Start Git Flow Release", flowHotfix = "Start Git Flow Hotfix"
     case moveMain = "Move Main Repository", repairPointers = "Repair Repository Pointers", infrastructureHistory = "Migration / Repair History", managementBackups = "Management Backups", worktree = "Add Worktree", submodule = "Add Submodule", refresh = "Refresh", repositories = "Repositories", quickOpen = "Quick Open", stageAll = "Stage All", unstageAll = "Unstage All", saveStash = "Save Stash", discard = "Discard All Local Changes", recover = "Recover Local Changes", applyPatch = "Apply Patch", branch = "Create Branch", tag = "Create Tag", merge = "Merge", rebase = "Rebase", interactiveRebase = "Interactive Rebase", compare = "Compare Revisions", tools = "External Tool Settings", sessions = "External Tool Sessions", undo = "Undo Git Operation", redo = "Redo Git Operation"
 }
-struct QuickActionItem: Identifiable {
+struct QuickActionItem: Identifiable, Sendable {
     let id: String
     let title: String
     let subtitle: String
@@ -16,6 +16,15 @@ struct QuickActionItem: Identifiable {
     let target: QuickActionTarget
 }
 struct QuickActionSearch {
+    static func fileItems(_ files: [WorkingFileEntry], hasHEAD: Bool) -> [QuickActionItem] {
+        files.flatMap { file in
+            let item = QuickActionItem(id: "file:" + file.path, title: file.path, subtitle: "Working Copy · " + file.status, icon: "doc", target: .file(file.path))
+            if file.isTracked && hasHEAD {
+                return [item, QuickActionItem(id: "file-history:" + file.path, title: "File History · " + file.path, subtitle: "Inspect revisions and blame", icon: "clock", target: .history(file.path))]
+            }
+            return [item]
+        }
+    }
     static func results(_ items: [QuickActionItem], query: String) -> [QuickActionItem] {
         func fold(_ value: String) -> String { value.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX")) }
         let query = fold(query.trimmingCharacters(in: .whitespacesAndNewlines)), words = query.split(whereSeparator: \.isWhitespace)
@@ -55,10 +64,7 @@ extension RepositoryStore {
         }
         for entry in worktrees where !entry.isBare && entry.prunable == nil { result.append(QuickActionItem(id: "worktree:" + entry.id, title: "Open Worktree · " + entry.name, subtitle: entry.path, icon: "folder.badge.gearshape", target: .worktree(entry))) }
         for entry in submodules { result.append(QuickActionItem(id: "submodule:" + entry.id, title: (entry.initialized ? "Open Submodule · " : "Initialize Submodule · ") + entry.path, subtitle: entry.status, icon: "shippingbox", target: .submodule(entry))) }
-        for file in files {
-            result.append(QuickActionItem(id: "file:" + file.path, title: file.path, subtitle: "Working Copy · " + file.status, icon: "doc", target: .file(file.path)))
-            if file.isTracked && snapshot?.hasHEAD == true { result.append(QuickActionItem(id: "file-history:" + file.path, title: "File History · " + file.path, subtitle: "Inspect revisions and blame", icon: "clock", target: .history(file.path))) }
-        }
+        result += QuickActionSearch.fileItems(files, hasHEAD: snapshot?.hasHEAD == true)
         for ref in snapshot?.references ?? [] {
             result.append(QuickActionItem(id: "ref:" + ref.fullName, title: "History · " + ref.name, subtitle: ref.fullName, icon: "arrow.triangle.branch", target: .reference(ref)))
             if !ref.isCurrent && (ref.isLocal || ref.isRemote) && !ref.name.hasSuffix("/HEAD") { result.append(QuickActionItem(id: "checkout:" + ref.fullName, title: "Checkout · " + ref.name, subtitle: "Switch branch · " + String(ref.hash.prefix(8)), icon: "arrow.turn.down.right", target: .checkout(ref))) }
@@ -109,7 +115,7 @@ extension RepositoryStore {
             case .worktree: manageWorktree(.create(nil))
             case .submodule: manageSubmodule(.add)
             case .refresh: refresh()
-            case .repositories: showingRepositoryLibrary = true
+            case .repositories: showRepositories()
             case .quickOpen: showingQuickOpen = true
             case .stageAll: stage(unstaged.filter { !$0.isConflicted })
             case .unstageAll: unstage(staged)

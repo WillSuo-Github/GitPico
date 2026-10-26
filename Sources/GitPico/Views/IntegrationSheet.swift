@@ -14,7 +14,7 @@ struct IntegrationSheet: View {
     var title: String { request.action == .cherryPick ? "Cherry-Pick" : request.action.rawValue.capitalized }
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text(title).font(.title2.bold())
+            SheetTitle(title)
             LabeledContent("Current branch", value: store.snapshot?.branch ?? "")
             if request.revision != nil || request.action == .cherryPick || request.action == .revert {
                 LabeledContent("Commit", value: request.revision ?? "") .font(.system(size: 11, design: .monospaced)).textSelection(.enabled)
@@ -57,14 +57,11 @@ struct OperationBanner: View {
     @State private var confirmAbort = false
     var body: some View {
         if let operation = store.snapshot?.operation, operation != .none {
-            HStack {
-                Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
-                Text("\(operation.rawValue.capitalized) in progress").fontWeight(.medium)
-                Text("Resolve and stage conflicts before continuing.").foregroundStyle(.secondary)
-                Spacer()
+            NoticeBanner(icon: "arrow.triangle.merge", title: "\(operation.rawValue.capitalized) in progress", message: store.changes.contains(where: \.isConflicted) ? "Resolve and stage conflicts in Working Copy, then continue." : "All conflicts are resolved. Continue to finish.") {
+                Button("Show Conflicts") { store.navigate(.workingCopy) }.disabled(store.destination == .workingCopy)
                 Button("Abort…") { confirmAbort = true }
-                Button("Continue", action: store.continueOperation).disabled(store.changes.contains(where: \.isConflicted))
-            }.font(.system(size: 11)).padding(10).background(.orange.opacity(0.08)).disabled(store.isBusy)
+                Button("Continue", action: store.continueOperation).buttonStyle(.borderedProminent).disabled(store.changes.contains(where: \.isConflicted))
+            }.disabled(store.isBusy)
                 .confirmationDialog("Abort this operation?", isPresented: $confirmAbort, titleVisibility: .visible) {
                     Button("Abort Operation", role: .destructive, action: store.abortOperation)
                 } message: { Text("Git will restore the pre-operation state. Edits made while resolving conflicts may be lost.") }

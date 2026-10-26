@@ -13,7 +13,7 @@ struct RemoteEditSheet: View {
     var title: String { action == .remove ? "Remove Remote" : action == .rename ? "Rename Remote" : remote == nil ? "Add Remote Repository" : "Edit Remote Repository" }
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text(title).font(.title2.bold())
+            SheetTitle(title)
             if action == .remove, let remote {
                 LabeledContent("Name", value: remote.name)
                 Text(remote.fetchURL).font(.callout).textSelection(.enabled)
@@ -56,7 +56,7 @@ struct RemoteFetchSheet: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("Fetch Remote Repository").font(.title2.bold())
+            SheetTitle("Fetch Remote Repository")
             Picker("Remote", selection: $name) { Text("All Remotes").tag(""); ForEach(store.managedRemotes) { Text($0.name).tag($0.name) } }
             Toggle("Prune Deleted Remote Branches", isOn: $prune)
             Toggle("Fetch All Tags", isOn: $tags)
@@ -94,7 +94,7 @@ struct RemotePushSheet: View {
     var title: String { deleting ? "Delete Remote Reference" : lease ? "Force Push with Lease" : "Publish / Push" }
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text(title).font(.title2.bold())
+            SheetTitle(title)
             if let preview {
                 Grid(alignment: .leading, verticalSpacing: 10) {
                     GridRow { Text("Remote").foregroundStyle(.secondary); Text(preview.remote.name) }

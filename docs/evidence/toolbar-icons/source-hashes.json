@@ -1,0 +1,5 @@
+{
+  "Sources/GitPico/App/NativeRepositoryWindows.swift": "0ccef18b3a6810f3c88b48bb8f8ab4b0b102371a310b634bc7a15fd5da88394a",
+  "Sources/GitPico/Views/RepositoryToolbar.swift": "38aa209a0b150e9497f6a8b5b901ebb9d979cf8cfd8c644540289609b32d9f89",
+  "Tests/GitPicoTests/NativeRepositoryWindowTests.swift": "cfe0097230152af4e1ccc1f734477f278916c14d6ab8c9d5b0be2e3b0c5f7c9e"
+}

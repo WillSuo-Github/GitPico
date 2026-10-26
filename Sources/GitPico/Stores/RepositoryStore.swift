@@ -8,7 +8,7 @@ struct ConflictDraft {
     let text: String
 }
 
-enum Destination: Hashable {
+enum Destination: Hashable, Sendable {
     case worktrees, submodules, workingCopy, history, reflog, stashes, branchesReview, repositorySettings, reference(String), fileHistory(String, String), comparison(String)
     var title: String {
         switch self {
@@ -44,6 +44,8 @@ enum Destination: Hashable {
 
 @MainActor @Observable
 final class RepositoryStore {
+    @ObservationIgnored weak var workspace: RepositoryWorkspace?
+    var sidebarFilter = ""
     var backStack: [Destination] = []
     var forwardStack: [Destination] = []
     @ObservationIgnored var navigationBookmarks: [Destination:NavigationBookmark] = [:]
@@ -127,7 +129,6 @@ final class RepositoryStore {
     @ObservationIgnored var workingDiffRequest: WorkingDiffRequest?
     var externalToolRequest: ExternalToolRequest?
     var showingExternalToolSettings = false
-    var showingQuickActions = false
     var toolPreferences = ExternalToolPreferences()
     @ObservationIgnored var externalToolRunner = ExternalToolRunner()
     @ObservationIgnored var fileBrowserGeneration = UUID()
@@ -147,8 +148,9 @@ final class RepositoryStore {
     var error: String?
     var search = ""
     var searchFocusRequest: UUID?
-    var commitSubject = "" { didSet { if !commitSubject.isEmpty { commitFeedback = nil; commitWarning = nil } } }
-    var commitBody = "" { didSet { if !commitBody.isEmpty { commitFeedback = nil; commitWarning = nil } } }
+    var searchActionsRequest: UUID?
+    var commitSubject = "" { didSet { if !commitSubject.isEmpty { commitFeedback = nil; commitWarning = nil }; if oldValue != commitSubject { workspace?.recordDraft(self) } } }
+    var commitBody = "" { didSet { if !commitBody.isEmpty { commitFeedback = nil; commitWarning = nil }; if oldValue != commitBody { workspace?.recordDraft(self) } } }
     var conflictDrafts: [String: ConflictDraft] = [:]
     var showingBranchSheet = false
     var showingStashSheet = false
@@ -158,6 +160,7 @@ final class RepositoryStore {
     var showingRepositoryLibrary = false
     var showingQuickOpen = false
     init(library: RepositoryLibrary? = nil, historyReader: any HistoryReading = GitHistoryReader(), workingDiffReader: any WorkingDiffReading = GitWorkingDiffReader(), mutationRefreshReader: any MutationRefreshReading = GitMutationRefreshReader()) { self.library = library ?? RepositoryLibrary(); self.historyReader = historyReader; self.workingDiffReader = workingDiffReader; self.mutationRefreshReader = mutationRefreshReader }
+    @ObservationIgnored var lastOpenReport: RepositoryOpenReport?
     var lastUpdated: Date?
     @ObservationIgnored var repository: GitRepository?
     @ObservationIgnored var detailToken = UUID()
@@ -178,7 +181,10 @@ final class RepositoryStore {
         } else if let path = recentPaths.first { await open(URL(fileURLWithPath: path)) }
     }
 
+    func showRepositories() { if let workspace { workspace.showRepositories(from: self) } else { showingRepositoryLibrary = true } }
+
     func chooseRepository() {
+        if let workspace { workspace.chooseRepository(from: self); return }
         guard !isBusy else { return }
         let panel = NSOpenPanel()
         panel.title = "Open Git Repository"
@@ -193,21 +199,39 @@ final class RepositoryStore {
     }
 
     func open(_ url: URL) async {
+        if let workspace { await workspace.open(url, from: self); return }
+        await openInPlace(url)
+    }
+
+    func reopenCurrentRepository(_ url: URL) async {
+        if let workspace {
+            let canonical = url.standardizedFileURL.resolvingSymlinksInPath()
+            let currentStillExists = snapshot.map { FileManager.default.fileExists(atPath: $0.root.appendingPathComponent(".git").path) } ?? false
+            let replacing = snapshot?.root.path == canonical.path || !currentStillExists
+            await workspace.open(url, from: self, replacing: replacing)
+        } else { await openInPlace(url) }
+    }
+
+    func openInPlace(_ url: URL, openedRepository: GitRepository? = nil) async {
         guard !isBusy else { return }
         isBusy = true; activity = "Opening repository…"
-        defer { isBusy = false; activity = "" }
+        let timing = RepositoryOpenTiming(); var succeeded = false
+        defer { isBusy = false; activity = ""; lastOpenReport = timing.finish(succeeded: succeeded) }
         do {
-            let repo = try await GitRepository.open(url)
-            let data = try await repo.snapshot()
+            let repo: GitRepository
+            if let openedRepository { repo = openedRepository } else { repo = try await timing.measure("validate") { try await GitRepository.open(url) } }
+            let data = try await timing.measure("snapshot") { try await repo.snapshot(countHistory: false) }
             cancelPreviewWork(); clearHistoryCache(); commitDetailCache = [:]; historyPresentation = .empty; historyError = nil
-            searchFocusRequest = nil; metadataEpoch = UUID(); metadataTask?.cancel(); metadataTask = nil; metadataDirty = []; repositoryToken = UUID(); detailToken = UUID(); workingFileEntries = []; workingList = .empty; workingOnlyConflicts = false; commitFeedback = nil; commitWarning = nil; diffError = nil; workingDiffRequest = nil; showAllFiles = false; showIgnoredFiles = false; dragActions = [:]; selectedWorkingFiles = []
+            searchFocusRequest = nil; searchActionsRequest = nil; metadataEpoch = UUID(); metadataTask?.cancel(); metadataTask = nil; metadataDirty = []; repositoryToken = UUID(); detailToken = UUID(); workingFileEntries = []; workingList = .empty; workingOnlyConflicts = false; commitFeedback = nil; commitWarning = nil; diffError = nil; workingDiffRequest = nil; showAllFiles = false; showIgnoredFiles = false; dragActions = [:]; selectedWorkingFiles = []
             lfsRequest = nil; flowRequest = nil; lfsState = nil; lfsChanges = []; lfsTransfers = []; lfsProgress = ""; lfsError = nil; flowConfiguration = nil; activeFlow = nil; flowHistory = []; workflowError = nil
-            managementRequest = nil; stashRequest = nil; localChangeRequest = nil; historicalRequest = nil; worktreeRequest = nil; submoduleRequest = nil; relatedAdministrationRequest = nil; infrastructureRequest = nil; relatedBatchProgress = nil; worktrees = []; submodules = []; externalToolRequest = nil; showingQuickActions = false; showingBranchSheet = false; showingStashSheet = false
+            managementRequest = nil; stashRequest = nil; localChangeRequest = nil; historicalRequest = nil; worktreeRequest = nil; submoduleRequest = nil; relatedAdministrationRequest = nil; infrastructureRequest = nil; relatedBatchProgress = nil; worktrees = []; submodules = []; externalToolRequest = nil; showingBranchSheet = false; showingStashSheet = false
             automaticStashRequest = nil; pendingAutomaticStashRequest = nil
-            automaticStash = try await repo.automaticStashRecord()
+            automaticStash = try await timing.measure("automatic-stash") { try await repo.automaticStashRecord() }
             repository = repo; snapshot = data
-            managedRemotes = try await repo.remoteConfigurations(); organization = try await repo.referenceOrganization()
-            undoAvailability = try await repo.undoAvailability(); rebaseProgress = try await repo.rebaseProgress()
+            managedRemotes = try await timing.measure("remotes") { try await repo.remoteConfigurations() }
+            organization = try await timing.measure("organization") { try await repo.referenceOrganization() }
+            undoAvailability = try await timing.measure("undo") { try await repo.undoAvailability() }
+            rebaseProgress = try await timing.measure("rebase") { try await repo.rebaseProgress() }
             backStack = []; forwardStack = []; navigationBookmarks = [:]; navigationBookmarkOrder = []; pendingHistorySelection = nil; historyNeedsReveal = false; historyReveal = nil; draftBeforeAmend = nil
             destination = .workingCopy; search = ""; historyOptions = HistoryOptions(); amend = false; signOff = false; configuration = nil
             selectedChange = nil; selectedCommit = nil; selectedStash = nil
@@ -216,9 +240,10 @@ final class RepositoryStore {
             conflictDrafts = [:]
             do { try library.recordOpened(data.root) }
             catch { self.error = "Repository opened, but the library could not be saved: " + error.localizedDescription }
-            await loadRelatedRepositories(); await loadWorkflowState()
-            await rebuildWorkingList()
-            lastUpdated = Date()
+            await timing.measure("related") { await loadRelatedRepositories() }
+            await timing.measure("workflow") { await loadWorkflowState() }
+            await timing.measure("working-list") { await rebuildWorkingList() }
+            lastUpdated = Date(); succeeded = true
         } catch { self.error = error.localizedDescription }
     }
 

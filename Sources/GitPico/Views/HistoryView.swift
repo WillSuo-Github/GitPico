@@ -9,15 +9,14 @@ struct HistoryView: View {
     var body: some View {
         PersistentSplitView(name: "history", width: 320) {
             VStack(spacing: 0) {
-                HStack {
-                    Image(systemName: "clock.arrow.circlepath").foregroundStyle(.secondary)
-                    Text(store.destination.ref == nil ? "All Branches, Remotes, Tags" : store.destination.title).lineLimit(1)
-                    Spacer(minLength: 0)
+                PaneBar(title: store.destination.ref == nil ? "All Branches" : store.destination.title,
+                        subtitle: store.destination.ref == nil ? "Branches, remotes and tags · \(commits.count)\(store.historyPresentation.page.hasMore ? "+" : "") commits" : "\(commits.count)\(store.historyPresentation.page.hasMore ? "+" : "") commits",
+                        icon: store.destination.ref == nil ? "clock.arrow.circlepath" : "arrow.triangle.branch") {
                     if let ref = store.previewedReference, !ref.isCurrent {
-                        Text("Preview").font(.caption2).foregroundStyle(.secondary)
+                        Chip(text: "Preview", icon: "eye", tint: .secondary)
                             .help("Viewing this revision does not change the checked-out branch.")
                         if ref.isLocal {
-                            Button("Check Out") { store.switchBranch(ref) }
+                            Button("Check Out") { store.switchBranch(ref) }.controlSize(.small)
                                 .disabled(store.checkoutUnavailableReason(ref) != nil)
                                 .help(store.checkoutUnavailableReason(ref) ?? ("Switch the working copy to " + ref.name))
                         }
@@ -30,12 +29,11 @@ struct HistoryView: View {
                         Picker("Sort By", selection: $store.historyOptions.sortByDate) { Text("Topo Order").tag(false); Text("Date").tag(true) }
                         Toggle("Group by Month", isOn: $preferences.historyGroups)
                         Picker("Commit View Size", selection: $preferences.historyCompact) { Text("Medium").tag(false); Text("Small").tag(true) }
-                    } label: { Image(systemName: "slider.horizontal.3") }.menuStyle(.borderlessButton).frame(width: 20).help("Change viewing options").disabled(store.isBusy)
-                }.font(.system(size: 12)).padding(.horizontal, 12).frame(height: 40).background(.bar)
-                Divider()
+                    } label: { Image(systemName: "line.3.horizontal.decrease.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Change viewing options").disabled(store.isBusy)
+                }
                 if let failure = store.historyError, !commits.isEmpty {
                     HStack { Image(systemName: "exclamationmark.triangle"); Text(failure).lineLimit(2); Spacer(); Button("Retry") { store.requestHistory() } }
-                        .font(.caption).padding(8).background(.yellow.opacity(0.1))
+                        .font(.caption).padding(8).background(Pico.warning.opacity(0.1))
                 }
                 let graph = store.historyPresentation.graph
                 let width = CGFloat(store.historyPresentation.graphWidth)
@@ -49,7 +47,7 @@ struct HistoryView: View {
                                     .picoDrop(store, .commit(commit, .squash))
                                     .tag(commit.id).id(commit.id).listRowSeparator(.hidden).listRowInsets(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 4))
                             }
-                        } header: { if !group.title.isEmpty { Text(group.title).font(.system(size: 11)).foregroundStyle(.secondary) } }
+                        } header: { if !group.title.isEmpty { SectionCaption(group.title).padding(.vertical, 2) } }
                     }
                     if store.historyPresentation.page.hasMore && store.historyOptions.limit < 20_000 {
                         Button("Load More · \(commits.count) shown", action: store.loadMoreHistory).frame(maxWidth: .infinity).disabled(store.isLoadingHistory || store.isBusy)
@@ -57,8 +55,8 @@ struct HistoryView: View {
                     if store.historyPresentation.page.hasMore && store.historyOptions.limit >= 20_000 {
                         Text("Showing the first 20,000 matches. Narrow the search to find older commits.").font(.caption).foregroundStyle(.secondary)
                     }
-                }.listStyle(.plain).environment(\.defaultMinListRowHeight, preferences.historyCompact ? 32 : 48)
-                .overlay { if commits.isEmpty { if store.isLoadingHistory { ProgressView("Loading history…") } else { EmptyPane(title: store.historyError ?? (store.search.isEmpty ? "No commits yet" : "No matching commits"), subtitle: "", icon: "clock") } } }
+                }.listStyle(.plain).environment(\.defaultMinListRowHeight, preferences.historyCompact ? 32 : 50)
+                .overlay { if commits.isEmpty { if store.isLoadingHistory { ProgressView("Loading history…") } else { EmptyPane(title: store.historyError ?? (store.search.isEmpty ? "No commits yet" : "No matching commits"), subtitle: store.search.isEmpty ? "" : "Try a different message, author or hash.", icon: store.search.isEmpty ? "clock" : "magnifyingglass") } } }
                 .onChange(of: store.historyReveal, initial: true) {
                     guard let request = store.historyReveal else { return }
                     Task { @MainActor in

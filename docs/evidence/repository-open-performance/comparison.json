@@ -1,0 +1,75 @@
+{
+  "before": {
+    "wallSeconds": [
+      3.088281334,
+      2.9585152089999998,
+      2.978565917
+    ],
+    "medianSeconds": 2.978565917,
+    "commands": [
+      35,
+      35,
+      35
+    ],
+    "phaseMedians": {
+      "snapshot": 0.510797708,
+      "automatic-stash": 0.099921541,
+      "remotes": 1.008655542,
+      "organization": 0.100066875,
+      "undo": 0.395970042,
+      "rebase": 0.103009583,
+      "related": 0.326646083,
+      "workflow": 0.299413875,
+      "working-list": 0.015888417
+    }
+  },
+  "event": {
+    "wallSeconds": [
+      0.374281916,
+      0.398702709,
+      0.394951666
+    ],
+    "medianSeconds": 0.394951666,
+    "commands": [
+      35,
+      35,
+      35
+    ],
+    "phaseMedians": {
+      "snapshot": 0.118343417,
+      "automatic-stash": 0.011772625,
+      "remotes": 0.1042825,
+      "organization": 0.011248,
+      "undo": 0.045886667,
+      "rebase": 0.01092,
+      "related": 0.036026791,
+      "workflow": 0.031036083,
+      "working-list": 0.007083416
+    }
+  },
+  "after": {
+    "wallSeconds": [
+      0.238688667,
+      0.228319833,
+      0.227772291
+    ],
+    "medianSeconds": 0.228319833,
+    "commands": [
+      26,
+      26,
+      26
+    ],
+    "phaseMedians": {
+      "snapshot": 0.073690208,
+      "automatic-stash": 0.009172292,
+      "remotes": 0.018114917,
+      "organization": 0.009193625,
+      "undo": 0.035524417,
+      "rebase": 0.009506667,
+      "related": 0.031243333,
+      "workflow": 0.029018959,
+      "working-list": 0.006433083
+    }
+  },
+  "reductionPercent": 92.3345717582788
+}

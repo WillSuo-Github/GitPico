@@ -1,0 +1,41 @@
+Building for debugging...
+[Constructing description]
+[Pre-planning 1 / 153]
+[Planning deferred tasks]
+[7 / 34]
+[10 / 34] GitCoreTests-product
+[10 / 33] GitPico
+[21 / 44] GitPico
+[26 / 54] GitPico
+[27 / 54] GitPico
+[28 / 54] GitPico
+[29 / 54] GitPico
+[30 / 54] GitPico
+[31 / 54] GitPico
+[36 / 51] GitPico
+[38 / 51] GitPico
+[40 / 51] GitPicoTests-product
+[51 / 62] GitPicoTests-product
+[55 / 61] GitPicoTests-product
+[57 / 61] GitPicoTests-product
+Build complete! (15.94 sec)
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test repositoryTabsPreserveIndependentDraftSelectionAndWarmHistory() started.
+◇ Test busyTabCannotCloseButOtherTabsRemainAvailable() started.
+◇ Test rejectedOpenKeepsExistingRepositoryAndDraftIntact() started.
+◇ Test corruptDraftStoragePreventsSilentLossWhenClosingRepository() started.
+◇ Test concurrentCanonicalRepositoryOpenCreatesOnlyOneWorkspace() started.
+◇ Test successfulCommitClearsPersistedTabDraft() started.
+◇ Test closingLastRepositoryReturnsPickerAndPersistsDraftAcrossReopen() started.
+◇ Test repositoryPickerReusesEmptyTabAndDuplicateRepositoryFocusesExistingTab() started.
+✔ Test corruptDraftStoragePreventsSilentLossWhenClosingRepository() passed after 6.736 seconds.
+✔ Test concurrentCanonicalRepositoryOpenCreatesOnlyOneWorkspace() passed after 6.831 seconds.
+✔ Test rejectedOpenKeepsExistingRepositoryAndDraftIntact() passed after 6.937 seconds.
+✔ Test repositoryPickerReusesEmptyTabAndDuplicateRepositoryFocusesExistingTab() passed after 7.024 seconds.
+✔ Test busyTabCannotCloseButOtherTabsRemainAvailable() passed after 8.642 seconds.
+✔ Test repositoryTabsPreserveIndependentDraftSelectionAndWarmHistory() passed after 9.027 seconds.
+✔ Test closingLastRepositoryReturnsPickerAndPersistsDraftAcrossReopen() passed after 10.574 seconds.
+✔ Test successfulCommitClearsPersistedTabDraft() passed after 11.934 seconds.
+✔ Test run with 8 tests in 0 suites passed after 11.934 seconds.

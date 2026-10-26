@@ -13,7 +13,7 @@ public actor GitRepository {
         return GitRepository(root: URL(fileURLWithPath: path, isDirectory: true).resolvingSymlinksInPath())
     }
 
-    public func snapshot(ref: String? = nil, options: HistoryOptions = HistoryOptions()) async throws -> RepositorySnapshot {
+    public func snapshot(ref: String? = nil, options: HistoryOptions = HistoryOptions(), countHistory: Bool = true) async throws -> RepositorySnapshot {
         async let status = GitProcess.run(["status", "--porcelain=v1", "-z", "--untracked-files=all"], at: root)
         async let refs = GitProcess.run(["for-each-ref", "--sort=refname", "--format=%(refname)%00%(objectname)%00%(symref)%00%(upstream:short)%00%(HEAD)", "refs/heads", "refs/remotes", "refs/tags"], at: root)
         async let branch = GitProcess.run(["symbolic-ref", "--quiet", "HEAD"], at: root, allowed: [0, 1])
@@ -32,8 +32,10 @@ public actor GitRepository {
         if hasHEAD || !references.isEmpty {
             let output = try await GitProcess.run(["log", "--no-show-signature", options.sortByDate ? "--date-order" : "--topo-order", "--max-count=\(options.limit)", "--format=%H%x00%P%x00%an%x00%ae%x00%at%x00%s%x00%D%x00"] + filters + selectors, at: root)
             commits = GitParser.commits(output.data)
-            let count = try await GitProcess.run(["rev-list", "--count"] + filters + selectors, at: root)
-            historyCount = Int(count.text.trimmingCharacters(in: .whitespacesAndNewlines)) ?? commits.count
+            if countHistory {
+                let count = try await GitProcess.run(["rev-list", "--count"] + filters + selectors, at: root)
+                historyCount = Int(count.text.trimmingCharacters(in: .whitespacesAndNewlines)) ?? commits.count
+            } else { historyCount = commits.count }
         } else { commits = []; historyCount = 0 }
         async let identity = readIdentity()
         async let operation = currentOperation()
@@ -44,7 +46,7 @@ public actor GitRepository {
             let values = counts.text.split(whereSeparator: \.isWhitespace).compactMap { Int($0) }
             if values.count == 2 { ahead = values[0]; behind = values[1] }
         }
-        return RepositorySnapshot(root: root, branch: branchOutput.status == 0 ? branchOutput.text.trimmingCharacters(in: .newlines).replacingOccurrences(of: "^refs/heads/", with: "", options: .regularExpression) : "Detached HEAD", changes: GitParser.status(statusOutput.data), commits: commits, references: references, stashes: stashOutput, remotes: remotesOutput.text.split(separator: "\n").map(String.init), ahead: ahead, behind: behind, hasHEAD: hasHEAD, identity: try await identity, operation: try await operation, historyCount: historyCount, head: HeadPosition(branch: branchOutput.status == 0 ? branchOutput.text.trimmingCharacters(in: .newlines) : "HEAD", hash: hasHEAD ? headOutput.text.trimmingCharacters(in: .newlines) : nil), historyCountIsExact: true)
+        return RepositorySnapshot(root: root, branch: branchOutput.status == 0 ? branchOutput.text.trimmingCharacters(in: .newlines).replacingOccurrences(of: "^refs/heads/", with: "", options: .regularExpression) : "Detached HEAD", changes: GitParser.status(statusOutput.data), commits: commits, references: references, stashes: stashOutput, remotes: remotesOutput.text.split(separator: "\n").map(String.init), ahead: ahead, behind: behind, hasHEAD: hasHEAD, identity: try await identity, operation: try await operation, historyCount: historyCount, head: HeadPosition(branch: branchOutput.status == 0 ? branchOutput.text.trimmingCharacters(in: .newlines) : "HEAD", hash: hasHEAD ? headOutput.text.trimmingCharacters(in: .newlines) : nil), historyCountIsExact: countHistory || commits.count < options.limit)
     }
 
     public func diff(_ change: FileChange, staged: Bool, context: Int = 7, ignoreWhitespace: Bool = false, cancellable: Bool = false) async throws -> String {

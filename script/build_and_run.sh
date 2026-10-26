@@ -57,6 +57,31 @@ assert result['backgroundTesting'] and not result['isActive'] and result['visibl
 assert result['frontmostProcessIdentifier'] != result['processIdentifier'], result
 print(json.dumps(result, indent=2))
 PYVERIFY
+    if [[ "$MODE" == "--verify" ]]; then
+      NATIVE_VERIFY_OUTPUT="$ROOT_DIR/dist/native-startup-verification.json"
+      rm -f "$NATIVE_VERIFY_OUTPUT"
+      /usr/bin/open -g -j -n "$APP_BUNDLE" --args --native-startup-verification --verification-output "$NATIVE_VERIFY_OUTPUT" --verification-exit
+      python3 - "$NATIVE_VERIFY_OUTPUT" <<'PYNATIVEVERIFY'
+import json, sys, time
+from pathlib import Path
+path = Path(sys.argv[1])
+deadline = time.monotonic() + 20
+while not path.exists() and time.monotonic() < deadline:
+    time.sleep(0.1)
+assert path.exists(), 'Native App startup did not produce its verification report.'
+result = json.loads(path.read_text())
+assert result['nativeStartupVerification'] and not result['isActive'] and result['visibleWindows'] == 0, result
+assert result['newTabMenuWorks'] and result['closeTabMenuWorks'], result
+assert result['repositoryMenuContextWorks'], result
+assert result['repositoriesMenuReusesCurrentTab'], result
+assert result['quickActionsUseToolbarSearch'] and result['findUsesToolbarSearch'], result
+assert result['frontmostProcessIdentifier'] != result['processIdentifier'], result
+assert result['singleTabBarHidden'] and result['multipleTabBarVisible'] and result['singleTabBarHiddenAfterClose'], result
+assert result['nativeSelectionMatchesModel'], result
+assert result['newTabShortcut'] == 't' and result['closeTabShortcut'] == 'w', result
+print(json.dumps(result, indent=2))
+PYNATIVEVERIFY
+    fi
     ;;
   run) /usr/bin/open -n "$APP_BUNDLE" ;;
 esac

@@ -1,0 +1,781 @@
+{
+  "branches" : 150,
+  "commits" : 10000,
+  "headUnchanged" : true,
+  "remotes" : 3,
+  "samples" : [
+    {
+      "commands" : [
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "other",
+          "seconds" : 0.096270290999999994
+        },
+        {
+          "command" : "stash",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.098562167000000006
+        },
+        {
+          "command" : "remote",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.098752458000000001
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.098822416999999996
+        },
+        {
+          "command" : "symbolic-ref",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.098869374999999995
+        },
+        {
+          "command" : "status",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.123339166
+        },
+        {
+          "command" : "for-each-ref",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.12598324999999999
+        },
+        {
+          "command" : "log",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.15417875
+        },
+        {
+          "command" : "rev-list",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.12826337500000001
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.095353666000000004
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.095429958999999995
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.095570791000000002
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "automatic-stash",
+          "seconds" : 0.099574291999999995
+        },
+        {
+          "command" : "remote",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.099339834000000002
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.17725095799999999
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.14520920900000001
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.125153083
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.095678417000000002
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.096789458999999994
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.099716541000000006
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.099239375000000005
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.10143616699999999
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.099272291999999998
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "organization",
+          "seconds" : 0.097269291999999993
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "undo",
+          "seconds" : 0.099266458000000002
+        },
+        {
+          "command" : "symbolic-ref",
+          "failed" : false,
+          "phase" : "undo",
+          "seconds" : 0.096726207999999994
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "undo",
+          "seconds" : 0.100900458
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "undo",
+          "seconds" : 0.096907875000000004
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "rebase",
+          "seconds" : 0.100322625
+        },
+        {
+          "command" : "worktree",
+          "failed" : false,
+          "phase" : "related",
+          "seconds" : 0.098956541999999995
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "related",
+          "seconds" : 0.095501125000000006
+        },
+        {
+          "command" : "ls-files",
+          "failed" : false,
+          "phase" : "related",
+          "seconds" : 0.12568912500000001
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "workflow",
+          "seconds" : 0.097413458999999994
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "workflow",
+          "seconds" : 0.096448667000000002
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "workflow",
+          "seconds" : 0.100081458
+        }
+      ],
+      "open" : {
+        "phases" : [
+          {
+            "name" : "snapshot",
+            "seconds" : 0.51361349999999995
+          },
+          {
+            "name" : "automatic-stash",
+            "seconds" : 0.099921541000000003
+          },
+          {
+            "name" : "remotes",
+            "seconds" : 1.139771584
+          },
+          {
+            "name" : "organization",
+            "seconds" : 0.097791749999999997
+          },
+          {
+            "name" : "undo",
+            "seconds" : 0.39432445900000002
+          },
+          {
+            "name" : "rebase",
+            "seconds" : 0.100491625
+          },
+          {
+            "name" : "related",
+            "seconds" : 0.33171945800000002
+          },
+          {
+            "name" : "workflow",
+            "seconds" : 0.29631812499999999
+          },
+          {
+            "name" : "working-list",
+            "seconds" : 0.015175084
+          }
+        ],
+        "seconds" : 2.9914062919999997,
+        "succeeded" : true
+      },
+      "wallSeconds" : 3.0882813339999999
+    },
+    {
+      "commands" : [
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "other",
+          "seconds" : 0.10071925
+        },
+        {
+          "command" : "stash",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.098326625000000001
+        },
+        {
+          "command" : "remote",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.098359540999999995
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.098409458000000005
+        },
+        {
+          "command" : "symbolic-ref",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.098610084000000001
+        },
+        {
+          "command" : "for-each-ref",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.122050375
+        },
+        {
+          "command" : "status",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.12588883300000001
+        },
+        {
+          "command" : "log",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.15485529200000001
+        },
+        {
+          "command" : "rev-list",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.12631837500000001
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.095292917000000005
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.095332166999999995
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.095393375000000002
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "automatic-stash",
+          "seconds" : 0.099721708000000006
+        },
+        {
+          "command" : "remote",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.097255084000000006
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.12555125
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.100249458
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.095728458000000002
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.098185583000000007
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.100543166
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.095650166999999994
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.098894041000000002
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.100643833
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.095314291999999995
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "organization",
+          "seconds" : 0.10235383300000001
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "undo",
+          "seconds" : 0.100198709
+        },
+        {
+          "command" : "symbolic-ref",
+          "failed" : false,
+          "phase" : "undo",
+          "seconds" : 0.096077541000000002
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "undo",
+          "seconds" : 0.10155391599999999
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "undo",
+          "seconds" : 0.097415083
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "rebase",
+          "seconds" : 0.102616
+        },
+        {
+          "command" : "worktree",
+          "failed" : false,
+          "phase" : "related",
+          "seconds" : 0.102702709
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "related",
+          "seconds" : 0.098568792000000002
+        },
+        {
+          "command" : "ls-files",
+          "failed" : false,
+          "phase" : "related",
+          "seconds" : 0.100697167
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "workflow",
+          "seconds" : 0.099617999999999998
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "workflow",
+          "seconds" : 0.099705000000000002
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "workflow",
+          "seconds" : 0.099834084000000003
+        }
+      ],
+      "open" : {
+        "phases" : [
+          {
+            "name" : "snapshot",
+            "seconds" : 0.51079770800000002
+          },
+          {
+            "name" : "automatic-stash",
+            "seconds" : 0.099991207999999998
+          },
+          {
+            "name" : "remotes",
+            "seconds" : 1.0086555420000001
+          },
+          {
+            "name" : "organization",
+            "seconds" : 0.102775167
+          },
+          {
+            "name" : "undo",
+            "seconds" : 0.39597004200000002
+          },
+          {
+            "name" : "rebase",
+            "seconds" : 0.103009583
+          },
+          {
+            "name" : "related",
+            "seconds" : 0.31316658400000003
+          },
+          {
+            "name" : "workflow",
+            "seconds" : 0.30163929099999998
+          },
+          {
+            "name" : "working-list",
+            "seconds" : 0.017532584
+          }
+        ],
+        "seconds" : 2.8574977079999999,
+        "succeeded" : true
+      },
+      "wallSeconds" : 2.9585152089999998
+    },
+    {
+      "commands" : [
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "other",
+          "seconds" : 0.100447541
+        },
+        {
+          "command" : "stash",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.101037708
+        },
+        {
+          "command" : "remote",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.101087042
+        },
+        {
+          "command" : "symbolic-ref",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.101145
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.101187292
+        },
+        {
+          "command" : "for-each-ref",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.124425625
+        },
+        {
+          "command" : "status",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.13084154200000001
+        },
+        {
+          "command" : "log",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.13041045900000001
+        },
+        {
+          "command" : "rev-list",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.12710645800000001
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.098209832999999996
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.098258708
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "snapshot",
+          "seconds" : 0.098364124999999997
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "automatic-stash",
+          "seconds" : 0.096767459
+        },
+        {
+          "command" : "remote",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.098770750000000004
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.100210042
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.101573916
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.097652416000000006
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.102291708
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.102506208
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.097183000000000005
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.10084183400000001
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.100279875
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "remotes",
+          "seconds" : 0.097292666999999999
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "organization",
+          "seconds" : 0.099817375
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "undo",
+          "seconds" : 0.097511874999999998
+        },
+        {
+          "command" : "symbolic-ref",
+          "failed" : false,
+          "phase" : "undo",
+          "seconds" : 0.10082466700000001
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "undo",
+          "seconds" : 0.099955666999999998
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "undo",
+          "seconds" : 0.10241649999999999
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "rebase",
+          "seconds" : 0.14030899999999999
+        },
+        {
+          "command" : "worktree",
+          "failed" : false,
+          "phase" : "related",
+          "seconds" : 0.126666375
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "related",
+          "seconds" : 0.095692290999999999
+        },
+        {
+          "command" : "ls-files",
+          "failed" : false,
+          "phase" : "related",
+          "seconds" : 0.096971249999999995
+        },
+        {
+          "command" : "config",
+          "failed" : false,
+          "phase" : "workflow",
+          "seconds" : 0.098260082999999998
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "workflow",
+          "seconds" : 0.10034283300000001
+        },
+        {
+          "command" : "rev-parse",
+          "failed" : false,
+          "phase" : "workflow",
+          "seconds" : 0.097680791000000003
+        }
+      ],
+      "open" : {
+        "phases" : [
+          {
+            "name" : "snapshot",
+            "seconds" : 0.49449141600000002
+          },
+          {
+            "name" : "automatic-stash",
+            "seconds" : 0.097065874999999996
+          },
+          {
+            "name" : "remotes",
+            "seconds" : 0.99920162499999998
+          },
+          {
+            "name" : "organization",
+            "seconds" : 0.100066875
+          },
+          {
+            "name" : "undo",
+            "seconds" : 0.40183179200000002
+          },
+          {
+            "name" : "rebase",
+            "seconds" : 0.14063545799999999
+          },
+          {
+            "name" : "related",
+            "seconds" : 0.32664608299999998
+          },
+          {
+            "name" : "workflow",
+            "seconds" : 0.299413875
+          },
+          {
+            "name" : "working-list",
+            "seconds" : 0.015888416999999998
+          }
+        ],
+        "seconds" : 2.8776567499999999,
+        "succeeded" : true
+      },
+      "wallSeconds" : 2.9785659170000001
+    }
+  ],
+  "untrackedFiles" : 2000,
+  "worktrees" : 9
+}

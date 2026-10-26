@@ -12,26 +12,28 @@ struct ReflogView: View {
     var body: some View {
         PersistentSplitView(name: "reflog", width: 320) {
             VStack(spacing: 0) {
-                HStack {
-                    Picker("Ref:", selection: $ref) {
+                PaneBar(title: "Reflog", subtitle: "\(entries.count) events", icon: "list.bullet.rectangle") {
+                    Picker("Reference", selection: $ref) {
                         Text("HEAD").tag("HEAD")
                         ForEach((store.snapshot?.references ?? []).filter { $0.isLocal || $0.isRemote }) { Text($0.name).tag($0.fullName) }
-                    }.pickerStyle(.menu)
-                    Spacer(minLength: 0)
-                    Text("\(entries.count) events").foregroundStyle(.secondary)
-                }.font(.system(size: 12)).padding(.horizontal, 12).frame(height: 40).background(.bar)
-                Divider()
+                    }.labelsHidden().frame(maxWidth: 150)
+                }
                 List(selection: $selected) {
                     ForEach(filtered) { entry in
-                        VStack(alignment: .leading, spacing: 5) {
-                            HStack(spacing: 5) {
-                                Text(String(entry.hash.prefix(8))).font(.system(size: 11, design: .monospaced)).foregroundStyle(.secondary)
-                                Text(eventType(entry.message)).font(.system(size: 10, weight: .medium)).padding(.horizontal, 4).padding(.vertical, 2).foregroundStyle(.white).background(eventColor(entry.message).opacity(0.8), in: RoundedRectangle(cornerRadius: 3))
-                                Spacer(minLength: 0)
-                                Text(entry.date, format: .dateTime.month(.twoDigits).day(.twoDigits).hour().minute()).font(.system(size: 10)).foregroundStyle(.tertiary).fixedSize()
+                        HStack(alignment: .top, spacing: 10) {
+                            Image(systemName: eventIcon(entry.message)).font(.system(size: 12, weight: .semibold)).foregroundStyle(eventColor(entry.message))
+                                .frame(width: 26, height: 26).background(eventColor(entry.message).opacity(0.14), in: Circle())
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(eventDetail(entry.message)).font(.system(size: 12.5, weight: .medium)).lineLimit(2).frame(maxWidth: .infinity, alignment: .leading)
+                                HStack(spacing: 5) {
+                                    Text(eventType(entry.message)).foregroundStyle(eventColor(entry.message)).fontWeight(.semibold)
+                                    Text("·")
+                                    Text(String(entry.hash.prefix(8))).font(.system(size: 10.5, design: .monospaced))
+                                    Spacer(minLength: 0)
+                                    Text(entry.date.picoRelative).fixedSize()
+                                }.font(.system(size: 11)).foregroundStyle(.secondary)
                             }
-                            Text(entry.message).font(.system(size: 12)).lineLimit(2).frame(maxWidth: .infinity, alignment: .leading)
-                        }.padding(.vertical, 8).tag(entry.id).help("\(entry.selector) · \(entry.name) <\(entry.email)>")
+                        }.padding(.vertical, 5).tag(entry.id).help("\(entry.selector) · \(entry.name) <\(entry.email)>")
                             .accessibilityLabel("\(entry.selector), \(entry.hash.prefix(8)), \(entry.message), \(entry.date.formatted(date: .abbreviated, time: .shortened))")
                             .contextMenu {
                                 Button("Restore HEAD Here…") { store.recoveryRequest = RecoveryRequest(action: .restore(entry.hash)) }
@@ -40,7 +42,7 @@ struct ReflogView: View {
                     }
                     if entries.count == limit { Button("Load More Events") { limit += 500 } }
                 }.listStyle(.plain)
-                    .overlay { if let error { EmptyPane(title: "Unable to load Reflog", subtitle: error, icon: "exclamationmark.triangle") } else if filtered.isEmpty { EmptyPane(title: "No reflog events", subtitle: "Reference movements are recorded locally by Git.", icon: "clock") } }
+                    .overlay { if let error { EmptyPane(title: "Unable to load Reflog", subtitle: error, icon: "exclamationmark.triangle") } else if filtered.isEmpty { EmptyPane(title: store.search.isEmpty ? "No reflog events" : "No matching events", subtitle: "Git records every local HEAD and branch movement here, so lost commits can be recovered.", icon: "list.bullet.rectangle") } }
             }
         } trailing: {
             CommitDetailView(store: store)
@@ -63,5 +65,33 @@ struct ReflogView: View {
         catch { self.error = error.localizedDescription }
     }
     func eventType(_ message: String) -> String { String(message.split(separator: ":").first?.split(separator: " ").first ?? "event") }
-    func eventColor(_ message: String) -> Color { switch eventType(message) { case "rebase": .red; case "commit": .yellow; case "merge": .blue; default: .gray } }
+    func eventColor(_ message: String) -> Color {
+        switch eventType(message) {
+        case "rebase": .purple
+        case "commit": Pico.addition
+        case "merge": Pico.modified
+        case "reset": Pico.deletion
+        case "checkout": .teal
+        case "pull", "fetch": .indigo
+        default: .secondary
+        }
+    }
+    func eventIcon(_ message: String) -> String {
+        switch eventType(message) {
+        case "rebase": "arrow.triangle.swap"
+        case "commit": "plus"
+        case "merge": "arrow.triangle.merge"
+        case "reset": "arrow.uturn.backward"
+        case "checkout": "arrow.triangle.branch"
+        case "pull", "fetch": "arrow.down"
+        case "cherry-pick": "arrow.right.doc.on.clipboard"
+        default: "circle"
+        }
+    }
+    /// Message without its "type:" prefix, which the row already shows as a label.
+    func eventDetail(_ message: String) -> String {
+        guard let colon = message.firstIndex(of: ":") else { return message }
+        let rest = message[message.index(after: colon)...].trimmingCharacters(in: .whitespaces)
+        return rest.isEmpty ? message : rest.prefix(1).uppercased() + rest.dropFirst()
+    }
 }

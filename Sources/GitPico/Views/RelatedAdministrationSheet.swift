@@ -34,7 +34,7 @@ struct RelatedBatchSheet: View {
     var needsValue: Bool { isWorktree ? worktreeOperation == .move || worktreeOperation == .lock : [.move, .setURL, .checkout].contains(submoduleOperation) }
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Label(isResume ? (completedHistory ? "Batch History" : "Resume Batch") : isWorktree ? "Manage Worktrees" : "Manage Submodules", systemImage: "checklist").font(.title2.bold())
+            SheetTitle(isResume ? (completedHistory ? "Batch History" : "Resume Batch") : isWorktree ? "Manage Worktrees" : "Manage Submodules", icon: "checklist")
             if plan == nil && !isResume {
                 if isWorktree { Picker("Operation", selection: $worktreeOperation) { ForEach(WorktreeBatchOperation.allCases, id: \.self) { Text($0.rawValue).tag($0) } } }
                 else { Picker("Operation", selection: $submoduleOperation) { ForEach(SubmoduleOperation.allCases, id: \.self) { Text($0.rawValue).tag($0) } } }
@@ -112,7 +112,7 @@ struct RelatedManagementBackupsView: View {
     var chosen: RelatedManagementBackup? { backups.first { $0.id == selected } }
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Label("Management Backups", systemImage: "clock.arrow.circlepath").font(.title2.bold())
+            SheetTitle("Management Backups", icon: "clock.arrow.circlepath")
             Text("Restore the original directory, staging and Git configuration. Newer files, staging, revisions or configuration block restoration. Current directories are quarantined rather than deleted. Restore multiple operations in reverse order.").font(.callout).foregroundStyle(.secondary)
             if let savedModule {
                 relatedField("Saved module repository", savedModule.backup.title)

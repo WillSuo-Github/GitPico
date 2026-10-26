@@ -27,7 +27,7 @@ struct GitFlowSettingsPane: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 18) {
-                HStack { Label("Git Flow", systemImage: "arrow.triangle.branch").font(.title2.bold()); Spacer(); GitFlowToolbarMenu(store: store); Button("Reload") { Task { await store.loadWorkflowState() } }.disabled(store.isBusy) }
+                HStack { SheetTitle("Git Flow", icon: "arrow.triangle.branch"); Spacer(); GitFlowToolbarMenu(store: store); Button("Reload") { Task { await store.loadWorkflowState() } }.disabled(store.isBusy) }
                 Text("Classic Git Flow implemented with Git. Compatible repository-local gitflow.* branch/prefix settings; no separate git-flow script is required. Custom CLI hooks and alternative workflow engines are not executed.").font(.callout).foregroundStyle(.secondary)
                 if let config = store.flowConfiguration {
                     Grid(alignment: .leading, horizontalSpacing: 28, verticalSpacing: 9) {
@@ -68,11 +68,10 @@ struct GitFlowOperationBanner: View {
     let store: RepositoryStore
     var body: some View {
         if let active = store.activeFlow {
-            HStack {
-                Label(active.title + " · \(active.next)/\(active.stepCount)", systemImage: "arrow.triangle.branch").font(.caption)
-                Spacer(); Button("Git Flow…", action: store.showGitFlow)
-                Button("Continue…") { store.manageFlow(.resume(active)) }.disabled(store.isBusy)
-            }.padding(.horizontal, 14).padding(.vertical, 7).background(.bar)
+            NoticeBanner(icon: "arrow.triangle.branch", title: active.title, message: "Step \(active.next) of \(active.stepCount)", tint: .purple) {
+                Button("Git Flow…", action: store.showGitFlow)
+                Button("Continue…") { store.manageFlow(.resume(active)) }.buttonStyle(.borderedProminent).disabled(store.isBusy)
+            }
         }
     }
 }

@@ -1,0 +1,17 @@
+{
+  "Sources/GitPico/App/GitPicoApp.swift": "67a2b773182c3144a7f6a18e8dc0f9f7e5b991ca2ac7ddb94340192b2ccb3fa3",
+  "Sources/GitPico/App/RepositoryCommands.swift": "8a020a63e96f04deda41800e3ce213e41533bca55dfbaec5f63a93550e23c369",
+  "Sources/GitPico/Stores/RepositoryWorkspace.swift": "8ebc4d38ab9b1d93731eee956d55845765050ea24f78a99f6e7268e43dc630bb",
+  "Sources/GitPico/Stores/RepositoryDraftStore.swift": "3ced5f77d05d4f984532a0e21a667c6bd592ec22267e4e9a11c5d5afb29f079c",
+  "Sources/GitPico/Stores/RepositoryStore.swift": "b2f0077ade6c8deb8d2e3d84adb1cd441adffac855e3768e087ec22e77a5a8e9",
+  "Sources/GitPico/Stores/RepositoryInfrastructureActions.swift": "bbd85bad2a7b0b06ad08c426e3d9ae0188152c74045e1de3b81bf0c82325be01",
+  "Sources/GitPico/Stores/QuickActions.swift": "d5c5c6df53730cdb485eaf2fad822725eed8cbc098556190aa385409189ce740",
+  "Sources/GitPico/Views/ContentView.swift": "71568c1dc208651e7ece1e44b1bbd19c81254266e9b542247c5beae0c39bdfd1",
+  "Sources/GitPico/Views/RepositoryMenu.swift": "744aad54f9f368f4228dbad5f3df71e7ecfafbdfed10c2e2abe4beddff268d8c",
+  "Sources/GitPico/Views/RepositoryWorkspaceView.swift": "f4e76ca027a87167d1c9f07a46599b2ea4ab25a19dbe9f2dc53cf042bf1e06aa",
+  "Sources/GitPico/Views/RepositoryPickerView.swift": "2f03c1aed79fab7623a8cd9cb7b0d349159825876574c749d5333a3b747f48c5",
+  "Sources/GitPico/Views/SidebarView.swift": "86853e810e039852b5f03be7616c9477bacdf94424c53c1c57403378a3629ce4",
+  "Tests/GitPicoTests/RepositoryWorkspaceTests.swift": "f08983cbe5ba04599ea025ffad413d27987b895009bde33720e7c25844ccefba",
+  "Sources/GitPico/Stores/RelatedRepositoryActions.swift": "28763751e108cfba730263fc7637dd4ed3c575521b657e553ab1e589d9af2364",
+  "Tests/GitPicoTests/RelatedRepositoryRoutingTests.swift": "06ec73a63398d7e2af826649e85091a26cd06a438f2dc680eefb5399e40a56cf"
+}

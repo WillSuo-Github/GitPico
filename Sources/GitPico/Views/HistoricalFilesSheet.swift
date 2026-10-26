@@ -25,7 +25,7 @@ struct HistoricalFilesSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Label(title, systemImage: restoring ? "clock.arrow.circlepath" : archive ? "doc.zipper" : "square.and.arrow.up").font(.title2.bold())
+            SheetTitle(title, icon: restoring ? "clock.arrow.circlepath" : archive ? "doc.zipper" : "square.and.arrow.up")
             if let snapshot {
                 HStack { Text(snapshot.revision).font(.system(size: 11, design: .monospaced)).textSelection(.enabled); Spacer(); Text("\(snapshot.files.count) entries · \(snapshot.totalBytes.formatted(.byteCount(style: .file)))").font(.caption).foregroundStyle(.secondary) }
                 if restoring {

@@ -20,7 +20,7 @@ struct ExternalToolSheet: View {
     var browsingSessions: Bool { if case .sessions = request.action { true } else { false } }
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack { Text(session?.isMerge == true ? "External Merge" : browsingSessions ? "External Tool Sessions" : "External Comparison").font(.title2.bold()); Spacer(); Button("Tool Settings…") { showingSettings = true } }
+            HStack { SheetTitle(session?.isMerge == true ? "External Merge" : browsingSessions ? "External Tool Sessions" : "External Comparison"); Spacer(); Button("Tool Settings…") { showingSettings = true } }
             if !sessions.isEmpty {
                 Picker("Saved Session", selection: $selected) { Text("Select a session").tag(nil as UUID?); ForEach(sessions) { item in Text(item.path + " · " + item.date.formatted(date: .numeric, time: .shortened)).tag(Optional(item.id)) } }.disabled(loading || launching)
             }

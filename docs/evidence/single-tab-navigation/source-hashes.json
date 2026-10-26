@@ -1,0 +1,18 @@
+{
+  "Sources/GitPico/Stores/RepositoryWorkspace.swift": "90666df396b4f0dc2b17b4154d7658306bc6c96f0436434cd81d96521d08bd81",
+  "Sources/GitPico/Stores/RepositoryStore.swift": "403fd261a5a517cf28e14d1dfb5fd6f7c40794864dd67c9c8bef2d5764b741ad",
+  "Sources/GitPico/Stores/NavigationState.swift": "26c5caa99768817c85909b219f13a868c3181c77d2294a2f62351dd3f49bf577",
+  "Sources/GitPico/Stores/WorkingCopyState.swift": "f2e76b447416400b70e44de45da967718ce6b0a91d80d702a35263846474b5fd",
+  "Sources/GitPico/Views/RepositoryWorkspaceView.swift": "25b9510f4c39839aa577fbc2d8b4c30ace17033dbc8c1ebb12a302d1b434bd0c",
+  "Sources/GitPico/Views/ContentView.swift": "bd53337791be9523ab414089325243204a9a3e067a6e00e9955e7c92dca3cf9a",
+  "Sources/GitPico/Views/RepositoryMenu.swift": "5bdc301d4f11d1d89dc4cd4350142a1a8bcb8050611719038f91e73bd18dbaf9",
+  "Sources/GitPico/Views/RepositoryPickerView.swift": "4817e6709a4b7634ce54e7c6b74f237c3786ac452dbf77db3852b4f852c7af73",
+  "Sources/GitPico/Views/RepositoryStatusBar.swift": "bf10b1b92115d593b0da577f7cc44a079ec20c09f65d1ae7d0ea3b7836c7806a",
+  "Sources/GitPico/Views/RepositoryToolbar.swift": "81b3ed2dd871fbb456889a41f5dd8579b1b2225b52f9893c986893a7562178a5",
+  "Sources/GitPico/App/NativeRepositoryWindows.swift": "9e3a30f843748a4139de8a8bb3a2dd1fb7a1958134bdea5963863b57352c261d",
+  "Sources/GitPico/App/RepositoryCommands.swift": "21fa84d9857b6c3c34f3f7874adae9bda3b53239c07b29396d3d93d60d0827b6",
+  "Sources/GitPico/App/NativeStartupVerification.swift": "4b6964107957a95a65dd0c7dcb35d60f62f6afbe68406c2611431946e1e2ffe7",
+  "Tests/GitPicoTests/RepositoryWorkspaceTests.swift": "8a71afceeadf0dcfa1a83352a80cfbe6b1f2d1869df35e9f976cfe2a098ec5f1",
+  "Tests/GitPicoTests/NativeRepositoryWindowTests.swift": "f538d2999e80f9560940f580852c638bfcdc7d2204bc5de255f3223a2ec482e9",
+  "script/build_and_run.sh": "19e44f437bee2e3d521cfc94e6dafe585230bc289290d91fc98d69dad7e7ab45"
+}

@@ -1,0 +1,18 @@
+{
+  "CFBundleIdentifier": "com.willsuo.GitPico",
+  "CFBundleShortVersionString": "0.01",
+  "CFBundleVersion": "20261025140116",
+  "LSMinimumSystemVersion": "26.0",
+  "normalLaunchRequested": true,
+  "newProcessIdentifiers": [
+    6756
+  ],
+  "existingProcessIdentifiers": [
+    6673
+  ],
+  "existingProcessesPreserved": true,
+  "sourceHashesMatch": true,
+  "nativeAccessibilityReadSucceeded": false,
+  "nativeAccessibilityReadNote": "The native app inspection endpoint timed out; process sampling shows the normal AppKit event loop.",
+  "launchProcessAlive": true
+}

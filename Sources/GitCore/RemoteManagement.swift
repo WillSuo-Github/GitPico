@@ -4,15 +4,20 @@ import Foundation
 extension GitRepository {
     public func remoteConfigurations() async throws -> [RemoteConfiguration] {
         let names = try await GitProcess.run(["remote"], at: root).text.split(separator: "\n").map(String.init)
-        var result: [RemoteConfiguration] = []
-        for name in names {
-            func values(_ field: String) async throws -> [String] {
-                try await GitProcess.run(["config", "--null", "--get-all", "remote." + name + "." + field], at: root, allowed: [0, 1]).text.components(separatedBy: "\0").filter { !$0.isEmpty }
-            }
-            let fetch = try await values("url"), push = try await values("pushurl"), refspecs = try await values("fetch")
-            result.append(RemoteConfiguration(name: name, fetchURL: fetch.first ?? "", pushURL: push.first ?? fetch.first ?? "", fetchURLs: fetch, pushURLs: push, refspecs: refspecs))
+        guard !names.isEmpty else { return [] }
+        // Read all multi-valued remote fields together, including inherited config.
+        let output = try await GitProcess.run(["config", "--null", "--get-regexp", "^remote\\..*\\.(url|pushurl|fetch)$"], at: root, allowed: [0, 1])
+        var fields: [String: [String]] = [:]
+        for record in output.text.split(separator: "\0") {
+            guard let newline = record.firstIndex(of: "\n") else { throw GitFailure("Invalid remote configuration entry.") }
+            let value = String(record[record.index(after: newline)...])
+            if !value.isEmpty { fields[String(record[..<newline]), default: []].append(value) }
         }
-        return result
+        return names.map { name in
+            let prefix = "remote." + name + "."
+            let fetch = fields[prefix + "url"] ?? [], push = fields[prefix + "pushurl"] ?? [], refspecs = fields[prefix + "fetch"] ?? []
+            return RemoteConfiguration(name: name, fetchURL: fetch.first ?? "", pushURL: push.first ?? fetch.first ?? "", fetchURLs: fetch, pushURLs: push, refspecs: refspecs)
+        }
     }
 
     func requireRemote(_ expected: RemoteConfiguration) async throws {

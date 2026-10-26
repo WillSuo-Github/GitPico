@@ -41,7 +41,7 @@ extension RepositoryStore {
     func openWorktree(_ record: ManagedWorktree) {
         guard !isBusy, let repository else { return }
         isBusy = true; activity = "Opening worktree…"
-        Task {
+        operationTask = Task {
             do { let child = try await repository.checkedWorktree(record); let url = await child.root; isBusy = false; await open(url) }
             catch { self.error = error.localizedDescription; isBusy = false }
             activity = ""
@@ -50,7 +50,7 @@ extension RepositoryStore {
     func openSubmodule(_ record: ManagedSubmodule) {
         guard !isBusy, let repository else { return }
         isBusy = true; activity = "Opening submodule…"
-        Task {
+        operationTask = Task {
             do { let child = try await repository.checkedSubmodule(record); let url = await child.root; isBusy = false; await open(url) }
             catch { self.error = error.localizedDescription; isBusy = false }
             activity = ""

@@ -13,7 +13,7 @@ struct BranchCreateSheet: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("Create New Branch").font(.title2.bold())
+            SheetTitle("Create New Branch")
             Text("Creates a local branch at the selected revision.").foregroundStyle(.secondary)
             Form {
                 TextField("Name", text: $name)
@@ -50,7 +50,7 @@ struct TagCreateSheet: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("Create New Tag").font(.title2.bold())
+            SheetTitle("Create New Tag")
             Text("Creates a local tag pointing at the selected revision.").foregroundStyle(.secondary)
             Form {
                 TextField("Name", text: $name)
@@ -87,7 +87,7 @@ struct ReferenceEditSheet: View {
     var title: String { action == .upstream ? "Track Upstream Branch" : (action == .rename ? "Rename " : "Delete ") + noun }
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text(title).font(.title2.bold())
+            SheetTitle(title)
             LabeledContent(noun, value: reference.name).textSelection(.enabled)
             LabeledContent("Object", value: String(reference.hash.prefix(12))).font(.system(size: 11, design: .monospaced))
             if action == .rename {
@@ -127,7 +127,7 @@ struct TagInformationSheet: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text(reference.name).font(.title2.bold())
+            SheetTitle(reference.name, icon: "tag")
             Text(reference.hash).font(.system(size: 11, design: .monospaced)).textSelection(.enabled)
             ScrollView { Text(text).font(.system(size: 12, design: .monospaced)).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading) }
             HStack { Spacer(); Button("Close") { dismiss() }.keyboardShortcut(.cancelAction) }

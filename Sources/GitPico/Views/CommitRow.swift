@@ -2,7 +2,7 @@ import AppKit
 import GitCore
 import SwiftUI
 
-private let graphColors: [Color] = [.blue, .pink, .green, .orange, .purple, .teal, .indigo]
+private let graphColors: [Color] = Pico.laneColors
 
 struct CommitRow: View {
     @Environment(\.controlActiveState) private var controlActiveState
@@ -24,29 +24,35 @@ struct CommitRow: View {
     var exportFiles: (() -> Void)? = nil
     var archiveFiles: (() -> Void)? = nil
     var fileActions: HistoricalFileMenu? = nil
+    var secondary: Color { selected ? selectionColor.opacity(0.75) : .secondary }
     var body: some View {
-        HStack(spacing: 8) {
-                if let graph, showGraph { GraphCell(row: graph).frame(width: min(graphWidth, 110), height: compact ? 30 : 48).clipped() }
-                Text(commit.initials).font(.system(size: 11, weight: .medium)).foregroundStyle(selected ? selectionColor.opacity(0.8) : .secondary)
-                    .frame(width: compact ? 22 : 30, height: compact ? 22 : 30).background(.quaternary, in: Circle())
+        HStack(spacing: 9) {
+                if let graph, showGraph {
+                    GraphCell(row: graph)
+                        .frame(width: min(graphWidth, CGFloat(max(1, graph.laneCount)) * 13 + 16, 110), height: compact ? 30 : 46)
+                        .clipped()
+                }
+                AuthorAvatar(name: commit.author, size: compact ? 20 : 26)
                 VStack(alignment: .leading, spacing: compact ? 0 : 3) {
-                    HStack(spacing: 5) {
-                        Text(commit.author).font(.system(size: compact ? 10 : 11)).foregroundStyle(selected ? selectionColor.opacity(0.8) : .secondary).lineLimit(1)
+                    HStack(spacing: 6) {
+                        Text(commit.subject).font(.system(size: 12.5, weight: .medium)).foregroundStyle(selected ? selectionColor : .primary).lineLimit(1).help(commit.subject)
+                        Spacer(minLength: 0)
                         if !commit.decorations.isEmpty {
                             CommitReferenceBadge(decorations: commit.decorations, selected: selected)
-
                         }
-                        Spacer(minLength: 0)
-                        Text(commit.date, format: .dateTime.month(.twoDigits).day(.twoDigits).year(.twoDigits)).font(.system(size: 10)).foregroundStyle(selected ? selectionColor.opacity(0.7) : .secondary).fixedSize().lineLimit(1)
                     }
-                    HStack(spacing: 7) {
-                        Text(commit.shortHash).font(.system(size: 10, design: .monospaced)).foregroundStyle(selected ? selectionColor.opacity(0.7) : .secondary)
-                        Text(commit.subject).font(.system(size: 12)).foregroundStyle(selected ? selectionColor : .primary).lineLimit(1).help(commit.subject)
-                        Spacer(minLength: 0)
+                    if !compact {
+                        HStack(spacing: 5) {
+                            Text(commit.author).lineLimit(1)
+                            Text("·").foregroundStyle(secondary.opacity(0.6))
+                            Text(commit.shortHash).font(.system(size: 10.5, design: .monospaced))
+                            Spacer(minLength: 0)
+                            Text(commit.date.picoRelative).fixedSize().lineLimit(1).help(commit.date.formatted(date: .complete, time: .shortened))
+                        }.font(.system(size: 11)).foregroundStyle(secondary)
                     }
                 }
             }
-            .padding(.leading, graph == nil || !showGraph ? 12 : 4).padding(.trailing, 12).frame(height: compact ? 32 : 48)
+            .padding(.leading, graph == nil || !showGraph ? 12 : 4).padding(.trailing, 12).frame(height: compact ? 32 : 50)
             .contentShape(Rectangle())
             .accessibilityElement(children: .combine)
             .accessibilityLabel(commit.subject + ", " + commit.author + ", " + commit.shortHash)
@@ -78,17 +84,26 @@ struct CommitReferenceBadge: View {
     private var selectionColor: Color { Color(nsColor: controlActiveState == .key ? .alternateSelectedControlTextColor : .unemphasizedSelectedTextColor) }
     let decorations: [String]
     let selected: Bool
-    var label: String { decorations.contains { $0.hasPrefix("HEAD") } ? "HEAD" : (decorations.first ?? "").replacingOccurrences(of: "tag: ", with: "") }
-    var isTag: Bool { !decorations.contains { $0.hasPrefix("HEAD") } && decorations.first?.hasPrefix("tag: ") == true }
+    var isHead: Bool { decorations.contains { $0.hasPrefix("HEAD") } }
+    var label: String {
+        if let head = decorations.first(where: { $0.hasPrefix("HEAD -> ") }) { return String(head.dropFirst(8)) }
+        return isHead ? "HEAD" : (decorations.first ?? "").replacingOccurrences(of: "tag: ", with: "")
+    }
+    var isTag: Bool { !isHead && decorations.first?.hasPrefix("tag: ") == true }
+    var tint: Color { isHead ? .accentColor : isTag ? Pico.warning : Pico.modified }
     var body: some View {
         HStack(spacing: 3) {
-            Text(label).lineLimit(1).truncationMode(.middle).padding(.horizontal, 4).padding(.vertical, 1)
-                .background((isTag ? Color.orange : Color.accentColor).opacity(selected ? 0.7 : 0.18), in: RoundedRectangle(cornerRadius: 3))
+            HStack(spacing: 3) {
+                Image(systemName: isTag ? "tag.fill" : isHead ? "smallcircle.filled.circle" : "arrow.triangle.branch").imageScale(.small)
+                Text(label).lineLimit(1).truncationMode(.middle)
+            }
+            .padding(.horizontal, 5).padding(.vertical, 1.5)
+            .foregroundStyle(selected ? selectionColor : (isHead ? .white : tint))
+            .background(selected ? AnyShapeStyle(selectionColor.opacity(0.2)) : isHead ? AnyShapeStyle(tint) : AnyShapeStyle(tint.opacity(0.15)), in: Capsule())
             if decorations.count > 1 { Text("+\(decorations.count - 1)").foregroundStyle(selected ? selectionColor.opacity(0.8) : .secondary) }
         }
-        .font(.system(size: 9, weight: .medium))
-        .foregroundStyle(selected ? selectionColor : (isTag ? .orange : .accentColor))
-        .frame(maxWidth: 95).help(decorations.joined(separator: ", "))
+        .font(.system(size: 9.5, weight: .semibold))
+        .frame(maxWidth: 130, alignment: .trailing).fixedSize(horizontal: false, vertical: true).help(decorations.joined(separator: ", "))
     }
 }
 

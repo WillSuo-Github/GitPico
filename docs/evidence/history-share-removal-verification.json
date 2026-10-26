@@ -1,0 +1,53 @@
+{
+  "CFBundleShortVersionString": "0.01",
+  "CFBundleVersion": "20261025205053",
+  "LSMinimumSystemVersion": "26.0",
+  "background-verification": {
+    "backgroundTesting": true,
+    "build": "20261025205053",
+    "frontmostBundle": "com.openai.codex",
+    "frontmostProcessIdentifier": 752,
+    "isActive": false,
+    "processIdentifier": 47797,
+    "version": "0.01",
+    "visibleWindows": 0
+  },
+  "native-startup-verification": {
+    "build": "20261025205053",
+    "chooserMenuDisabled": true,
+    "closeTabMenuWorks": true,
+    "closeTabShortcut": "w",
+    "fixtureError": "",
+    "frontmostBundle": "com.openai.codex",
+    "frontmostProcessIdentifier": 752,
+    "isActive": false,
+    "menuTitles": [
+      "GitPico",
+      "File",
+      "Edit",
+      "View",
+      "Repository",
+      "Branch",
+      "Commit",
+      "Working Copy",
+      "Navigate",
+      "Window",
+      "Help"
+    ],
+    "multipleTabBarVisible": true,
+    "nativeSelectionMatchesModel": true,
+    "nativeStartupVerification": true,
+    "nativeTabBarVisible": false,
+    "newTabMenuWorks": true,
+    "newTabShortcut": "t",
+    "processIdentifier": 47811,
+    "repositoryMenuContextWorks": true,
+    "repositoryMenuEnabled": true,
+    "repositoryReady": true,
+    "returnedMenuEnabled": true,
+    "singleTabBarHidden": true,
+    "singleTabBarHiddenAfterClose": true,
+    "version": "0.01",
+    "visibleWindows": 0
+  }
+}

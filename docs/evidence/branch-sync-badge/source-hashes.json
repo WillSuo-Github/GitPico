@@ -1,0 +1,5 @@
+{
+  "Sources/GitPico/Views/CurrentBranchBadge.swift": "200aa13f8c408ea72a189c78fbd14e1ad80af2d260067a42d3ea8f65d3b0134b",
+  "Sources/GitPico/Views/SidebarView.swift": "6f4d8432e493b5682e53bb2fa214972efcb52f3dc1e8ed7599f3e51175eea548",
+  "Tests/GitPicoTests/BranchSyncBadgeTests.swift": "a0e87facdaa04a16a927e2de6d0843209cea44b27c3e43fae4ee045fb9fe47c4"
+}

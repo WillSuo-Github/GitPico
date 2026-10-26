@@ -87,8 +87,8 @@ extension RepositoryStore {
     func stageSelectedFiles(_ context: String? = nil) { stage(workingTargets(context).filter { !$0.isConflicted && $0.isUnstaged }) }
     func unstageSelectedFiles(_ context: String? = nil) { unstage(workingTargets(context).filter { !$0.isConflicted && $0.isStaged }) }
     var commitUnavailableReason: String? {
-        guard snapshot != nil else { return "Open a repository to commit." }
-        if isBusy { return "Wait for the current operation." }
+        guard snapshot != nil, !isChoosingRepository else { return "Open a repository to commit." }
+        if isBusy || isOpeningRepository { return "Wait for the current operation." }
         if snapshot?.operation != RepositoryOperation.none { return "Finish or abort the current Git operation." }
         if changes.contains(where: \.isConflicted) { return "Resolve conflicts before committing." }
         if staged.isEmpty && !(amend && snapshot?.hasHEAD == true) { return "Stage changes to include in the commit." }

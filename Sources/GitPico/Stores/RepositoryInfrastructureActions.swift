@@ -20,7 +20,7 @@ extension RepositoryStore {
                 let moved = try await GitRepository.open(plan.source).migrateMainRepository(plan)
                 do { try library.relocatePrefix(from: plan.source.path, to: plan.destination.path) }
                 catch { self.error = "The repository moved, but saved registrations need review: " + error.localizedDescription }
-                let url = await moved.root; isBusy = false; await open(url)
+                let url = await moved.root; isBusy = false; await reopenCurrentRepository(url)
             } catch { self.error = error.localizedDescription; isBusy = false }
             activity = ""
         }
@@ -29,7 +29,7 @@ extension RepositoryStore {
         guard !isBusy, request.repositoryToken == repositoryToken else { error = "The repository changed. Reopen the pointer preview."; return }
         isBusy = true; activity = "Repairing repository pointers…"
         Task {
-            do { _ = try await GitRepository(root: plan.mainRoot).applyPointerRepair(plan); isBusy = false; await open(plan.mainRoot) }
+            do { _ = try await GitRepository(root: plan.mainRoot).applyPointerRepair(plan); isBusy = false; await reopenCurrentRepository(plan.mainRoot) }
             catch { self.error = error.localizedDescription; isBusy = false }
             activity = ""
         }
@@ -51,13 +51,13 @@ extension RepositoryStore {
                 let restored = try await GitRepository(root: URL(fileURLWithPath: plan.backup.destination)).restoreMainRepositoryMigration(plan)
                 do { try library.relocatePrefix(from: plan.backup.destination, to: plan.backup.source) }
                 catch { self.error = "Repository restored, but saved registrations need review: " + error.localizedDescription }
-                let url = await restored.root; isBusy = false; await open(url)
+                let url = await restored.root; isBusy = false; await reopenCurrentRepository(url)
             } catch {
                 self.error = error.localizedDescription; isBusy = false
                 let source = URL(fileURLWithPath: plan.backup.source)
                 if FileManager.default.fileExists(atPath: source.appendingPathComponent(".git").path) {
                     try? library.relocatePrefix(from: plan.backup.destination, to: plan.backup.source)
-                    await open(source)
+                    await reopenCurrentRepository(source)
                 }
             }
             activity = ""
@@ -67,7 +67,7 @@ extension RepositoryStore {
         guard !isBusy, request.repositoryToken == repositoryToken else { error = "The repository changed. Reopen this repair history."; return }
         isBusy = true; activity = undo ? "Restoring pointer metadata…" : "Resuming pointer repair…"
         Task {
-            do { try await GitRepository(root: URL(fileURLWithPath: record.mainPath)).resumePointerRepair(record, undo: undo); isBusy = false; await open(URL(fileURLWithPath: record.mainPath)) }
+            do { try await GitRepository(root: URL(fileURLWithPath: record.mainPath)).resumePointerRepair(record, undo: undo); isBusy = false; await reopenCurrentRepository(URL(fileURLWithPath: record.mainPath)) }
             catch { self.error = error.localizedDescription; isBusy = false }
             activity = ""
         }

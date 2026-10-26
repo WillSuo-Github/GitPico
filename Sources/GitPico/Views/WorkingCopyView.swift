@@ -5,54 +5,84 @@ import SwiftUI
 struct WorkingCopyView: View {
     @Bindable var store: RepositoryStore
     var files: [WorkingFileEntry] { store.workingList.files }
+    var isFiltered: Bool { !store.search.isEmpty || store.workingOnlyConflicts || store.showAllFiles || store.showIgnoredFiles }
     var body: some View {
-        PersistentSplitView(name: "working", width: 310) {
+        PersistentSplitView(name: "working", width: 340) {
             VStack(spacing: 0) {
-                PaneHeader(title: store.snapshot?.branch ?? "Working Copy", subtitle: store.snapshot?.references.first(where: \.isCurrent)?.upstream.nilIfEmpty ?? "No Tracking", icon: "arrow.triangle.branch")
+                WorkingListHeader(store: store)
                 if store.snapshot?.operation != RepositoryOperation.none {
                     WorkingOperationPanel(store: store, onlyConflicts: $store.workingOnlyConflicts)
-                } else { CommitComposer(store: store) }
-                HStack {
-                    Button { store.workingOrderByStatus = true } label: { HStack(spacing: 3) { Text("Status"); if store.workingOrderByStatus { Image(systemName: "chevron.up").font(.system(size: 8)) } } }.frame(width: 65, alignment: .leading)
-                    Button { store.workingOrderByStatus = false } label: { HStack(spacing: 3) { Text("Filename"); if !store.workingOrderByStatus { Image(systemName: "chevron.up").font(.system(size: 8)) } } }
-                    Spacer()
-                    Menu {
-                        Toggle("Show All Files", isOn: $store.showAllFiles)
-                        Toggle("Show Ignored Files", isOn: $store.showIgnoredFiles)
-                        Toggle("Show Assume-Unchanged Files", isOn: $store.showAssumeUnchanged)
-                        Divider()
-                        Button("Stage All") { store.stage(store.unstaged.filter { !$0.isConflicted }) }.disabled(store.isBusy); Button("Unstage All") { store.unstage(store.staged) }.disabled(store.isBusy) } label: { Image(systemName: "line.3.horizontal.decrease") }.menuStyle(.borderlessButton).frame(width: 20)
-                }.buttonStyle(.plain).font(.system(size: 11, weight: .semibold)).padding(.horizontal, 12).frame(height: 28).background(.bar)
-                Divider()
-                if !store.selectedWorkingFiles.isEmpty {
+                }
+                if store.selectedWorkingFiles.count > 1 {
                     HStack(spacing: 8) {
                         Text("\(store.selectedWorkingFiles.count) selected").foregroundStyle(.secondary)
                         Spacer(minLength: 0)
                         Button("Stage") { store.stageSelectedFiles() }.disabled(store.isBusy || !store.workingTargets().contains { $0.isUnstaged && !$0.isConflicted })
                         Button("Unstage") { store.unstageSelectedFiles() }.disabled(store.isBusy || !store.workingTargets().contains { $0.isStaged && !$0.isConflicted })
-                    }.font(.system(size: 11)).controlSize(.small).padding(.horizontal, 10).frame(height: 30).background(.bar)
+                    }.font(.system(size: 11)).controlSize(.small).padding(.horizontal, 12).frame(height: 30)
+                        .background(Color.accentColor.opacity(0.07)).overlay(alignment: .bottom) { Divider() }
                 }
                 List(selection: Binding<Set<String>>(get: { store.selectedWorkingFiles }, set: store.setWorkingSelection)) {
                     ForEach(files) { file in
                         Group {
                             if let change = file.change { WorkingFileRow(store: store, file: change).picoDrag(store, .workingFiles(store.selectedWorkingFiles.contains(file.path) ? store.selectedWorkingFiles.sorted().filter { path in store.changes.contains { $0.path == path } } : [file.path])) }
                             else { BrowserFileRow(store: store, file: file) }
-                        }.tag(file.path).listRowInsets(EdgeInsets(top: 3, leading: 9, bottom: 3, trailing: 8))
+                        }.tag(file.path).listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
                     }
                 }.listStyle(.plain).disabled(store.isBusy)
                 .overlay {
                     if files.isEmpty && (store.isLoadingWorkingFiles || store.isBusy) { ProgressView("Loading files…") }
-                    else if files.isEmpty { EmptyPane(title: !store.search.isEmpty || store.workingOnlyConflicts || store.showAllFiles || store.showIgnoredFiles ? "No matching files" : "Working copy is clean", subtitle: !store.search.isEmpty || store.workingOnlyConflicts || store.showAllFiles || store.showIgnoredFiles ? "Change the file filter or refresh." : "Enable Show All Files to browse unchanged files.", icon: "checkmark.circle") }
+                    else if files.isEmpty { EmptyPane(title: isFiltered ? "No matching files" : "Nothing to commit", subtitle: isFiltered ? "Change the file filter or refresh." : "Your working copy matches HEAD. Show All Files to browse the tree.", icon: isFiltered ? "line.3.horizontal.decrease.circle" : "checkmark.seal") }
                 }
-                Divider()
-                HStack { Text("\(files.count) shown"); Spacer(); Text("\(store.staged.count) staged") }
-                    .font(.system(size: 10)).foregroundStyle(.secondary).padding(.horizontal, 12).frame(height: 26)
+                if store.snapshot?.operation == RepositoryOperation.none {
+                    CommitComposer(store: store)
+                }
             }
         } trailing: {
             WorkingDiffView(store: store)
         }.task(id: "\(store.repositoryToken):\(store.showAllFiles):\(store.showIgnoredFiles):\(store.showAssumeUnchanged)") { if store.showAllFiles || store.showIgnoredFiles || store.showAssumeUnchanged { await store.refreshFileBrowser() } }
         .task(id: store.workingFilesInput) { await store.rebuildWorkingList() }
 
+    }
+}
+
+/// Branch → upstream, change counts, sorting/visibility options and Stage All.
+struct WorkingListHeader: View {
+    @Bindable var store: RepositoryStore
+    var upstream: String? { store.snapshot?.references.first(where: \.isCurrent)?.upstream.nilIfEmpty }
+    var body: some View {
+        let unstagedCount = store.unstaged.count, stagedCount = store.staged.count
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                Text("Changes").font(.system(size: 13, weight: .semibold))
+                if !store.changes.isEmpty { Chip(text: "\(store.changes.count)", tint: .accentColor) }
+                Spacer(minLength: 4)
+                Menu {
+                    Picker("Sort By", selection: $store.workingOrderByStatus) { Text("Status").tag(true); Text("File Name").tag(false) }
+                    Divider()
+                    Toggle("Show All Files", isOn: $store.showAllFiles)
+                    Toggle("Show Ignored Files", isOn: $store.showIgnoredFiles)
+                    Toggle("Show Assume-Unchanged Files", isOn: $store.showAssumeUnchanged)
+                    Divider()
+                    Button("Unstage All") { store.unstage(store.staged) }.disabled(store.isBusy || store.staged.isEmpty)
+                } label: { Image(systemName: "line.3.horizontal.decrease.circle") }
+                    .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Sort and file visibility")
+                Button("Stage All") { store.stage(store.unstaged.filter { !$0.isConflicted }) }
+                    .controlSize(.small).disabled(store.isBusy || store.unstaged.allSatisfy(\.isConflicted))
+                    .help("Stage every changed file, including files hidden by the filter")
+            }
+            HStack(spacing: 6) {
+                Image(systemName: "arrow.triangle.branch").imageScale(.small)
+                Text(store.snapshot?.branch ?? "—").lineLimit(1)
+                Image(systemName: "arrow.right").imageScale(.small).foregroundStyle(.tertiary)
+                Text(upstream ?? "No upstream").lineLimit(1).foregroundStyle(upstream == nil ? .tertiary : .secondary)
+                Spacer(minLength: 4)
+                if stagedCount > 0 { Text("\(stagedCount) staged").foregroundStyle(.tint) }
+                if unstagedCount > 0 { Text("\(unstagedCount) unstaged") }
+            }.font(.system(size: 11)).foregroundStyle(.secondary).truncationMode(.middle)
+        }
+        .padding(.horizontal, 14).padding(.vertical, 9)
+        .background(.bar).overlay(alignment: .bottom) { Divider() }
     }
 }
 
@@ -71,10 +101,9 @@ struct WorkingFileRow: View {
             .accessibilityLabel(file.isConflicted ? "Resolve conflict in " + file.path : (file.isStaged && !file.isUnstaged ? "Unstage " : "Stage ") + file.path)
             .accessibilityValue(file.isStaged && file.isUnstaged ? "Partially staged" : file.isStaged ? "Staged" : "Unstaged")
             StatusBadge(status: file.displayStatus, selected: isSelected)
-            Image(systemName: "doc.text").foregroundStyle(isSelected ? selectedText.opacity(0.8) : .secondary).font(.system(size: 12))
-            Text(file.path).font(.system(size: 12)).foregroundStyle(isSelected ? selectedText : .primary).lineLimit(1).truncationMode(.middle)
+            FilePathLabel(path: file.path, selectedText: isSelected ? selectedText : nil)
             Spacer(minLength: 0)
-        }.frame(height: 22).contentShape(Rectangle()).help(file.path + " · " + (file.isStaged && file.isUnstaged ? "Staged and unstaged changes" : file.isStaged ? "Staged" : file.displayStatus))
+        }.frame(height: 24).contentShape(Rectangle()).help(file.path + " · " + (file.isStaged && file.isUnstaged ? "Staged and unstaged changes" : file.isStaged ? "Staged" : file.displayStatus))
         .contextMenu {
             LFSFileContextMenu(store: store, path: file.path)
             if file.isConflicted { Button("Resolve Conflict…") { store.selectChange(file, staged: false) } }
@@ -99,54 +128,87 @@ struct WorkingFileRow: View {
     }
 }
 
+/// Bottom-anchored composer: subject, optional description, identity/options and the primary Commit button.
 struct CommitComposer: View {
     @Bindable var store: RepositoryStore
     @State private var showBody = false
-    @State private var showOptions = false
     @FocusState private var subjectFocused: Bool
-    var showsDetails: Bool { showOptions || showBody || subjectFocused || !store.commitSubject.isEmpty || store.amend }
+    var commitTitle: String {
+        if store.amend { return "Amend Commit" }
+        let count = store.staged.count
+        return count == 0 ? "Commit" : "Commit \(count) \(count == 1 ? "File" : "Files")"
+    }
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            if showsDetails {
-            HStack {
-                Toggle("Amend", isOn: $store.amend).disabled(store.snapshot?.hasHEAD != true)
-                Spacer()
-                Toggle("Sign Off", isOn: $store.signOff)
-            }.font(.system(size: 10)).toggleStyle(.checkbox)
-            HStack(spacing: 5) {
-                Image(systemName: "person.crop.circle").foregroundStyle(.secondary)
-                Text("\(store.snapshot?.identity.name ?? "") <\(store.snapshot?.identity.email ?? "")>").font(.system(size: 10)).foregroundStyle(.secondary).lineLimit(1)
-                Spacer(minLength: 0)
-                Button { store.navigate(.repositorySettings) } label: { Image(systemName: "gearshape") }.buttonStyle(.plain).help("Repository identity")
+        VStack(alignment: .leading, spacing: 8) {
+            VStack(spacing: 0) {
+                HStack(spacing: 6) {
+                    TextField("Summary", text: $store.commitSubject).textFieldStyle(.plain).font(.system(size: 13, weight: .medium)).focused($subjectFocused)
+                    if !store.commitSubject.isEmpty { Text("\(store.commitSubject.count)").font(.system(size: 10).monospacedDigit()).foregroundStyle(store.commitSubject.count > 72 ? Pico.warning : Color.secondary.opacity(0.6)).help("Summary length; 50–72 characters reads best in logs") }
+                    Button { showBody.toggle() } label: { Image(systemName: "text.alignleft").foregroundStyle(showBody || !store.commitBody.isEmpty ? Color.accentColor : .secondary) }
+                        .buttonStyle(.plain).help(showBody ? "Hide description" : "Add a description")
+                }.padding(.horizontal, 10).frame(height: 32)
+                if showBody || !store.commitBody.isEmpty {
+                    Divider().padding(.horizontal, 8)
+                    TextEditor(text: $store.commitBody).font(.system(size: 12)).frame(height: 76).scrollContentBackground(.hidden).padding(.horizontal, 5).padding(.vertical, 4)
+                        .overlay(alignment: .topLeading) { if store.commitBody.isEmpty { Text("Description").font(.system(size: 12)).foregroundStyle(.tertiary).padding(.horizontal, 10).padding(.vertical, 4).allowsHitTesting(false) } }
+                }
             }
+            .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(subjectFocused ? Color.accentColor.opacity(0.7) : Color(nsColor: .separatorColor), lineWidth: subjectFocused ? 1.5 : 0.5))
+            HStack(spacing: 8) {
+                Button { store.navigate(.repositorySettings) } label: {
+                    HStack(spacing: 5) {
+                        AuthorAvatar(name: store.snapshot?.identity.name.nilIfEmpty ?? "?", size: 18)
+                        Text(store.snapshot?.identity.name.nilIfEmpty ?? "No identity").lineLimit(1).foregroundStyle(.secondary)
+                    }.contentShape(Rectangle())
+                }.buttonStyle(.plain).font(.system(size: 11)).help(identityLine + "\nEdit the commit identity in Repository Settings")
+                Spacer(minLength: 4)
+                Toggle("Amend", isOn: $store.amend).toggleStyle(.checkbox).font(.system(size: 11)).disabled(store.snapshot?.hasHEAD != true).help("Replace the last commit with the staged changes")
+                Menu {
+                    Toggle("Add Signed-off-by Trailer", isOn: $store.signOff)
+                    Button("Edit Identity…") { store.navigate(.repositorySettings) }
+                } label: { Image(systemName: store.signOff ? "signature" : "ellipsis.circle") }
+                    .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help(store.signOff ? "Signed-off-by will be added" : "Commit options")
+                Button(commitTitle, action: store.commit).buttonStyle(.borderedProminent).disabled(!store.canCommit)
+                    .help(store.commitUnavailableReason ?? "Commit staged changes (⌘Return)")
+            }.controlSize(.regular)
+            if let message = statusMessage {
+                HStack(alignment: .firstTextBaseline, spacing: 5) {
+                    Image(systemName: message.icon).imageScale(.small)
+                    Text(message.text).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
+                    Spacer(minLength: 0)
+                    if store.commitWarning != nil { Button("Inspect Reflog") { store.navigate(.reflog) }.buttonStyle(.link) }
+                }.font(.system(size: 11)).foregroundStyle(message.color)
             }
-            HStack(spacing: 5) {
-                TextField("Commit Subject", text: $store.commitSubject).textFieldStyle(.roundedBorder).font(.system(size: 12)).focused($subjectFocused)
-                Button { showOptions.toggle() } label: { Image(systemName: showOptions ? "chevron.up" : "chevron.down").font(.system(size: 9)) }.buttonStyle(.plain).help("Commit options")
-            }
-            if showsDetails {
-            DisclosureGroup("Extended Description", isExpanded: $showBody) {
-                TextEditor(text: $store.commitBody).font(.system(size: 12)).frame(height: 90).scrollContentBackground(.hidden)
-                    .padding(4).background(.quaternary.opacity(0.25), in: RoundedRectangle(cornerRadius: 4))
-            }.font(.system(size: 10)).foregroundStyle(.secondary)
-            }
-            HStack {
-                Button("Stage All") { store.stage(store.unstaged) }.disabled(store.unstaged.isEmpty || store.changes.contains(where: \.isConflicted)).help("Stage every changed file, including files hidden by the filter")
-                Spacer()
-                Button(store.amend ? "Amend Commit" : "Commit", action: store.commit).disabled(!store.canCommit).help(store.commitUnavailableReason ?? "Commit staged changes (⌘Return)")
-            }.controlSize(.small)
-            HStack {
-                Text(store.commitFeedback ?? store.commitUnavailableReason ?? "\(store.staged.count) staged files will be committed.")
-                    .font(.caption2).foregroundStyle(store.commitFeedback == nil ? Color.secondary : Color.green)
-                Spacer(minLength: 0)
-            }
-            if let warning = store.commitWarning {
-                Text(warning).font(.caption2).foregroundStyle(.orange).textSelection(.enabled)
-                Button("Inspect Reflog") { store.navigate(.reflog) }.font(.caption2).buttonStyle(.link)
-            }
-            if store.amend { Text("Amend replaces the HEAD commit.").font(.caption2).foregroundStyle(.orange) }
-            if store.changes.contains(where: \.isConflicted) { Text("Select a conflicted file to resolve it here.").font(.caption2).foregroundStyle(.orange) }
-        }.padding(14).disabled(store.isBusy).onChange(of: store.amend) { store.updateAmend() }
+        }
+        .padding(12)
+        .background(.bar).overlay(alignment: .top) { Divider() }
+        .disabled(store.isBusy).onChange(of: store.amend) { store.updateAmend() }
+    }
+    var identityLine: String {
+        guard let identity = store.snapshot?.identity, !identity.name.isEmpty else { return "No Git identity configured" }
+        return identity.name + " <" + identity.email + ">"
+    }
+    var statusMessage: (text: String, icon: String, color: Color)? {
+        if let warning = store.commitWarning { return (warning, "exclamationmark.triangle.fill", Pico.warning) }
+        if let feedback = store.commitFeedback { return (feedback, "checkmark.circle.fill", .green) }
+        if store.changes.contains(where: \.isConflicted) { return ("Select a conflicted file to resolve it.", "exclamationmark.triangle.fill", Pico.warning) }
+        if store.amend { return ("Amend replaces the HEAD commit.", "info.circle", Pico.warning) }
+        if let reason = store.commitUnavailableReason { return (reason, "info.circle", .secondary) }
+        return nil
+    }
+}
+
+/// File name emphasized, parent folder dimmed — long paths stay scannable.
+struct FilePathLabel: View {
+    let path: String
+    var selectedText: Color? = nil
+    var body: some View {
+        let folder = (path as NSString).deletingLastPathComponent
+        HStack(spacing: 5) {
+            Text((path as NSString).lastPathComponent).foregroundStyle(selectedText ?? .primary).layoutPriority(1)
+            if !folder.isEmpty { Text(folder).foregroundStyle(selectedText.map { AnyShapeStyle($0.opacity(0.75)) } ?? AnyShapeStyle(.secondary)).truncationMode(.head) }
+        }.font(.system(size: 12)).lineLimit(1)
     }
 }
 
@@ -157,15 +219,21 @@ struct WorkingDiffView: View {
             if let file = store.currentChange, file.isConflicted {
                 ConflictResolverView(store: store, path: file.path).id(file.path)
             } else if let file = store.currentChange {
-                HStack {
-                    Image(systemName: "doc.text").foregroundStyle(.secondary)
-                    Text((file.path as NSString).lastPathComponent).fontWeight(.semibold).lineLimit(1)
-                    Spacer()
+                FileTitleBar(path: file.path, subtitle: store.stagedDiff ? "HEAD → Index" : "Index → Working Copy", status: file.displayStatus) {
+                    Picker("Diff version", selection: $store.stagedDiff) { Text("Unstaged").tag(false).disabled(!file.isUnstaged && !file.isConflicted); Text("Staged").tag(true).disabled(!file.isStaged) }
+                        .pickerStyle(.segmented).labelsHidden().fixedSize()
                     DiffLayoutPicker()
-                    Picker("Diff version", selection: $store.stagedDiff) { Text("Staged").tag(true).disabled(!file.isStaged); Text("Unstaged").tag(false).disabled(!file.isUnstaged && !file.isConflicted) }
-                        .pickerStyle(.segmented).labelsHidden().frame(width: 160)
-                }.font(.system(size: 12)).padding(.horizontal, 14).frame(height: 40).background(.bar)
-                Divider()
+                    Menu {
+                        Toggle("Ignore Whitespace", isOn: $store.ignoreWhitespace)
+                        Picker("Context Lines", selection: $store.diffContext) { ForEach([3, 7, 15, 30], id: \.self) { Text("\($0) lines").tag($0) } }
+                    } label: { Image(systemName: store.ignoreWhitespace ? "ellipsis.circle.fill" : "ellipsis.circle") }
+                        .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+                        .help(store.ignoreWhitespace ? "Diff options · whitespace ignored (partial staging is disabled)" : "Diff options")
+                }
+                if store.ignoreWhitespace {
+                    Label("Whitespace changes are hidden, so chunk and line staging is paused.", systemImage: "eye.slash").font(.system(size: 11)).foregroundStyle(Pico.warning)
+                        .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 14).frame(height: 26).background(Pico.warning.opacity(0.08))
+                }
                 if let error = store.diffError {
                     VStack(spacing: 12) { Text(error).foregroundStyle(.secondary).textSelection(.enabled); Button("Retry") { store.selectChange(file, staged: store.stagedDiff) } }.padding().frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
@@ -174,17 +242,9 @@ struct WorkingDiffView: View {
                               discardLines: store.stagedDiff || store.ignoreWhitespace ? nil : { store.localChange(.lines(file, store.diff, $0, store.diffContext)) },
                               exportLines: store.ignoreWhitespace ? nil : { store.localChange(.exportLines(file, store.diff, $0, store.stagedDiff, store.diffContext)) }).id(store.repositoryToken.uuidString + file.path + (store.stagedDiff ? ".staged" : ".unstaged"))
                 }
-                Divider()
-                HStack {
-                    Toggle(isOn: $store.ignoreWhitespace) { Image(systemName: "textformat") }.toggleStyle(.button).buttonStyle(.borderless).help("Ignore whitespace changes (partial staging is disabled while active)")
-                    Spacer()
-                    Text(store.stagedDiff ? "HEAD → Index" : "Index → Working Copy").foregroundStyle(.secondary)
-                    Spacer()
-                    Picker("Context:", selection: $store.diffContext) { ForEach([3, 7, 15, 30], id: \.self) { Text("\($0) lines").tag($0) } }.frame(width: 130)
-                }.font(.system(size: 10)).padding(.horizontal, 12).frame(height: 27)
             } else if let path = store.selectedChange, let repository = store.repository {
                 WorkingFilePreview(repository: repository, path: path).id(store.repositoryToken.uuidString + path)
-            } else { EmptyPane(title: "No file selected", subtitle: "", icon: "doc") }
+            } else { EmptyPane(title: "Select a file", subtitle: store.changes.isEmpty ? "There are no local changes to review." : "Pick a changed file to review its diff and stage chunks or single lines.", icon: "doc.text.magnifyingglass") }
         }
         .onChange(of: store.stagedDiff) { _, staged in if let file = store.currentChange { store.selectChange(file, staged: staged) } }
         .onChange(of: store.diffContext) { if let file = store.currentChange { store.selectChange(file, staged: store.stagedDiff) } }
@@ -196,14 +256,7 @@ struct PaneHeader: View {
     let title: String
     var subtitle: String? = nil
     let icon: String
-    var body: some View {
-        HStack(spacing: 7) {
-            Image(systemName: icon).foregroundStyle(.secondary)
-            Text(title).lineLimit(1).truncationMode(.middle)
-            if let subtitle { Image(systemName: "chevron.right").font(.system(size: 9)); Text(subtitle).foregroundStyle(.secondary).lineLimit(1) }
-            Spacer(minLength: 0)
-        }.font(.system(size: 12)).padding(.horizontal, 12).frame(height: 40).background(.bar).overlay(alignment: .bottom) { Divider() }
-    }
+    var body: some View { PaneBar(title: title, subtitle: subtitle, icon: icon) }
 }
 
 struct StatusBadge: View {
@@ -212,12 +265,13 @@ struct StatusBadge: View {
     @Environment(\.controlActiveState) private var activeState
     var selectedText: Color { Color(nsColor: activeState == .key ? .alternateSelectedControlTextColor : .unemphasizedSelectedTextColor) }
     var color: Color {
-        switch status.first { case "A", "U": .green; case "D": .red; case "R": .purple; case "C": .red; default: .blue }
+        if status == "Untracked" { return .teal }
+        switch status.first { case "A": return Pico.addition; case "D": return Pico.deletion; case "R": return .purple; case "C": return Pico.deletion; case "U": return Pico.addition; default: return Pico.modified }
     }
     var body: some View {
         Text(status == "Conflict" ? "!" : status == "Untracked" ? "?" : String(status.prefix(1)))
-            .font(.system(size: 9, weight: .bold, design: .monospaced)).foregroundStyle(selected ? selectedText : color).frame(width: 16, height: 16)
-            .background(color.opacity(0.15), in: RoundedRectangle(cornerRadius: 3)).help(status)
+            .font(.system(size: 9.5, weight: .heavy, design: .rounded)).foregroundStyle(selected ? selectedText : status == "Conflict" ? .white : color).frame(width: 17, height: 17)
+            .background(selected ? AnyShapeStyle(selectedText.opacity(0.18)) : status == "Conflict" ? AnyShapeStyle(color) : AnyShapeStyle(color.opacity(0.16)), in: RoundedRectangle(cornerRadius: 4.5, style: .continuous)).help(status)
     }
 }
 

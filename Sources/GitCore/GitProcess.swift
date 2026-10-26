@@ -18,12 +18,21 @@ public enum GitProcess {
     public static func run(_ arguments: [String], at root: URL, allowed: Set<Int32> = [0], timeout: TimeInterval = 30, acceptGeneratedMessage: Bool = false, sequenceEditor: URL? = nil, input: Data? = nil, identityEnvironment: [String: String] = [:], indexFile: URL? = nil, maxOutputBytes: Int = 16 * 1024 * 1024, lfsEnvironment: [String: String] = [:], cancellable: Bool = false) async throws -> GitOutput {
         if cancellable { try Task.checkCancellation() }
         guard (1...128 * 1024 * 1024).contains(maxOutputBytes) else { throw GitFailure("Invalid Git output limit.") }
+        let trace = GitCommandTrace.current, phase = GitCommandTrace.phase, started = ContinuousClock.now
         let worker = Task.detached(priority: .userInitiated) {
             try execute(arguments, root: root, allowed: allowed, timeout: timeout, acceptGeneratedMessage: acceptGeneratedMessage, sequenceEditor: sequenceEditor, input: input, identityEnvironment: identityEnvironment, indexFile: indexFile, maxOutputBytes: maxOutputBytes, lfsEnvironment: lfsEnvironment, cancellable: cancellable)
         }
         // Write operations retain their existing finish-current-step semantics.
-        guard cancellable else { return try await worker.value }
-        return try await withTaskCancellationHandler { try await worker.value } onCancel: { worker.cancel() }
+        do {
+            let result: GitOutput
+            if cancellable { result = try await withTaskCancellationHandler { try await worker.value } onCancel: { worker.cancel() } }
+            else { result = try await worker.value }
+            await trace?.record(command: arguments.first ?? "unknown", phase: phase, elapsed: started.duration(to: .now), failed: false)
+            return result
+        } catch {
+            await trace?.record(command: arguments.first ?? "unknown", phase: phase, elapsed: started.duration(to: .now), failed: true)
+            throw error
+        }
     }
 
     private static func execute(_ arguments: [String], root: URL, allowed: Set<Int32>, timeout: TimeInterval, acceptGeneratedMessage: Bool, sequenceEditor: URL?, input: Data?, identityEnvironment: [String: String], indexFile: URL?, maxOutputBytes: Int, lfsEnvironment: [String: String], cancellable: Bool) throws -> GitOutput {
@@ -76,11 +85,22 @@ public enum GitProcess {
             defer { try? inputHandle?.close() }
             process.standardOutput = output
             process.standardError = errors
+            let completion = DispatchSemaphore(value: 0)
+            process.terminationHandler = { _ in completion.signal() }
             try process.run()
-            let deadline = Date().addingTimeInterval(timeout)
-            while process.isRunning && Date() < deadline && !(cancellable && Task.isCancelled) { Thread.sleep(forTimeInterval: cancellable ? 0.01 : 0.025) }
-            if process.isRunning {
-                process.terminate()
+            let deadline = ContinuousClock.now.advanced(by: .seconds(timeout))
+            let completed: Bool
+            if cancellable {
+                var exited = false
+                while !Task.isCancelled && ContinuousClock.now < deadline {
+                    if completion.wait(timeout: .now() + .milliseconds(10)) == .success { exited = true; break }
+                }
+                completed = exited
+            } else {
+                completed = completion.wait(timeout: .now() + timeout) == .success
+            }
+            if !completed {
+                if process.isRunning { process.terminate() }
                 let grace = Date().addingTimeInterval(1)
                 while process.isRunning && Date() < grace { Thread.sleep(forTimeInterval: 0.025) }
                 if process.isRunning { kill(process.processIdentifier, SIGKILL) }
@@ -88,7 +108,8 @@ public enum GitProcess {
                 if cancellable && Task.isCancelled { throw CancellationError() }
                 throw GitFailure("Git timed out after \(Int(timeout)) seconds. Check SSH, signing, hooks, or network access.")
             }
-            process.waitUntilExit()
+            // The termination callback already observed exit; waitUntilExit would pump
+            // Foundation's run loop and add latency to every short command.
             if cancellable { try Task.checkCancellation() }
             let reader = try FileHandle(forReadingFrom: outURL)
             defer { try? reader.close() }

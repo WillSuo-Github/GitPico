@@ -25,28 +25,34 @@ struct RevisionComparisonView: View {
     }
     var body: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 12) {
+            HStack(spacing: 10) {
+                Image(systemName: "arrow.left.arrow.right").font(.system(size: 13, weight: .medium)).foregroundStyle(.tint)
                 revisionField("From", text: $left)
-                Button { swap(&left, &right) } label: { Image(systemName: "arrow.left.arrow.right") }.help("Swap revisions")
+                Button { swap(&left, &right) } label: { Image(systemName: "arrow.left.arrow.right.circle") }.buttonStyle(.borderless).help("Swap revisions")
                 revisionField("To", text: $right)
-                Toggle("From Merge Base", isOn: $mergeBase).toggleStyle(.checkbox).fixedSize().help("Compare the common ancestor of From and To with To")
-                Button("Compare") { request = UUID() }.disabled(loading || left.isEmpty || right.isEmpty).keyboardShortcut(.return, modifiers: [.command, .option])
-            }.font(.system(size: 12)).padding(14).background(.bar)
-            Divider()
+                Menu {
+                    Toggle("Compare from Merge Base", isOn: $mergeBase)
+                    Toggle("Ignore Whitespace", isOn: $ignoreWhitespace)
+                    Picker("Context Lines", selection: $context) { ForEach([3, 7, 15, 30], id: \.self) { Text("\($0) lines").tag($0) } }
+                } label: { Image(systemName: mergeBase || ignoreWhitespace ? "ellipsis.circle.fill" : "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Comparison options")
+                Button("Compare") { request = UUID() }.buttonStyle(.borderedProminent).disabled(loading || left.isEmpty || right.isEmpty).keyboardShortcut(.return, modifiers: [.command, .option])
+            }.font(.system(size: 12)).padding(.horizontal, 14).frame(height: Pico.headerHeight).background(.bar).overlay(alignment: .bottom) { Divider() }
             if loading { ProgressView("Comparing revisions…").frame(maxWidth: .infinity, maxHeight: .infinity) }
             else if let error { InspectionErrorView(message: error) }
             else if let comparison {
                 PersistentSplitView(name: "comparison", width: 310) {
                     VStack(spacing: 0) {
-                        PaneHeader(title: "\(comparison.files.count) changed files", subtitle: "\(comparison.left.prefix(8)) → \(comparison.right.prefix(8))", icon: "arrow.left.arrow.right")
-                        TextField("Filter files", text: $query).textFieldStyle(.roundedBorder).padding(10)
+                        PaneBar(title: "\(comparison.files.count) changed \(comparison.files.count == 1 ? "file" : "files")", subtitle: "\(comparison.left.prefix(8)) → \(comparison.right.prefix(8))", icon: "doc.on.doc") {
+                            DiffStat(additions: comparison.statistics.values.reduce(0) { $0 + $1.additions }, deletions: comparison.statistics.values.reduce(0) { $0 + $1.deletions }, showsBar: false)
+                        }
+                        TextField("Filter files", text: $query).textFieldStyle(.roundedBorder).padding(.horizontal, 10).padding(.vertical, 8)
                         List(selection: $selected) {
                             ForEach(files) { file in
                                 HStack(spacing: 8) {
                                     StatusBadge(status: file.status)
-                                    Text(file.path).font(.system(size: 12)).lineLimit(1).truncationMode(.middle)
+                                    FilePathLabel(path: file.path)
                                     Spacer(minLength: 0)
-                                    if let stats = comparison.statistics[file.path] { Text(stats.isBinary ? "Binary" : "+\(stats.additions) −\(stats.deletions)").font(.system(size: 10, design: .monospaced)).foregroundStyle(.secondary) }
+                                    if let stats = comparison.statistics[file.path] { if stats.isBinary { Chip(text: "Binary", tint: .secondary) } else { DiffStat(additions: stats.additions, deletions: stats.deletions, showsBar: false) } }
                                 }.tag(file.path).padding(.vertical, 3).contextMenu { Button("Compare in External Tool…") { store.externalTool(.comparison(comparison.left, comparison.right, file.path, comparison.originalPaths[file.path])) } }
                             }
                         }.listStyle(.plain)
@@ -54,26 +60,19 @@ struct RevisionComparisonView: View {
                     }
                 } trailing: {
                     VStack(spacing: 0) {
-                        HStack {
-                            Text("\(comparison.left.prefix(12)) → \(comparison.right.prefix(12))").font(.system(size: 11, design: .monospaced)).foregroundStyle(.secondary)
-                            Spacer()
-                            Picker("Context", selection: $context) { ForEach([3, 7, 15, 30], id: \.self) { Text("\($0) lines").tag($0) } }.frame(width: 130)
-                            Toggle("Ignore Whitespace", isOn: $ignoreWhitespace).toggleStyle(.checkbox).font(.caption)
-                        }.padding(10).background(.bar)
-                        Divider()
                         if let diffError { InspectionErrorView(message: diffError) }
                         else { DiffView(text: diff, title: selected, isLoading: loadingDiff) }
                     }
                 }
-            } else { EmptyPane(title: "Compare Revisions", subtitle: "Choose any two branches, tags, or commit hashes.", icon: "arrow.left.arrow.right") }
+            } else { EmptyPane(title: "Compare Revisions", subtitle: "Choose any two branches, tags or commit hashes, then press Compare.", icon: "arrow.left.arrow.right") }
         }
         .task(id: request) { await compare() }
         .task(id: "\(comparison?.left ?? ""):\(comparison?.right ?? ""):\(selected ?? ""):\(context):\(ignoreWhitespace)") { await loadDiff() }
     }
     private func revisionField(_ title: String, text: Binding<String>) -> some View {
         HStack(spacing: 6) {
-            Text(title).foregroundStyle(.secondary)
-            TextField("Branch, tag, or commit", text: text).textFieldStyle(.roundedBorder)
+            Text(title).foregroundStyle(.secondary).font(.system(size: 11, weight: .medium))
+            TextField("Branch, tag, or commit", text: text).textFieldStyle(.roundedBorder).font(.system(size: 12, design: .monospaced))
             Menu {
                 Button("HEAD") { text.wrappedValue = "HEAD" }
                 ForEach(store.snapshot?.references ?? []) { ref in Button(ref.name) { text.wrappedValue = ref.fullName } }

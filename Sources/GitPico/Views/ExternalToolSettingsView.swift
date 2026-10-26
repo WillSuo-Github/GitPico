@@ -13,7 +13,7 @@ struct ExternalToolSettingsView: View {
     @State private var loaded = ExternalToolSettings()
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("External Diff & Merge Tools").font(.title2.bold())
+            SheetTitle("External Diff & Merge Tools")
             Text("Choose a command-line helper. FileMerge is included with Xcode. Tools run only when you click Launch Tool.").font(.callout).foregroundStyle(.secondary)
             GroupBox("Diff Tool") { fields(path: $diffPath, arguments: $diffArguments) }
             GroupBox("Merge Tool") { fields(path: $mergePath, arguments: $mergeArguments) }

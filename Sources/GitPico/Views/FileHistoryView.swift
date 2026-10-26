@@ -27,12 +27,9 @@ struct FileHistoryView: View {
     var body: some View {
         PersistentSplitView(name: "fileHistory", width: 320) {
             VStack(spacing: 0) {
-                HStack {
-                    Button { showingFiles = true } label: { Label(path.isEmpty ? "Choose File…" : path, systemImage: "doc.text").lineLimit(1).truncationMode(.middle) }.buttonStyle(.plain).help("Choose a tracked file")
-                    Spacer()
-                    Text("\(history?.revisions.count ?? 0) commits").foregroundStyle(.secondary).fixedSize()
-                }.font(.system(size: 12)).padding(.horizontal, 12).frame(height: 40).background(.bar)
-                Divider()
+                PaneBar(title: path.isEmpty ? "File History" : (path as NSString).lastPathComponent, subtitle: path.isEmpty ? "No file chosen" : "\(history?.revisions.count ?? 0)\(history?.hasMore == true ? "+" : "") commits · " + ((path as NSString).deletingLastPathComponent.nilIfEmpty ?? "repository root"), icon: "doc.text.magnifyingglass") {
+                    Button("Choose…") { showingFiles = true }.controlSize(.small).help("Choose another tracked file")
+                }
                 if let error { InspectionErrorView(message: error) }
                 else if isLoading && history == nil { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
                 else if path.isEmpty { EmptyPane(title: "File History", subtitle: "Choose a tracked file to inspect its commits, including earlier names.", icon: "doc.text.magnifyingglass") }
@@ -41,8 +38,11 @@ struct FileHistoryView: View {
                         LazyVStack(spacing: 0) {
                             ForEach(filtered) { entry in
                                 CommitRow(commit: entry.commit, graph: nil, graphWidth: 0, selected: selected == entry.id, fileActions: sourceRevision(entry).map { HistoricalFileMenu(store: store, revision: $0, paths: [entry.path], destination: path) })
-                                    .background(selected == entry.id ? Color.accentColor.opacity(0.18) : .clear)
+                                    .background(selected == entry.id ? Color(nsColor: .selectedContentBackgroundColor) : .clear, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                    .padding(.horizontal, 6)
+                                    .contentShape(Rectangle())
                                     .onTapGesture(count: 2) { showCommit(entry.commit) }
+                                    .onTapGesture { selected = entry.id }
                             }
                             if history?.hasMore == true {
                                 Button("Load 500 More Commits") { limit += 500 }.controlSize(.small).padding(14).disabled(isLoading || limit >= 10_000)
@@ -61,7 +61,7 @@ struct FileHistoryView: View {
         } trailing: {
             VStack(spacing: 0) {
                 HStack(spacing: 10) {
-                    Text(current?.commit.shortHash ?? "").font(.system(size: 12, design: .monospaced)).foregroundStyle(.secondary)
+                    if let current { HashChip(hash: current.commit.hash) }
                     if let current {
                         Menu("Actions") {
                             if let source = sourceRevision(current) {
@@ -77,18 +77,25 @@ struct FileHistoryView: View {
                     Spacer()
                     if mode == "Diff" { DiffLayoutPicker() }
                     if mode == "Blame" { Toggle("Ignore Whitespace", isOn: $ignoreWhitespace).toggleStyle(.checkbox).font(.caption) }
-                    Picker("File view", selection: $mode) { Text("Diff").tag("Diff"); Text("Raw").tag("Raw"); Text("Blame").tag("Blame") }.pickerStyle(.segmented).labelsHidden().frame(width: 210)
-                }.padding(.horizontal, 14).frame(height: 40).background(.bar)
-                Divider()
+                    Picker("File view", selection: $mode) { Text("Diff").tag("Diff"); Text("Raw").tag("Raw"); Text("Blame").tag("Blame") }.pickerStyle(.segmented).labelsHidden().fixedSize()
+                }.padding(.horizontal, 14).frame(height: Pico.headerHeight).background(.bar).overlay(alignment: .bottom) { Divider() }
                 if let current {
-                    HStack { Text(current.path).lineLimit(1).truncationMode(.middle); Spacer(); Text(current.commit.subject).lineLimit(1).foregroundStyle(.secondary) }.font(.system(size: 11)).padding(10)
+                    HStack(spacing: 10) {
+                        AuthorAvatar(name: current.commit.author, size: 26)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(current.commit.subject).font(.system(size: 13, weight: .semibold)).lineLimit(1)
+                            Text(current.commit.author + " · " + current.commit.date.picoRelative + (current.path != path ? " · as " + current.path : "")).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+                        }
+                        Spacer(minLength: 0)
+                        if current.isDeleted { Chip(text: "Deleted here", tint: Pico.deletion) }
+                    }.padding(.horizontal, 14).padding(.vertical, 9)
                     Divider()
                     if loadingPreview { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
                     else if let previewError { InspectionErrorView(message: previewError) }
                     else if mode == "Diff" { DiffView(text: preview, title: current.path, showsHeader: false) }
                     else if mode == "Blame" { BlameView(lines: blame, inspect: { hash in Task { do { inspectedCommit = try await repository.commit(at: hash) } catch { previewError = error.localizedDescription } } }) }
                     else { InspectionTextView(text: preview) }
-                } else { EmptyPane(title: "No file revision selected", subtitle: "Select a commit to inspect this file.", icon: "doc.text") }
+                } else { EmptyPane(title: "Select a revision", subtitle: "Pick a commit to see how this file changed, its full contents or line-by-line blame.", icon: "doc.text") }
             }
         }
         .task(id: limit) { await loadHistory() }
@@ -152,7 +159,7 @@ struct InspectionFilePicker: View {
     var matches: [String] { files.filter { search.isEmpty || $0.localizedCaseInsensitiveContains(search) } }
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Choose File").font(.title2.bold())
+            SheetTitle("Choose File")
             TextField("Search tracked files", text: $search)
             if let error { Text(error).foregroundStyle(.red) }
             if loading { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
@@ -186,7 +193,8 @@ struct BlameView: View {
                             Divider()
                             Button { inspect(line.hash) } label: {
                                 HStack(spacing: 8) {
-                                    Text(String(line.hash.prefix(8))).font(.system(size: 10, design: .monospaced)).foregroundStyle(.blue)
+                                    AuthorAvatar(name: line.author, size: 16)
+                                    Text(String(line.hash.prefix(8))).font(.system(size: 10, design: .monospaced)).foregroundStyle(.tint)
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(line.subject).lineLimit(1)
                                         Text("\(line.author) · \(line.date.formatted(date: .abbreviated, time: .omitted))").foregroundStyle(.secondary).lineLimit(1)
@@ -214,5 +222,10 @@ struct InspectionTextView: View {
 
 struct InspectionErrorView: View {
     let message: String
-    var body: some View { Label(message, systemImage: "exclamationmark.triangle").font(.callout).foregroundStyle(.secondary).textSelection(.enabled).padding(24).frame(maxWidth: .infinity, maxHeight: .infinity) }
+    var body: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "exclamationmark.triangle").font(.system(size: 22)).foregroundStyle(Pico.warning).frame(width: 52, height: 52).background(Pico.warning.opacity(0.12), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            Text(message).font(.callout).foregroundStyle(.secondary).multilineTextAlignment(.center).textSelection(.enabled).frame(maxWidth: 420)
+        }.padding(24).frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
 }

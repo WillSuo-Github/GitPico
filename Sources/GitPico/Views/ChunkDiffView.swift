@@ -26,36 +26,39 @@ struct ChunkDiffView: View {
             let patch = prepared.patch
             let previews = prepared.previews
             VStack(spacing: 0) {
-                if lineAction != nil, patch.supportsChunkStaging {
-                    HStack(spacing: 10) {
-                        Text(selectedLines.ids.isEmpty ? "Select changed lines in the gutter" : "\(selectedLines.ids.count) \(selectedLines.ids.count == 1 ? "line" : "lines") selected").foregroundStyle(.secondary)
-                        Spacer()
-                        if !selectedLines.ids.isEmpty {
+                HStack(spacing: 10) {
+                    DiffStat(additions: patch.additions, deletions: patch.deletions)
+                    Text("\(patch.hunks.count) \(patch.hunks.count == 1 ? "chunk" : "chunks")").foregroundStyle(.secondary)
+                    Spacer()
+                    if lineAction != nil, patch.supportsChunkStaging {
+                        if selectedLines.ids.isEmpty {
+                            Label("Click the gutter to pick lines", systemImage: "hand.point.up.left").foregroundStyle(.tertiary)
+                        } else {
+                            Text("\(selectedLines.ids.count) \(selectedLines.ids.count == 1 ? "line" : "lines") selected").foregroundStyle(.secondary)
                             Menu {
                                 Button("Clear Selection") { selectedLines.clear() }
                                 if let exportLines { Button("Save Lines as Patch…") { exportLines(selectedLines.ids) } }
-                            } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).frame(width: 24)
+                            } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
                             if let discardLines { Button("Discard Lines…", role: .destructive) { discardLines(selectedLines.ids) } }
-                            Button(actionTitle.hasPrefix("Unstage") ? "Unstage Selected Lines" : "Stage Selected Lines") { lineAction?(selectedLines.ids) }
+                            Button(actionTitle.hasPrefix("Unstage") ? "Unstage Lines" : "Stage Lines") { lineAction?(selectedLines.ids) }
+                                .buttonStyle(.borderedProminent)
                                 .keyboardShortcut(.return, modifiers: [.command, .shift])
                         }
-                    }.font(.system(size: 11)).controlSize(.small).padding(.horizontal, 12).frame(height: 32).background(.bar).disabled(disabled)
-                    Divider()
-                }
+                    }
+                }.font(.system(size: 11)).controlSize(.small).padding(.horizontal, 14).frame(height: 34).disabled(disabled)
+                Divider()
                 GeometryReader { geometry in
                     ScrollView(.vertical) {
                         LazyVStack(alignment: .leading, spacing: 0) {
-                            Text(patch.summary)
-                                .font(.system(size: 11, design: .monospaced)).foregroundStyle(.secondary).padding(12)
                             if preferences.splitDiff {
-                                HStack(spacing: 0) { Text(leftTitle).frame(maxWidth: .infinity, alignment: .leading); Text(rightTitle).frame(maxWidth: .infinity, alignment: .leading) }.font(.system(size: 10, weight: .medium)).foregroundStyle(.secondary).padding(.horizontal, 16).frame(height: 25).background(.bar)
+                                HStack(spacing: 0) { Text(leftTitle).frame(maxWidth: .infinity, alignment: .leading); Text(rightTitle).frame(maxWidth: .infinity, alignment: .leading) }.font(.system(size: 10, weight: .semibold)).textCase(.uppercase).tracking(0.5).foregroundStyle(.secondary).padding(.horizontal, 16).frame(height: 24)
                             }
                             if patch.hunks.isEmpty { Text(text).font(.system(size: preferences.diffFontSize, design: .monospaced)).textSelection(.enabled).padding(12) }
                             ForEach(previews) { preview in
                                 let hunk = preview.hunk
                                 let canSelect = lineAction != nil && patch.supportsChunkStaging && !preview.isTruncated
                                 HStack {
-                                    Text(hunk.header).font(.system(size: 10, design: .monospaced)).foregroundStyle(.secondary)
+                                    Text(hunk.header).font(.system(size: 10, weight: .medium, design: .monospaced)).foregroundStyle(Color.accentColor.opacity(0.85)).lineLimit(1)
                                     Spacer()
                                     if let discardChunk, patch.supportsChunkStaging {
                                         Button("Discard Chunk…", role: .destructive) { discardChunk(hunk.id) }.controlSize(.mini).disabled(disabled || preview.isTruncated)
@@ -63,7 +66,7 @@ struct ChunkDiffView: View {
                                     if let chunkAction, patch.supportsChunkStaging {
                                         Button(actionTitle) { chunkAction(hunk.id) }.controlSize(.mini).disabled(disabled || preview.isTruncated)
                                     }
-                                }.padding(.horizontal, 12).frame(height: 28).background(.quaternary.opacity(0.2))
+                                }.padding(.horizontal, 12).frame(height: 30).background(Color.accentColor.opacity(0.06)).overlay(alignment: .top) { Divider().opacity(0.6) }
                                 if preferences.splitDiff {
                                     SplitDiffView(lines: preview.lines, fontSize: preferences.diffFontSize, preparedRows: prepared.splitRows[hunk.id], selected: Set(selectedLines.ids.filter { $0.hunk == hunk.id }.map(\.line)), select: canSelect ? { toggle($0, in: hunk, prepared: prepared) } : nil, minimumWidth: geometry.size.width)
                                 } else {

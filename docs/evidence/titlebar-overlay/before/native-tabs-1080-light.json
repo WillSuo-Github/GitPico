@@ -1,0 +1,29 @@
+{
+  "content" : "{{0, 0}, {1080, 798}}",
+  "controlCount" : 16,
+  "tabTitles" : [
+    "GitPico",
+    "Costaware-iOS",
+    "Website"
+  ],
+  "toolbarLabels" : [
+    "Repositories",
+    "Hide Sidebar",
+    "Previous",
+    "Next",
+    "Actions",
+    "Undo",
+    "Redo",
+    "Fetch",
+    "Pull",
+    "Push",
+    "Branches",
+    "Integrate",
+    "Stash",
+    "Apply",
+    "Refresh",
+    ""
+  ],
+  "visibleControlCount" : 15,
+  "window" : "{{-10000, -10000}, {1080, 900}}"
+}

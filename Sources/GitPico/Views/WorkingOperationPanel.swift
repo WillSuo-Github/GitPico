@@ -8,27 +8,36 @@ struct WorkingOperationPanel: View {
     @State private var confirmSkip = false
     var count: Int { store.changes.filter(\.isConflicted).count }
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: "arrow.triangle.merge").font(.system(size: 28, weight: .semibold)).foregroundStyle(.yellow).padding(.top, 3)
-            VStack(alignment: .leading, spacing: 10) {
-                Text("\(store.snapshot?.operation.rawValue.capitalized ?? "Integration") in progress").fontWeight(.semibold)
-                Text("\(count) unresolved \(count == 1 ? "conflict" : "conflicts")")
-                if let progress = store.rebaseProgress {
-                    Text("Step \(progress.completed) of \(progress.total)\(progress.isEditing ? " · editing commit" : "")").foregroundStyle(.secondary)
-                    if progress.isEditing { Button("Amend Paused Commit…") { store.showingRebaseEdit = true }.controlSize(.small) }
-                    Button("Skip This Commit…") { confirmSkip = true }.controlSize(.small)
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                Image(systemName: "arrow.triangle.merge").font(.system(size: 15, weight: .semibold)).foregroundStyle(Pico.warning)
+                    .frame(width: 32, height: 32).background(Pico.warning.opacity(0.15), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("\(store.snapshot?.operation.rawValue.capitalized ?? "Integration") in progress").font(.system(size: 13, weight: .semibold))
+                    Text(count > 0 ? "\(count) unresolved \(count == 1 ? "conflict" : "conflicts")" : "All conflicts resolved").font(.system(size: 11, weight: .medium)).foregroundStyle(count > 0 ? Pico.deletion : Pico.addition)
                 }
-                Text(count > 0 ? "Resolve each file to complete this operation." : store.rebaseProgress?.isEditing == true ? "Stage edits and amend this commit, or Continue without changing it." : "All conflicts resolved. Continue to finish the operation.").foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-                Toggle("Show only conflicts", isOn: $onlyConflicts).toggleStyle(.checkbox)
-                HStack {
-                    Button("Abort…") { confirmAbort = true }
-                    Spacer()
-                    Button("Continue", action: store.continueOperation).disabled(count > 0)
-                }.controlSize(.small)
-            }.font(.system(size: 11))
-        }.padding(14).frame(maxWidth: .infinity, alignment: .leading)
-            .background(.yellow.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(.yellow.opacity(0.18))).padding(12).disabled(store.isBusy)
+                Spacer(minLength: 0)
+                if let progress = store.rebaseProgress {
+                    Chip(text: "Step \(progress.completed)/\(progress.total)", tint: .secondary)
+                }
+            }
+            if let progress = store.rebaseProgress, progress.total > 0 {
+                ProgressView(value: Double(progress.completed), total: Double(progress.total)).tint(Pico.warning)
+            }
+            Text(count > 0 ? "Resolve each file to complete this operation." : store.rebaseProgress?.isEditing == true ? "Stage edits and amend this commit, or Continue without changing it." : "Continue to finish the operation.").font(.system(size: 11)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            Toggle("Show only conflicted files", isOn: $onlyConflicts).toggleStyle(.checkbox).font(.system(size: 11))
+            HStack(spacing: 6) {
+                Button("Abort…") { confirmAbort = true }
+                if let progress = store.rebaseProgress {
+                    if progress.isEditing { Button("Amend…") { store.showingRebaseEdit = true } }
+                    Button("Skip…") { confirmSkip = true }
+                }
+                Spacer()
+                Button("Continue", action: store.continueOperation).buttonStyle(.borderedProminent).disabled(count > 0)
+            }.controlSize(.small)
+        }.padding(12).frame(maxWidth: .infinity, alignment: .leading)
+            .background(Pico.warning.opacity(0.07), in: RoundedRectangle(cornerRadius: Pico.corner, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: Pico.corner, style: .continuous).strokeBorder(Pico.warning.opacity(0.25), lineWidth: 0.5)).padding(10).disabled(store.isBusy)
             .confirmationDialog("Abort this operation?", isPresented: $confirmAbort, titleVisibility: .visible) {
                 Button("Abort Operation", role: .destructive, action: store.abortOperation)
             } message: { Text("Git will restore the pre-operation state. Edits made while resolving conflicts may be lost.") }

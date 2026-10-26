@@ -1,0 +1,799 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project GitPico.xcodeproj -scheme GitPico -configuration Debug -destination platform=macOS -derivedDataPath .build/xcode build-for-testing
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:macOS, arch:arm64, id:00008132-000C284E0205001C, name:My Mac }
+{ platform:macOS, arch:x86_64, id:00008132-000C284E0205001C, name:My Mac }
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (4 targets)
+    Target 'GitPicoTests' in project 'GitPico'
+        ➜ Explicit dependency on target 'GitPico' in project 'GitPico'
+        ➜ Explicit dependency on target 'GitCore' in project 'GitPico'
+    Target 'GitPico' in project 'GitPico'
+        ➜ Explicit dependency on target 'GitCore' in project 'GitPico'
+    Target 'GitCoreTests' in project 'GitPico'
+        ➜ Explicit dependency on target 'GitCore' in project 'GitPico'
+    Target 'GitCore' in project 'GitPico' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: f81978962fbcdaebf2290b354024f1bd
+Build description path: /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/XCBuildData/f81978962fbcdaebf2290b354024f1bd.xcbuilddata
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk /Users/willsuo/files/Github/GitPico/.build/xcode/SDKStatCaches.noindex/macosx27.0-26A425-e829b21a6f8c9b70876ba0858053c0447231f6df4def33e022ae2eb8f782df1a.sdkstatcache
+    cd /Users/willsuo/files/Github/GitPico/GitPico.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -o /Users/willsuo/files/Github/GitPico/.build/xcode/SDKStatCaches.noindex/macosx27.0-26A425-e829b21a6f8c9b70876ba0858053c0447231f6df4def33e022ae2eb8f782df1a.sdkstatcache
+
+WriteAuxiliaryFile /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.LinkFileList (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    write-file /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.LinkFileList
+
+WriteAuxiliaryFile /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.SwiftFileList (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    write-file /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.SwiftFileList
+
+WriteAuxiliaryFile /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.SwiftConstValuesFileList (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    write-file /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests-OutputFileMap.json (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    write-file /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests-OutputFileMap.json
+
+WriteAuxiliaryFile /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico-OutputFileMap.json (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    write-file /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico-OutputFileMap.json
+
+WriteAuxiliaryFile /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.SwiftConstValuesFileList (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    write-file /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.LinkFileList (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    write-file /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.LinkFileList
+
+WriteAuxiliaryFile /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.SwiftFileList (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    write-file /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.SwiftFileList
+
+MkDir /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/MacOS (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    /bin/mkdir -p /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/MacOS
+
+MkDir /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/Frameworks (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    /bin/mkdir -p /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/Frameworks
+
+MkDir /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    /bin/mkdir -p /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents
+
+MkDir /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    /bin/mkdir -p /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest
+
+MkDir /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    /bin/mkdir -p /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns
+
+ProcessInfoPlistFile /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitCore.framework/Versions/A/Resources/Info.plist /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitCore.build/empty-GitCore.plist (in target 'GitCore' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-infoPlistUtility /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitCore.build/empty-GitCore.plist -producttype com.apple.product-type.framework -expandbuildsettings -platform macosx -o /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitCore.framework/Versions/A/Resources/Info.plist
+
+ProcessProductPackaging "" /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico.app.xcent (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    
+    Entitlements:
+    
+    {
+    "com.apple.security.get-task-allow" = 1;
+}
+    
+    builtin-productPackagingUtility -entitlements -format xml -o /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico.app.xcent
+
+ProcessProductPackagingDER /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico.app.xcent /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico.app.xcent.der (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    /usr/bin/derq query -f xml -i /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico.app.xcent -o /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico.app.xcent.der --raw
+
+ProcessInfoPlistFile /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitCoreTests.xctest/Contents/Info.plist /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitCoreTests.build/empty-GitCoreTests.plist (in target 'GitCoreTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-infoPlistUtility /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitCoreTests.build/empty-GitCoreTests.plist -producttype com.apple.product-type.bundle.unit-test -expandbuildsettings -platform macosx -o /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitCoreTests.xctest/Contents/Info.plist
+
+PhaseScriptExecution Generate\ Date\ Build\ Number /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Script-FE8F9C82814F999D18C3B5BA.sh (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    /bin/sh -c /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Script-FE8F9C82814F999D18C3B5BA.sh
+GitPico development build: 20261025134114
+
+CopySwiftLibs /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitCoreTests.xctest (in target 'GitCoreTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-swiftStdLibTool --copy --verbose --sign - --scan-executable /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitCoreTests.xctest/Contents/MacOS/GitCoreTests --scan-folder /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitCoreTests.xctest/Contents/Frameworks --scan-folder /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitCoreTests.xctest/Contents/PlugIns --scan-folder /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitCoreTests.xctest/Contents/Library/SystemExtensions --scan-folder /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitCoreTests.xctest/Contents/Extensions --scan-folder /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitCore.framework --platform macosx --toolchain /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v27.1.266.1.1tmrkn/Metal.xctoolchain --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitCoreTests.xctest/Contents/Frameworks --strip-bitcode --scan-executable /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libXCTestSwiftSupport.dylib --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitCoreTests.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os
+
+SwiftDriver GitPico normal arm64 com.apple.xcode.tools.swift.compiler (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name GitPico -Onone @/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.SwiftFileList -DDEBUG -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -target arm64-apple-macos26.0 -g -module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/willsuo/files/Github/GitPico/.build/xcode/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 6 -I /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug -F /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/SDKStatCaches.noindex/macosx27.0-26A425-e829b21a6f8c9b70876ba0858053c0447231f6df4def33e022ae2eb8f782df1a.sdkstatcache -output-file-map /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/ModuleCache.noindex -sdk-module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /Users/willsuo/files/Github/GitPico/.build/xcode/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico_const_extract_protocols.json -Xcc -iquote -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico-generated-files.hmap -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico-own-target-headers.hmap -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico-all-non-framework-target-headers.hmap -Xcc -ivfsoverlay -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico-9ce83e4c7c368f9d9a4864f305d9eec0-VFS/all-product-headers.yaml -Xcc -iquote -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico-project-headers.hmap -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/include -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/DerivedSources-normal/arm64 -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/DerivedSources/arm64 -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico-Swift.h -working-directory /Users/willsuo/files/Github/GitPico -experimental-emit-module-separately -disable-cmo
+
+SwiftCompile normal arm64 Compiling\ QuickActions.swift,\ RepositoryDraftStore.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/QuickActions.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RepositoryDraftStore.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/QuickActions.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile QuickActions.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RepositoryDraftStore.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RepositoryDraftStore.swift
+
+SwiftCompile normal arm64 Compiling\ RepositoryWorkspace.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RepositoryWorkspace.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RepositoryWorkspace.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RepositoryWorkspace.swift
+
+SwiftCompile normal arm64 Compiling\ RepositoryStore.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RepositoryStore.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RepositoryStore.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RepositoryStore.swift
+
+SwiftCompile normal arm64 Compiling\ RepositoryInfrastructureActions.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RepositoryInfrastructureActions.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RepositoryInfrastructureActions.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RepositoryInfrastructureActions.swift
+
+SwiftCompile normal arm64 Compiling\ ContentView.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/ContentView.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/ContentView.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile ContentView.swift
+
+SwiftCompile normal arm64 Compiling\ RepositoryMenu.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositoryMenu.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositoryMenu.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RepositoryMenu.swift
+
+SwiftCompile normal arm64 Compiling\ RepositoryPickerView.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositoryPickerView.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositoryPickerView.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RepositoryPickerView.swift
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ GitPico (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    
+
+SwiftCompile normal arm64 Compiling\ SidebarView.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/SidebarView.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/SidebarView.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile SidebarView.swift
+
+SwiftCompile normal arm64 Compiling\ GitPicoApp.swift,\ RepositoryCommands.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/App/GitPicoApp.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/App/RepositoryCommands.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/App/GitPicoApp.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile GitPicoApp.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/App/RepositoryCommands.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RepositoryCommands.swift
+
+SwiftCompile normal arm64 Compiling\ RepositoryWorkspaceView.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositoryWorkspaceView.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositoryWorkspaceView.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RepositoryWorkspaceView.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling RepositoryMenu.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 Compiling\ RepositoryToolbar.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositoryToolbar.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositoryToolbar.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RepositoryToolbar.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling RepositoryInfrastructureActions.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 Compiling\ GitPicoLauncher.swift,\ AutomaticStashActions.swift,\ DragActions.swift,\ ExtensionActions.swift,\ ExternalToolActions.swift,\ HistoricalActions.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/App/GitPicoLauncher.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/AutomaticStashActions.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/DragActions.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/ExtensionActions.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/ExternalToolActions.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/HistoricalActions.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/App/GitPicoLauncher.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile GitPicoLauncher.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/AutomaticStashActions.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile AutomaticStashActions.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/DragActions.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile DragActions.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/ExtensionActions.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile ExtensionActions.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/ExternalToolActions.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile ExternalToolActions.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/HistoricalActions.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile HistoricalActions.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling RepositoryWorkspace.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 Compiling\ RelatedAdministrationActions.swift,\ RelatedRepositoryActions.swift,\ RepositoryActions.swift,\ RepositoryLibraryActions.swift,\ WorkingCopyState.swift,\ AutomaticStashView.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RelatedAdministrationActions.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RelatedRepositoryActions.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RepositoryActions.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RepositoryLibraryActions.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/WorkingCopyState.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/AutomaticStashView.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RelatedAdministrationActions.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RelatedAdministrationActions.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RelatedRepositoryActions.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RelatedRepositoryActions.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RepositoryActions.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RepositoryActions.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/RepositoryLibraryActions.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RepositoryLibraryActions.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/WorkingCopyState.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile WorkingCopyState.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/AutomaticStashView.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile AutomaticStashView.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling RepositoryPickerView.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 Compiling\ ReflogView.swift,\ RelatedAdministrationSheet.swift,\ RelatedRepositoriesView.swift,\ RelatedRepositorySheets.swift,\ RemoteSettingsPane.swift,\ RemoteSheets.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/ReflogView.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RelatedAdministrationSheet.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RelatedRepositoriesView.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RelatedRepositorySheets.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RemoteSettingsPane.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RemoteSheets.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/ReflogView.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile ReflogView.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RelatedAdministrationSheet.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RelatedAdministrationSheet.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RelatedRepositoriesView.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RelatedRepositoriesView.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RelatedRepositorySheets.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RelatedRepositorySheets.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RemoteSettingsPane.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RemoteSettingsPane.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RemoteSheets.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RemoteSheets.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling QuickActions.swift, RepositoryDraftStore.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 Compiling\ StashFileDisclosure.swift,\ StashSheets.swift,\ WelcomeView.swift,\ WorkingCopyView.swift,\ WorkingOperationPanel.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/StashFileDisclosure.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/StashSheets.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/WelcomeView.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/WorkingCopyView.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/WorkingOperationPanel.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/StashFileDisclosure.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile StashFileDisclosure.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/StashSheets.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile StashSheets.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/WelcomeView.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile WelcomeView.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/WorkingCopyView.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile WorkingCopyView.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/WorkingOperationPanel.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile WorkingOperationPanel.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling RepositoryToolbar.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 Compiling\ BranchesReviewView.swift,\ BranchNavigationMenu.swift,\ BranchTagSheets.swift,\ BrowserFileRow.swift,\ CommitDetailView.swift,\ CommitRow.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/BranchesReviewView.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/BranchNavigationMenu.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/BranchTagSheets.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/BrowserFileRow.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/CommitDetailView.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/CommitRow.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/BranchesReviewView.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile BranchesReviewView.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/BranchNavigationMenu.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile BranchNavigationMenu.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/BranchTagSheets.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile BranchTagSheets.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/BrowserFileRow.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile BrowserFileRow.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/CommitDetailView.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile CommitDetailView.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/CommitRow.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile CommitRow.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling GitPicoApp.swift, RepositoryCommands.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 Compiling\ LFSSettingsPane.swift,\ LocalChangesSheet.swift,\ ManagementRecoverySheet.swift,\ ManagementSheet.swift,\ QuickActionsSheet.swift,\ QuickOpenSheet.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/LFSSettingsPane.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/LocalChangesSheet.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/ManagementRecoverySheet.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/ManagementSheet.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/QuickActionsSheet.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/QuickOpenSheet.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/LFSSettingsPane.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile LFSSettingsPane.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/LocalChangesSheet.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile LocalChangesSheet.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/ManagementRecoverySheet.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile ManagementRecoverySheet.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/ManagementSheet.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile ManagementSheet.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/QuickActionsSheet.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile QuickActionsSheet.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/QuickOpenSheet.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile QuickOpenSheet.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling RepositoryWorkspaceView.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 Compiling\ RepositoryCreationSheet.swift,\ RepositoryInfrastructureSheet.swift,\ RepositoryLibraryView.swift,\ RepositorySettingsView.swift,\ RevisionComparisonView.swift,\ StashesView.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositoryCreationSheet.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositoryInfrastructureSheet.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositoryLibraryView.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositorySettingsView.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RevisionComparisonView.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/StashesView.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositoryCreationSheet.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RepositoryCreationSheet.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositoryInfrastructureSheet.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RepositoryInfrastructureSheet.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositoryLibraryView.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RepositoryLibraryView.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RepositorySettingsView.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RepositorySettingsView.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/RevisionComparisonView.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RevisionComparisonView.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/StashesView.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile StashesView.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling SidebarView.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 Compiling\ HistoryActions.swift,\ HistoryPreview.swift,\ IncrementalRefresh.swift,\ LocalChangeActions.swift,\ ManagementActions.swift,\ NavigationState.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/HistoryActions.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/HistoryPreview.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/IncrementalRefresh.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/LocalChangeActions.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/ManagementActions.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/NavigationState.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/HistoryActions.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile HistoryActions.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/HistoryPreview.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile HistoryPreview.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/IncrementalRefresh.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile IncrementalRefresh.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/LocalChangeActions.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile LocalChangeActions.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/ManagementActions.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile ManagementActions.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Stores/NavigationState.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile NavigationState.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling RepositoryStore.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 Compiling\ HistoricalFilesSheet.swift,\ HistoryRecoverySheet.swift,\ HistoryView.swift,\ IntegrationSheet.swift,\ InteractiveRebaseSheet.swift,\ LFSManagementSheet.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/HistoricalFilesSheet.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/HistoryRecoverySheet.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/HistoryView.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/IntegrationSheet.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/InteractiveRebaseSheet.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/LFSManagementSheet.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/HistoricalFilesSheet.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile HistoricalFilesSheet.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/HistoryRecoverySheet.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile HistoryRecoverySheet.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/HistoryView.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile HistoryView.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/IntegrationSheet.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile IntegrationSheet.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/InteractiveRebaseSheet.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile InteractiveRebaseSheet.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/LFSManagementSheet.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile LFSManagementSheet.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling RelatedAdministrationActions.swift, RelatedRepositoryActions.swift, RepositoryActions.swift, RepositoryLibraryActions.swift, WorkingCopyState.swift, AutomaticStashView.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 Compiling\ ConflictResolverView.swift,\ ExternalToolSheet.swift,\ FileHistoryView.swift,\ GitDragModifiers.swift,\ GitFlowManagementSheet.swift,\ GitFlowSettingsPane.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/ConflictResolverView.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/ExternalToolSheet.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/FileHistoryView.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/GitDragModifiers.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/GitFlowManagementSheet.swift /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/GitFlowSettingsPane.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/ConflictResolverView.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile ConflictResolverView.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/ExternalToolSheet.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile ExternalToolSheet.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/FileHistoryView.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile FileHistoryView.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/GitDragModifiers.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile GitDragModifiers.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/GitFlowManagementSheet.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile GitFlowManagementSheet.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Sources/GitPico/Views/GitFlowSettingsPane.swift (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile GitFlowSettingsPane.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling GitPicoLauncher.swift, AutomaticStashActions.swift, DragActions.swift, ExtensionActions.swift, ExternalToolActions.swift, HistoricalActions.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftDriverJobDiscovery normal arm64 Compiling ContentView.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftDriverJobDiscovery normal arm64 Compiling HistoryActions.swift, HistoryPreview.swift, IncrementalRefresh.swift, LocalChangeActions.swift, ManagementActions.swift, NavigationState.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftDriverJobDiscovery normal arm64 Compiling StashFileDisclosure.swift, StashSheets.swift, WelcomeView.swift, WorkingCopyView.swift, WorkingOperationPanel.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for GitPico (in target 'GitPico' from project 'GitPico')
+
+SwiftDriver\ Compilation\ Requirements GitPico normal arm64 com.apple.xcode.tools.swift.compiler (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name GitPico -Onone @/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.SwiftFileList -DDEBUG -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -target arm64-apple-macos26.0 -g -module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/willsuo/files/Github/GitPico/.build/xcode/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 6 -I /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug -F /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/SDKStatCaches.noindex/macosx27.0-26A425-e829b21a6f8c9b70876ba0858053c0447231f6df4def33e022ae2eb8f782df1a.sdkstatcache -output-file-map /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/ModuleCache.noindex -sdk-module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /Users/willsuo/files/Github/GitPico/.build/xcode/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico_const_extract_protocols.json -Xcc -iquote -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico-generated-files.hmap -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico-own-target-headers.hmap -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico-all-non-framework-target-headers.hmap -Xcc -ivfsoverlay -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico-9ce83e4c7c368f9d9a4864f305d9eec0-VFS/all-product-headers.yaml -Xcc -iquote -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico-project-headers.hmap -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/include -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/DerivedSources-normal/arm64 -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/DerivedSources/arm64 -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico-Swift.h -working-directory /Users/willsuo/files/Github/GitPico -experimental-emit-module-separately -disable-cmo
+
+SwiftMergeGeneratedHeaders /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/DerivedSources/GitPico-Swift.h /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico-Swift.h (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-swiftHeaderTool -arch arm64 /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico-Swift.h -o /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/DerivedSources/GitPico-Swift.h
+
+Copy /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.swiftmodule/arm64-apple-macos.swiftmodule /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.swiftmodule (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.swiftmodule /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.swiftmodule/arm64-apple-macos.swiftmodule
+
+Copy /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.swiftmodule/arm64-apple-macos.abi.json /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.abi.json (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.abi.json /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.swiftmodule/arm64-apple-macos.abi.json
+
+Copy /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.swiftmodule/Project/arm64-apple-macos.swiftsourceinfo /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.swiftsourceinfo (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.swiftsourceinfo /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.swiftmodule/Project/arm64-apple-macos.swiftsourceinfo
+
+SwiftDriver GitPicoTests normal arm64 com.apple.xcode.tools.swift.compiler (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name GitPicoTests -Onone @/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.SwiftFileList -DDEBUG -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -target arm64-apple-macos26.0 -g -module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/willsuo/files/Github/GitPico/.build/xcode/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 6 -I /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug -F /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/SDKStatCaches.noindex/macosx27.0-26A425-e829b21a6f8c9b70876ba0858053c0447231f6df4def33e022ae2eb8f782df1a.sdkstatcache -output-file-map /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/ModuleCache.noindex -sdk-module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /Users/willsuo/files/Github/GitPico/.build/xcode/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests_const_extract_protocols.json -Xcc -iquote -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/GitPicoTests-generated-files.hmap -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/GitPicoTests-own-target-headers.hmap -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/GitPicoTests-all-non-framework-target-headers.hmap -Xcc -ivfsoverlay -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico-9ce83e4c7c368f9d9a4864f305d9eec0-VFS/all-product-headers.yaml -Xcc -iquote -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/GitPicoTests-project-headers.hmap -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/include -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/DerivedSources-normal/arm64 -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/DerivedSources/arm64 -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests-Swift.h -working-directory /Users/willsuo/files/Github/GitPico -experimental-emit-module-separately -disable-cmo
+
+SwiftCompile normal arm64 Compiling\ DragRoutingTests.swift,\ HistoricalRoutingTests.swift /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/DragRoutingTests.swift /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/HistoricalRoutingTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/DragRoutingTests.swift (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile DragRoutingTests.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/HistoricalRoutingTests.swift (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile HistoricalRoutingTests.swift
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ GitPicoTests (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftCompile normal arm64 (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    
+
+SwiftCompile normal arm64 Compiling\ BranchPreviewPerformanceTests.swift,\ BrowseToolActionsTests.swift /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/BranchPreviewPerformanceTests.swift /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/BrowseToolActionsTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/BranchPreviewPerformanceTests.swift (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile BranchPreviewPerformanceTests.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/BrowseToolActionsTests.swift (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile BrowseToolActionsTests.swift
+
+SwiftCompile normal arm64 Compiling\ XcodeHostTests.swift /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/XcodeHostTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/XcodeHostTests.swift (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile XcodeHostTests.swift
+
+SwiftCompile normal arm64 Compiling\ LocalChangeRoutingTests.swift,\ NativeDropTests.swift /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/LocalChangeRoutingTests.swift /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/NativeDropTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/LocalChangeRoutingTests.swift (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile LocalChangeRoutingTests.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/NativeDropTests.swift (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile NativeDropTests.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling LFSSettingsPane.swift, LocalChangesSheet.swift, ManagementRecoverySheet.swift, ManagementSheet.swift, QuickActionsSheet.swift, QuickOpenSheet.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 Compiling\ WorkingTreeRefreshPerformanceTests.swift,\ WorkingTreeRefreshTests.swift /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/WorkingTreeRefreshPerformanceTests.swift /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/WorkingTreeRefreshTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/WorkingTreeRefreshPerformanceTests.swift (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile WorkingTreeRefreshPerformanceTests.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/WorkingTreeRefreshTests.swift (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile WorkingTreeRefreshTests.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling BranchesReviewView.swift, BranchNavigationMenu.swift, BranchTagSheets.swift, BrowserFileRow.swift, CommitDetailView.swift, CommitRow.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 Compiling\ RepositoryLibraryTests.swift,\ RepositoryWorkspaceTests.swift /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/RepositoryLibraryTests.swift /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/RepositoryWorkspaceTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/RepositoryLibraryTests.swift (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RepositoryLibraryTests.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/RepositoryWorkspaceTests.swift (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RepositoryWorkspaceTests.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling XcodeHostTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftCompile normal arm64 Compiling\ NavigationExperienceTests.swift,\ RelatedRepositoryRoutingTests.swift /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/NavigationExperienceTests.swift /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/RelatedRepositoryRoutingTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/NavigationExperienceTests.swift (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile NavigationExperienceTests.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/RelatedRepositoryRoutingTests.swift (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile RelatedRepositoryRoutingTests.swift
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for GitPicoTests (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftDriver\ Compilation\ Requirements GitPicoTests normal arm64 com.apple.xcode.tools.swift.compiler (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name GitPicoTests -Onone @/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.SwiftFileList -DDEBUG -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -target arm64-apple-macos26.0 -g -module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/willsuo/files/Github/GitPico/.build/xcode/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 6 -I /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug -F /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/SDKStatCaches.noindex/macosx27.0-26A425-e829b21a6f8c9b70876ba0858053c0447231f6df4def33e022ae2eb8f782df1a.sdkstatcache -output-file-map /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/ModuleCache.noindex -sdk-module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /Users/willsuo/files/Github/GitPico/.build/xcode/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests_const_extract_protocols.json -Xcc -iquote -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/GitPicoTests-generated-files.hmap -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/GitPicoTests-own-target-headers.hmap -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/GitPicoTests-all-non-framework-target-headers.hmap -Xcc -ivfsoverlay -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico-9ce83e4c7c368f9d9a4864f305d9eec0-VFS/all-product-headers.yaml -Xcc -iquote -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/GitPicoTests-project-headers.hmap -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/include -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/DerivedSources-normal/arm64 -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/DerivedSources/arm64 -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests-Swift.h -working-directory /Users/willsuo/files/Github/GitPico -experimental-emit-module-separately -disable-cmo
+
+SwiftDriverJobDiscovery normal arm64 Compiling BranchPreviewPerformanceTests.swift, BrowseToolActionsTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftCompile normal arm64 Compiling\ IncrementalRefreshPerformanceTests.swift,\ IncrementalRefreshTests.swift /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/IncrementalRefreshPerformanceTests.swift /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/IncrementalRefreshTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/IncrementalRefreshPerformanceTests.swift (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile IncrementalRefreshPerformanceTests.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/IncrementalRefreshTests.swift (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile IncrementalRefreshTests.swift
+
+Copy /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPicoTests.swiftmodule/arm64-apple-macos.swiftmodule /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.swiftmodule (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.swiftmodule /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPicoTests.swiftmodule/arm64-apple-macos.swiftmodule
+
+Copy /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPicoTests.swiftmodule/arm64-apple-macos.abi.json /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.abi.json (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.abi.json /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPicoTests.swiftmodule/arm64-apple-macos.abi.json
+
+SwiftDriverJobDiscovery normal arm64 Compiling DragRoutingTests.swift, HistoricalRoutingTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+Copy /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPicoTests.swiftmodule/Project/arm64-apple-macos.swiftsourceinfo /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.swiftsourceinfo (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.swiftsourceinfo /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPicoTests.swiftmodule/Project/arm64-apple-macos.swiftsourceinfo
+
+SwiftCompile normal arm64 Compiling\ HistoryComponentRenderTests.swift,\ HistoryPreviewTests.swift /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/HistoryComponentRenderTests.swift /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/HistoryPreviewTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/HistoryComponentRenderTests.swift (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile HistoryComponentRenderTests.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/HistoryPreviewTests.swift (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile HistoryPreviewTests.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling ReflogView.swift, RelatedAdministrationSheet.swift, RelatedRepositoriesView.swift, RelatedRepositorySheets.swift, RemoteSettingsPane.swift, RemoteSheets.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftCompile normal arm64 Compiling\ WorkingComponentRenderTests.swift,\ WorkingCopyExperienceTests.swift /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/WorkingComponentRenderTests.swift /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/WorkingCopyExperienceTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/WorkingComponentRenderTests.swift (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile WorkingComponentRenderTests.swift
+
+SwiftCompile normal arm64 /Users/willsuo/files/Github/GitPico/Tests/GitPicoTests/WorkingCopyExperienceTests.swift (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-SwiftPerFileCompile WorkingCopyExperienceTests.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling HistoricalFilesSheet.swift, HistoryRecoverySheet.swift, HistoryView.swift, IntegrationSheet.swift, InteractiveRebaseSheet.swift, LFSManagementSheet.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftDriverJobDiscovery normal arm64 Compiling LocalChangeRoutingTests.swift, NativeDropTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftDriverJobDiscovery normal arm64 Compiling ConflictResolverView.swift, ExternalToolSheet.swift, FileHistoryView.swift, GitDragModifiers.swift, GitFlowManagementSheet.swift, GitFlowSettingsPane.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftDriverJobDiscovery normal arm64 Compiling RepositoryCreationSheet.swift, RepositoryInfrastructureSheet.swift, RepositoryLibraryView.swift, RepositorySettingsView.swift, RevisionComparisonView.swift, StashesView.swift (in target 'GitPico' from project 'GitPico')
+
+SwiftDriver\ Compilation GitPico normal arm64 com.apple.xcode.tools.swift.compiler (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name GitPico -Onone @/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.SwiftFileList -DDEBUG -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -target arm64-apple-macos26.0 -g -module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/willsuo/files/Github/GitPico/.build/xcode/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 6 -I /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug -F /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/SDKStatCaches.noindex/macosx27.0-26A425-e829b21a6f8c9b70876ba0858053c0447231f6df4def33e022ae2eb8f782df1a.sdkstatcache -output-file-map /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/ModuleCache.noindex -sdk-module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /Users/willsuo/files/Github/GitPico/.build/xcode/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico_const_extract_protocols.json -Xcc -iquote -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico-generated-files.hmap -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico-own-target-headers.hmap -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico-all-non-framework-target-headers.hmap -Xcc -ivfsoverlay -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico-9ce83e4c7c368f9d9a4864f305d9eec0-VFS/all-product-headers.yaml -Xcc -iquote -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico-project-headers.hmap -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/include -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/DerivedSources-normal/arm64 -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/DerivedSources/arm64 -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico-Swift.h -working-directory /Users/willsuo/files/Github/GitPico -experimental-emit-module-separately -disable-cmo
+
+Ld /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/MacOS/GitPico.debug.dylib normal (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-macos26.0 -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -O0 -Xlinker -no_warn_duplicate_libraries -L/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/EagerLinkingTBDs/Debug -L/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug -F/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/EagerLinkingTBDs/Debug -F/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug -filelist /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.LinkFileList -install_name @rpath/GitPico.debug.dylib -Xlinker -rpath -Xlinker @executable_path/../Frameworks -Xlinker -object_path_lto -Xlinker /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -dependency_info -Xlinker /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico_dependency_info.dat -fobjc-link-runtime -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.swiftmodule -Xlinker -alias -Xlinker _main -Xlinker ___debug_main_executable_dylib_entry_point -framework GitCore -Xlinker -no_adhoc_codesign -o /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/MacOS/GitPico.debug.dylib
+
+SwiftDriverJobDiscovery normal arm64 Compiling IncrementalRefreshPerformanceTests.swift, IncrementalRefreshTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftDriverJobDiscovery normal arm64 Compiling WorkingTreeRefreshPerformanceTests.swift, WorkingTreeRefreshTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+ConstructStubExecutorLinkFileList /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico-ExecutorLinkFileList-normal-arm64.txt (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    construct-stub-executor-link-file-list /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/MacOS/GitPico.debug.dylib /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libPreviewsJITStubExecutor_no_swift_entry_point.a /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libPreviewsJITStubExecutor.a --output /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico-ExecutorLinkFileList-normal-arm64.txt
+note: Using stub executor library with Swift entry point. (in target 'GitPico' from project 'GitPico')
+
+Ld /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/MacOS/GitPico normal (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-macos26.0 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -O0 -Xlinker -no_warn_duplicate_libraries -L/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug -F/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug -Xlinker -rpath -Xlinker @executable_path -Xlinker -rpath -Xlinker @executable_path/../Frameworks -rdynamic -Xlinker -no_deduplicate -e ___debug_blank_executor_main -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_dylib -Xlinker /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico-DebugDylibPath-normal-arm64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_instlnm -Xlinker /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico-DebugDylibInstallName-normal-arm64.txt -Xlinker -filelist -Xlinker /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico-ExecutorLinkFileList-normal-arm64.txt /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/MacOS/GitPico.debug.dylib -Xlinker -no_adhoc_codesign -o /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/MacOS/GitPico
+
+ProcessInfoPlistFile /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/Info.plist /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/DerivedSources/GitPico-Info.plist (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-infoPlistUtility /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/DerivedSources/GitPico-Info.plist -producttype com.apple.product-type.application -genpkginfo /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PkgInfo -expandbuildsettings -platform macosx -additionalcontentfile /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/assetcatalog_generated_info.plist -scanforprivacyfile /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/Frameworks/GitCore.framework -o /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/Info.plist
+
+ExtractAppIntentsMetadata (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v27.1.266.1.1tmrkn/Metal.xctoolchain --module-name GitPico --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk --xcode-version 27A9275 --platform-family macOS --deployment-target 26.0 --bundle-identifier com.willsuo.GitPico --output /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/Resources --target-triple arm64-apple-macos26.0 --binary-file /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/MacOS/GitPico --dependency-file /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico_dependency_info.dat --stringsdata-file /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.SwiftFileList --metadata-file-list /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico.DependencyMetadataFileList --static-metadata-file-list /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico.DependencyStaticMetadataFileList --swift-const-vals-list /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/Objects-normal/arm64/GitPico.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --no-app-shortcuts-localization
+2026-10-25 13:41:31.277 appintentsmetadataprocessor[59716:5416493] Starting appintentsmetadataprocessor export
+2026-10-25 13:41:31.281 appintentsmetadataprocessor[59716:5416493] warning: Metadata extraction skipped, no AppIntents.framework dependency found
+
+CopySwiftLibs /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-swiftStdLibTool --copy --verbose --sign - --scan-executable /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/MacOS/GitPico.debug.dylib --scan-folder /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/Frameworks --scan-folder /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns --scan-folder /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/Library/SystemExtensions --scan-folder /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/Extensions --scan-folder /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitCore.framework --platform macosx --toolchain /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v27.1.266.1.1tmrkn/Metal.xctoolchain --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os
+
+ProcessInfoPlistFile /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/Info.plist /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/empty-GitPicoTests.plist (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-infoPlistUtility /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/empty-GitPicoTests.plist -producttype com.apple.product-type.bundle.unit-test -expandbuildsettings -platform macosx -o /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/Info.plist
+
+SwiftDriverJobDiscovery normal arm64 Compiling HistoryComponentRenderTests.swift, HistoryPreviewTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftDriverJobDiscovery normal arm64 Compiling NavigationExperienceTests.swift, RelatedRepositoryRoutingTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftDriverJobDiscovery normal arm64 Compiling RepositoryLibraryTests.swift, RepositoryWorkspaceTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftDriverJobDiscovery normal arm64 Compiling WorkingComponentRenderTests.swift, WorkingCopyExperienceTests.swift (in target 'GitPicoTests' from project 'GitPico')
+
+SwiftDriver\ Compilation GitPicoTests normal arm64 com.apple.xcode.tools.swift.compiler (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name GitPicoTests -Onone @/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.SwiftFileList -DDEBUG -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -target arm64-apple-macos26.0 -g -module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/willsuo/files/Github/GitPico/.build/xcode/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 6 -I /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug -F /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/SDKStatCaches.noindex/macosx27.0-26A425-e829b21a6f8c9b70876ba0858053c0447231f6df4def33e022ae2eb8f782df1a.sdkstatcache -output-file-map /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/ModuleCache.noindex -sdk-module-cache-path /Users/willsuo/files/Github/GitPico/.build/xcode/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file /Users/willsuo/files/Github/GitPico/.build/xcode/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -emit-const-values -const-gather-protocols-list /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests_const_extract_protocols.json -Xcc -iquote -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/GitPicoTests-generated-files.hmap -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/GitPicoTests-own-target-headers.hmap -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/GitPicoTests-all-non-framework-target-headers.hmap -Xcc -ivfsoverlay -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico-9ce83e4c7c368f9d9a4864f305d9eec0-VFS/all-product-headers.yaml -Xcc -iquote -Xcc /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/GitPicoTests-project-headers.hmap -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/include -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/DerivedSources-normal/arm64 -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/DerivedSources/arm64 -Xcc -I/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests-Swift.h -working-directory /Users/willsuo/files/Github/GitPico -experimental-emit-module-separately -disable-cmo
+
+Ld /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/MacOS/GitPicoTests normal (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-macos26.0 -bundle -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -O0 -Xlinker -no_warn_duplicate_libraries -L/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/EagerLinkingTBDs/Debug -L/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug -L/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/EagerLinkingTBDs/Debug -F/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -filelist /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.LinkFileList -Xlinker -rpath -Xlinker @loader_path/../Frameworks -Xlinker -rpath -Xlinker @executable_path/../Frameworks -bundle_loader /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/MacOS/GitPico -Xlinker -object_path_lto -Xlinker /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -dependency_info -Xlinker /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests_dependency_info.dat -fobjc-link-runtime -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.swiftmodule -Xlinker -needed_framework -Xlinker XCTest -framework XCTest -Xlinker -needed-lXCTestSwiftSupport -lXCTestSwiftSupport -framework GitCore /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/MacOS/GitPico.debug.dylib -Xlinker -no_adhoc_codesign -o /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/MacOS/GitPicoTests
+
+Copy /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/Frameworks/GitCore.framework /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitCore.framework (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -exclude Headers -exclude PrivateHeaders -exclude Modules -exclude \*.tbd -resolve-src-symlinks -remove-static-executable /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitCore.framework /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/Frameworks
+
+CodeSign /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/Frameworks/GitCore.framework/Versions/A (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --timestamp\=none --preserve-metadata\=identifier,entitlements,flags --generate-entitlement-der /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/Frameworks/GitCore.framework/Versions/A
+/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/Frameworks/GitCore.framework/Versions/A: replacing existing signature
+
+CopySwiftLibs /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-swiftStdLibTool --copy --verbose --sign - --scan-executable /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/MacOS/GitPicoTests --scan-folder /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/Frameworks --scan-folder /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/PlugIns --scan-folder /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/Library/SystemExtensions --scan-folder /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/Extensions --scan-folder /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitCore.framework --platform macosx --toolchain /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v27.1.266.1.1tmrkn/Metal.xctoolchain --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/Frameworks --strip-bitcode --scan-executable /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libXCTestSwiftSupport.dylib --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os
+
+ExtractAppIntentsMetadata (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v27.1.266.1.1tmrkn/Metal.xctoolchain --module-name GitPicoTests --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk --xcode-version 27A9275 --platform-family macOS --deployment-target 26.0 --bundle-identifier com.willsuo.GitPico.GitPicoTests --output /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/Resources --target-triple arm64-apple-macos26.0 --binary-file /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest/Contents/MacOS/GitPicoTests --dependency-file /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests_dependency_info.dat --stringsdata-file /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.SwiftFileList --metadata-file-list /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/GitPicoTests.DependencyMetadataFileList --static-metadata-file-list /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/GitPicoTests.DependencyStaticMetadataFileList --swift-const-vals-list /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPicoTests.build/Objects-normal/arm64/GitPicoTests.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --no-app-shortcuts-localization
+2026-10-25 13:41:32.187 appintentsmetadataprocessor[59734:5416645] Starting appintentsmetadataprocessor export
+2026-10-25 13:41:32.187 appintentsmetadataprocessor[59734:5416645] warning: Metadata extraction skipped, no AppIntents.framework dependency found
+
+CodeSign /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest
+
+RegisterExecutionPolicyException /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-RegisterExecutionPolicyException /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest
+
+Touch /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest (in target 'GitPicoTests' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    /usr/bin/touch -c /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/PlugIns/GitPicoTests.xctest
+
+CodeSign /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/MacOS/GitPico.debug.dylib (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/MacOS/GitPico.debug.dylib
+
+CodeSign /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/MacOS/__preview.dylib (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/MacOS/__preview.dylib
+/Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app/Contents/MacOS/__preview.dylib: replacing existing signature
+
+CodeSign /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --entitlements /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/GitPico.build/Debug/GitPico.build/GitPico.app.xcent --timestamp\=none --generate-entitlement-der /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app
+
+Validate /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-validationUtility /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app -no-validate-extension -infoplist-subpath Contents/Info.plist
+
+RegisterWithLaunchServices /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app (in target 'GitPico' from project 'GitPico')
+    cd /Users/willsuo/files/Github/GitPico
+    builtin-lsregisterurl --record-path /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/XCBuildData/registered-launchservices.txt -- /System/Library/Frameworks/CoreServices.framework/Versions/Current/Frameworks/LaunchServices.framework/Versions/Current/Support/lsregister -f -R -trusted /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Products/Debug/GitPico.app
+
+PruneExplicitPrecompiledModules /Users/willsuo/files/Github/GitPico/.build/xcode/SDKExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/willsuo/files/Github/GitPico/.build/xcode/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+note: Run script build phase 'Generate Date Build Number' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'GitPico' from project 'GitPico')
+** TEST BUILD SUCCEEDED **
+

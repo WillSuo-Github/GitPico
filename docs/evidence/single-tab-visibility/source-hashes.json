@@ -1,0 +1,7 @@
+{
+  "Sources/GitPico/App/RepositoryNativeWindow.swift": "4a213532dfefb8a6881e4f68139fa8b93bb18dd7adea60f8e67187c61b736f61",
+  "Sources/GitPico/App/NativeRepositoryWindows.swift": "f3806716a3cec311d0468726d8d6c3474b5da22a1cf99320ddd40c8bdaf23f7a",
+  "Sources/GitPico/App/NativeStartupVerification.swift": "a3a530e91ed7523888780e7112a4dfb3259c93db177946211bb4bb9d14f64f98",
+  "Tests/GitPicoTests/NativeRepositoryWindowTests.swift": "29cbfc220258a5a368ceeb16cae2809b3d027f1e870857acbb2388f6f7ffbe96",
+  "script/build_and_run.sh": "d9a809e9ee0bbdae302e19ae790fccdc46185a69e9aaf9904656bbf5857abfcf"
+}

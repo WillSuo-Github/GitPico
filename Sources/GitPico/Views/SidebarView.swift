@@ -4,7 +4,7 @@ import SwiftUI
 
 struct SidebarView: View {
     @Bindable var store: RepositoryStore
-    @State private var filter = ""
+    var filter: String { store.sidebarFilter }
     @State private var outline = SidebarOutline.empty
     var outlineInput: SidebarOutlineInput { SidebarOutlineInput(references: store.snapshot?.references ?? [], remotes: store.snapshot?.remotes ?? [], pinned: store.organization.pinned, archived: store.organization.archived, filter: filter) }
     var selection: Destination {
@@ -14,11 +14,17 @@ struct SidebarView: View {
         default: store.destination
         }
     }
+    @AppStorage("sidebar.branchesExpanded") private var branchesExpanded = true
+    @AppStorage("sidebar.tagsExpanded") private var tagsExpanded = true
+    @AppStorage("sidebar.remotesExpanded") private var remotesExpanded = true
+    @AppStorage("sidebar.relatedExpanded") private var relatedExpanded = true
+    @AppStorage("sidebar.toolsExpanded") private var toolsExpanded = true
     var body: some View {
         VStack(spacing: 0) {
+            SidebarRepositoryHeader(store: store)
             List(selection: Binding<Destination?>(get: { selection }, set: { if let value = $0 { store.navigate(value) } })) {
-                Section("Workspace") {
-                    Label { HStack { Text("Working Copy"); Spacer(); if !store.changes.isEmpty { Text("\(store.changes.count)").font(.caption).foregroundStyle(.secondary) } } } icon: { Image(systemName: "folder") }.tag(Destination.workingCopy).picoDrop(store, .workingCopy).contextMenu {
+                Section {
+                    Label("Working Copy", systemImage: "square.and.pencil").badge(store.changes.count).tag(Destination.workingCopy).picoDrop(store, .workingCopy).contextMenu {
                         Button("Discard All Local Changes…") { store.localChange(.discard(store.changes.map(\.path))) }.disabled(store.changes.isEmpty || store.isBusy)
                         Button("Recover Local Changes…") { store.localChange(.recovery) }.disabled(store.isBusy)
                         Divider()
@@ -27,13 +33,9 @@ struct SidebarView: View {
                         Button("Save Staged Patch…") { store.localChange(.export(.staged, [])) }.disabled(store.isBusy)
                     }
                     Label("History", systemImage: "clock.arrow.circlepath").tag(Destination.history)
-                    Label("Stashes", systemImage: "list.clipboard").tag(Destination.stashes).picoDrop(store, .stashes)
-                    Label("Pull Requests", systemImage: "arrow.triangle.pull").foregroundStyle(.tertiary).disabled(true).help("Hosted-account integration is not available yet")
-                    Label("Branches Review", systemImage: "arrow.left.arrow.right.circle").tag(Destination.branchesReview)
-                    Label("Reflog", systemImage: "list.bullet.rectangle").tag(Destination.reflog)
-                    Label("Settings", systemImage: "gearshape").tag(Destination.repositorySettings)
-                }
-                Section {
+                    Label("Stashes", systemImage: "tray.full").badge(store.snapshot?.stashes.count ?? 0).tag(Destination.stashes).picoDrop(store, .stashes)
+                } header: { Text("Workspace") }
+                Section(isExpanded: $branchesExpanded) {
                     ForEach(outline.pinned) { ref in
                         referenceRow(ref, title: ref.name, icon: "pin")
                     }
@@ -50,30 +52,14 @@ struct SidebarView: View {
                         }
                     }
                 }
-                Section {
-                    OutlineGroup(outline.tags, children: \.children) { node in
-                        if let ref = node.reference { referenceRow(ref, title: node.name, icon: "tag") }
-                        else { Label(node.name, systemImage: "folder") }
-                    }
-                } header: { Text("Tags").frame(maxWidth: .infinity, alignment: .leading).picoDrop(store, .tags) }
-                Section("Related Repositories") {
-                    Label("Worktrees (\(store.worktrees.count))", systemImage: "folder.badge.gearshape").tag(Destination.worktrees).contextMenu { Button("Add Worktree…") { store.manageWorktree(.create(nil)) } }
-                    ForEach(store.worktrees.filter { !$0.isBare }) { entry in
-                        Button { store.openWorktree(entry) } label: { Label(entry.name + (entry.locked != nil ? " 🔒" : ""), systemImage: "folder") }.buttonStyle(.plain).padding(.leading, 12).disabled(entry.prunable != nil).contextMenu { WorktreeContextActions(store: store, entry: entry) }
-                    }
-                    Label("Submodules (\(store.submodules.count))", systemImage: "shippingbox").tag(Destination.submodules).contextMenu { Button("Add Submodule…") { store.manageSubmodule(.add) } }
-                    ForEach(store.submodules) { entry in
-                        Button { if entry.initialized { store.openSubmodule(entry) } else { store.manageSubmodule(.manage(entry, .initialize)) } } label: { Label(entry.path, systemImage: "shippingbox") }.buttonStyle(.plain).padding(.leading, 12).contextMenu { SubmoduleContextActions(store: store, entry: entry) }
-                    }
-                }
-                Section("Remotes") {
+                Section(isExpanded: $remotesExpanded) {
                     ForEach(store.snapshot?.remotes ?? [], id: \.self) { remote in
                         DisclosureGroup {
                             OutlineGroup(outline.remotes[remote] ?? [], children: \.children) { node in
                                 if let ref = node.reference { referenceRow(ref, title: node.name, icon: "arrow.triangle.branch") }
                                 else { Label(node.name, systemImage: "folder") }
                             }
-                        } label: { Label(remote, systemImage: "network").picoDrop(store, .remote(remote)).contextMenu {
+                        } label: { Label(remote, systemImage: "cloud").picoDrop(store, .remote(remote)).contextMenu {
                             if let value = store.managedRemotes.first(where: { $0.name == remote }) {
                                 Button("Fetch…") { store.manage(.fetch(value)) }
                                 Button("Edit Remote…") { store.manage(.editRemote(value)) }
@@ -82,23 +68,58 @@ struct SidebarView: View {
                             }
                         } }
                     }
-                }
+                    if store.snapshot?.remotes.isEmpty != false {
+                        Button { store.manage(.addRemote) } label: { Label("Add Remote…", systemImage: "plus.circle") }.buttonStyle(.plain).foregroundStyle(.secondary)
+                    }
+                } header: { Text("Remotes") }
+                Section(isExpanded: $tagsExpanded) {
+                    OutlineGroup(outline.tags, children: \.children) { node in
+                        if let ref = node.reference { referenceRow(ref, title: node.name, icon: "tag") }
+                        else { Label(node.name, systemImage: "folder") }
+                    }
+                    if outline.tags.isEmpty {
+                        if filter.isEmpty {
+                            Button { store.manage(.createTag("HEAD")) } label: { Label("New Tag…", systemImage: "plus.circle") }.buttonStyle(.plain).foregroundStyle(.secondary).disabled(store.snapshot?.hasHEAD != true)
+                        } else { Text("No matching tags").foregroundStyle(.tertiary) }
+                    }
+                } header: { Text("Tags").frame(maxWidth: .infinity, alignment: .leading).picoDrop(store, .tags) }
+                Section(isExpanded: $relatedExpanded) {
+                    Label("Worktrees", systemImage: "folder.badge.gearshape").badge(store.worktrees.filter { !$0.isMain && !$0.isBare }.count).tag(Destination.worktrees).contextMenu { Button("Add Worktree…") { store.manageWorktree(.create(nil)) } }
+                    ForEach(store.worktrees.filter { !$0.isBare && $0.path != store.snapshot?.root.path }) { entry in
+                        Button { store.openWorktree(entry) } label: { Label(entry.name, systemImage: entry.locked != nil ? "lock" : "folder") }.buttonStyle(.plain).padding(.leading, 12).disabled(entry.prunable != nil).help("Open " + entry.path).contextMenu { WorktreeContextActions(store: store, entry: entry) }
+                    }
+                    Label("Submodules", systemImage: "shippingbox").badge(store.submodules.count).tag(Destination.submodules).contextMenu { Button("Add Submodule…") { store.manageSubmodule(.add) } }
+                    ForEach(store.submodules) { entry in
+                        Button { if entry.initialized { store.openSubmodule(entry) } else { store.manageSubmodule(.manage(entry, .initialize)) } } label: { Label(entry.path, systemImage: "shippingbox") }.buttonStyle(.plain).padding(.leading, 12).contextMenu { SubmoduleContextActions(store: store, entry: entry) }
+                    }
+                } header: { Text("Related Repositories") }
+                Section(isExpanded: $toolsExpanded) {
+                    Label("Branches Review", systemImage: "arrow.left.arrow.right").tag(Destination.branchesReview)
+                    Label("Reflog", systemImage: "list.bullet.rectangle").tag(Destination.reflog)
+                } header: { Text("Tools") }
             }.listStyle(.sidebar).disabled(store.isBusy)
             Divider()
-            HStack(spacing: 7) {
-                Image(systemName: "line.3.horizontal.decrease.circle").foregroundStyle(.secondary)
-                TextField("Filter", text: $filter).textFieldStyle(.plain)
+            HStack(spacing: 8) {
+                HStack(spacing: 5) {
+                    Image(systemName: "line.3.horizontal.decrease").foregroundStyle(.secondary)
+                    TextField("Filter branches & tags", text: $store.sidebarFilter).textFieldStyle(.plain)
+                    if !store.sidebarFilter.isEmpty {
+                        Button { store.sidebarFilter = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.tertiary) }.buttonStyle(.plain).accessibilityLabel("Clear filter")
+                    }
+                }
+                .padding(.horizontal, 8).frame(height: 22)
+                .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
                 Menu {
-                    Button("Create New Branch…") { store.showingBranchSheet = true }
-                    Button("Create New Tag…") { store.manage(.createTag("HEAD")) }
-                    Button("Add New Remote…") { store.manage(.addRemote) }
+                    Button("New Branch…") { store.showingBranchSheet = true }
+                    Button("New Tag…") { store.manage(.createTag("HEAD")) }
+                    Button("Add Remote…") { store.manage(.addRemote) }
                     Button("Add Worktree…") { store.manageWorktree(.create(nil)) }
                     Button("Add Submodule…") { store.manageSubmodule(.add) }
                     Divider()
                     Button("Recover Deleted Items…") { store.manage(.recovery) }
-                } label: { Image(systemName: "plus") }.menuStyle(.borderlessButton).fixedSize().help("Add branch, tag, remote, worktree or submodule")
-                Button { store.navigate(.repositorySettings) } label: { Image(systemName: "slider.horizontal.3") }.buttonStyle(.plain).help("Repository settings")
-            }.font(.system(size: 11)).padding(.horizontal, 12).frame(height: 28)
+                } label: { Image(systemName: "plus") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Add branch, tag, remote, worktree or submodule")
+                Button { store.navigate(.repositorySettings) } label: { Image(systemName: "gearshape") }.buttonStyle(.borderless).help("Repository settings (⌘5)")
+            }.font(.system(size: 11)).padding(.horizontal, 10).frame(height: 34)
         }
         .task(id: outlineInput) {
             let input = outlineInput
@@ -112,7 +133,9 @@ struct SidebarView: View {
             HStack(spacing: 4) {
                 Text(title).lineLimit(1).truncationMode(.middle)
                 Spacer(minLength: 0)
-                if ref.isCurrent { Text("HEAD").font(.system(size: 9, weight: .bold)).padding(.horizontal, 5).padding(.vertical, 2).background(.quaternary, in: Capsule()) }
+                if let status = BranchSyncStatus.current(ref, snapshot: store.snapshot) {
+                    CurrentBranchBadge(status: status)
+                }
             }
         } icon: { Image(systemName: icon) }
         .tag(Destination.reference(ref.fullName))
@@ -159,5 +182,46 @@ struct SidebarView: View {
             Button("Compare with Revision…") { store.navigate(.comparison(ref.fullName)) }
             Button("Copy Name") { NSPasteboard.general.clearContents(); NSPasteboard.general.setString(ref.name, forType: .string) }
         }.help(ref.name + (ref.isCurrent ? " · Current branch" : " · Click to preview history"))
+    }
+}
+
+/// Identifies the open repository and its HEAD at a glance; clicking switches repositories.
+struct SidebarRepositoryHeader: View {
+    @Bindable var store: RepositoryStore
+    var name: String { store.workspace?.tab(for: store)?.title ?? store.title }
+    var body: some View {
+        if let snapshot = store.snapshot {
+            Button(action: store.showRepositories) {
+                HStack(spacing: 10) {
+                    RepositoryGlyph(name: name, size: 32)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(name).font(.system(size: 13, weight: .semibold)).lineLimit(1).truncationMode(.middle)
+                        HStack(spacing: 4) {
+                            Image(systemName: "arrow.triangle.branch").imageScale(.small)
+                            Text(snapshot.branch).lineLimit(1).truncationMode(.middle)
+                            if snapshot.ahead > 0 { Text("↑\(snapshot.ahead)").monospacedDigit() }
+                            if snapshot.behind > 0 { Text("↓\(snapshot.behind)").monospacedDigit() }
+                        }.font(.system(size: 11)).foregroundStyle(.secondary)
+                    }
+                    Spacer(minLength: 4)
+                    Image(systemName: "chevron.up.chevron.down").font(.system(size: 10, weight: .semibold)).foregroundStyle(.tertiary)
+                }
+                .padding(.horizontal, 10).padding(.vertical, 8)
+                .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: Pico.corner, style: .continuous))
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(store.isBusy || store.isOpeningRepository)
+            .help("Switch repository\n" + snapshot.root.path)
+            .accessibilityLabel("Repository " + name + ", branch " + snapshot.branch + ". Switch repository")
+            .contextMenu {
+                Button("Switch Repository…", action: store.showRepositories)
+                Button("Repository Settings") { store.navigate(.repositorySettings) }
+                Divider()
+                Button("Reveal in Finder") { NSWorkspace.shared.activateFileViewerSelecting([snapshot.root]) }
+                Button("Copy Path") { Pico.copy(snapshot.root.path) }
+            }
+            .padding(.horizontal, 10).padding(.top, 6).padding(.bottom, 4)
+        }
     }
 }

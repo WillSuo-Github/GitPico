@@ -14,13 +14,13 @@ import Testing
     try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
     for scheme in [ColorScheme.light, .dark] {
         let content = VStack(alignment: .leading, spacing: 8) {
-            CommitRow(commit: commit, graph: graph, graphWidth: 29, selected: false)
-            CommitRow(commit: commit, graph: graph, graphWidth: 29, selected: true)
+            CommitRow(commit: commit, graph: graph, graphWidth: 110, selected: false)
+            CommitRow(commit: commit, graph: graph, graphWidth: 110, selected: true)
                 .background(Color(nsColor: .selectedContentBackgroundColor), in: RoundedRectangle(cornerRadius: 5))
-            CommitRow(commit: commit, graph: graph, graphWidth: 29, selected: true)
+            CommitRow(commit: commit, graph: graph, graphWidth: 110, selected: true)
                 .environment(\.controlActiveState, .inactive)
                 .background(Color(nsColor: .unemphasizedSelectedContentBackgroundColor), in: RoundedRectangle(cornerRadius: 5))
-            CommitRow(commit: commit, graph: graph, graphWidth: 29, compact: true, selected: false)
+            CommitRow(commit: commit, graph: graph, graphWidth: 110, compact: true, selected: false)
             CommitRow(commit: commit, graph: nil, graphWidth: 0, showGraph: false, selected: false)
         }.padding(12).frame(width: 380).background(Color(nsColor: .textBackgroundColor)).environment(\.colorScheme, scheme).environment(\.controlActiveState, .key)
         let renderer = ImageRenderer(content: content); renderer.scale = 2

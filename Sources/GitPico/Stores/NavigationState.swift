@@ -35,7 +35,9 @@ extension RepositoryStore {
         historyReveal = HistoryReveal(hash: selectedCommit.hash, atTop: pendingHistorySelection == nil || pendingHistorySelection != selectedCommit.hash)
         historyNeedsReveal = false; pendingHistorySelection = nil
     }
-    var canUseRepository: Bool { snapshot != nil && !isBusy }
+    var isChoosingRepository: Bool { workspace?.tab(for: self)?.showsRepositoryPicker == true }
+    var isOpeningRepository: Bool { workspace?.tab(for: self)?.isOpening == true }
+    var canUseRepository: Bool { snapshot != nil && !isBusy && !isChoosingRepository && !isOpeningRepository }
     var canBrowseHistory: Bool { canUseRepository && snapshot?.hasHEAD == true }
     var canIntegrate: Bool { canBrowseHistory && snapshot?.operation == RepositoryOperation.none }
     var canSynchronize: Bool { canIntegrate && snapshot?.remotes.isEmpty == false && snapshot?.references.contains { $0.isCurrent && !$0.upstream.isEmpty } == true }

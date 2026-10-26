@@ -31,7 +31,7 @@ struct RepositoryLibraryView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("Repositories").font(.title2.bold())
+                SheetTitle("Repositories")
                 Spacer()
                 TextField("Search name, path or group", text: $query).textFieldStyle(.roundedBorder).frame(width: 290)
                 Button { library.reload(); failure = nil } label: { Image(systemName: "arrow.clockwise") }.help("Reload repository library")
@@ -55,13 +55,16 @@ struct RepositoryLibraryView: View {
                 VStack(spacing: 0) {
                     List(entries, selection: $selection) { entry in
                         HStack(spacing: 10) {
-                            Image(systemName: entry.favorite ? "star.fill" : "folder").foregroundStyle(entry.favorite ? Color.yellow : Color.secondary)
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(entry.name).font(.callout.weight(.medium))
-                                Text(entry.path).font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+                            RepositoryGlyph(name: entry.name, size: 28)
+                            VStack(alignment: .leading, spacing: 3) {
+                                HStack(spacing: 5) {
+                                    Text(entry.name).font(.callout.weight(.semibold))
+                                    if entry.favorite { Image(systemName: "star.fill").font(.system(size: 9)).foregroundStyle(.yellow) }
+                                }
+                                Text(Pico.abbreviated(entry.path)).font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
                             }
                             Spacer()
-                            if entry.path == store.snapshot?.root.path { Text("Open").font(.caption).foregroundStyle(.secondary) }
+                            if entry.path == store.snapshot?.root.path { Chip(text: "Open", tint: .accentColor) }
                             Text(library.breadcrumb(entry.group)).font(.caption).foregroundStyle(.tertiary).lineLimit(1)
                         }.padding(.vertical, 4).tag(entry.id).contentShape(Rectangle())
                             .onTapGesture(count: 2) { open(entry) }
@@ -147,7 +150,7 @@ private struct LibraryNameSheet: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(title).font(.title2.bold())
+            SheetTitle(title)
             TextField("Name", text: $name).textFieldStyle(.roundedBorder)
             HStack { Spacer(); Button("Cancel") { dismiss() }.keyboardShortcut(.cancelAction); Button("Save") { action(name); dismiss() }.keyboardShortcut(.defaultAction).disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) }
         }.padding(24).frame(width: 420).onAppear { name = initial }

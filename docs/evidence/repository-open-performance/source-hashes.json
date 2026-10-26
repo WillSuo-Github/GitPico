@@ -1,0 +1,11 @@
+{
+  "Sources/GitCore/GitProcess.swift": "93b205fee3748ad94e59a33b9776d9e0f0153e06c1c632abae55e8d9f4ae8e15",
+  "Sources/GitCore/GitCommandTrace.swift": "b9958a228e42d72598793c7a63300b5a087bff1c4956a4c083d27826ad24708c",
+  "Sources/GitCore/GitRepository.swift": "e80218f411ad809d52f7611062ba7b421f4c0ca724c02529adf10f1a2d044421",
+  "Sources/GitCore/RemoteManagement.swift": "15ee60cc681b3b2853599d3161e0a554ad925150881a1fb637ec0187801a04df",
+  "Sources/GitPico/Stores/RepositoryStore.swift": "84df97f0cd7e8de993545dd1de6e6b0c63422ff5057d6cc7511cb9c8f5edc3b0",
+  "Sources/GitPico/Stores/RepositoryOpenTiming.swift": "5356d9dfa24dc510319623a23394e526d25f996648333f3d285b7f248845f857",
+  "Sources/GitPico/App/NativeStartupVerification.swift": "467d4f5df5ed7dd212368ef64dd84971a798def5f688fc2e2e2cf14d80f1e243",
+  "Tests/GitCoreTests/RepositoryOpenReadTests.swift": "3a58ddd7a493578011ae0672deb754c1d02ee364fd18447689cfe6e642a7c1c1",
+  "Tests/GitPicoTests/RepositoryOpenPerformanceTests.swift": "0b74502173b00bc777bad2005e3671ffec8da1d80f5fdd21e482d0375926bc16"
+}

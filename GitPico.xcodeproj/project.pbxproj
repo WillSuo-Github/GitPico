@@ -12,6 +12,7 @@
 		34062C3E56FD5C853F0A5A1A /* GitCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6B05CF827D25B77F396230D /* GitCore.framework */; };
 		974648B4762AAAB1810733C5 /* GitCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A6B05CF827D25B77F396230D /* GitCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A110643C5A4511B7E79A9433 /* GitCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A6B05CF827D25B77F396230D /* GitCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		A5E7C0DE51A0C0102B3E4D01 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A5E7C0DE51A0C0102B3E4D02 /* Assets.xcassets */; };
 		AEE93C285505AA2CB4B4ADC6 /* GitCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6B05CF827D25B77F396230D /* GitCore.framework */; };
 		D5877B69C4E956644DF2228C /* GitCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A6B05CF827D25B77F396230D /* GitCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -97,6 +98,7 @@
 		82BC667E1CCE1AB2D5CCA5E6 /* create_demo.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = create_demo.sh; sourceTree = "<group>"; };
 		93B53209B3D5A6E63E1200A0 /* project.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = project.yml; sourceTree = "<group>"; };
 		98EA577E49C3224AD5EC70EF /* GitPicoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GitPicoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A5E7C0DE51A0C0102B3E4D02 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A6B05CF827D25B77F396230D /* GitCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GitCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AFFD843E6532C7ADF959F8ED /* create_review_demo.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = create_review_demo.py; sourceTree = "<group>"; };
 		B704ABDA06CD1B93A9122BC7 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -185,6 +187,7 @@
 			isa = PBXGroup;
 			children = (
 				FE067960E19E32FCB749C0C5 /* AppIcon.icon */,
+				A5E7C0DE51A0C0102B3E4D02 /* Assets.xcassets */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -409,6 +412,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				23CEC5CFF8551B6F92785A2F /* AppIcon.icon in Resources */,
+				A5E7C0DE51A0C0102B3E4D01 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -517,6 +521,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -714,6 +719,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
