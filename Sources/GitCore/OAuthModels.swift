@@ -8,17 +8,16 @@ public struct OAuthConfiguration: Codable, Equatable, Sendable {
     public let provider: OAuthProvider
     public let host: String
     public let clientID: String
-    public var apiAccess: Bool? = nil
-    public init(provider: OAuthProvider, host: String, clientID: String, apiAccess: Bool = false) throws {
+    public init(provider: OAuthProvider, host: String, clientID: String) throws {
         guard let url = URLComponents(string: "https://" + host), let hostname = url.host, !hostname.isEmpty,
               url.user == nil, url.password == nil, url.path.isEmpty, url.query == nil, url.fragment == nil,
               !host.contains(where: { $0.isWhitespace || $0 == "\0" }),
               !clientID.isEmpty, clientID.utf8.count <= 256, !clientID.contains(where: { $0.isWhitespace || $0 == "\0" }) else { throw GitFailure("Enter a valid OAuth server and Client ID.") }
-        self.provider = provider; self.host = host.lowercased(); self.clientID = clientID; self.apiAccess = apiAccess ? true : nil
+        self.provider = provider; self.host = host.lowercased(); self.clientID = clientID
     }
     public var callback: URL { URL(string: "gitpico://oauth/" + provider.rawValue + "/callback")! }
     public var tokenURL: URL { URL(string: "https://" + host + (provider == .github ? "/login/oauth/access_token" : "/oauth/token"))! }
-    public var scopes: [String] { provider == .github ? ["repo", "read:user", "offline_access"] : ["read_user", "write_repository"] + (apiAccess == true ? ["api"] : []) }
+    public var scopes: [String] { provider == .github ? ["repo", "read:user", "offline_access"] : ["read_user", "write_repository"] }
 }
 
 public struct OAuthAuthorization: Codable, Sendable {

@@ -42,7 +42,6 @@ struct ContentView: View {
         .sheet(item: $store.rebaseRequest, onDismiss: store.presentPendingAutomaticStash) { InteractiveRebaseSheet(store: store, request: $0) }
         .sheet(item: $store.recoveryRequest) { HistoryRecoverySheet(store: store, request: $0) }
         .sheet(isPresented: $store.showingRebaseEdit) { RebaseEditSheet(store: store) }
-        .sheet(isPresented: $store.showingHostedReviews) { HostedReviewsView(store: store) }
         .sheet(isPresented: $store.showingLFSLocks) { LFSLocksView(store: store) }
         .sheet(item: $store.managementRequest, onDismiss: store.presentPendingAutomaticStash) { ManagementSheet(store: store, request: $0) }
         .sheet(item: $store.externalToolRequest) { ExternalToolSheet(store: store, request: $0) }

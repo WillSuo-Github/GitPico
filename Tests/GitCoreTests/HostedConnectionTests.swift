@@ -15,42 +15,6 @@ private actor ReviewTransport: OAuthHTTPTransport {
 private func reviewResponse(_ object: Any, status: Int = 200) throws -> OAuthHTTPResponse {
     OAuthHTTPResponse(status: status, data: try JSONSerialization.data(withJSONObject: object))
 }
-@Test func hostedReviewsUseExactHostCredentialsEncodedProjectsAndReviewedHead() async throws {
-    let project = try HostedRepository(remote: "git@git.example.invalid:team/sub/project.git", provider: .gitlab)
-    let item: [String: Any] = ["iid": 3, "title": "Review", "description": "Body", "author": ["username": "reviewer"], "source_branch": "feature", "target_branch": "main", "sha": "abc123", "state": "opened", "web_url": "https://git.example.invalid/team/sub/project/-/merge_requests/3"]
-    let transport = try ReviewTransport([reviewResponse([item]), reviewResponse(item, status: 201), reviewResponse(item.merging(["state": "merged"]) { _, new in new })])
-    let client = try HostedReviewClient(repository: project, credential: GitStoredCredential(host: project.host, username: "fixture", secret: "fixture-token"), transport: transport)
-    let review = try #require(try await client.list().first)
-    #expect(review.number == 3 && review.head == "abc123")
-    _ = try await client.create(title: "Title", body: "Body", source: "feature", target: "main")
-    try await client.merge(review, squash: true)
-    let requests = await transport.requests
-    #expect(requests[0].url?.absoluteString.contains("projects/team%2Fsub%2Fproject/merge_requests") == true)
-    #expect(requests.allSatisfy { $0.value(forHTTPHeaderField: "PRIVATE-TOKEN") == "fixture-token" })
-    let mergeBody = try #require(requests.last?.httpBody)
-    let merge = try #require(try JSONSerialization.jsonObject(with: mergeBody) as? [String: Any])
-    #expect(merge["sha"] as? String == "abc123" && merge["squash"] as? Bool == true)
-    #expect(merge["should_remove_source_branch"] as? Bool == false)
-    #expect(throws: GitFailure.self) { try HostedReviewClient(repository: project, credential: GitStoredCredential(host: "other.invalid", username: "fixture", secret: "fixture-token"), transport: transport) }
-}
-
-@Test func githubReviewCreationAndApprovalKeepDraftAndCommitGuards() async throws {
-    let project = try HostedRepository(remote: "https://github.com/example/fixture.git", provider: .github)
-    let item: [String: Any] = ["number": 2, "title": "Review", "user": ["login": "reviewer"], "head": ["ref": "feature", "sha": "abc123"], "base": ["ref": "main"], "state": "open", "html_url": "https://github.com/example/fixture/pull/2"]
-    let transport = try ReviewTransport([reviewResponse(item, status: 201), reviewResponse([:]), reviewResponse(["merged": false])])
-    let client = try HostedReviewClient(repository: project, credential: GitStoredCredential(host: "github.com", username: "fixture", secret: "fixture-token"), transport: transport)
-    let review = try await client.create(title: "Title", body: "Body", source: "feature", target: "main")
-    try await client.approve(review, comment: "Needs a change", requestChanges: true)
-    await #expect(throws: GitFailure.self) { try await client.merge(review, squash: false) }
-    let requests = await transport.requests
-    let creationBody = try #require(requests[0].httpBody), approvalBody = try #require(requests[1].httpBody)
-    let creation = try #require(try JSONSerialization.jsonObject(with: creationBody) as? [String: Any])
-    let approval = try #require(try JSONSerialization.jsonObject(with: approvalBody) as? [String: Any])
-    #expect(creation["draft"] as? Bool == true)
-    #expect(approval["commit_id"] as? String == "abc123" && approval["event"] as? String == "REQUEST_CHANGES")
-    #expect(requests.allSatisfy { $0.url?.host == "api.github.com" && $0.value(forHTTPHeaderField: "Authorization") == "Bearer fixture-token" })
-}
-
 private actor TransientPollTransport: OAuthHTTPTransport {
     var attempts = 0
     let alwaysFail: Bool

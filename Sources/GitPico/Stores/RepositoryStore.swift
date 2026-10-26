@@ -83,7 +83,6 @@ final class RepositoryStore {
     var undoAvailability: UndoAvailability?
     var rebaseProgress: RebaseProgress?
     var showingRebaseEdit = false
-    var showingHostedReviews = false
     var showingLFSLocks = false
     var settingsTab = "General"
     var lfsRequest: LFSRequest?

@@ -30,7 +30,7 @@ struct RepositoryCommands: Commands {
                 Button("Export Diagnostics…") { DiagnosticExporter.export(store: store) { store.connectionTestMessage = $0 } }
             }
             CommandMenu("Repository") {
-                Button("Pull / Merge Requests…") { store.showingHostedReviews = true }.disabled(!store.canUseRepository)
+                HostedReviewWebMenu(store: store).disabled(!store.canUseRepository)
                 Button("Network Activity…") { store.showingNetworkActivity = true }.keyboardShortcut("n", modifiers: [.command, .option])
                 Button("Authentication…") { store.showingAuthentication = true }
                 Button("Saved Conflict Drafts…") { store.showingConflictDrafts = true }.disabled(store.conflictDrafts.isEmpty && store.conflictDraftSaveError == nil)

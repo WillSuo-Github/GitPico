@@ -94,7 +94,7 @@ struct SidebarView: View {
                     }
                 } header: { Text("Related Repositories") }
                 Section(isExpanded: $toolsExpanded) {
-                    Button { store.showingHostedReviews = true } label: { Label("Pull / Merge Requests", systemImage: "arrow.triangle.pull") }.buttonStyle(.plain)
+                    HostedReviewWebMenu(store: store)
                     Label("Branches Review", systemImage: "arrow.left.arrow.right").tag(Destination.branchesReview)
                     Label("Reflog", systemImage: "list.bullet.rectangle").tag(Destination.reflog)
                 } header: { Text("Tools") }

@@ -103,32 +103,6 @@ private func tokenGrant(_ provider: OAuthProvider) throws -> OAuthTokenGrant { t
     #expect(requests.last?.value(forHTTPHeaderField: "Authorization") == "Bearer fixture-access")
 }
 
-@Test @MainActor func gitlabAPIScopeUpgradePreservesConfigurationAndRejectsReducedGrants() async throws {
-    for permitted in [true, false] {
-        let f = try LoginFixture(); defer { f.clean() }
-        let oldConfiguration = try OAuthAppCatalog.configuration(.gitlab), root = f.directory.appendingPathComponent("Repo")
-        let profile = try f.store.completeOAuth(oldConfiguration, grant: tokenGrant(.gitlab), username: "fixture-user", root: root)
-        let upgraded = try OAuthConfiguration(provider: .gitlab, host: oldConfiguration.host, clientID: oldConfiguration.clientID, apiAccess: true)
-        var grant = loginGrant(.gitlab); grant["access_token"] = "upgraded-fixture-access"
-        if permitted { grant["scope"] = "read_user write_repository api" }
-        let transport = try loginTransport(permitted ? [grant, ["username": "fixture-user"]] : [grant])
-        let browser = LoginBrowser(), login = OAuthLoginController(browser: browser, transport: transport)
-        var saved = false
-        login.start(upgraded, authentication: f.store, root: nil, reconnecting: profile) { saved = true }
-        await login.finishForTesting()
-        let url = try #require(browser.requestedURL)
-        let scope = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == "scope" }?.value
-        #expect(scope?.split(separator: " ").contains("api") == true)
-        #expect(f.store.profiles.count == 1 && f.store.profile(for: root)?.id == profile.id)
-        let credential = try f.vault.read(profile.id)
-        if permitted {
-            #expect(saved && login.failure == nil && credential.oauth?.configuration.apiAccess == true && credential.secret == "upgraded-fixture-access")
-        } else {
-            #expect(!saved && login.failure != nil && credential.oauth?.configuration.apiAccess != true && credential.secret == "fixture-access")
-        }
-    }
-}
-
 @Test @MainActor func declinedMismatchedOrCancelledOAuthLoginNeverSavesAnAccount() async throws {
     for mode in [LoginBrowser.ResultMode.denied, .wrongState, .waiting] {
         let f = try LoginFixture(); defer { f.clean() }

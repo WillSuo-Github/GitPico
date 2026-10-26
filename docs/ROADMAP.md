@@ -1,5 +1,7 @@
 # GitPico milestones
 
+Current scope (2026-10-26): PR/MR creation, comments, discussions and merge management deliberately remain on the hosting website. The app exposes only a browser link. Earlier hosted-review milestones below are historical and were superseded by this user decision.
+
 ## Implemented in 0.1
 
 Open existing repositories; inspect status/diffs; stage/unstage/commit; browse ancestry and ref history; create/check out branches; basic sync; stash inspection/application. SwiftUI on macOS 26+.
@@ -118,7 +120,7 @@ Open existing repositories; inspect status/diffs; stage/unstage/commit; browse a
 
 The maturity completion work supersedes the old missing-feature inventory. See [completion](COMPLETION-2026-10-26.md) for current results and [parity delta](PARITY-DELTA-2026-10-26.md) for the historical Tower checklist mapping.
 
-- Complete live PR/MR/fork/inline/API-grant and enterprise permission acceptance; provider LFS quotas/locking and hardware/encrypted SSH integrations.
+- Complete enterprise Git permission acceptance, provider LFS quotas/locking and hardware/encrypted SSH integrations. PR/MR collaboration stays on the hosting website.
 - Complete native keyboard, real Chinese IME, VoiceOver, multi-display/session restoration and prolonged physical sleep/network/memory/energy acceptance.
 - Establish passing macOS 26 arm64/Intel CI and runtime evidence, notarized installation and the authenticated signed update/install/relaunch loop.
 - Further product expansion includes richer blame, combined merge patches, LFS history migration/pruning, additional drag/Quick Action variants, automatic branch management, workflow/Graphite/SVN/Gerrit integrations, syntax coloring and localization. These are distinct from the six-area maturity completion scope and full Tower parity remains incomplete.

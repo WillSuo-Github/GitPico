@@ -49,7 +49,10 @@ if ! gh release download "$TAG" --repo "$REPOSITORY" --pattern "$ZIP_NAME" --dir
 else
   cmp -s "$OUTPUT_DIR/$ZIP_NAME" "$OUTPUT_DIR/remote-check/$ZIP_NAME" || { echo 'Existing remote archive differs. Use a new build.' >&2; exit 1; }
 fi
-gh api "repos/$REPOSITORY/releases/tags/$TAG" > "$OUTPUT_DIR/github-release.json"
+# The tag endpoint can return 404 for an authenticated private draft even when
+# release creation/upload succeeded. The releases list includes owned drafts.
+gh api --paginate --slurp "repos/$REPOSITORY/releases?per_page=100" > "$OUTPUT_DIR/github-releases.json"
+python3 "$ROOT_DIR/script/select_github_draft.py" "$OUTPUT_DIR/github-releases.json" "$TAG" "$OUTPUT_DIR/github-release.json"
 ASSET_ID="$(python3 - "$OUTPUT_DIR/github-release.json" "$ZIP_NAME" <<'PY'
 import json,sys
 values=[a['id'] for a in json.load(open(sys.argv[1]))['assets'] if a['name']==sys.argv[2]]

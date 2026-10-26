@@ -24,22 +24,12 @@ import Testing
     try png(.systemOrange).write(to: root.appendingPathComponent("Preview.png"))
     _ = try await GitProcess.run(["add", "--", "Preview.png"], at: root)
     try png(.systemBlue).write(to: root.appendingPathComponent("Preview.png"))
-    let model = HostedReviewsModel(store: f.store)
-    model.detail = HostedReview(number: 42, title: "Preserve workspace state between launches", body: "Restore repository tabs, native window groups and the last selected revision.\n\nChecks run in disposable repositories.", author: "pico-demo", source: "feature/session-restore", target: "main", head: String(repeating: "a", count: 40), state: "open", url: URL(string: "https://github.com/example/fixture/pull/42")!)
-    model.checks = [HostedReviewCheck(id: "fixture-1", name: "macOS 26 / arm64", status: "success")]
-    model.comments = [HostedReviewComment(id: 1, author: "reviewer", body: "Please keep missing repositories available for recovery.")]
-    model.threads = [HostedReviewThread(id: "42", comments: [HostedReviewComment(id: 42, author: "reviewer", body: "Keep the original draft when inserting this template."), HostedReviewComment(id: 43, author: "pico-demo", body: "Append and explicit replacement are separate actions.")], path: "Sources/CommitWorkflow.swift", line: 24, side: .right, resolved: false, canResolve: false)]
-    let project = try HostedRepository(remote: "https://github.com/example/fixture.git", provider: .github)
-    let inline = HostedInlineRequest(review: try #require(model.detail), file: HostedReviewFile(path: "Sources/CommitWorkflow.swift", previousPath: nil, status: "modified", patch: "@@ -1,2 +1,3 @@\n import Foundation\n+// Preserve the current draft.\n struct CommitWorkflow {}\n"), project: project)
     let snapshot = try #require(f.store.snapshot)
     let panels: [(String, AnyView, NSSize)] = [
         ("pull", AnyView(PullReviewSheet(store: f.store, request: PullReviewRequest(head: snapshot.head, upstream: "origin/main"))), NSSize(width: 580, height: 480)),
         ("binary-image", AnyView(BinaryComparisonView(repository: f.repository, path: "Preview.png", left: .index, right: .workingCopy)), NSSize(width: 1000, height: 620)),
-        ("review-detail", AnyView(HostedReviewDetailView(model: model)), NSSize(width: 1000, height: 660)),
         ("updates", AnyView(UpdatesSettingsView(store: f.store)), NSSize(width: 740, height: 570)),
-        ("commit-template", AnyView(CommitTemplateInsertionView(store: f.store, insertion: CommitTemplateInsertion(name: "Feature Template", text: "Feature summary\n\nMotivation\n\nImplementation\n\nValidation", root: root))), NSSize(width: 580, height: 400)),
-        ("inline-comment", AnyView(HostedInlineCommentView(model: model, request: inline)), NSSize(width: 720, height: 620)),
-        ("discussions", AnyView(HostedReviewThreadsView(model: model)), NSSize(width: 720, height: 460))
+        ("commit-template", AnyView(CommitTemplateInsertionView(store: f.store, insertion: CommitTemplateInsertion(name: "Feature Template", text: "Feature summary\n\nMotivation\n\nImplementation\n\nValidation", root: root))), NSSize(width: 580, height: 400))
     ]
     let window = RepositoryNativeWindow(tabID: UUID(), permitsPresentation: false)
     window.setFrameOrigin(NSPoint(x: -10000, y: -10000))
