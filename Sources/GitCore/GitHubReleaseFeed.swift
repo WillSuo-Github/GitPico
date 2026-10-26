@@ -10,6 +10,30 @@ public struct GitHubReleaseFeed: Sendable {
 public struct GitHubReleaseFeedClient: Sendable {
     private let transport: any OAuthHTTPTransport
     public init(transport: any OAuthHTTPTransport = OAuthHTTPSClient(maximumResponseBytes: 1024 * 1024)) { self.transport = transport }
+    public func feedDownloadURL(_ release: GitHubReleaseFeed, credential: GitStoredCredential) async throws -> URL {
+        let url = release.feedURL
+        let path = url.path.split(separator: "/")
+        guard credential.host == "github.com", url.scheme == "https", url.host == "api.github.com",
+              url.port == nil, url.user == nil, url.password == nil, url.query == nil, url.fragment == nil,
+              path.count == 6, path[0] == "repos", path[3] == "releases", path[4] == "assets", Int(path[5]).map({ $0 > 0 }) == true else {
+            throw GitFailure("The update feed is not a verified GitHub release asset.")
+        }
+        var request = URLRequest(url: url)
+        request.setValue("Bearer " + credential.secret, forHTTPHeaderField: "Authorization")
+        request.setValue("application/octet-stream", forHTTPHeaderField: "Accept")
+        request.setValue("GitPico", forHTTPHeaderField: "User-Agent")
+        let response = try await transport.send(request)
+        // Sparkle replaces the feed Accept header with RSS, which makes GitHub's
+        // asset API return JSON metadata. Resolve its signed HTTPS download first;
+        // Sparkle receives no account credential when fetching the CDN feed.
+        guard response.status == 302, let destination = response.redirectURL,
+              destination.scheme == "https", ["release-assets.githubusercontent.com", "objects.githubusercontent.com"].contains(destination.host),
+              destination.port == nil || destination.port == 443,
+              destination.user == nil, destination.password == nil, destination.fragment == nil else {
+            throw GitFailure("GitHub did not provide a supported secure update feed download. Check again or install the signed package manually.")
+        }
+        return destination
+    }
     public func latest(project: String, credential: GitStoredCredential) async throws -> GitHubReleaseFeed {
         let parts = project.split(separator: "/", omittingEmptySubsequences: false)
         guard credential.host == "github.com", parts.count == 2,

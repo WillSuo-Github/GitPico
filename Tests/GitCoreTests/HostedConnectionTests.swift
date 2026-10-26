@@ -59,3 +59,23 @@ private actor TransientPollTransport: OAuthHTTPTransport {
     let rejected = GitHubReleaseFeedClient(transport: denied)
     for _ in 0..<3 { await #expect(throws: GitFailure.self) { try await rejected.latest(project: "example/private", credential: credential) } }
 }
+
+@Test func privateFeedResolvesOnlyGitHubSignedCDNDownloadsWithoutFollowingAccountRedirects() async throws {
+    let credential = GitStoredCredential(host: "github.com", username: "fixture", secret: "fixture-token")
+    let api = URL(string: "https://api.github.com/repos/example/private/releases/assets/10")!
+    let release = GitHubReleaseFeed(feedURL: api, assets: [], releaseURL: URL(string: "https://github.com/example/private/releases")!, tag: "fixture")
+    let destination = URL(string: "https://release-assets.githubusercontent.com/fixture/appcast.xml?fixture=opaque")!
+    let transport = ReviewTransport([OAuthHTTPResponse(status: 302, data: Data(), redirectURL: destination)])
+    let resolved = try await GitHubReleaseFeedClient(transport: transport).feedDownloadURL(release, credential: credential)
+    #expect(resolved == destination)
+    let requests = await transport.requests
+    #expect(requests.count == 1 && requests[0].url == api)
+    #expect(requests[0].value(forHTTPHeaderField: "Accept") == "application/octet-stream")
+    #expect(requests[0].value(forHTTPHeaderField: "Authorization") == "Bearer fixture-token")
+    for value in ["http://release-assets.githubusercontent.com/feed", "https://other.invalid/feed", "https://release-assets.githubusercontent.com.other.invalid/feed", "https://user@release-assets.githubusercontent.com/feed"] {
+        let denied = ReviewTransport([OAuthHTTPResponse(status: 302, data: Data(), redirectURL: URL(string: value))])
+        await #expect(throws: GitFailure.self) { try await GitHubReleaseFeedClient(transport: denied).feedDownloadURL(release, credential: credential) }
+    }
+    let metadata = ReviewTransport([OAuthHTTPResponse(status: 200, data: Data("{}".utf8))])
+    await #expect(throws: GitFailure.self) { try await GitHubReleaseFeedClient(transport: metadata).feedDownloadURL(release, credential: credential) }
+}

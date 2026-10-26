@@ -12,13 +12,15 @@ import Sparkle
     private(set) var status = "Updates are not configured for this development build."
     private(set) var preparing = false
     var selectedProfile: UUID? {
-        didSet { UserDefaults.standard.set(selectedProfile?.uuidString, forKey: "GitPico.UpdateProfile"); prepared = nil; readyForCheck = false; controller?.updater.httpHeaders = nil }
+        didSet { UserDefaults.standard.set(selectedProfile?.uuidString, forKey: "GitPico.UpdateProfile"); prepared = nil; preparedFeedURL = nil; preparedCredential = nil; readyForCheck = false; controller?.updater.httpHeaders = nil }
     }
     var githubProject: String? { Bundle.main.object(forInfoDictionaryKey: "GitPicoUpdateRepository") as? String }
     @ObservationIgnored private var controller: SPUStandardUpdaterController?
     @ObservationIgnored private var observation: AnyCancellable?
     @ObservationIgnored private var authentication: AuthenticationStore?
     @ObservationIgnored private var prepared: GitHubReleaseFeed?
+    @ObservationIgnored private var preparedFeedURL: URL?
+    @ObservationIgnored private var preparedCredential: GitStoredCredential?
     @ObservationIgnored private var readyForCheck = false
     private var preferenceRevision = 0
     private override init() { selectedProfile = UserDefaults.standard.string(forKey: "GitPico.UpdateProfile").flatMap(UUID.init(uuidString:)); super.init() }
@@ -50,13 +52,16 @@ import Sparkle
             let profiles = authentication.profiles.filter { $0.provider == .github && $0.host == "github.com" }
             guard let profile = profiles.first(where: { $0.id == selectedProfile }) ?? (profiles.count == 1 ? profiles.first : nil) else { throw GitFailure("Select a GitHub account with access to the update repository in Updates & Support.") }
             let credential = profile.isOAuth ? try await OAuthCredentialRefresher.shared.credential(profile.id) : try authentication.vault.read(profile.id)
-            prepared = try await GitHubReleaseFeedClient().latest(project: project, credential: credential)
-            controller?.updater.httpHeaders = ["Authorization": "Bearer " + credential.secret, "Accept": "application/octet-stream"]
+            let client = GitHubReleaseFeedClient()
+            let release = try await client.latest(project: project, credential: credential)
+            let feedURL = try await client.feedDownloadURL(release, credential: credential)
+            prepared = release; preparedFeedURL = feedURL; preparedCredential = credential
+            controller?.updater.httpHeaders = nil
             status = "Checking signed GitHub Release “" + (prepared?.tag ?? "") + "”."
             return true
-        } catch { prepared = nil; controller?.updater.httpHeaders = nil; status = GitLogRedaction.clean(error.localizedDescription); return false }
+        } catch { prepared = nil; preparedFeedURL = nil; preparedCredential = nil; controller?.updater.httpHeaders = nil; status = GitLogRedaction.clean(error.localizedDescription); return false }
     }
-    func feedURLString(for updater: SPUUpdater) -> String? { prepared?.feedURL.absoluteString }
+    func feedURLString(for updater: SPUUpdater) -> String? { preparedFeedURL?.absoluteString }
     func updater(_ updater: SPUUpdater, mayPerform updateCheck: SPUUpdateCheck) throws {
         guard githubProject != nil else { return }
         if readyForCheck, prepared != nil { readyForCheck = false; return }
@@ -76,8 +81,11 @@ import Sparkle
         }
     }
     func updater(_ updater: SPUUpdater, willDownloadUpdate item: SUAppcastItem, with request: NSMutableURLRequest) {
-        if githubProject != nil, request.url.map({ prepared?.permits($0) != true }) ?? true {
-            request.setValue(nil, forHTTPHeaderField: "Authorization"); request.url = URL(string: "about:blank")
+        guard githubProject != nil else { return }
+        guard let credential = preparedCredential, let url = request.url, prepared?.permits(url) == true else {
+            request.setValue(nil, forHTTPHeaderField: "Authorization"); request.url = URL(string: "about:blank"); return
         }
+        request.setValue("Bearer " + credential.secret, forHTTPHeaderField: "Authorization")
+        request.setValue("application/octet-stream", forHTTPHeaderField: "Accept")
     }
 }

@@ -3,7 +3,8 @@ import Foundation
 public struct OAuthHTTPResponse: Sendable {
     public let status: Int
     public let data: Data
-    public init(status: Int, data: Data) { self.status = status; self.data = data }
+    public let redirectURL: URL?
+    public init(status: Int, data: Data, redirectURL: URL? = nil) { self.status = status; self.data = data; self.redirectURL = redirectURL }
 }
 public protocol OAuthHTTPTransport: Sendable {
     func send(_ request: URLRequest) async throws -> OAuthHTTPResponse
@@ -32,7 +33,8 @@ public struct OAuthHTTPSClient: OAuthHTTPTransport {
                 guard data.count < maximumResponseBytes else { throw GitFailure("The server response exceeded its size limit.") }
                 data.append(byte)
             }
-            return OAuthHTTPResponse(status: response.statusCode, data: data)
+            let redirect = response.value(forHTTPHeaderField: "Location").flatMap { URL(string: $0, relativeTo: request.url)?.absoluteURL }
+            return OAuthHTTPResponse(status: response.statusCode, data: data, redirectURL: redirect)
         } catch is CancellationError { throw CancellationError() }
         catch let failure as GitFailure { throw failure }
         catch {
