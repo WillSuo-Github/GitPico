@@ -137,6 +137,7 @@ struct RemotePushSheet: View {
             sourceID = source?.id ?? refs.first(where: \.isCurrent)?.id ?? refs.first?.id ?? ""
             destinationName = deleting ? destination ?? "" : selectedSource?.name ?? ""
             lease = force
+            tracking = selectedSource?.isLocal == true && selectedSource?.upstream.isEmpty == true
         }
         .task(id: remoteID) {
             urls = []; pushURL = ""; failure = nil

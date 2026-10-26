@@ -12,6 +12,7 @@ import SwiftUI
     private var synchronizing = false
     private var needsSynchronization = false
     private var stopping = false
+    private var membershipUpdateScheduled = false
     private var lastSelectedID: UUID?
     private var preparedAnchorID: UUID?
     var hasRepositoryWindows: Bool { !controllers.isEmpty }
@@ -158,9 +159,17 @@ import SwiftUI
         for group in groups { updateTabBarVisibility(group) }
     }
     private func membershipChanged() {
-        guard !stopping else { return }
-        observeGroups()
-        workspace.scheduleSessionSave()
+        guard !stopping, !membershipUpdateScheduled else { return }
+        membershipUpdateScheduled = true
+        // AppKit emits this KVO while mutating the native group. Re-entering tab-bar
+        // layout from that callback can hang older AppKit; inspect only after it returns.
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.membershipUpdateScheduled = false
+            guard !self.stopping else { return }
+            self.observeGroups()
+            self.workspace.scheduleSessionSave()
+        }
     }
     private func updateTabBarVisibility(_ group: NSWindowTabGroup) {
         let shouldShow = group.windows.count > 1

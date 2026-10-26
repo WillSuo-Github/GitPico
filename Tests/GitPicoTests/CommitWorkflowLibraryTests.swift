@@ -44,3 +44,17 @@ import Testing
     #expect(f.store.snapshot?.identity.name == "Work Author")
     #expect(try await GitProcess.run(["config", "--local", "user.email"], at: f.repository.root).text == "work@example.invalid\n")
 }
+
+@Test @MainActor func firstPushOpensReviewedPublicationWithoutWritingTheRemote() async throws {
+    let f = try await WorkingAppFixture.make(); defer { f.clean() }
+    let remote = f.root.appendingPathComponent("origin.git")
+    _ = try await GitProcess.run(["init", "--bare", remote.path], at: f.repository.root)
+    _ = try await GitProcess.run(["remote", "add", "origin", remote.path], at: f.repository.root)
+    try await f.sync(); f.store.managedRemotes = try await f.repository.remoteConfigurations()
+    f.store.sync(.push); await f.store.metadataTask?.value
+    guard case .publish(let source, _, _, let force) = f.store.managementRequest?.action else { Issue.record("First Push did not open the publication review."); return }
+    #expect(source?.isCurrent == true && source?.upstream.isEmpty == true && !force)
+    #expect(f.store.operationTask == nil)
+    let result = try await GitProcess.run(["show-ref", "--verify", "--quiet", "refs/heads/main"], at: remote, allowed: [0, 1])
+    #expect(result.status == 1)
+}

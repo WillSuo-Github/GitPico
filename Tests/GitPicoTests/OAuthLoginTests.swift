@@ -43,9 +43,11 @@ private func loginTransport(_ values: [[String: Any]]) throws -> LoginTransport 
     enum ResultMode { case success, denied, wrongState, waiting }
     var mode: ResultMode
     var started = false
+    var requestedURL: URL?
     init(_ mode: ResultMode = .success) { self.mode = mode }
     func authenticate(_ url: URL, callbackScheme: String) async throws -> URL {
         started = true
+        requestedURL = url
         if mode == .waiting { try await Task.sleep(for: .seconds(60)); throw CancellationError() }
         let state = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == "state" }?.value ?? ""
         return URL(string: "gitpico://oauth/gitlab/callback?state=" + (mode == .wrongState ? "wrong" : state) + (mode == .denied ? "&error=access_denied" : "&code=fixture-code"))!
@@ -99,6 +101,32 @@ private func tokenGrant(_ provider: OAuthProvider) throws -> OAuthTokenGrant { t
     let requests = await transport.requests
     #expect(String(decoding: requests[0].httpBody ?? Data(), as: UTF8.self).contains("client_id=Ov23liSrQZqjI0HkLbHN"))
     #expect(requests.last?.value(forHTTPHeaderField: "Authorization") == "Bearer fixture-access")
+}
+
+@Test @MainActor func gitlabAPIScopeUpgradePreservesConfigurationAndRejectsReducedGrants() async throws {
+    for permitted in [true, false] {
+        let f = try LoginFixture(); defer { f.clean() }
+        let oldConfiguration = try OAuthAppCatalog.configuration(.gitlab), root = f.directory.appendingPathComponent("Repo")
+        let profile = try f.store.completeOAuth(oldConfiguration, grant: tokenGrant(.gitlab), username: "fixture-user", root: root)
+        let upgraded = try OAuthConfiguration(provider: .gitlab, host: oldConfiguration.host, clientID: oldConfiguration.clientID, apiAccess: true)
+        var grant = loginGrant(.gitlab); grant["access_token"] = "upgraded-fixture-access"
+        if permitted { grant["scope"] = "read_user write_repository api" }
+        let transport = try loginTransport(permitted ? [grant, ["username": "fixture-user"]] : [grant])
+        let browser = LoginBrowser(), login = OAuthLoginController(browser: browser, transport: transport)
+        var saved = false
+        login.start(upgraded, authentication: f.store, root: nil, reconnecting: profile) { saved = true }
+        await login.finishForTesting()
+        let url = try #require(browser.requestedURL)
+        let scope = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == "scope" }?.value
+        #expect(scope?.split(separator: " ").contains("api") == true)
+        #expect(f.store.profiles.count == 1 && f.store.profile(for: root)?.id == profile.id)
+        let credential = try f.vault.read(profile.id)
+        if permitted {
+            #expect(saved && login.failure == nil && credential.oauth?.configuration.apiAccess == true && credential.secret == "upgraded-fixture-access")
+        } else {
+            #expect(!saved && login.failure != nil && credential.oauth?.configuration.apiAccess != true && credential.secret == "fixture-access")
+        }
+    }
 }
 
 @Test @MainActor func declinedMismatchedOrCancelledOAuthLoginNeverSavesAnAccount() async throws {

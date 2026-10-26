@@ -21,7 +21,7 @@ import Observation
             guard let self else { return }
             defer { isRunning = false; deviceChallenge = nil; task = nil }
             do {
-                let configuration = try OAuthConfiguration(provider: configuration.provider, host: configuration.host, clientID: configuration.clientID)
+                let configuration = try OAuthConfiguration(provider: configuration.provider, host: configuration.host, clientID: configuration.clientID, apiAccess: configuration.apiAccess == true)
                 let grant: OAuthTokenGrant
                 if configuration.provider == .github {
                     let client = OAuthDeviceAuthorization(transport: transport)
