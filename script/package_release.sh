@@ -60,7 +60,17 @@ xcodebuild archive -project GitPico.xcodeproj -scheme GitPico -configuration Rel
   CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="$GITPICO_SIGNING_IDENTITY" DEVELOPMENT_TEAM="$GITPICO_TEAM_ID" \
   GITPICO_UPDATE_FEED_URL="$GITPICO_UPDATE_FEED_URL" GITPICO_UPDATE_PUBLIC_KEY="$GITPICO_UPDATE_PUBLIC_KEY" \
   > "$ARCHIVE_DIR/archive.log" 2>&1
-APP="$ARCHIVE_DIR/GitPico.xcarchive/Products/Applications/GitPico.app"
+python3 - "$ARCHIVE_DIR/ExportOptions.plist" "$GITPICO_TEAM_ID" "$GITPICO_SIGNING_IDENTITY" <<'PY'
+import plistlib, sys
+with open(sys.argv[1], 'wb') as stream:
+    plistlib.dump({'method': 'developer-id', 'teamID': sys.argv[2], 'signingStyle': 'manual',
+                  'signingCertificate': sys.argv[3], 'manageAppVersionAndBuildNumber': False,
+                  'stripSwiftSymbols': True}, stream)
+PY
+xcodebuild -exportArchive -archivePath "$ARCHIVE_DIR/GitPico.xcarchive" \
+  -exportPath "$ARCHIVE_DIR/export" -exportOptionsPlist "$ARCHIVE_DIR/ExportOptions.plist" \
+  > "$ARCHIVE_DIR/export.log" 2>&1
+APP="$ARCHIVE_DIR/export/GitPico.app"
 verify_source
 BUILD_ID="$(/usr/libexec/PlistBuddy -c 'Print CFBundleVersion' "$APP/Contents/Info.plist")"
 OUTPUT_DIR="$ROOT_DIR/dist/releases/$BUILD_ID"

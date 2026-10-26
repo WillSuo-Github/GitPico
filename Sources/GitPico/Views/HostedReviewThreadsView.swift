@@ -55,7 +55,11 @@ struct HostedInlineCommentView: View {
     @State private var text = ""
     @State private var confirming = false
     @Environment(\.dismiss) private var dismiss
-    private var lines: [DiffLine] { DiffDocument(request.file.patch ?? "").lines }
+    private let lines: [DiffLine]
+    init(model: HostedReviewsModel, request: HostedInlineRequest) {
+        self.model = model; self.request = request
+        lines = DiffDocument(request.file.patch ?? "").lines
+    }
     private var location: Int? { lines.first { $0.id == selected }.flatMap { side == .left ? $0.oldNumber : $0.newNumber } }
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -68,7 +72,8 @@ struct HostedInlineCommentView: View {
                     Text(line.text).lineLimit(3)
                 }.font(.system(.caption, design: .monospaced)).tag(line.id)
             }.frame(height: 250)
-            TextEditor(text: $text).frame(height: 100).accessibilityLabel("Inline review comment")
+            Text("Comment").font(.caption.bold())
+            TextEditor(text: $text).frame(height: 100).padding(4).border(.separator).accessibilityLabel("Inline review comment")
             if let error = model.error { Text(error).foregroundStyle(Pico.deletion).font(.caption).textSelection(.enabled) }
             HStack { Button("Cancel") { dismiss() }; Spacer(); Text(location.map { "Line \($0)" } ?? "Select a line").font(.caption); Button("Post Comment…") { confirming = true }.disabled(location == nil || text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || model.busy) }
         }.padding(24).frame(width: 720)

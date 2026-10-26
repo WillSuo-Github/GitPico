@@ -72,7 +72,7 @@ struct CommitTemplateInsertionView: View {
         VStack(alignment: .leading, spacing: 12) {
             SheetTitle(insertion.name, icon: "doc.text")
             ScrollView { Text(insertion.text).font(.system(.body, design: .monospaced)).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading) }.frame(height: 240)
-            Text("Append keeps your current draft. Replace uses the first line as the summary and the remaining text as the description.").font(.caption).foregroundStyle(.secondary)
+            Text("Append keeps your current draft. Replace uses the first line as the summary and the remaining text as the description.").font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             HStack {
                 Button("Cancel") { dismiss() }; Spacer()
                 Button("Append to Description") { store.commitBody += (store.commitBody.isEmpty ? "" : "\n\n") + insertion.text; dismiss() }
