@@ -19,9 +19,10 @@ struct RevisionComparisonView: View {
     @State private var context = 7
     @State private var ignoreWhitespace = false
     var files: [ChangedPath] { (comparison?.files ?? []).filter { query.isEmpty || $0.path.localizedCaseInsensitiveContains(query) } }
-    init(store: RepositoryStore, repository: GitRepository, initialLeft: String) {
+    init(store: RepositoryStore, repository: GitRepository, initialLeft: String, initialRight: String = "HEAD") {
         self.store = store; self.repository = repository
         _left = State(initialValue: initialLeft)
+        _right = State(initialValue: initialRight)
     }
     var body: some View {
         VStack(spacing: 0) {
@@ -61,7 +62,9 @@ struct RevisionComparisonView: View {
                 } trailing: {
                     VStack(spacing: 0) {
                         if let diffError { InspectionErrorView(message: diffError) }
-                        else { DiffView(text: diff, title: selected, isLoading: loadingDiff) }
+                        else if let path = selected, let repository = store.repository, comparison.statistics[path]?.isBinary == true || BinaryComparisonView.isImageCandidate(path) {
+                            BinaryComparisonView(repository: repository, path: path, originalPath: comparison.originalPaths[path], left: .revision(comparison.left), right: .revision(comparison.right))
+                        } else { DiffView(text: diff, title: selected, isLoading: loadingDiff) }
                     }
                 }
             } else { EmptyPane(title: "Compare Revisions", subtitle: "Choose any two branches, tags or commit hashes, then press Compare.", icon: "arrow.left.arrow.right") }

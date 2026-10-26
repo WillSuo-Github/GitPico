@@ -8,8 +8,15 @@ public struct OAuthHTTPResponse: Sendable {
 public protocol OAuthHTTPTransport: Sendable {
     func send(_ request: URLRequest) async throws -> OAuthHTTPResponse
 }
+public struct OAuthTransportFailure: LocalizedError, Sendable {
+    public let retryable: Bool
+    public let message: String
+    public var errorDescription: String? { message }
+    public init(retryable: Bool, message: String) { self.retryable = retryable; self.message = message }
+}
 public struct OAuthHTTPSClient: OAuthHTTPTransport {
-    public init() {}
+    private let maximumResponseBytes: Int
+    public init(maximumResponseBytes: Int = 131_072) { self.maximumResponseBytes = min(4 * 1024 * 1024, max(1, maximumResponseBytes)) }
     public func send(_ request: URLRequest) async throws -> OAuthHTTPResponse {
         guard request.url?.scheme == "https", request.url?.user == nil, request.url?.password == nil else { throw GitFailure("OAuth requires a secure server URL.") }
         let config = URLSessionConfiguration.ephemeral
@@ -22,13 +29,20 @@ public struct OAuthHTTPSClient: OAuthHTTPTransport {
             var data = Data()
             for try await byte in bytes {
                 try Task.checkCancellation()
-                guard data.count < 131_072 else { throw GitFailure("The sign-in response exceeded its size limit.") }
+                guard data.count < maximumResponseBytes else { throw GitFailure("The server response exceeded its size limit.") }
                 data.append(byte)
             }
             return OAuthHTTPResponse(status: response.statusCode, data: data)
         } catch is CancellationError { throw CancellationError() }
         catch let failure as GitFailure { throw failure }
-        catch { if Task.isCancelled { throw CancellationError() }; throw GitFailure("Could not reach the sign-in server. Check your network and try again.") }
+        catch {
+            if Task.isCancelled || (error as? URLError)?.code == .cancelled { throw CancellationError() }
+            let code = (error as? URLError)?.code
+            if code == .secureConnectionFailed || code == .serverCertificateUntrusted || code == .serverCertificateHasBadDate || code == .serverCertificateHasUnknownRoot {
+                throw OAuthTransportFailure(retryable: false, message: "The secure connection failed. Check the server certificate, system date and proxy. Certificate validation remains enabled.")
+            }
+            throw OAuthTransportFailure(retryable: [.timedOut, .networkConnectionLost, .notConnectedToInternet, .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed].contains(code), message: "Could not reach the server. Check your network or proxy and try again.")
+        }
     }
     private final class NoOAuthRedirects: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
         func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping @Sendable (URLRequest?) -> Void) { completionHandler(nil) }

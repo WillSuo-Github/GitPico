@@ -46,4 +46,6 @@ final class RepositoryWindowController: NSWindowController, NSWindowDelegate {
         guard let window = notification.object as? RepositoryNativeWindow else { return }
         repositoryWindows?.didSelect(window)
     }
+    func windowDidMove(_ notification: Notification) { repositoryWindows?.workspace.scheduleSessionSave() }
+    func windowDidResize(_ notification: Notification) { repositoryWindows?.workspace.scheduleSessionSave() }
 }

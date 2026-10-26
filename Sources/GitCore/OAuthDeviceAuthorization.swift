@@ -25,12 +25,23 @@ public struct OAuthDeviceAuthorization: Sendable {
     }
     public func wait(_ challenge: OAuthDeviceChallenge, configuration: OAuthConfiguration, now: @Sendable () -> Date = { Date() }, sleep: @escaping @Sendable (TimeInterval) async throws -> Void = { try await Task.sleep(for: .seconds($0)) }) async throws -> OAuthTokenGrant {
         var interval = challenge.interval
+        var failures = 0
         while now() < challenge.expiresAt {
             try Task.checkCancellation()
             try await sleep(min(interval, max(0, challenge.expiresAt.timeIntervalSince(now()))))
             try Task.checkCancellation()
             guard now() < challenge.expiresAt else { break }
-            let response = try await transport.send(OAuthRequests.form(configuration.tokenURL, [("client_id", configuration.clientID), ("device_code", challenge.deviceCode), ("grant_type", "urn:ietf:params:oauth:grant-type:device_code")]))
+            let response: OAuthHTTPResponse
+            do {
+                response = try await transport.send(OAuthRequests.form(configuration.tokenURL, [("client_id", configuration.clientID), ("device_code", challenge.deviceCode), ("grant_type", "urn:ietf:params:oauth:grant-type:device_code")]))
+            } catch let failure as OAuthTransportFailure where failure.retryable && failures < 3 {
+                failures += 1; interval = min(30, max(interval, Double(failures * 5))); continue
+            }
+            if response.status == 429 || (500...599).contains(response.status) {
+                guard failures < 3 else { throw GitFailure("The sign-in server remains unavailable or rate limited. Try again later.") }
+                failures += 1; interval = min(60, interval + 5); continue
+            }
+            failures = 0
             let object = try OAuthRequests.object(response)
             switch object["error"] as? String {
             case "authorization_pending": continue

@@ -8,10 +8,16 @@ import Observation
     func prepareNewTab(from id: UUID)
     func workspaceChanged()
     func cycleNativeTabs(_ offset: Int) -> Bool
+    func sessionWindows() -> [WorkspaceWindowGroup]
+    func restoreWindows(_ groups: [WorkspaceWindowGroup])
+}
+extension RepositoryWindowRouting {
+    func sessionWindows() -> [WorkspaceWindowGroup] { [] }
+    func restoreWindows(_ groups: [WorkspaceWindowGroup]) {}
 }
 
 @MainActor @Observable final class RepositoryTab: Identifiable {
-    let id = UUID()
+    let id: UUID
     let store: RepositoryStore
     var root: URL?
     var isOpening = false
@@ -19,7 +25,8 @@ import Observation
     var pickerQuery = ""
     var pickerFilter: RepositoryLibraryFilter = .recent
     var pickerSelection: UUID?
-    init(store: RepositoryStore) {
+    init(store: RepositoryStore, id: UUID = UUID()) {
+        self.id = id
         self.store = store
         if store.library.recentPaths.isEmpty { pickerFilter = .all }
     }
@@ -36,6 +43,10 @@ import Observation
     let networkActivity: NetworkActivityStore
     var error: String?
     var draftSaveWarning: String?
+    var sessionSaveWarning: String?
+    @ObservationIgnored let session: WorkspaceSessionStore
+    @ObservationIgnored private var sessionTask: Task<Void, Never>?
+    @ObservationIgnored private var restoringSession = false
     @ObservationIgnored let drafts: RepositoryDraftStore
     @ObservationIgnored private let makeStore: (RepositoryLibrary) -> RepositoryStore
     @ObservationIgnored private var draftTask: Task<Void, Never>?
@@ -56,9 +67,11 @@ import Observation
         let factory = storeFactory ?? { RepositoryStore(library: $0, authentication: authentication, networkActivity: networkActivity) }
         self.makeStore = factory
         drafts = RepositoryDraftStore(file: draftsFile ?? library.file.deletingLastPathComponent().appendingPathComponent("repository-drafts.json"))
+        session = WorkspaceSessionStore(file: library.file.deletingLastPathComponent().appendingPathComponent("workspace-session.json"))
         let first = RepositoryTab(store: factory(library))
         tabs = [first]; selectedID = first.id; first.store.workspace = self
         draftSaveWarning = drafts.error
+        sessionSaveWarning = session.error
     }
     func tab(for store: RepositoryStore) -> RepositoryTab? { tabs.first { $0.store === store } }
     private func originTab(from store: RepositoryStore?) -> RepositoryTab? {
@@ -78,6 +91,7 @@ import Observation
         activeStore.searchFocusRequest = nil
         selectedID = id; activeStore.searchFocusRequest = nil
         windowRouting?.workspaceChanged()
+        scheduleSessionSave()
     }
     func cycle(_ offset: Int) {
         if windowRouting?.cycleNativeTabs(offset) == true { return }
@@ -112,13 +126,17 @@ import Observation
         if tabs.isEmpty { newTab() }
         else if selectedID == id { select(tabs[min(index, tabs.count - 1)].id) }
         windowRouting?.workspaceChanged()
+        scheduleSessionSave()
         return true
     }
     func startup() async {
         guard !didStartup else { return }; didStartup = true
         let args = ProcessInfo.processInfo.arguments
+        guard !args.contains("--background-testing"), !NativeStartupVerification.enabled else { return }
         if let index = args.firstIndex(of: "--repository"), args.indices.contains(index + 1) {
             await open(URL(fileURLWithPath: args[index + 1]), from: activeStore)
+        } else if AppPreferences.shared.resumeWorkspace {
+            await restoreSavedSession()
         }
     }
     func open(_ url: URL, from source: RepositoryStore? = nil, replacing: Bool = false) async {
@@ -128,7 +146,7 @@ import Observation
         let target = origin
         select(target.id)
         target.isOpening = true
-        defer { target.isOpening = false }
+        defer { target.isOpening = false; scheduleSessionSave() }
         do {
             let repository = try await GitRepository.open(url), root = await repository.root
             if let existing = tabs.first(where: { $0.id != target.id && $0.root?.path == root.path }) {
@@ -184,6 +202,8 @@ import Observation
         catch { draftSaveWarning = error.localizedDescription }
     }
     func shutdown() {
+        sessionTask?.cancel()
+        saveSession()
         for tab in tabs {
             do { try tab.store.flushConflictDrafts() }
             catch { draftSaveWarning = error.localizedDescription; return }
@@ -191,6 +211,51 @@ import Observation
         for tab in tabs { tab.store.disconnectNetworkContext(); tab.store.stopAutomaticRefresh(); recordDraft(tab.store) }
         flushDrafts()
         networkActivity.flush()
+    }
+    func scheduleSessionSave() {
+        guard didStartup, !restoringSession else { return }
+        sessionTask?.cancel()
+        sessionTask = Task { [weak self] in
+            do { try await Task.sleep(for: .milliseconds(400)) } catch { return }
+            self?.saveSession()
+        }
+    }
+    func saveSession() {
+        guard !restoringSession, !tabs.contains(where: \.isOpening) else { return }
+        do {
+            try session.save(WorkspaceSession(tabs: tabs.map { WorkspaceSessionTab(id: $0.id, path: $0.root?.path, choosing: $0.isChoosingRepository, navigation: $0.store.sessionState) }, selected: selectedID, windows: windowRouting?.sessionWindows() ?? []))
+            sessionSaveWarning = nil
+        } catch { sessionSaveWarning = error.localizedDescription }
+    }
+    func retrySessionSave() { session.reload(); saveSession() }
+    func restoreSavedSession() async {
+        guard let saved = session.saved, !tabs.contains(where: \.isBusy) else { return }
+        restoringSession = true
+        defer { restoringSession = false; scheduleSessionSave() }
+        for tab in tabs { tab.store.stopAutomaticRefresh(); tab.store.cancelPreviewWork(); tab.store.disconnectNetworkContext() }
+        tabs = saved.tabs.map { item in
+            let store = makeStore(library); store.workspace = self
+            return RepositoryTab(store: store, id: item.id)
+        }
+        selectedID = saved.selected
+        var failures: [String] = []
+        for item in saved.tabs {
+            guard let tab = tabs.first(where: { $0.id == item.id }), let path = item.path else { continue }
+            await open(URL(fileURLWithPath: path), from: tab.store)
+            if tab.store.snapshot != nil {
+                await tab.store.restoreSessionState(item.navigation)
+                tab.isChoosingRepository = item.choosing
+            } else {
+                tab.root = URL(fileURLWithPath: path)
+                tab.isChoosingRepository = true
+                tab.store.error = nil
+                failures.append(path)
+            }
+        }
+        if tabs.contains(where: { $0.id == saved.selected }) { selectedID = saved.selected }
+        windowRouting?.workspaceChanged()
+        windowRouting?.restoreWindows(saved.windows)
+        if !failures.isEmpty { error = "Some saved repositories could not be reopened. Their tabs were kept for recovery:\n" + failures.joined(separator: "\n") }
     }
     func startMonitoring() {
         monitoringEnabled = true

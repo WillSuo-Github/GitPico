@@ -24,13 +24,14 @@ struct ContentView: View {
         .navigationSubtitle(store.isChoosingRepository ? "Choose a repository" : store.navigationSubtitle)
         .toolbar { if store.workspace == nil { RepositoryToolbar(store: store) } }
         .safeAreaInset(edge: .bottom, spacing: 0) { if showsSidebar { RepositoryStatusBar(store: store) } }
-        .safeAreaInset(edge: .top, spacing: 0) { if !store.isChoosingRepository { VStack(spacing: 0) { AutomaticStashBanner(store: store); GitFlowOperationBanner(store: store); if store.destination != .workingCopy { OperationBanner(store: store) } } } }
+        .safeAreaInset(edge: .top, spacing: 0) { if !store.isChoosingRepository { VStack(spacing: 0) { UpstreamRecoveryBanner(store: store); AutomaticStashBanner(store: store); GitFlowOperationBanner(store: store); if store.destination != .workingCopy { OperationBanner(store: store) } } } }
         .task(id: store.search) { await store.searchHistory() }
         .alert("Git operation failed", isPresented: Binding(get: { store.error != nil }, set: { if !$0 { store.error = nil } })) {
             Button("OK") { store.error = nil }
         } message: { Text(store.error ?? "") }
         .sheet(item: $store.automaticStashRequest) { AutomaticStashSheet(store: store, request: $0) }
         .sheet(item: $store.integrationRequest, onDismiss: store.presentPendingAutomaticStash) { IntegrationSheet(store: store, request: $0) }
+        .sheet(item: $store.pullRequest, onDismiss: store.finishPullReview) { PullReviewSheet(store: store, request: $0) }
         .sheet(item: $store.lfsRequest) { LFSManagementSheet(store: store, request: $0) }
         .sheet(item: $store.flowRequest) { GitFlowManagementSheet(store: store, request: $0) }
         .sheet(item: $store.infrastructureRequest) { RepositoryInfrastructureSheet(store: store, request: $0) }
@@ -41,6 +42,8 @@ struct ContentView: View {
         .sheet(item: $store.rebaseRequest, onDismiss: store.presentPendingAutomaticStash) { InteractiveRebaseSheet(store: store, request: $0) }
         .sheet(item: $store.recoveryRequest) { HistoryRecoverySheet(store: store, request: $0) }
         .sheet(isPresented: $store.showingRebaseEdit) { RebaseEditSheet(store: store) }
+        .sheet(isPresented: $store.showingHostedReviews) { HostedReviewsView(store: store) }
+        .sheet(isPresented: $store.showingLFSLocks) { LFSLocksView(store: store) }
         .sheet(item: $store.managementRequest, onDismiss: store.presentPendingAutomaticStash) { ManagementSheet(store: store, request: $0) }
         .sheet(item: $store.externalToolRequest) { ExternalToolSheet(store: store, request: $0) }
         .sheet(isPresented: $store.showingExternalToolSettings) { VStack { ExternalToolSettingsView(preferences: store.toolPreferences); Button("Close") { store.showingExternalToolSettings = false }.padding(.bottom) } }

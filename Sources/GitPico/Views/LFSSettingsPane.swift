@@ -8,6 +8,7 @@ struct LFSSettingsPane: View {
             LazyVStack(alignment: .leading, spacing: 18) {
                 HStack {
                     SheetTitle("Git LFS", icon: "externaldrive"); Spacer()
+                    Button("Server Locks…") { store.showingLFSLocks = true }.disabled(store.isBusy)
                     Button("Reload") { Task { await store.loadLFS() } }.disabled(store.isBusy)
                 }
                 if let state = store.lfsState {

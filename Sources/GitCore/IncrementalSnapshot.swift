@@ -26,9 +26,7 @@ extension GitRepository {
                 commits = page.commits; count = page.totalCount ?? page.commits.count; exact = page.totalCount != nil
                 ahead = 0; behind = 0
                 if refs.contains(where: { $0.isCurrent && !$0.upstream.isEmpty }) {
-                    let counts = try await GitProcess.run(["rev-list", "--left-right", "--count", "HEAD...@{upstream}", "--"], at: root).text.split(whereSeparator: \.isWhitespace).compactMap { Int($0) }
-                    guard counts.count == 2 else { throw GitFailure("Unable to read upstream divergence.") }
-                    ahead = counts[0]; behind = counts[1]
+                    (ahead, behind) = try await upstreamDivergence()
                 }
                 identity = try await readIdentity()
             }

@@ -25,7 +25,12 @@ struct RepositoryCommands: Commands {
                     }
                 }.disabled(store.isBusy || store.isOpeningRepository)
             }
+            CommandGroup(after: .appInfo) {
+                Button("Check for Updates…", action: UpdateController.shared.check).disabled(!UpdateController.shared.canCheck)
+                Button("Export Diagnostics…") { DiagnosticExporter.export(store: store) { store.connectionTestMessage = $0 } }
+            }
             CommandMenu("Repository") {
+                Button("Pull / Merge Requests…") { store.showingHostedReviews = true }.disabled(!store.canUseRepository)
                 Button("Network Activity…") { store.showingNetworkActivity = true }.keyboardShortcut("n", modifiers: [.command, .option])
                 Button("Authentication…") { store.showingAuthentication = true }
                 Button("Saved Conflict Drafts…") { store.showingConflictDrafts = true }.disabled(store.conflictDrafts.isEmpty && store.conflictDraftSaveError == nil)
@@ -34,7 +39,7 @@ struct RepositoryCommands: Commands {
                 Divider()
                 Group {
                     Button("Fetch") { store.sync(.fetch) }
-                    Button("Pull (Fast-forward Only)") { store.sync(.pull) }.disabled(!store.canIntegrate)
+                    Button("Pull…") { store.sync(.pull) }.disabled(!store.canIntegrate)
                     Button("Push") { store.sync(.push) }.disabled(!store.canIntegrate)
                     Button("Synchronize (Fetch, Pull, Push)", action: store.syncAll).disabled(!store.canSynchronize)
                 }.disabled(!store.canUseRepository || store.managedRemotes.isEmpty)

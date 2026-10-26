@@ -1,0 +1,83 @@
+{
+  "baseCommit": "18be8be8ebed25e4f587a6fe1963afcb80f1a8cc",
+  "gitPushed": false,
+  "host": {
+    "architecture": "arm64",
+    "macOS": "27.0.1"
+  },
+  "pythonTests": {
+    "failed": 0,
+    "passed": 4
+  },
+  "releasePublished": false,
+  "releaseUploaded": false,
+  "setupFailureRetained": ".build/MaturityFinalCapture.xcresult: ordinary staging removed the hosted XCTest plugin; rebuilt before successful retry",
+  "snapshotPhase": "validation-before-source-delivery",
+  "sourceHashes": "source-hashes.json",
+  "stagedBundle": {
+    "CFBundleShortVersionString": "0.01",
+    "CFBundleVersion": "20261026181848",
+    "GitPicoUpdateRepository": "WillSuo-Github/GitPico",
+    "LSMinimumSystemVersion": "26.0"
+  },
+  "startup": {
+    "background-verification.json": {
+      "backgroundTesting": true,
+      "isActive": false,
+      "visibleWindows": 0
+    },
+    "native-startup-verification.json": {
+      "chooserMenuDisabled": true,
+      "closeTabMenuWorks": true,
+      "findUsesToolbarSearch": true,
+      "isActive": false,
+      "multipleTabBarVisible": true,
+      "nativeSelectionMatchesModel": true,
+      "nativeStartupVerification": true,
+      "nativeTabBarVisible": false,
+      "newTabMenuWorks": true,
+      "quickActionsUseToolbarSearch": true,
+      "repositoriesMenuReusesCurrentTab": true,
+      "repositoryMenuContextWorks": true,
+      "repositoryMenuEnabled": true,
+      "repositoryOpenSeconds": 0.4142505,
+      "repositoryReady": true,
+      "returnedMenuEnabled": true,
+      "singleTabBarHidden": true,
+      "singleTabBarHiddenAfterClose": true,
+      "visibleWindows": 0
+    }
+  },
+  "tests": {
+    "applicationAndBenchmarks": {
+      "failedTests": 0,
+      "passedTests": 139,
+      "result": "Passed",
+      "skippedTests": 11,
+      "totalTestCount": 150
+    },
+    "finalCaptureRetry": {
+      "failedTests": 0,
+      "passedTests": 1,
+      "result": "Passed",
+      "skippedTests": 0,
+      "totalTestCount": 1
+    },
+    "finalCoreGuardsAndCapture": {
+      "failedTests": 0,
+      "passedTests": 4,
+      "result": "Passed",
+      "skippedTests": 0,
+      "totalTestCount": 4
+    },
+    "fullRegression": {
+      "failedTests": 0,
+      "passedTests": 372,
+      "result": "Passed",
+      "skippedTests": 16,
+      "totalTestCount": 388
+    }
+  },
+  "updatesEnabled": false,
+  "workingTreeUncommitted": true
+}

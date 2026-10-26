@@ -1,0 +1,79 @@
+{
+  "branches" : 120,
+  "changedFiles" : 500,
+  "commits" : 3000,
+  "samples" : [
+    {
+      "branch" : 5,
+      "detailSeconds" : 0.30123191599999999,
+      "historySeconds" : 0.20530037500000001,
+      "layoutSeconds" : 4.0874999999999997e-05,
+      "maximumMainActorGapSeconds" : 0.079405000000000003,
+      "selectionSeconds" : 6.7416000000000006e-05
+    },
+    {
+      "branch" : 70,
+      "detailSeconds" : 0.15136466700000001,
+      "historySeconds" : 0.071673125000000004,
+      "layoutSeconds" : 3.6667e-05,
+      "maximumMainActorGapSeconds" : 0.043409083000000001,
+      "selectionSeconds" : 0.000112
+    },
+    {
+      "branch" : 105,
+      "detailSeconds" : 0.13087750000000001,
+      "historySeconds" : 0.068682415999999996,
+      "layoutSeconds" : 0.0091968750000000002,
+      "maximumMainActorGapSeconds" : 0.038786208000000003,
+      "selectionSeconds" : 8.5415999999999997e-05
+    },
+    {
+      "branch" : 5,
+      "detailSeconds" : 0.061132958000000001,
+      "historySeconds" : 0.061130583000000002,
+      "layoutSeconds" : 4.7583999999999997e-05,
+      "maximumMainActorGapSeconds" : 0.049366332999999998,
+      "selectionSeconds" : 0.00011658300000000001
+    },
+    {
+      "branch" : 70,
+      "detailSeconds" : 0.060239083999999998,
+      "historySeconds" : 0.060236625000000002,
+      "layoutSeconds" : 5.6292000000000002e-05,
+      "maximumMainActorGapSeconds" : 0.053610084000000002,
+      "selectionSeconds" : 0.000101375
+    },
+    {
+      "branch" : 105,
+      "detailSeconds" : 0.049865417000000002,
+      "historySeconds" : 0.049863917000000001,
+      "layoutSeconds" : 9.3917000000000002e-05,
+      "maximumMainActorGapSeconds" : 0.036790416999999999,
+      "selectionSeconds" : 0.000102
+    },
+    {
+      "branch" : 5,
+      "detailSeconds" : 0.060292667000000001,
+      "historySeconds" : 0.060292083000000003,
+      "layoutSeconds" : 5.3708999999999997e-05,
+      "maximumMainActorGapSeconds" : 0.047383333,
+      "selectionSeconds" : 0.000227333
+    },
+    {
+      "branch" : 70,
+      "detailSeconds" : 0.084697166000000004,
+      "historySeconds" : 0.084695707999999995,
+      "layoutSeconds" : 5.7292e-05,
+      "maximumMainActorGapSeconds" : 0.070923209000000001,
+      "selectionSeconds" : 0.00023029100000000001
+    },
+    {
+      "branch" : 105,
+      "detailSeconds" : 0.045342582999999999,
+      "historySeconds" : 0.045341541999999999,
+      "layoutSeconds" : 4.8665999999999998e-05,
+      "maximumMainActorGapSeconds" : 0.023827000000000001,
+      "selectionSeconds" : 0.000144375
+    }
+  ]
+}

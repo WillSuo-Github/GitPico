@@ -160,6 +160,7 @@ import SwiftUI
     private func membershipChanged() {
         guard !stopping else { return }
         observeGroups()
+        workspace.scheduleSessionSave()
     }
     private func updateTabBarVisibility(_ group: NSWindowTabGroup) {
         let shouldShow = group.windows.count > 1
@@ -184,6 +185,34 @@ import SwiftUI
         guard let index = ids.firstIndex(of: workspace.selectedID), !ids.isEmpty else { return false }
         workspace.select(ids[(index + offset % ids.count + ids.count) % ids.count])
         return true
+    }
+    func sessionWindows() -> [WorkspaceWindowGroup] {
+        var seen: Set<UUID> = []
+        return workspace.tabs.compactMap { tab in
+            guard !seen.contains(tab.id), let window = window(for: tab.id) else { return nil }
+            let members = window.tabGroup?.windows.compactMap { ($0 as? RepositoryNativeWindow)?.tabID } ?? [tab.id]
+            seen.formUnion(members)
+            let selected = (window.tabGroup?.selectedWindow as? RepositoryNativeWindow)?.tabID ?? tab.id
+            let frame = window.frame
+            return WorkspaceWindowGroup(tabs: members, selected: selected, x: frame.origin.x, y: frame.origin.y, width: frame.width, height: frame.height)
+        }
+    }
+    func restoreWindows(_ groups: [WorkspaceWindowGroup]) {
+        guard !groups.isEmpty else { return }
+        synchronizing = true
+        defer { synchronizing = false; observeGroups(); workspaceChanged() }
+        for group in groups {
+            let windows = group.tabs.compactMap { window(for: $0) }
+            guard let anchor = windows.first else { continue }
+            for window in windows { window.tabGroup?.removeWindow(window) }
+            for window in windows.dropFirst() { anchor.addTabbedWindow(window, ordered: .above) }
+            if permitsPresentation {
+                var frame = NSRect(x: group.x, y: group.y, width: group.width, height: group.height)
+                if !NSScreen.screens.contains(where: { $0.visibleFrame.intersects(frame) }), let screen = NSScreen.main { frame.origin = screen.visibleFrame.origin }
+                for window in windows { window.setFrame(frame, display: false) }
+            }
+            if let selected = window(for: group.selected) { anchor.tabGroup?.selectedWindow = selected }
+        }
     }
     func shouldClose(_ window: RepositoryNativeWindow) -> Bool {
         guard let tab = workspace.tabs.first(where: { $0.id == window.tabID }) else { return true }

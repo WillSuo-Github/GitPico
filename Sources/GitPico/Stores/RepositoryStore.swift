@@ -8,7 +8,7 @@ struct ConflictDraft: Codable, Sendable {
     let text: String
 }
 
-enum Destination: Hashable, Sendable {
+enum Destination: Hashable, Sendable, Codable {
     case worktrees, submodules, workingCopy, history, reflog, stashes, branchesReview, repositorySettings, reference(String), fileHistory(String, String), comparison(String)
     var title: String {
         switch self {
@@ -45,7 +45,7 @@ enum Destination: Hashable, Sendable {
 @MainActor @Observable
 final class RepositoryStore {
     @ObservationIgnored weak var workspace: RepositoryWorkspace?
-    var sidebarFilter = ""
+    var sidebarFilter = "" { didSet { workspace?.scheduleSessionSave() } }
     var backStack: [Destination] = []
     var forwardStack: [Destination] = []
     @ObservationIgnored var navigationBookmarks: [Destination:NavigationBookmark] = [:]
@@ -53,7 +53,7 @@ final class RepositoryStore {
     @ObservationIgnored var pendingHistorySelection: String?
     @ObservationIgnored var historyNeedsReveal = false
     var historyReveal: HistoryReveal?
-    var historyOptions = HistoryOptions()
+    var historyOptions = HistoryOptions() { didSet { workspace?.scheduleSessionSave() } }
     var isLoadingHistory = false
     var historyPresentation = HistoryPresentation.empty
     var historyError: String?
@@ -76,11 +76,15 @@ final class RepositoryStore {
     var amend = false
     var signOff = false
     var integrationRequest: IntegrationRequest?
+    var pullRequest: PullReviewRequest?
+    var trackingAfterPull = false
     var rebaseRequest: RebaseRequest?
     var recoveryRequest: RecoveryRequest?
     var undoAvailability: UndoAvailability?
     var rebaseProgress: RebaseProgress?
     var showingRebaseEdit = false
+    var showingHostedReviews = false
+    var showingLFSLocks = false
     var settingsTab = "General"
     var lfsRequest: LFSRequest?
     var flowRequest: FlowRequest?
@@ -111,11 +115,11 @@ final class RepositoryStore {
     var submoduleRequest: SubmoduleRequest?
     var historicalRequest: HistoricalRequest?
     var snapshot: RepositorySnapshot?
-    var destination: Destination = .workingCopy
+    var destination: Destination = .workingCopy { didSet { workspace?.scheduleSessionSave() } }
     @ObservationIgnored var dragActions: [UUID: PicoDragAction] = [:]
-    var selectedWorkingFiles: Set<String> = []
-    var showAllFiles = false
-    var showIgnoredFiles = false
+    var selectedWorkingFiles: Set<String> = [] { didSet { workspace?.scheduleSessionSave() } }
+    var showAllFiles = false { didSet { workspace?.scheduleSessionSave() } }
+    var showIgnoredFiles = false { didSet { workspace?.scheduleSessionSave() } }
     var showAssumeUnchanged = false
     var workingFileEntries: [WorkingFileEntry] = []
     var workingList = WorkingFilesPresentation.empty
@@ -132,11 +136,11 @@ final class RepositoryStore {
     var toolPreferences = ExternalToolPreferences()
     @ObservationIgnored var externalToolRunner = ExternalToolRunner()
     @ObservationIgnored var fileBrowserGeneration = UUID()
-    var selectedChange: String?
-    var stagedDiff = false
-    var selectedCommit: Commit?
+    var selectedChange: String? { didSet { workspace?.scheduleSessionSave() } }
+    var stagedDiff = false { didSet { workspace?.scheduleSessionSave() } }
+    var selectedCommit: Commit? { didSet { workspace?.scheduleSessionSave() } }
     var commitDetail: CommitDetail?
-    var selectedCommitPath: String?
+    var selectedCommitPath: String? { didSet { workspace?.scheduleSessionSave() } }
     var automaticStash: AutomaticStashRecord?
     var automaticStashRequest: AutomaticStashRequest?
     var pendingAutomaticStashRequest: AutomaticStashRequest?
@@ -161,7 +165,7 @@ final class RepositoryStore {
     @ObservationIgnored var lastBackgroundFetch = Date.distantPast
     var activity = ""
     var error: String?
-    var search = ""
+    var search = "" { didSet { workspace?.scheduleSessionSave() } }
     var searchFocusRequest: UUID?
     var searchActionsRequest: UUID?
     var commitSubject = "" { didSet { if !commitSubject.isEmpty { commitFeedback = nil; commitWarning = nil }; if oldValue != commitSubject { workspace?.recordDraft(self) } } }
@@ -478,7 +482,9 @@ final class RepositoryStore {
 
     func sync(_ action: GitRepository.SyncAction) {
         guard canUseRepository, snapshot?.remotes.isEmpty == false, action == .fetch || canIntegrate else { return }
-        protectedPerform("\(action.rawValue.capitalized)…", protect: action == .pull) { try await $0.sync(action) }
+        if action == .pull, let snapshot {
+            pullRequest = PullReviewRequest(head: snapshot.head, upstream: snapshot.references.first(where: \.isCurrent)?.upstream ?? "")
+        } else { protectedPerform("\(action.rawValue.capitalized)…", protect: false) { try await $0.sync(action) } }
     }
     func switchBranch(_ ref: Reference) {
         guard checkoutUnavailableReason(ref) == nil else { return }

@@ -55,7 +55,10 @@ import Testing
     try await git(["push", "origin", "main"], at: peer)
     f.store.sync(.fetch); await f.finish()
     #expect(try status().text == "HEAD | ↓1")
-    f.store.sync(.pull); await f.finish()
+    f.store.sync(.pull)
+    let pull = try #require(f.store.pullRequest)
+    f.store.pullRequest = nil
+    f.store.runPull(pull, policy: .fastForwardOnly); await f.finish()
     let pulled = try status()
     #expect(f.store.error == nil && pulled.text == "HEAD")
     try await git(["switch", "--detach"]); try await f.sync()

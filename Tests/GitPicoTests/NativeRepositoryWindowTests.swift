@@ -4,6 +4,20 @@ import GitCore
 import Testing
 @testable import GitPico
 
+@Test @MainActor func nativeSessionRestoresDetachedGroupsAndVisualTabOrderWithoutWindows() async throws {
+    let f = try await NativeTabFixture.make(); defer { f.clean() }
+    let first = f.workspace.activeTab.id
+    let second = f.workspace.newTab().id
+    let third = f.workspace.newTab().id
+    let groups = [WorkspaceWindowGroup(tabs: [second, first], selected: first, x: 100, y: 100, width: 1420, height: 900),
+                  WorkspaceWindowGroup(tabs: [third], selected: third, x: 200, y: 200, width: 1420, height: 900)]
+    f.windows.restoreWindows(groups)
+    let restored = f.windows.sessionWindows()
+    #expect(restored.contains { $0.tabs == [second, first] && $0.selected == first })
+    #expect(restored.contains { $0.tabs == [third] })
+    #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
+}
+
 @MainActor private struct NativeTabFixture {
     let base: WorkingAppFixture
     let workspace: RepositoryWorkspace

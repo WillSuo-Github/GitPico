@@ -1,11 +1,18 @@
 import GitCore
 import SwiftUI
 
+private struct MergeParentComparison: Identifiable {
+    let id = UUID()
+    let parent: String
+    let commit: String
+}
+
 struct CommitDetailView: View {
     @Bindable var store: RepositoryStore
     @State private var tree = false
     @State private var metadataExpanded = false
     @State private var expandedFiles: Set<String> = []
+    @State private var parentComparison: MergeParentComparison?
     var body: some View {
         VStack(spacing: 0) {
             if let commit = store.selectedCommit {
@@ -13,6 +20,13 @@ struct CommitDetailView: View {
                     HashChip(hash: commit.hash)
                     if commit.parents.count > 1 { Chip(text: "Merge", icon: "arrow.triangle.merge", tint: .purple) }
                     Spacer()
+                    if commit.parents.count > 1 {
+                        Menu("Compare Parent") {
+                            ForEach(Array(commit.parents.enumerated()), id: \.offset) { index, parent in
+                                Button("Parent \(index + 1) · " + String(parent.prefix(8))) { parentComparison = MergeParentComparison(parent: parent, commit: commit.hash) }
+                            }
+                        }.fixedSize().controlSize(.small).help("Compare the merge result with a specific parent")
+                    }
                     if store.destination == .reflog {
                         Menu("Recover") {
                             Button("Create Branch Here…") { store.recoveryRequest = RecoveryRequest(action: .branch(commit.hash)) }
@@ -60,6 +74,14 @@ struct CommitDetailView: View {
                 } else { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
             } else { EmptyPane(title: "Select a commit", subtitle: "Pick a commit to read its message and review every changed file.", icon: "clock.arrow.circlepath") }
         }.onChange(of: store.selectedCommit?.id) { expandedFiles = [] }
+        .sheet(item: $parentComparison) { request in
+            if let repository = store.repository {
+                VStack(spacing: 12) {
+                    HStack { SheetTitle("Merge Parent Comparison", icon: "arrow.triangle.merge"); Spacer(); Button("Close") { parentComparison = nil }.keyboardShortcut(.cancelAction) }
+                    RevisionComparisonView(store: store, repository: repository, initialLeft: request.parent, initialRight: request.commit)
+                }.padding(20).frame(width: 1060, height: 720)
+            }
+        }
     }
 }
 
@@ -151,7 +173,9 @@ struct CommitFileDisclosure: View {
         VStack(spacing: 0) {
             Divider()
             DisclosureGroup(isExpanded: $expanded) {
-                if let diff {
+                if stats?.isBinary == true || BinaryComparisonView.isImageCandidate(file.path) {
+                    BinaryComparisonView(repository: repository, path: file.path, left: commit.parents.first.map { .revision($0) } ?? .empty, right: .revision(commit.hash)).frame(minHeight: 320)
+                } else if let diff {
                     let patch = PatchDocument(diff)
                     if patch.hunks.isEmpty { Text(diff).font(.system(size: 11, design: .monospaced)).textSelection(.enabled).padding(12).frame(maxWidth: .infinity, alignment: .leading) }
                     if preferences.splitDiff {

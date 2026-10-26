@@ -13,6 +13,10 @@ struct AuthenticationSettingsView: View {
     @State private var removing: AuthenticationProfile?
     @State private var editing: AuthenticationProfile?
     @State private var oauth = OAuthLoginController()
+    @State private var customProvider = OAuthProvider.gitlab
+    @State private var customHost = ""
+    @State private var customClientID = ""
+    @State private var customAPI = false
     var body: some View {
         Form {
             Section {
@@ -47,6 +51,23 @@ struct AuthenticationSettingsView: View {
                 if let message = oauth.message { Text(message).font(.callout).textSelection(.enabled) }
                 if let failure = oauth.failure { Text(failure).font(.callout).foregroundStyle(Pico.deletion).textSelection(.enabled) }
             }
+            Section("Enterprise and Self-managed OAuth") {
+                Picker("Provider", selection: $customProvider) { Text("GitHub Enterprise").tag(OAuthProvider.github); Text("GitLab Self-managed").tag(OAuthProvider.gitlab) }
+                TextField("Server hostname", text: $customHost, prompt: Text("git.example.com"))
+                TextField("Public OAuth Client ID", text: $customClientID)
+                Text("Register a public native OAuth application on this server. GitHub requires Device Flow; GitLab requires PKCE with Confidential disabled.").font(.caption).foregroundStyle(.secondary)
+                Text("Callback: gitpico://oauth/" + customProvider.rawValue + "/callback").font(.system(.caption, design: .monospaced)).textSelection(.enabled)
+                if customProvider == .gitlab {
+                    Toggle("Enable Merge Requests API access", isOn: $customAPI)
+                    Text("MR actions require the api scope in addition to Git access. Enable it in your server's OAuth registration and review the broader access on its consent screen.").font(.caption).foregroundStyle(.secondary)
+                }
+                Button("Sign In to This Server") {
+                    run {
+                        let configuration = try OAuthConfiguration(provider: customProvider, host: customHost.trimmingCharacters(in: .whitespacesAndNewlines), clientID: customClientID.trimmingCharacters(in: .whitespacesAndNewlines), apiAccess: customProvider == .gitlab && customAPI)
+                        oauth.start(configuration, authentication: store.authentication, root: store.snapshot?.root, showDevice: { NSWorkspace.shared.open($0) }, saved: updateContexts)
+                    }
+                }.disabled(busy || oauth.isRunning || customHost.isEmpty || customClientID.isEmpty)
+            }
             Section("Connected HTTPS Accounts") {
                 if store.authentication.profiles.isEmpty { Text("No saved accounts").foregroundStyle(.secondary) }
                 ForEach(store.authentication.profiles) { profile in
@@ -57,6 +78,10 @@ struct AuthenticationSettingsView: View {
                         if profile.isOAuth { Button("Sign In Again…") { reconnect(profile) }.disabled(busy || oauth.isRunning || store.networkActivity?.runningCount ?? 0 > 0) }
                         else { Button("Update Token…") { editing = profile; provider = profile.provider; host = profile.host; username = profile.username; token = "" }.disabled(busy || oauth.isRunning || store.networkActivity?.runningCount ?? 0 > 0) }
                         Button("Remove…", role: .destructive) { removing = profile }.disabled(busy || oauth.isRunning || store.networkActivity?.runningCount ?? 0 > 0)
+                    }
+                    if profile.isOAuth, profile.provider == .gitlab {
+                        Button("Enable Merge Requests API…") { reconnect(profile, apiAccess: true) }.disabled(busy || oauth.isRunning || store.networkActivity?.runningCount ?? 0 > 0)
+                        Text("Requires api in the OAuth app registration. The browser will ask you to review the additional API permissions.").font(.caption).foregroundStyle(.secondary)
                     }
                 }
                 Text("Remove deletes this app's local credential. Revoke the provider grant from your authorized applications to withdraw server access.").font(.caption).foregroundStyle(.secondary)
@@ -120,14 +145,15 @@ struct AuthenticationSettingsView: View {
             oauth.start(configuration, authentication: store.authentication, root: store.snapshot?.root, showDevice: { url in NSWorkspace.shared.open(url) }, saved: updateContexts)
         }
     }
-    private func reconnect(_ profile: AuthenticationProfile) {
+    private func reconnect(_ profile: AuthenticationProfile, apiAccess: Bool = false) {
         busy = true
         Task {
             defer { busy = false }
             do {
                 let vault = store.authentication.vault
                 let credential = try await Task.detached { try vault.read(profile.id) }.value
-                guard let configuration = credential.oauth?.configuration else { throw GitFailure("This OAuth credential is missing. Remove the account and sign in again.") }
+                guard let existing = credential.oauth?.configuration else { throw GitFailure("This OAuth credential is missing. Remove the account and sign in again.") }
+                let configuration = try OAuthConfiguration(provider: existing.provider, host: existing.host, clientID: existing.clientID, apiAccess: apiAccess || existing.apiAccess == true)
                 oauth.start(configuration, authentication: store.authentication, root: nil, reconnecting: profile, showDevice: { url in NSWorkspace.shared.open(url) }, saved: updateContexts)
             } catch { message = GitLogRedaction.clean(error.localizedDescription) }
         }

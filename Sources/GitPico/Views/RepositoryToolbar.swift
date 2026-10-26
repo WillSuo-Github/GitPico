@@ -33,7 +33,7 @@ struct RepositoryToolbar: ToolbarContent {
                 Group {
                     Button { store.sync(.fetch) } label: { Label("Fetch", systemImage: "arrow.down.circle") }.help("Fetch all remotes")
                     Button { store.sync(.pull) } label: { Label("Pull", systemImage: "arrow.down") }
-                        .help(snapshot.behind > 0 ? "Pull \(snapshot.behind) incoming commits (fast-forward only)" : "Pull current branch (fast-forward only)").disabled(!store.canIntegrate)
+                        .help("Review Pull strategy (" + AppPreferences.shared.pullPolicy.title + ")").disabled(!store.canIntegrate)
                     Button { store.sync(.push) } label: { Label("Push", systemImage: "arrow.up") }
                         .help(snapshot.ahead > 0 ? "Push \(snapshot.ahead) outgoing commits" : "Push current branch").disabled(!store.canIntegrate)
                 }.disabled(!store.canUseRepository || snapshot.remotes.isEmpty)

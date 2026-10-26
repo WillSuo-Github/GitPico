@@ -55,6 +55,11 @@ public struct Stash: Identifiable, Hashable, Sendable {
 }
 
 public struct RepositorySnapshot: Sendable {
+    public var unresolvedUpstream: String? {
+        guard let current = references.first(where: \.isCurrent), !current.upstream.isEmpty,
+              !references.contains(where: { $0.name == current.upstream || $0.fullName == current.upstream }) else { return nil }
+        return current.upstream
+    }
     public let root: URL
     public let branch: String
     public let changes: [FileChange]
@@ -112,7 +117,7 @@ public struct FileStatistics: Sendable {
     public let isBinary: Bool
 }
 
-public struct HistoryOptions: Sendable, Equatable {
+public struct HistoryOptions: Sendable, Equatable, Codable {
     public var limit = 500
     public var query = ""
     public var firstParent = false

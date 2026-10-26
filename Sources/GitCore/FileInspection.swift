@@ -41,7 +41,7 @@ extension GitRepository {
         try validateInspectionPath(path)
         let tip = try await verifiedCommit(revision)
         let count = min(max(1, limit), 10_000)
-        let output = try await GitProcess.run(["log", "--no-show-signature", "--follow", "--find-renames", "--max-count=\(count + 1)", "-z", "--format=%H%x00%P%x00%an%x00%ae%x00%at%x00%s%x00%D%x00", "--name-status", tip, "--", path], at: root)
+        let output = try await GitProcess.run(["log", "--no-show-signature", "--follow", "--find-renames", "--max-count=\(count + 1)", "-z", "--format=%H%x00%P%x00%an%x00%ae%x00%at%x00%s%x00%D%x00", "--name-status", tip, "--", path], at: root, cancellable: true)
         let revisions = try InspectionParser.fileHistory(output.data, path: path)
         return FileHistory(tip: tip, revisions: Array(revisions.prefix(count)), hasMore: revisions.count > count)
     }

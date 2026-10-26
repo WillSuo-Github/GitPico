@@ -236,6 +236,10 @@ struct WorkingDiffView: View {
                 }
                 if let error = store.diffError {
                     VStack(spacing: 12) { Text(error).foregroundStyle(.secondary).textSelection(.enabled); Button("Retry") { store.selectChange(file, staged: store.stagedDiff) } }.padding().frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if let repository = store.repository, BinaryComparisonView.isImageCandidate(file.path) || store.diff.contains("Binary files ") {
+                    BinaryComparisonView(repository: repository, path: file.path, originalPath: store.stagedDiff ? file.originalPath : nil,
+                        left: store.stagedDiff ? (store.snapshot?.hasHEAD == true ? .revision("HEAD") : .empty) : .index,
+                        right: store.stagedDiff ? .index : .workingCopy, version: store.lastUpdated)
                 } else {
                 ChunkDiffView(text: store.diff, isLoading: store.isLoadingDiff, chunkAction: store.ignoreWhitespace ? nil : { store.stageChunk($0) }, lineAction: store.ignoreWhitespace ? nil : { store.stageLines($0) }, actionTitle: store.stagedDiff ? "Unstage Chunk" : "Stage Chunk", leftTitle: store.stagedDiff ? "HEAD" : "Index", rightTitle: store.stagedDiff ? "Index" : "Working Copy", disabled: store.isBusy,
                               discardChunk: store.stagedDiff || store.ignoreWhitespace ? nil : { store.localChange(.chunk(file, store.diff, $0, store.diffContext)) },

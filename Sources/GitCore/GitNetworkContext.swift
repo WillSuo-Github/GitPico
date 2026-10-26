@@ -66,7 +66,7 @@ final class GitNetworkObservation {
         guard let context, index < arguments.count, ["fetch", "push", "pull", "clone", "ls-remote", "lfs", "submodule"].contains(arguments[index]) else { return nil }
         let command = arguments[index]
         let subcommand = index + 1 < arguments.count ? arguments[index + 1] : ""
-        if command == "lfs", !["fetch", "pull", "push", "clone"].contains(subcommand) { return nil }
+        if command == "lfs", !["fetch", "pull", "push", "clone", "locks", "lock", "unlock"].contains(subcommand) { return nil }
         if command == "submodule", !["add", "update"].contains(subcommand) { return nil }
         self.context = context; self.command = ["lfs", "submodule"].contains(command) ? command + " " + subcommand : command
         repository = command == "clone" ? URL(fileURLWithPath: arguments.last ?? root.path).lastPathComponent : root.lastPathComponent

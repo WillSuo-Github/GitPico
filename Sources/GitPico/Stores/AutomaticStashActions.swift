@@ -15,7 +15,7 @@ extension RepositoryStore {
         guard automaticStash == nil else { error = "Review the pending automatic stash before starting another operation."; return }
         if !changes.isEmpty, AppPreferences.shared.offerAutomaticStash {
             let request = AutomaticStashRequest(title: title, refresh: refresh, action: action)
-            if integrationRequest != nil || managementRequest != nil || rebaseRequest != nil || showingBranchSheet {
+            if integrationRequest != nil || pullRequest != nil || managementRequest != nil || rebaseRequest != nil || showingBranchSheet {
                 pendingAutomaticStashRequest = request
             } else { automaticStashRequest = request }
         } else { perform(title, refresh: refresh, action: action) }

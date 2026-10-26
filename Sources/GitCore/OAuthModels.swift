@@ -2,22 +2,23 @@ import CryptoKit
 import Foundation
 import Security
 
-public enum OAuthProvider: String, Codable, Sendable { case github, gitlab }
+public enum OAuthProvider: String, Codable, Sendable, CaseIterable { case github, gitlab }
 
 public struct OAuthConfiguration: Codable, Equatable, Sendable {
     public let provider: OAuthProvider
     public let host: String
     public let clientID: String
-    public init(provider: OAuthProvider, host: String, clientID: String) throws {
+    public var apiAccess: Bool? = nil
+    public init(provider: OAuthProvider, host: String, clientID: String, apiAccess: Bool = false) throws {
         guard let url = URLComponents(string: "https://" + host), let hostname = url.host, !hostname.isEmpty,
               url.user == nil, url.password == nil, url.path.isEmpty, url.query == nil, url.fragment == nil,
               !host.contains(where: { $0.isWhitespace || $0 == "\0" }),
               !clientID.isEmpty, clientID.utf8.count <= 256, !clientID.contains(where: { $0.isWhitespace || $0 == "\0" }) else { throw GitFailure("Enter a valid OAuth server and Client ID.") }
-        self.provider = provider; self.host = host.lowercased(); self.clientID = clientID
+        self.provider = provider; self.host = host.lowercased(); self.clientID = clientID; self.apiAccess = apiAccess ? true : nil
     }
     public var callback: URL { URL(string: "gitpico://oauth/" + provider.rawValue + "/callback")! }
     public var tokenURL: URL { URL(string: "https://" + host + (provider == .github ? "/login/oauth/access_token" : "/oauth/token"))! }
-    public var scopes: [String] { provider == .github ? ["repo", "read:user", "offline_access"] : ["read_user", "write_repository"] }
+    public var scopes: [String] { provider == .github ? ["repo", "read:user", "offline_access"] : ["read_user", "write_repository"] + (apiAccess == true ? ["api"] : []) }
 }
 
 public struct OAuthAuthorization: Codable, Sendable {
@@ -43,7 +44,7 @@ public struct OAuthTokenGrant: Sendable {
     }
     public func requireRepositoryScopes(_ provider: OAuthProvider) throws {
         let values = Set(scopes)
-        guard provider == .github ? values.contains("repo") : values.contains("read_user") && values.contains("write_repository") else { throw GitFailure("The authorization did not grant the requested repository permissions. Sign in again and review the requested access.") }
+        guard provider == .github ? values.contains("repo") : values.contains("api") || values.contains("read_user") && values.contains("write_repository") else { throw GitFailure("The authorization did not grant the requested repository permissions. Sign in again and review the requested access.") }
     }
 }
 

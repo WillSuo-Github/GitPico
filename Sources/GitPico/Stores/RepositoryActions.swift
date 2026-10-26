@@ -39,12 +39,8 @@ extension RepositoryStore {
         backStack.append(destination); navigate(target, record: false)
     }
     func syncAll() {
-        guard canSynchronize else { return }
-        protectedPerform("Synchronizing…") { repository in
-            try await repository.sync(.fetch)
-            try await repository.sync(.pull)
-            try await repository.sync(.push)
-        }
+        guard canSynchronize, let snapshot else { return }
+        pullRequest = PullReviewRequest(head: snapshot.head, upstream: snapshot.references.first(where: \.isCurrent)?.upstream ?? "", pushAfter: true)
     }
 
     func searchHistory() async {

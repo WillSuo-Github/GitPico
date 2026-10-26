@@ -38,6 +38,9 @@ import Observation
                 }
                 try Task.checkCancellation()
                 try grant.requireRepositoryScopes(configuration.provider)
+                if configuration.provider == .gitlab, configuration.apiAccess == true, !grant.scopes.contains("api") {
+                    throw GitFailure("GitLab did not grant API access. Enable the api scope in this OAuth application's registration, then review authorization again.")
+                }
                 deviceChallenge = nil; message = "Verifying your account…"
                 let credential = GitStoredCredential(host: configuration.host, username: "", secret: grant.accessToken, oauth: grant.authorization(configuration))
                 let profile = AuthenticationProfile(id: UUID(), provider: configuration.provider == .github ? .github : .gitlab, host: configuration.host, username: "", method: .oauth)

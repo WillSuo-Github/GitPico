@@ -45,10 +45,8 @@ public actor GitRepository {
         async let operation = currentOperation()
         var ahead = 0
         var behind = 0
-        if references.contains(where: { $0.isCurrent && !$0.upstream.isEmpty }) {
-            let counts = try await GitProcess.run(["rev-list", "--left-right", "--count", "HEAD...@{upstream}", "--"], at: root)
-            let values = counts.text.split(whereSeparator: \.isWhitespace).compactMap { Int($0) }
-            if values.count == 2 { ahead = values[0]; behind = values[1] }
+        if hasHEAD, references.contains(where: { $0.isCurrent && !$0.upstream.isEmpty }) {
+            (ahead, behind) = try await upstreamDivergence()
         }
         return RepositorySnapshot(root: root, branch: branchOutput.status == 0 ? branchOutput.text.trimmingCharacters(in: .newlines).replacingOccurrences(of: "^refs/heads/", with: "", options: .regularExpression) : "Detached HEAD", changes: GitParser.status(statusOutput.data), commits: commits, references: references, stashes: stashOutput, remotes: remotesOutput.text.split(separator: "\n").map(String.init), ahead: ahead, behind: behind, hasHEAD: hasHEAD, identity: try await identity, operation: try await operation, historyCount: historyCount, head: position, historyCountIsExact: reusable?.historyCountIsExact ?? (countHistory || commits.count < options.limit))
     }

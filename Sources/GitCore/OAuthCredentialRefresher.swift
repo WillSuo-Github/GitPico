@@ -38,7 +38,7 @@ public actor OAuthCredentialRefresher {
         // A sibling window/helper may have rotated the token while this request waited.
         let current = try storage.read(id)
         guard let authorization = current.oauth, authorization.needsRefresh(at: now) else { return current }
-        let config = try OAuthConfiguration(provider: authorization.configuration.provider, host: current.host, clientID: authorization.configuration.clientID)
+        let config = try OAuthConfiguration(provider: authorization.configuration.provider, host: current.host, clientID: authorization.configuration.clientID, apiAccess: authorization.configuration.apiAccess == true)
         guard config == authorization.configuration, let refresh = authorization.refreshToken, !refresh.isEmpty,
               authorization.refreshExpiresAt.map({ $0 > now }) ?? true else { throw GitFailure("This account authorization expired. Sign in again in Authentication.") }
         var values = [("client_id", config.clientID), ("grant_type", "refresh_token"), ("refresh_token", refresh)]

@@ -11,6 +11,7 @@ struct FileHistoryView: View {
     @State private var selected: String?
     @State private var mode = "Diff"
     @State private var limit = 500
+    @State private var allReferences = false
     @State private var showingFiles = false
     @State private var isLoading = false
     @State private var error: String?
@@ -28,6 +29,7 @@ struct FileHistoryView: View {
         PersistentSplitView(name: "fileHistory", width: 320) {
             VStack(spacing: 0) {
                 PaneBar(title: path.isEmpty ? "File History" : (path as NSString).lastPathComponent, subtitle: path.isEmpty ? "No file chosen" : "\(history?.revisions.count ?? 0)\(history?.hasMore == true ? "+" : "") commits · " + ((path as NSString).deletingLastPathComponent.nilIfEmpty ?? "repository root"), icon: "doc.text.magnifyingglass") {
+                    Toggle("All Refs", isOn: $allReferences).toggleStyle(.checkbox).controlSize(.small).help("Include local branches, remote-tracking branches and tags, following earlier names where discovered.")
                     Button("Choose…") { showingFiles = true }.controlSize(.small).help("Choose another tracked file")
                 }
                 if let error { InspectionErrorView(message: error) }
@@ -98,7 +100,7 @@ struct FileHistoryView: View {
                 } else { EmptyPane(title: "Select a revision", subtitle: "Pick a commit to see how this file changed, its full contents or line-by-line blame.", icon: "doc.text") }
             }
         }
-        .task(id: limit) { await loadHistory() }
+        .task(id: "\(limit):\(allReferences)") { await loadHistory() }
         .task(id: "\(selected ?? ""):\(mode):\(ignoreWhitespace)") { await loadPreview() }
         .sheet(isPresented: $showingFiles) {
             InspectionFilePicker(repository: repository, revision: history?.tip ?? revision) { store.navigate(.fileHistory($0, history?.tip ?? revision)) }
@@ -118,7 +120,7 @@ struct FileHistoryView: View {
         isLoading = true; error = nil
         defer { isLoading = false }
         do {
-            let value = try await repository.fileHistory(path: path, revision: history?.tip ?? revision, limit: limit)
+            let value = allReferences ? try await repository.fileHistoryAcrossReferences(path: path, revision: history?.tip ?? revision, limit: limit) : try await repository.fileHistory(path: path, revision: history?.tip ?? revision, limit: limit)
             guard !Task.isCancelled else { return }
             history = value
             if !value.revisions.contains(where: { $0.id == selected }) { selected = value.revisions.first?.id }

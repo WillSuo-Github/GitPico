@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Write Xcode's derived Info.plist without changing source or project settings."""
 import os
+import base64
 import plistlib
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
+from urllib.parse import urlsplit
 
 from build_number import build_number
 
@@ -25,6 +27,17 @@ def generate_metadata(environment):
         except (OSError, plistlib.InvalidFileException):
             pass
     values['CFBundleVersion'] = build_number(datetime.now(ZoneInfo('Asia/Shanghai')), max(previous, default=''))
+    feed = environment.get('GITPICO_UPDATE_FEED_URL', '').strip()
+    key = environment.get('GITPICO_UPDATE_PUBLIC_KEY', '').strip()
+    if key and not feed and values.get('GitPicoUpdateRepository'):
+        feed = 'https://github.com/' + values['GitPicoUpdateRepository'] + '/releases/latest/download/appcast.xml'
+    if feed or key:
+        address = urlsplit(feed)
+        if address.scheme != 'https' or not address.hostname or address.username or address.password or address.fragment:
+            raise ValueError('Update feed must be an HTTPS URL without embedded credentials or fragment.')
+        if len(base64.b64decode(key, validate=True)) != 32:
+            raise ValueError('Update verification key must be a base64 Ed25519 public key.')
+        values.update(SUFeedURL=feed, SUPublicEDKey=key, SUEnableAutomaticChecks=False, SUAutomaticallyUpdate=False, SUVerifyUpdateBeforeExtraction=True, SURequireSignedFeed=True, SUShowReleaseNotes=False)
     derived.parent.mkdir(parents=True, exist_ok=True)
     temporary = derived.with_suffix('.plist.tmp')
     temporary.write_bytes(plistlib.dumps(values))

@@ -67,6 +67,6 @@ func networkFailureAdvice(_ output: String) -> String {
     if value.contains("authentication") || value.contains("401") || value.contains("403") || value.contains("permission denied") { return "Check the selected account, token permissions or unlocked SSH keys in Authentication." }
     if value.contains("host key verification") { return "Verify the SSH host fingerprint with your hosting service, then trust it using your system SSH setup. GitPico does not bypass host verification." }
     if value.contains("resolve host") || value.contains("timed out") || value.contains("unable to access") { return "Check the network, proxy and server address. Retry Fetch when the connection is available." }
-    if value.contains("non-fast-forward") || value.contains("fetch first") || value.contains("divergent") { return "Fetch and review incoming changes. Merge or rebase deliberately before pushing; do not force-push to bypass this error." }
+    if value.contains("non-fast-forward") || value.contains("fetch first") || value.contains("divergent") || value.contains("diverging") || value.contains("not possible to fast-forward") { return "Fetch and review incoming changes. Open Pull to choose Merge or Rebase deliberately; do not force-push to bypass this error." }
     return "Inspect the repository and remote state before retrying. A cancelled or failed write can have partially completed."
 }

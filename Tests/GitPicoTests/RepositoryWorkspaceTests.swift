@@ -3,6 +3,46 @@ import GitCore
 import Testing
 @testable import GitPico
 
+@Test @MainActor func workspaceSessionRestoresRepositoriesNavigationSelectionAndDrafts() async throws {
+    let t = try await TabFixture.make(); defer { t.clean() }
+    let w = t.workspace
+    await w.open(await t.f.repository.root)
+    let first = w.activeTab
+    first.store.commitSubject = "Restore this draft"
+    first.store.navigate(.history)
+    await first.store.historyTask?.value; await first.store.detailTask?.value
+    let hash = first.store.selectedCommit?.hash
+    w.newTab(); await w.open(t.second)
+    let second = w.activeTab
+    w.select(first.id); w.shutdown()
+    let restored = RepositoryWorkspace(library: w.library, draftsFile: w.drafts.file)
+    defer { restored.shutdown(); for tab in restored.tabs { tab.store.stopAutomaticRefresh(); tab.store.cancelPreviewWork(); tab.store.metadataTask?.cancel() } }
+    await restored.restoreSavedSession()
+    #expect(restored.tabs.map(\.id) == [first.id, second.id])
+    #expect(restored.selectedID == first.id && restored.activeStore.destination == .history)
+    #expect(restored.activeStore.selectedCommit?.hash == hash)
+    #expect(restored.activeStore.commitSubject == "Restore this draft")
+    #expect(restored.tabs[1].root?.path == t.second.resolvingSymlinksInPath().path)
+    #expect(restored.sessionSaveWarning == nil)
+}
+
+@Test @MainActor func corruptOrExternallyChangedSessionIsNotSilentlyOverwritten() async throws {
+    let t = try await TabFixture.make(); defer { t.clean() }
+    await t.workspace.open(await t.f.repository.root)
+    t.workspace.saveSession()
+    let original = try Data(contentsOf: t.workspace.session.file)
+    let corrupt = Data("not a workspace".utf8)
+    try corrupt.write(to: t.workspace.session.file)
+    t.workspace.saveSession()
+    #expect(t.workspace.sessionSaveWarning != nil)
+    #expect(try Data(contentsOf: t.workspace.session.file) == corrupt)
+    let reopened = RepositoryWorkspace(library: t.workspace.library)
+    reopened.saveSession()
+    #expect(reopened.sessionSaveWarning != nil)
+    #expect(try Data(contentsOf: t.workspace.session.file) == corrupt)
+    try original.write(to: t.workspace.session.file)
+}
+
 @MainActor private struct TabFixture {
     let f: WorkingAppFixture
     let second: URL

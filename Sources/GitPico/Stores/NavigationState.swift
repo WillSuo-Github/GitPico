@@ -1,7 +1,7 @@
 import Foundation
 import GitCore
 
-struct NavigationBookmark {
+struct NavigationBookmark: Codable, Equatable {
     let search: String
     let options: HistoryOptions
     let commitHash: String?

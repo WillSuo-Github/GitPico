@@ -40,6 +40,11 @@ struct RepositoryWorkspaceView: View {
                         Button("Retry", action: workspace.flushDrafts)
                     }
                 }
+                if let warning = workspace.sessionSaveWarning {
+                    NoticeBanner(icon: "exclamationmark.triangle.fill", title: "Workspace could not be saved", message: warning) {
+                        Button("Retry", action: workspace.retrySessionSave)
+                    }
+                }
                 ContentView(store: tab.store, showsSidebar: false)
             }
             // The split view's columns ignore the window-level inset; keep fixed bottom controls above the status bar.

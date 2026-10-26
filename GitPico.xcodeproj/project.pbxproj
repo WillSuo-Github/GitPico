@@ -7,13 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		021098FB9E745B2827F28440 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 609429E4E88AA2A929303213 /* Sparkle */; };
 		23CEC5CFF8551B6F92785A2F /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = FE067960E19E32FCB749C0C5 /* AppIcon.icon */; };
 		32EEA7057342B4AACF621735 /* GitCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6B05CF827D25B77F396230D /* GitCore.framework */; };
 		34062C3E56FD5C853F0A5A1A /* GitCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6B05CF827D25B77F396230D /* GitCore.framework */; };
 		974648B4762AAAB1810733C5 /* GitCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A6B05CF827D25B77F396230D /* GitCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A110643C5A4511B7E79A9433 /* GitCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A6B05CF827D25B77F396230D /* GitCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		A5E7C0DE51A0C0102B3E4D01 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A5E7C0DE51A0C0102B3E4D02 /* Assets.xcassets */; };
 		AEE93C285505AA2CB4B4ADC6 /* GitCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6B05CF827D25B77F396230D /* GitCore.framework */; };
+		C47EEB747EFD900F08028355 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F7FA56219B78DF89B47065FC /* Assets.xcassets */; };
 		D5877B69C4E956644DF2228C /* GitCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A6B05CF827D25B77F396230D /* GitCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -98,13 +99,13 @@
 		82BC667E1CCE1AB2D5CCA5E6 /* create_demo.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = create_demo.sh; sourceTree = "<group>"; };
 		93B53209B3D5A6E63E1200A0 /* project.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = project.yml; sourceTree = "<group>"; };
 		98EA577E49C3224AD5EC70EF /* GitPicoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GitPicoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		A5E7C0DE51A0C0102B3E4D02 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A6B05CF827D25B77F396230D /* GitCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GitCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AFFD843E6532C7ADF959F8ED /* create_review_demo.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = create_review_demo.py; sourceTree = "<group>"; };
 		B704ABDA06CD1B93A9122BC7 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		D140537807E8C5A02FA44B95 /* create_management_demo.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = create_management_demo.py; sourceTree = "<group>"; };
 		D29218C28ABAB9B6605694A0 /* create_inspection_demo.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = create_inspection_demo.py; sourceTree = "<group>"; };
 		F6EC6DEE1AC58244AB51332E /* build_and_run.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = build_and_run.sh; sourceTree = "<group>"; };
+		F7FA56219B78DF89B47065FC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FE067960E19E32FCB749C0C5 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -153,6 +154,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				32EEA7057342B4AACF621735 /* GitCore.framework in Frameworks */,
+				021098FB9E745B2827F28440 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -187,7 +189,7 @@
 			isa = PBXGroup;
 			children = (
 				FE067960E19E32FCB749C0C5 /* AppIcon.icon */,
-				A5E7C0DE51A0C0102B3E4D02 /* Assets.xcassets */,
+				F7FA56219B78DF89B47065FC /* Assets.xcassets */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -306,6 +308,7 @@
 			);
 			name = GitPico;
 			packageProductDependencies = (
+				609429E4E88AA2A929303213 /* Sparkle */,
 			);
 			productName = GitPico;
 			productReference = 54E89EF56EA2EC23E3CC8666 /* GitPico.app */;
@@ -372,6 +375,9 @@
 			);
 			mainGroup = 481F5026C91558E85BF11563;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				A9A195B8B9B202327B0A4C40 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B932C2DF5D8A14D52B343804 /* Products */;
 			projectDirPath = "";
@@ -412,7 +418,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				23CEC5CFF8551B6F92785A2F /* AppIcon.icon in Resources */,
-				A5E7C0DE51A0C0102B3E4D01 /* Assets.xcassets in Resources */,
+				C47EEB747EFD900F08028355 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -523,7 +529,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				COMBINE_HIDPI_IMAGES = YES;
-				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "$(DERIVED_FILE_DIR)/GitPico-Info.plist";
@@ -830,6 +836,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A9A195B8B9B202327B0A4C40 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = exactVersion;
+				version = 2.10.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		609429E4E88AA2A929303213 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A9A195B8B9B202327B0A4C40 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 91945058E5FE1E7C02EFF3DE /* Project object */;
 }

@@ -25,6 +25,7 @@ struct GitPicoApp: App {
         if NativeStartupVerification.enabled {
             Task { await NativeStartupVerification.finish(repositoryWindows) }
         } else {
+            UpdateController.shared.startIfConfigured(authentication: workspace.authentication)
             workspace.startMonitoring()
             Task { await workspace.startup() }
             NSApp.activate(ignoringOtherApps: true)
@@ -74,6 +75,11 @@ struct SettingsView: View {
                 }.padding(.vertical, 4)
             }
             Section("Workflow") {
+                Toggle("Restore repositories and windows on launch", isOn: $preferences.resumeWorkspace)
+                Picker("Default Pull strategy", selection: $preferences.pullPolicy) {
+                    ForEach(PullPolicy.allCases, id: \.self) { Text($0.title).tag($0) }
+                }
+                Text(preferences.pullPolicy.explanation).font(.caption).foregroundStyle(.secondary)
                 Toggle("Always offer to stash local changes", isOn: $preferences.offerAutomaticStash)
                 Toggle("Fetch remote updates in the background", isOn: $preferences.backgroundFetch)
                 Text("Every five minutes while an open repository is idle. Uses connected HTTPS accounts or unlocked SSH keys, never Pulls or Pushes, and reports failures in Network Activity without prompting.").font(.caption).foregroundStyle(.secondary)
@@ -97,6 +103,8 @@ struct SettingsView: View {
         .tabItem { Label("General", systemImage: "gearshape") }
         ExternalToolSettingsView(preferences: tools).tabItem { Label("External Tools", systemImage: "arrow.left.arrow.right") }
         AuthenticationSettingsView(store: store).tabItem { Label("Authentication", systemImage: "person.badge.key") }
+        SSHKeysSettingsView().tabItem { Label("SSH Keys", systemImage: "key") }
+        UpdatesSettingsView(store: store).tabItem { Label("Updates & Support", systemImage: "arrow.down.circle") }
         }.frame(width: 740, height: 570)
     }
 }

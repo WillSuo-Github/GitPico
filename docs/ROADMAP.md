@@ -181,3 +181,12 @@ Do not represent unimplemented controls as working. Verify write operations in d
 - Native Authentication offers GitHub device authorization and GitLab browser PKCE, one-time state/code validation, explicit cancellation/timeouts, identity verification before Keychain saving and reconnect without changing repository bindings. Existing PAT profiles decode unchanged; Clone and repository pickers identify OAuth profiles.
 - Keychain retains access/refresh tokens, expiration and issuer/client configuration. The exact-host Git helper renews expired OAuth credentials on demand, with cross-process locking and token-rotation preservation. SSH and unrelated HTTPS hosts do not require the selected OAuth profile to be renewed. Provider revocation remains explicit in the user's authorized-app settings.
 - [Registration, background regression, Keychain/helper coverage and remaining user acceptance](VALIDATION-OAUTH-2026-10-26.md). No foreground GitPico testing or automatic acceptance of provider repository grants was performed.
+
+
+## Remaining maturity implementation — 2026-10-26
+
+- Added unresolved-upstream recovery, captured Pull strategy review, persistent workspace/native window sessions, bounded image/binary comparison, all-ref rename history and merge-parent comparisons.
+- Added app-account PR/MR review/create/comment/approval/check/merge flows, configurable Enterprise/self-managed public OAuth clients, explicit GitLab API scope upgrades, bounded transient device-poll retries and clearer secure-connection failures.
+- Added public SSH fingerprints/key generation/agent actions and reviewed Git LFS server locking with exact lock/HEAD/index/config guards.
+- Added privacy-filtered diagnostic export, a macOS 26 arm64/Intel CI matrix, universal Developer ID/notarization packaging, signed Sparkle feeds and authenticated private GitHub Release asset delivery. Upload scripts prepare drafts only; no release was published in this implementation batch.
+- These entries supersede earlier pending implementation bullets for these features. They do not replace historical validation or establish full parity, native accessibility acceptance or production update acceptance. See [current validation](VALIDATION-MATURITY-IMPLEMENTATION-2026-10-26.md), [implementation tracker](IMPLEMENTATION-MATURITY-2026-10-26.md) and [private distribution](DISTRIBUTION.md).
