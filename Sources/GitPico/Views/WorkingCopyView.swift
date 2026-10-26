@@ -22,7 +22,7 @@ struct WorkingCopyView: View {
                     }.font(.system(size: 11)).controlSize(.small).padding(.horizontal, 12).frame(height: 30)
                         .background(Color.accentColor.opacity(0.07)).overlay(alignment: .bottom) { Divider() }
                 }
-                List(selection: Binding<Set<String>>(get: { store.selectedWorkingFiles }, set: store.setWorkingSelection)) {
+                List(selection: Binding<Set<String>>(get: { store.selectedWorkingFiles }, set: { store.setWorkingSelection($0) })) {
                     ForEach(files) { file in
                         Group {
                             if let change = file.change { WorkingFileRow(store: store, file: change).picoDrag(store, .workingFiles(store.selectedWorkingFiles.contains(file.path) ? store.selectedWorkingFiles.sorted().filter { path in store.changes.contains { $0.path == path } } : [file.path])) }

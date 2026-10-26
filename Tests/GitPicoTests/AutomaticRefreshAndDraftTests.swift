@@ -3,10 +3,10 @@ import GitCore
 import Testing
 @testable import GitPico
 
-@MainActor private func waitUntil(_ condition: () -> Bool) async throws {
+@MainActor private func waitUntil(sourceLocation: SourceLocation = #_sourceLocation, _ condition: () -> Bool) async throws {
     let deadline = ContinuousClock.now.advanced(by: .seconds(8))
     while !condition(), ContinuousClock.now < deadline { try await Task.sleep(for: .milliseconds(20)) }
-    #expect(condition())
+    try #require(condition(), "Timed out waiting for the requested repository/UI state.", sourceLocation: sourceLocation)
 }
 
 @Test @MainActor func fileEventsRefreshExternalEditsAndRefsWithoutLosingDraftOrSelection() async throws {
@@ -17,6 +17,8 @@ import Testing
     f.store.commitSubject = "Keep this message"
     try await f.write("a.txt", "outside edit\n")
     try await waitUntil { f.store.changes.contains { $0.path == "a.txt" } }
+    // Snapshot publication precedes the detached list rebuild. A real row must exist before selecting it.
+    try await waitUntil { f.store.workingList.paths.contains("a.txt") && !f.store.isLoadingWorkingFiles }
     f.store.setWorkingSelection(["a.txt"]); await f.store.detailTask?.value
     try await f.write("a.txt", "outside second edit\n")
     try await waitUntil { f.store.diff.contains("outside second edit") }
