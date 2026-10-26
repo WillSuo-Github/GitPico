@@ -80,16 +80,11 @@ codesign --verify --deep --strict "$APP"
 for architecture in arm64 x86_64; do lipo "$APP/Contents/MacOS/GitPico" -verify_arch "$architecture"; done
 ditto -c -k --sequesterRsrc --keepParent "$APP" "$ARCHIVE_DIR/notarization.zip"
 if [[ -n "${GITPICO_ASC_PROFILE:-}" ]]; then
-  asc --profile "$GITPICO_ASC_PROFILE" notarization submit --file "$ARCHIVE_DIR/notarization.zip" --wait --output json > "$OUTPUT_DIR/notarization.json"
+  asc --profile "$GITPICO_ASC_PROFILE" notarization submit --file "$ARCHIVE_DIR/notarization.zip" --wait --output json > "$OUTPUT_DIR/notarization-provider.json"
 else
-  xcrun notarytool submit "$ARCHIVE_DIR/notarization.zip" --keychain-profile "$GITPICO_NOTARY_PROFILE" --wait --output-format json > "$OUTPUT_DIR/notarization.json"
+  xcrun notarytool submit "$ARCHIVE_DIR/notarization.zip" --keychain-profile "$GITPICO_NOTARY_PROFILE" --wait --output-format json > "$OUTPUT_DIR/notarization-provider.json"
 fi
-python3 - "$OUTPUT_DIR/notarization.json" <<'PY'
-import json, sys
-record = json.load(open(sys.argv[1]))
-if record.get('status') != 'Accepted':
-    raise SystemExit('Notarization did not report Accepted. Inspect the retained report before proceeding.')
-PY
+python3 "$ROOT_DIR/script/normalize_notarization.py" "$OUTPUT_DIR/notarization-provider.json" "$OUTPUT_DIR/notarization.json"
 xcrun stapler staple "$APP"
 xcrun stapler validate "$APP"
 spctl --assess --type execute "$APP"
