@@ -35,6 +35,10 @@ export GITPICO_UPDATE_FEED_URL
 GITPICO_UPDATE_PUBLIC_KEY="${GITPICO_UPDATE_PUBLIC_KEY:-$(cat "$ROOT_DIR/Configuration/SparklePublicKey.txt")}"
 export GITPICO_UPDATE_PUBLIC_KEY
 [[ -z "$(git status --porcelain)" ]] || { echo 'Commit reviewed source changes before packaging a release.' >&2; exit 1; }
+SOURCE_COMMIT="$(git rev-parse HEAD)"
+verify_source() {
+  [[ "$(git rev-parse HEAD)" == "$SOURCE_COMMIT" && -z "$(git status --porcelain)" ]] || { echo 'Source changed during packaging. Keep the logs and rebuild from one clean commit.' >&2; exit 1; }
+}
 python3 - <<'PY'
 import base64, os
 from urllib.parse import urlsplit
@@ -57,6 +61,7 @@ xcodebuild archive -project GitPico.xcodeproj -scheme GitPico -configuration Rel
   GITPICO_UPDATE_FEED_URL="$GITPICO_UPDATE_FEED_URL" GITPICO_UPDATE_PUBLIC_KEY="$GITPICO_UPDATE_PUBLIC_KEY" \
   > "$ARCHIVE_DIR/archive.log" 2>&1
 APP="$ARCHIVE_DIR/GitPico.xcarchive/Products/Applications/GitPico.app"
+verify_source
 BUILD_ID="$(/usr/libexec/PlistBuddy -c 'Print CFBundleVersion' "$APP/Contents/Info.plist")"
 OUTPUT_DIR="$ROOT_DIR/dist/releases/$BUILD_ID"
 GITPICO_UPDATE_DOWNLOAD_PREFIX="${GITPICO_UPDATE_DOWNLOAD_PREFIX:-https://github.com/WillSuo-Github/GitPico/releases/download/build-$BUILD_ID}"
@@ -83,7 +88,8 @@ SPARKLE_BIN="${GITPICO_SPARKLE_BIN:-$ROOT_DIR/.build/distribution-derived/Source
 "$SPARKLE_BIN/generate_appcast" --account "${GITPICO_SPARKLE_ACCOUNT:-com.willsuo.GitPico.updates}" \
   --download-url-prefix "${GITPICO_UPDATE_DOWNLOAD_PREFIX%/}/" "$OUTPUT_DIR"
 python3 "$ROOT_DIR/script/validate_appcast.py" "$OUTPUT_DIR/appcast.xml" "$BUILD_ID"
-python3 - "$OUTPUT_DIR" "$BUILD_ID" "$(git rev-parse HEAD)" <<'PY'
+verify_source
+python3 - "$OUTPUT_DIR" "$BUILD_ID" "$SOURCE_COMMIT" <<'PY'
 import hashlib, json, sys
 from pathlib import Path
 folder, build, commit = Path(sys.argv[1]), sys.argv[2], sys.argv[3]
