@@ -1,0 +1,21 @@
+{
+  "bundle": "/Users/willsuo/files/Github/GitPico/dist/PrivateUpdateAcceptance-20261027/GitPico.app",
+  "beforeBuild": "20261027001805",
+  "processesBefore": [
+    "46833 /Users/willsuo/files/Github/GitPico/dist/PrivateUpdateAcceptance-20261027/GitPico.app/Contents/MacOS/GitPico"
+  ],
+  "sameVersionSignedFeedCheck": "Native Sparkle: You are up to date",
+  "accountMode": "Automatic (one GitHub account)",
+  "sourceCommit": "c9e88a29474ef57fb7b8fc6786805ac1d3b5f47f",
+  "afterBuild": "20261027002242",
+  "processesAfter": [
+    "49924 /Users/willsuo/files/Github/GitPico/dist/PrivateUpdateAcceptance-20261027/GitPico.app/Contents/MacOS/GitPico"
+  ],
+  "newProcessObservedBeforeAnyManualRelaunch": true,
+  "nativeDownloadReachedReadyToInstall": true,
+  "nativeInstallAndRelaunchInvoked": true,
+  "restoredRepository": "authorized GitLab synthetic fixture",
+  "settingsAfterRelaunchBuild": "20261027002242",
+  "updatedBundleCodeSignatureVerified": true,
+  "updatedBundleGatekeeperAccepted": true
+}

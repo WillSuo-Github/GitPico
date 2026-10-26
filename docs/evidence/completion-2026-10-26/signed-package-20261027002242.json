@@ -1,0 +1,12 @@
+{
+  "manifest": {
+    "build": "20261027002242",
+    "commit": "c9e88a29474ef57fb7b8fc6786805ac1d3b5f47f",
+    "sha256": "7ec97f96362d1bfc76e12ca98691ae7dfb5c48ae4c484f3169478148d6f175e9"
+  },
+  "notarization": {
+    "id": "eeafba93-996d-481f-aa40-ebca594b61ef",
+    "status": "Accepted"
+  },
+  "publishedPrivateRelease": "https://github.com/WillSuo-Github/GitPico/releases/tag/build-20261027002242"
+}

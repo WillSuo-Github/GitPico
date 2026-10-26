@@ -1,0 +1,9 @@
+{
+  "fromBuild": "20261026234538",
+  "attemptedBuild": "20261027000044",
+  "nativeResult": "Update Error: The update feed is improperly signed and could not be validated.",
+  "installed": false,
+  "cause": "Sparkle overwrites Accept with RSS; GitHub asset API returns JSON metadata instead of the signed XML.",
+  "publishedReleaseReturnedToDraft": true,
+  "fixSourceCommit": "c9e88a29474ef57fb7b8fc6786805ac1d3b5f47f"
+}

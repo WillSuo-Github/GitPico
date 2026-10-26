@@ -122,7 +122,7 @@ The maturity completion work supersedes the old missing-feature inventory. See [
 
 - Complete enterprise Git permission acceptance, provider LFS quotas/locking and hardware/encrypted SSH integrations. PR/MR collaboration stays on the hosting website.
 - Complete native keyboard, real Chinese IME, VoiceOver, multi-display/session restoration and prolonged physical sleep/network/memory/energy acceptance.
-- Establish passing macOS 26 arm64/Intel CI and runtime evidence, notarized installation and the authenticated signed update/install/relaunch loop.
+- Obtain newest-source macOS 26 arm64/Intel CI after the owner resolves GitHub Billing & plans. Notarized private installation and the authenticated update/install/relaunch loop passed on 2026-10-27; wider runtime and recovery acceptance remain.
 - Further product expansion includes richer blame, combined merge patches, LFS history migration/pruning, additional drag/Quick Action variants, automatic branch management, workflow/Graphite/SVN/Gerrit integrations, syntax coloring and localization. These are distinct from the six-area maturity completion scope and full Tower parity remains incomplete.
 
 Do not represent unimplemented controls as working. Verify write operations in disposable repositories before exercising them on personal projects.
