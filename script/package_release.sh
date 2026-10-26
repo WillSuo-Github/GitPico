@@ -67,7 +67,7 @@ OUTPUT_DIR="$ROOT_DIR/dist/releases/$BUILD_ID"
 GITPICO_UPDATE_DOWNLOAD_PREFIX="${GITPICO_UPDATE_DOWNLOAD_PREFIX:-https://github.com/WillSuo-Github/GitPico/releases/download/build-$BUILD_ID}"
 mkdir -p "$OUTPUT_DIR"
 codesign --verify --deep --strict "$APP"
-lipo -verify_arch arm64 x86_64 "$APP/Contents/MacOS/GitPico"
+lipo "$APP/Contents/MacOS/GitPico" -verify_arch arm64 x86_64
 ditto -c -k --sequesterRsrc --keepParent "$APP" "$ARCHIVE_DIR/notarization.zip"
 if [[ -n "${GITPICO_ASC_PROFILE:-}" ]]; then
   asc --profile "$GITPICO_ASC_PROFILE" notarization submit --file "$ARCHIVE_DIR/notarization.zip" --wait --output json > "$OUTPUT_DIR/notarization.json"
