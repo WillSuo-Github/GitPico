@@ -32,10 +32,14 @@ struct LFSLocksView: View {
         .confirmationDialog(plan?.action.title ?? "LFS Lock", isPresented: Binding(get: { plan != nil }, set: { if !$0 { plan = nil } })) {
             if let captured = plan { Button(captured.action.title, role: isForce(captured) ? .destructive : nil) { plan = nil; execute(captured) } }
         } message: {
-            if let plan { Text(plan.action.title + " “" + plan.action.path + "” on “" + plan.remote + "”?" + (isForce(plan) ? " This may remove another person's lock." : "")) }
+            if let plan { Text(confirmationMessage(plan)) }
         }
     }
     private func isForce(_ plan: LFSLockPlan) -> Bool { if case .unlock(_, true) = plan.action { true } else { false } }
+    private func confirmationMessage(_ plan: LFSLockPlan) -> String {
+        let question = "\(plan.action.title) “\(plan.action.path)” on “\(plan.remote)”?"
+        return isForce(plan) ? question + " This may remove another person's lock." : question
+    }
     private func prepare(_ action: LFSLockAction) {
         guard let repository = store.repository else { return }
         busy = true
