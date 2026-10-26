@@ -26,6 +26,7 @@ extension RepositoryStore {
                     }
                 }
                 if self.fileMonitor?.isRunning != true { self.automaticRefreshError = "File monitoring could not start. Use Refresh to update this repository." }
+                else { self.requestAutomaticRefresh() } // Reconcile edits made while FSEvents was starting.
             } catch { self?.automaticRefreshError = error.localizedDescription }
         }
     }

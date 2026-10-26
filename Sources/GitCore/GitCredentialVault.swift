@@ -5,7 +5,8 @@ public struct GitStoredCredential: Codable, Sendable {
     public let host: String
     public let username: String
     public let secret: String
-    public init(host: String, username: String, secret: String) { self.host = host.lowercased(); self.username = username; self.secret = secret }
+    public let oauth: OAuthAuthorization?
+    public init(host: String, username: String, secret: String, oauth: OAuthAuthorization? = nil) { self.host = host.lowercased(); self.username = username; self.secret = secret; self.oauth = oauth }
 }
 public struct GitCredentialReference: Sendable {
     public let id: UUID
@@ -20,6 +21,7 @@ public enum GitCredentialVault {
     public static func save(_ value: GitStoredCredential, id: UUID) throws {
         guard !value.host.isEmpty, !value.username.contains(where: { $0.isNewline || $0 == "\0" }), !value.secret.isEmpty, !value.secret.contains(where: { $0.isNewline || $0 == "\0" }), value.secret.utf8.count < 16_384 else { throw GitFailure("Enter a host, username and token without line breaks.") }
         let data = try JSONEncoder().encode(value)
+        guard data.count <= 65_536, value.oauth.map({ $0.configuration.host == value.host && ($0.refreshToken?.utf8.count ?? 0) < 16_384 }) ?? true else { throw GitFailure("Invalid OAuth credential data.") }
         var entry = query(id); entry[kSecValueData as String] = data
         entry[kSecUseAuthenticationUI as String] = kSecUseAuthenticationUIFail
         entry[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
@@ -56,13 +58,22 @@ public enum GitCredentialHelper {
             let fields = line.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
             if fields.count == 2 { values[String(fields[0])] = String(fields[1]) }
         }
-        guard values["protocol"] == "https", values["host"]?.lowercased() == expectedHost.lowercased(), credential.host == expectedHost.lowercased(), values["username"].map({ $0 == credential.username }) ?? true, !credential.username.contains(where: { $0.isNewline || $0 == "\0" }), !credential.secret.contains(where: { $0.isNewline || $0 == "\0" }) else { return "" }
-        return "username=" + credential.username + "\npassword=" + credential.secret + "\n\n"
+        let genericGitLabUser = credential.oauth?.configuration.provider == .gitlab && values["username"] == "oauth2"
+        guard values["protocol"] == "https", values["host"]?.lowercased() == expectedHost.lowercased(), credential.host == expectedHost.lowercased(), values["username"].map({ $0 == credential.username || genericGitLabUser }) ?? true, !credential.username.contains(where: { $0.isNewline || $0 == "\0" }), !credential.secret.contains(where: { $0.isNewline || $0 == "\0" }) else { return "" }
+        return "username=" + (genericGitLabUser ? "oauth2" : credential.username) + "\npassword=" + credential.secret + "\n\n"
     }
     public static func run(arguments: [String], environment: [String: String]) {
-        guard let raw = environment["GITPICO_CREDENTIAL_ID"], let id = UUID(uuidString: raw), let host = environment["GITPICO_CREDENTIAL_HOST"], let credential = try? GitCredentialVault.read(id) else { return }
+        guard arguments.last == "get", let raw = environment["GITPICO_CREDENTIAL_ID"], let id = UUID(uuidString: raw), let host = environment["GITPICO_CREDENTIAL_HOST"] else { return }
         let input = String(decoding: (try? FileHandle.standardInput.read(upToCount: 16_384)) ?? Data(), as: UTF8.self)
-        let output = response(operation: arguments.last ?? "", input: input, credential: credential, expectedHost: host)
-        if !output.isEmpty { try? FileHandle.standardOutput.write(contentsOf: Data(output.utf8)) }
+        let lines = input.split(separator: "\n").map(String.init)
+        guard lines.contains("protocol=https"), lines.contains(where: { $0.lowercased() == "host=" + host.lowercased() }) else { return }
+        do {
+            let credential = try OAuthCredentialRefresher.forGit(id)
+            let output = response(operation: "get", input: input, credential: credential, expectedHost: host)
+            if !output.isEmpty { try FileHandle.standardOutput.write(contentsOf: Data(output.utf8)) }
+        } catch {
+            let message = "GitPico authentication: " + GitLogRedaction.clean(error.localizedDescription) + "\n"
+            try? FileHandle.standardError.write(contentsOf: Data(message.utf8))
+        }
     }
 }

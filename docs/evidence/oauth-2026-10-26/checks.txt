@@ -1,0 +1,51 @@
+oauth-core-focused.log
+✔ Test oauthPKCEUsesRFCVectorAndChecksExactCallbackAndUniqueState() passed after 0.002 seconds.
+✔ Test oauthConfigurationAndFormRejectAmbiguousEndpointsAndEncodeSecretsInBodyOnly() passed after 0.001 seconds.
+✔ Test oauthGrantValidatesExpiryScopeAndNeverReportsProviderSecretsOnErrors() passed after 0.001 seconds.
+✔ Test githubDeviceFlowHonorsPendingSlowDownAndUsesNoClientSecret() passed after 0.001 seconds.
+✔ Test deviceFlowRejectsOffHostVerificationAndStopsOnDenialExpiryOrCancellation() passed after 0.001 seconds.
+✔ Test concurrentOAuthRenewalRotatesOnceAndPreservesAccountIdentity() passed after 0.113 seconds.
+✔ Test rejectedOAuthRenewalKeepsCredentialAndPersonalTokensNeverUseOAuthTransport() passed after 0.001 seconds.
+✔ Test oauthRedactionIncludesRefreshTokensVerifiersAndGitLabOAuthSecrets() passed after 0.001 seconds.
+✔ Test run with 9 tests in 0 suites passed after 0.121 seconds.
+
+oauth-full-tests.log
+✔ Test oauthPKCEUsesRFCVectorAndChecksExactCallbackAndUniqueState() passed after 0.001 seconds.
+✔ Test oauthConfigurationAndFormRejectAmbiguousEndpointsAndEncodeSecretsInBodyOnly() passed after 0.001 seconds.
+✔ Test oauthGrantValidatesExpiryScopeAndNeverReportsProviderSecretsOnErrors() passed after 0.001 seconds.
+✔ Test githubDeviceFlowHonorsPendingSlowDownAndUsesNoClientSecret() passed after 0.001 seconds.
+✔ Test deviceFlowRejectsOffHostVerificationAndStopsOnDenialExpiryOrCancellation() passed after 0.001 seconds.
+✔ Test concurrentOAuthRenewalRotatesOnceAndPreservesAccountIdentity() passed after 0.106 seconds.
+✔ Test rejectedOAuthRenewalKeepsCredentialAndPersonalTokensNeverUseOAuthTransport() passed after 0.001 seconds.
+✔ Test oauthRedactionIncludesRefreshTokensVerifiersAndGitLabOAuthSecrets() passed after 0.001 seconds.
+✔ Test run with 227 tests in 0 suites passed after 263.737 seconds.
+✔ Test actualOAuthKeychainHelperReturnsOnlyTheAccessToken() passed after 0.301 seconds.
+✘ Test fileEventsRefreshExternalEditsAndRefsWithoutLosingDraftOrSelection() recorded an issue at AutomaticRefreshAndDraftTests.swift:9:5: Expectation failed: condition()
+✘ Test fileEventsRefreshExternalEditsAndRefsWithoutLosingDraftOrSelection() recorded an issue at AutomaticRefreshAndDraftTests.swift:25:5: Expectation failed: f.store.selectedChange == "a.txt" && f.store.commitSubject == "Keep this message" && !f.store.isBusy
+✔ Test githubDeviceLoginUsesRegisteredPublicClientAndVerifiesIdentityBeforeSaving() passed after 0.001 seconds.
+✔ Test declinedMismatchedOrCancelledOAuthLoginNeverSavesAnAccount() passed after 0.001 seconds.
+✔ Test invalidOAuthIdentityAndPartialPermissionsAreRejectedBeforeKeychainSave() passed after 0.001 seconds.
+✔ Test oauthReconnectKeepsBindingsAndRejectsDifferentAccountsOrPATReplacement() passed after 0.001 seconds.
+✔ Test existingPersonalTokenProfilesDecodeWithoutOAuthMetadata() passed after 0.001 seconds.
+✔ Test registeredGitHubOAuthClientCanRequestADeviceCodeWithoutAuthorizingAnAccount() passed after 1.182 seconds.
+✘ Test run with 144 tests in 0 suites failed after 77.750 seconds with 2 issues.
+
+oauth-final-regression.log
+✔ Test oauthPKCEUsesRFCVectorAndChecksExactCallbackAndUniqueState() passed after 0.001 seconds.
+✔ Test oauthConfigurationAndFormRejectAmbiguousEndpointsAndEncodeSecretsInBodyOnly() passed after 0.001 seconds.
+✔ Test oauthGrantValidatesExpiryScopeAndNeverReportsProviderSecretsOnErrors() passed after 0.001 seconds.
+✔ Test githubDeviceFlowHonorsPendingSlowDownAndUsesNoClientSecret() passed after 0.001 seconds.
+✔ Test deviceFlowRejectsOffHostVerificationAndStopsOnDenialExpiryOrCancellation() passed after 0.001 seconds.
+✔ Test concurrentOAuthRenewalRotatesOnceAndPreservesAccountIdentity() passed after 0.110 seconds.
+✔ Test rejectedOAuthRenewalKeepsCredentialAndPersonalTokensNeverUseOAuthTransport() passed after 0.001 seconds.
+✔ Test oauthRedactionIncludesRefreshTokensVerifiersAndGitLabOAuthSecrets() passed after 0.001 seconds.
+✔ Test oauthRenewalFinishesSavingRotatedTokensAfterCallerCancellation() passed after 0.086 seconds.
+✔ Test run with 13 tests in 0 suites passed after 0.597 seconds.
+✔ Test actualOAuthKeychainHelperReturnsOnlyTheAccessToken() passed after 0.302 seconds.
+✔ Test fileEventsRefreshExternalEditsAndRefsWithoutLosingDraftOrSelection() passed after 1.680 seconds.
+✔ Test githubDeviceLoginUsesRegisteredPublicClientAndVerifiesIdentityBeforeSaving() passed after 0.001 seconds.
+✔ Test declinedMismatchedOrCancelledOAuthLoginNeverSavesAnAccount() passed after 0.001 seconds.
+✔ Test invalidOAuthIdentityAndPartialPermissionsAreRejectedBeforeKeychainSave() passed after 0.001 seconds.
+✔ Test oauthReconnectKeepsBindingsAndRejectsDifferentAccountsOrPATReplacement() passed after 0.001 seconds.
+✔ Test existingPersonalTokenProfilesDecodeWithoutOAuthMetadata() passed after 0.001 seconds.
+✔ Test run with 144 tests in 0 suites passed after 66.841 seconds.

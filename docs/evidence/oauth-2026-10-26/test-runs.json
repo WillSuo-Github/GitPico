@@ -1,0 +1,56 @@
+{
+  "oauth-core-focused.log": {
+    "summaries": [
+      "\u2714 Test run with 9 tests in 0 suites passed after 0.121 seconds."
+    ],
+    "skipped": [],
+    "issues": [],
+    "success": true
+  },
+  "oauth-full-tests.log": {
+    "summaries": [
+      "\u2714 Test run with 227 tests in 0 suites passed after 263.737 seconds.",
+      "\u2718 Test run with 144 tests in 0 suites failed after 77.750 seconds with 2 issues."
+    ],
+    "skipped": [
+      "branchPreviewPerformanceBenchmark()",
+      "branchPreviewRenderPerformanceBenchmark()",
+      "renderCurrentBranchSyncBadgesWithoutWindows()",
+      "renderDesignGalleryWithoutActivation()",
+      "renderHistoryRowsWithoutWindows()",
+      "writeRefreshPerformanceBenchmark()",
+      "renderNativeWindowTabsWithoutActivation()",
+      "repositoryOpenPerformanceBenchmark()",
+      "renderUnifiedSearchSuggestionsWithoutWindows()",
+      "renderWorkingFileAndDiffRowsWithoutWindows()",
+      "workingTreeRefreshPerformanceBenchmark()"
+    ],
+    "issues": [
+      "\u2718 Test fileEventsRefreshExternalEditsAndRefsWithoutLosingDraftOrSelection() recorded an issue at AutomaticRefreshAndDraftTests.swift:9:5: Expectation failed: condition()",
+      "\u2718 Test fileEventsRefreshExternalEditsAndRefsWithoutLosingDraftOrSelection() recorded an issue at AutomaticRefreshAndDraftTests.swift:25:5: Expectation failed: f.store.selectedChange == \"a.txt\" && f.store.commitSubject == \"Keep this message\" && !f.store.isBusy"
+    ],
+    "success": false
+  },
+  "oauth-final-regression.log": {
+    "summaries": [
+      "\u2714 Test run with 13 tests in 0 suites passed after 0.597 seconds.",
+      "\u2714 Test run with 144 tests in 0 suites passed after 66.841 seconds."
+    ],
+    "skipped": [
+      "branchPreviewPerformanceBenchmark()",
+      "branchPreviewRenderPerformanceBenchmark()",
+      "renderCurrentBranchSyncBadgesWithoutWindows()",
+      "renderDesignGalleryWithoutActivation()",
+      "renderHistoryRowsWithoutWindows()",
+      "writeRefreshPerformanceBenchmark()",
+      "renderNativeWindowTabsWithoutActivation()",
+      "registeredGitHubOAuthClientCanRequestADeviceCodeWithoutAuthorizingAnAccount()",
+      "repositoryOpenPerformanceBenchmark()",
+      "renderUnifiedSearchSuggestionsWithoutWindows()",
+      "renderWorkingFileAndDiffRowsWithoutWindows()",
+      "workingTreeRefreshPerformanceBenchmark()"
+    ],
+    "issues": [],
+    "success": true
+  }
+}

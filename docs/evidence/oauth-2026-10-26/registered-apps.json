@@ -1,0 +1,27 @@
+{
+  "github": {
+    "clientID": "Ov23liSrQZqjI0HkLbHN",
+    "settingsURL": "https://github.com/settings/applications/3964716",
+    "owner": "WillSuo-Github",
+    "callback": "gitpico://oauth/github/callback",
+    "deviceFlow": true,
+    "scopes": [
+      "repo",
+      "read:user",
+      "offline_access"
+    ]
+  },
+  "gitlab": {
+    "clientID": "5841c443bb4aa0e5e369e1abe79518770aa78f859ebf6e519196de34b53f12c8",
+    "settingsURL": "https://gitlab.com/oauth/applications/6291928",
+    "owner": "willsuosuo",
+    "callback": "gitpico://oauth/gitlab/callback",
+    "confidential": false,
+    "deviceFlow": false,
+    "scopes": [
+      "read_user",
+      "write_repository"
+    ]
+  },
+  "containsClientSecret": false
+}

@@ -65,3 +65,11 @@ import Testing
         #expect(GitNetworkObservation(arguments: arguments, context: context, root: root)?.command == arguments.prefix(2).joined(separator: " "))
     }
 }
+
+@Test func unusedHTTPSAccountDoesNotBlockALocalTransportOrRequireKeychainAccess() async throws {
+    let f = try await Fixture.make(); defer { f.clean() }
+    let context = GitNetworkContext(credential: GitCredentialReference(id: UUID(), host: "github.com", executable: "/usr/bin/false")) { _ in }
+    _ = try await GitNetworkContexts.$current.withValue(context) {
+        try await GitProcess.run(["ls-remote", "--", f.url.path], at: f.url)
+    }
+}

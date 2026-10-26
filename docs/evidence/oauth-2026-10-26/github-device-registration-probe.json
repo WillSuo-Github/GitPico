@@ -1,0 +1,9 @@
+{
+  "accountAuthorized" : false,
+  "browserOpened" : false,
+  "clientID" : "Ov23liSrQZqjI0HkLbHN",
+  "deviceEndpointAccepted" : true,
+  "provider" : "GitHub",
+  "tokenStored" : false,
+  "verificationURL" : "https:\/\/github.com\/login\/device"
+}

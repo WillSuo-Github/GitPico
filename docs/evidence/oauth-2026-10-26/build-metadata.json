@@ -1,0 +1,15 @@
+{
+  "CFBundleIdentifier": "com.willsuo.GitPico",
+  "CFBundleShortVersionString": "0.01",
+  "CFBundleVersion": "20261026150348",
+  "LSMinimumSystemVersion": "26.0",
+  "CFBundleURLTypes": [
+    {
+      "CFBundleTypeRole": "Viewer",
+      "CFBundleURLName": "com.willsuo.GitPico.oauth",
+      "CFBundleURLSchemes": [
+        "gitpico"
+      ]
+    }
+  ]
+}

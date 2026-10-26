@@ -9,8 +9,11 @@ struct AuthenticationProfile: Codable, Identifiable, Equatable, Sendable {
     let provider: HostingProvider
     let host: String
     let username: String
-    var label: String { provider.rawValue + " · " + username + " @ " + host }
+    var method: AuthenticationMethod? = nil
+    var isOAuth: Bool { method == .oauth }
+    var label: String { provider.rawValue + " · " + username + " @ " + host + (isOAuth ? " (OAuth)" : "") }
 }
+enum AuthenticationMethod: String, Codable, Sendable { case oauth }
 protocol CredentialStoring: Sendable {
     func save(_ value: GitStoredCredential, id: UUID) throws
     func read(_ id: UUID) throws -> GitStoredCredential
@@ -69,10 +72,30 @@ struct SystemCredentialVault: CredentialStoring {
         try persist(profiles, assignments: values)
     }
     func replaceToken(_ profile: AuthenticationProfile, token: String) throws {
+        guard !profile.isOAuth else { throw GitFailure("Use Sign In Again to renew an OAuth account.") }
         guard loaded, profiles.contains(profile), try read() == diskData else { throw GitFailure("Reload authentication settings before updating this account.") }
         guard !token.isEmpty, !token.contains(where: { $0.isNewline || $0 == "\0" }), token.utf8.count < 16_384 else { throw GitFailure("Enter a token without line breaks.") }
         try vault.save(GitStoredCredential(host: profile.host, username: profile.username, secret: token), id: profile.id)
         revision += 1
+    }
+    @discardableResult func completeOAuth(_ configuration: OAuthConfiguration, grant: OAuthTokenGrant, username: String, root: URL?, reconnecting: AuthenticationProfile? = nil) throws -> AuthenticationProfile {
+        guard loaded else { throw GitFailure("Reload authentication settings before signing in.") }
+        try grant.requireRepositoryScopes(configuration.provider)
+        let provider: HostingProvider = configuration.provider == .github ? .github : .gitlab
+        guard !username.isEmpty, !username.contains(where: { $0.isNewline || $0 == "\0" }) else { throw GitFailure("The provider returned an invalid account name.") }
+        if let reconnecting {
+            guard profiles.contains(reconnecting), reconnecting.isOAuth, reconnecting.provider == provider, reconnecting.host == configuration.host, reconnecting.username == username, try read() == diskData else { throw GitFailure("The signed-in account differs from the account being renewed, or account settings changed. Add it as a separate account or reload settings.") }
+            try vault.save(GitStoredCredential(host: configuration.host, username: username, secret: grant.accessToken, oauth: grant.authorization(configuration)), id: reconnecting.id)
+            revision += 1
+            return reconnecting
+        }
+        let profile = AuthenticationProfile(id: UUID(), provider: provider, host: configuration.host, username: username, method: .oauth)
+        let credential = GitStoredCredential(host: configuration.host, username: username, secret: grant.accessToken, oauth: grant.authorization(configuration))
+        try vault.save(credential, id: profile.id)
+        var values = assignments; if let root { values[root.path] = profile.id }
+        do { try persist(profiles + [profile], assignments: values) }
+        catch { try? vault.remove(profile.id); throw error }
+        return profile
     }
     func remove(_ profile: AuthenticationProfile) throws {
         let saved = try vault.read(profile.id)
@@ -111,7 +134,7 @@ enum HostingAccountClient {
         let endpoint = profile.provider == .github ? (publicGitHub ? "https://api.github.com/user" : base + "/api/v3/user") : base + "/api/v4/user"
         guard let url = URL(string: endpoint) else { throw GitFailure("Invalid hosting API URL.") }
         var request = URLRequest(url: url); request.timeoutInterval = 20
-        if profile.provider == .gitlab { request.setValue(credential.secret, forHTTPHeaderField: "PRIVATE-TOKEN") }
+        if profile.provider == .gitlab && credential.oauth == nil { request.setValue(credential.secret, forHTTPHeaderField: "PRIVATE-TOKEN") }
         else { request.setValue("Bearer " + credential.secret, forHTTPHeaderField: "Authorization") }
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue("GitPico", forHTTPHeaderField: "User-Agent")

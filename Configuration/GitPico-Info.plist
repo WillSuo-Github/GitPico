@@ -13,5 +13,11 @@
     <key>LSMinimumSystemVersion</key><string>$(MACOSX_DEPLOYMENT_TARGET)</string>
     <key>NSPrincipalClass</key><string>NSApplication</string>
     <key>NSHighResolutionCapable</key><true/>
+    <key>CFBundleURLTypes</key>
+    <array><dict>
+        <key>CFBundleURLName</key><string>com.willsuo.GitPico.oauth</string>
+        <key>CFBundleURLSchemes</key><array><string>gitpico</string></array>
+        <key>CFBundleTypeRole</key><string>Viewer</string>
+    </dict></array>
 </dict>
 </plist>

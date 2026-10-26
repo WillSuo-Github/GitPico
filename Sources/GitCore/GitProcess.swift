@@ -40,6 +40,7 @@ public enum GitProcess {
             if cancellable { try Task.checkCancellation() }
             let network = GitNetworkObservation(arguments: arguments, context: networkContext, root: root)
             defer { network?.finish(succeeded: false, message: "Git did not finish successfully. Review the output before retrying.") }
+            try network?.prepareCredential()
             let fm = FileManager.default
             let directory = fm.temporaryDirectory.appendingPathComponent("GitPico-process-\(UUID().uuidString)")
             try fm.createDirectory(at: directory, withIntermediateDirectories: true)

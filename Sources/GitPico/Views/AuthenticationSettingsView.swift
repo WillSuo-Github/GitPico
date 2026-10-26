@@ -12,29 +12,55 @@ struct AuthenticationSettingsView: View {
     @State private var busy = false
     @State private var removing: AuthenticationProfile?
     @State private var editing: AuthenticationProfile?
+    @State private var oauth = OAuthLoginController()
     var body: some View {
         Form {
             Section {
-                Text("Use your existing SSH agent and Git credential helpers, or connect an HTTPS account with a personal access token stored in Keychain.").font(.callout).foregroundStyle(.secondary)
+                Text("Sign in with GitHub or GitLab, connect an HTTPS token, or use your existing system Git and SSH setup. Credentials are stored in Keychain.").font(.callout).foregroundStyle(.secondary)
                 if let root = store.snapshot?.root {
                     Picker("This repository", selection: Binding<UUID?>(get: { store.authentication.profile(for: root)?.id }, set: { id in run { try store.authentication.assign(id, to: root); updateContexts() } })) {
                         Text("System Git / SSH").tag(nil as UUID?)
                         ForEach(store.authentication.profiles) { profile in Text(profile.label).tag(Optional(profile.id)) }
-                    }.disabled(store.networkActivity?.runningCount ?? 0 > 0)
+                    }.disabled(oauth.isRunning || store.networkActivity?.runningCount ?? 0 > 0)
                     Text(root.lastPathComponent + " · HTTPS profiles apply only to their exact host. SSH remotes continue to use system SSH.").font(.caption).foregroundStyle(.secondary)
                 }
             } header: { Text("Connection") }
+            Section("Sign In with Your Browser") {
+                HStack(spacing: 12) {
+                    Button { signIn(.github) } label: { Label("Sign In with GitHub", systemImage: "person.crop.circle.badge.checkmark") }
+                    Button { signIn(.gitlab) } label: { Label("Sign In with GitLab", systemImage: "person.crop.circle.badge.checkmark") }
+                }.disabled(busy || oauth.isRunning || store.networkActivity?.runningCount ?? 0 > 0)
+                Text("GitHub requests repository access (including private repositories) and profile access. GitLab requests profile read access and Git repository read/write access. Review the provider's consent screen before approving.").font(.caption).foregroundStyle(.secondary)
+                if oauth.isRunning { HStack { ProgressView().controlSize(.small); Spacer(); Button("Cancel Sign-In") { oauth.cancel() } } }
+                if let challenge = oauth.deviceChallenge {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("GitHub one-time code").font(.caption).foregroundStyle(.secondary)
+                            Text(challenge.userCode).font(.system(.title2, design: .monospaced).bold()).textSelection(.enabled)
+                        }
+                        Spacer()
+                        Button("Copy Code") { Pico.copy(challenge.userCode) }
+                        Link("Open GitHub", destination: challenge.verificationURL)
+                    }
+                    Text("Enter this code only at " + challenge.verificationURL.absoluteString + ". It expires at " + challenge.expiresAt.formatted(date: .omitted, time: .shortened) + ".").font(.caption).foregroundStyle(.secondary)
+                }
+                if let message = oauth.message { Text(message).font(.callout).textSelection(.enabled) }
+                if let failure = oauth.failure { Text(failure).font(.callout).foregroundStyle(Pico.deletion).textSelection(.enabled) }
+            }
             Section("Connected HTTPS Accounts") {
                 if store.authentication.profiles.isEmpty { Text("No saved accounts").foregroundStyle(.secondary) }
                 ForEach(store.authentication.profiles) { profile in
                     HStack {
-                        VStack(alignment: .leading) { Text(profile.username).fontWeight(.medium); Text(profile.provider.rawValue + " · " + profile.host).font(.caption).foregroundStyle(.secondary) }
+                        VStack(alignment: .leading) { Text(profile.username).fontWeight(.medium); Text(profile.provider.rawValue + " · " + profile.host + (profile.isOAuth ? " · OAuth" : " · Token")).font(.caption).foregroundStyle(.secondary) }
                         Spacer()
-                        if profile.provider != .generic { Button("Verify") { verify(profile) }.disabled(busy) }
-                        Button("Update Token…") { editing = profile; provider = profile.provider; host = profile.host; username = profile.username; token = "" }.disabled(busy || store.networkActivity?.runningCount ?? 0 > 0)
-                        Button("Remove…", role: .destructive) { removing = profile }.disabled(busy || store.networkActivity?.runningCount ?? 0 > 0)
+                        if profile.provider != .generic { Button("Verify") { verify(profile) }.disabled(busy || oauth.isRunning) }
+                        if profile.isOAuth { Button("Sign In Again…") { reconnect(profile) }.disabled(busy || oauth.isRunning || store.networkActivity?.runningCount ?? 0 > 0) }
+                        else { Button("Update Token…") { editing = profile; provider = profile.provider; host = profile.host; username = profile.username; token = "" }.disabled(busy || oauth.isRunning || store.networkActivity?.runningCount ?? 0 > 0) }
+                        Button("Remove…", role: .destructive) { removing = profile }.disabled(busy || oauth.isRunning || store.networkActivity?.runningCount ?? 0 > 0)
                     }
                 }
+                Text("Remove deletes this app's local credential. Revoke the provider grant from your authorized applications to withdraw server access.").font(.caption).foregroundStyle(.secondary)
+                HStack { Link("GitHub Authorized Apps", destination: URL(string: "https://github.com/settings/applications")!); Link("GitLab Authorized Apps", destination: URL(string: "https://gitlab.com/-/user_settings/applications")!) }
             }
             Section {
                 Picker("Service", selection: $provider) { ForEach(HostingProvider.allCases, id: \.self) { Text($0.rawValue).tag($0) } }
@@ -52,9 +78,9 @@ struct AuthenticationSettingsView: View {
                             else { _ = try store.authentication.add(provider: provider, host: host, username: username, token: token, for: store.snapshot?.root) }
                             editing = nil; token = ""; updateContexts(); message = "Account saved. Verify it, then test access to your remote."
                         }
-                    }.disabled(busy || token.isEmpty || username.isEmpty || host.isEmpty || store.networkActivity?.runningCount ?? 0 > 0)
+                    }.disabled(busy || oauth.isRunning || token.isEmpty || username.isEmpty || host.isEmpty || store.networkActivity?.runningCount ?? 0 > 0)
                 }
-            } header: { Text("Connect an Account") } footer: { Text("Use a token authorized for the repositories you need. Account verification checks identity; Test Remote checks read access. Push permissions are validated by the server during Push.").font(.caption) }
+            } header: { Text("Personal Access Token · Any HTTPS Server") } footer: { Text("Use a token authorized for the repositories you need. Account verification checks identity; Test Remote checks read access. Push permissions are validated by the server during Push.").font(.caption) }
             if provider == .github {
                 Link("GitHub token setup and permissions", destination: URL(string: "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens")!)
             } else if provider == .gitlab {
@@ -77,16 +103,35 @@ struct AuthenticationSettingsView: View {
                         if store.showingAuthentication { store.networkAfterAuthentication = true; store.showingAuthentication = false }
                         else { store.showingNetworkActivity = true }
                     }
-                    Button("Reload Account Settings") { store.authentication.reload(); updateContexts() }.disabled(busy || store.networkActivity?.runningCount ?? 0 > 0)
+                    Button("Reload Account Settings") { store.authentication.reload(); updateContexts() }.disabled(busy || oauth.isRunning || store.networkActivity?.runningCount ?? 0 > 0)
                 }
                 Text("Encrypted SSH keys must be unlocked in your SSH agent. Verify unknown host fingerprints before adding them to known_hosts. GitPico does not weaken SSH host verification.").font(.caption).foregroundStyle(.secondary)
             }
         }.formStyle(.grouped)
+            .onDisappear { oauth.cancel() }
             .confirmationDialog("Remove this account and its saved token?", isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } })) {
                 Button("Remove Account", role: .destructive) { if let removing { run { try store.authentication.remove(removing); updateContexts() } }; removing = nil }
             }
     }
     private func run(_ action: () throws -> Void) { do { try action() } catch { message = error.localizedDescription } }
+    private func signIn(_ provider: OAuthProvider) {
+        run {
+            let configuration = try OAuthAppCatalog.configuration(provider)
+            oauth.start(configuration, authentication: store.authentication, root: store.snapshot?.root, showDevice: { url in NSWorkspace.shared.open(url) }, saved: updateContexts)
+        }
+    }
+    private func reconnect(_ profile: AuthenticationProfile) {
+        busy = true
+        Task {
+            defer { busy = false }
+            do {
+                let vault = store.authentication.vault
+                let credential = try await Task.detached { try vault.read(profile.id) }.value
+                guard let configuration = credential.oauth?.configuration else { throw GitFailure("This OAuth credential is missing. Remove the account and sign in again.") }
+                oauth.start(configuration, authentication: store.authentication, root: nil, reconnecting: profile, showDevice: { url in NSWorkspace.shared.open(url) }, saved: updateContexts)
+            } catch { message = GitLogRedaction.clean(error.localizedDescription) }
+        }
+    }
     private func updateContexts() {
         if let workspace = store.workspace { for tab in workspace.tabs { tab.store.configureNetworkContext() } }
         else { store.configureNetworkContext() }
@@ -97,7 +142,7 @@ struct AuthenticationSettingsView: View {
             defer { busy = false }
             do {
                 let vault = store.authentication.vault
-                let credential = try await Task.detached { try vault.read(profile.id) }.value
+                let credential = profile.isOAuth ? try await OAuthCredentialRefresher.shared.credential(profile.id) : try await Task.detached { try vault.read(profile.id) }.value
                 let result = try await HostingAccountClient.verify(profile, credential: credential)
                 message = "Signed in as " + result.login + ". " + result.description
             } catch { message = GitLogRedaction.clean(error.localizedDescription) }

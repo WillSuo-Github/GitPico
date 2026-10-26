@@ -111,3 +111,19 @@ private final class MemoryCredentialVault: CredentialStoring, Sendable {
     try GitCredentialVault.remove(id)
     #expect(throws: GitFailure.self) { _ = try GitCredentialVault.read(id) }
 }
+
+@Test(.enabled(if: ProcessInfo.processInfo.environment["GITPICO_VERIFY_KEYCHAIN_HELPER"] == "1", "Explicit temporary OAuth Keychain round trip only; no hosting-server request."))
+@MainActor func actualOAuthKeychainHelperReturnsOnlyTheAccessToken() async throws {
+    let f = try await PreviewFixture.make(commits: 1, branches: 1); defer { f.clean() }
+    let id = UUID(), host = "gitpico-oauth-test.invalid", access = "fixture-access-" + UUID().uuidString, refresh = "fixture-refresh-" + UUID().uuidString
+    let configuration = try OAuthConfiguration(provider: .gitlab, host: host, clientID: "fixture-client")
+    let oauth = OAuthAuthorization(configuration: configuration, refreshToken: refresh, expiresAt: Date().addingTimeInterval(7200), refreshExpiresAt: nil, scopes: configuration.scopes)
+    try GitCredentialVault.save(GitStoredCredential(host: host, username: "fixture", secret: access, oauth: oauth), id: id)
+    defer { try? GitCredentialVault.remove(id) }
+    #expect(try GitCredentialVault.read(id).oauth?.refreshToken == refresh)
+    let reference = GitCredentialReference(id: id, host: host, executable: try #require(Bundle.main.executablePath))
+    let output = try await GitNetworkContexts.$current.withValue(GitNetworkContext(credential: reference) { _ in }) {
+        try await GitProcess.run(["credential", "fill"], at: f.repository.root, input: Data("protocol=https\nhost=gitpico-oauth-test.invalid\nusername=oauth2\n\n".utf8))
+    }
+    #expect(output.text.contains("username=oauth2\n") && output.text.contains("password=" + access + "\n") && !output.text.contains(refresh))
+}

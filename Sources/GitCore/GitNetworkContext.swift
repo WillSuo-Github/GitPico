@@ -43,7 +43,7 @@ public enum GitLogRedaction {
     public static func clean(_ text: String, secrets: [String] = []) -> String {
         var value = text
         for secret in secrets where !secret.isEmpty { value = value.replacingOccurrences(of: secret, with: "[redacted]") }
-        for pattern in ["[A-Za-z][A-Za-z0-9+.-]*://[^\\s]+", "(?:gh[pousr]_|github_pat_|glpat-|sk-)[A-Za-z0-9_-]*", "(?i)(?:authorization|proxy-authorization)\\s*[:=][^\\r\\n]*", "(?i)(?:password|access_token|private-token)\\s*[:=]\\s*[^\\s]+"] {
+        for pattern in ["[A-Za-z][A-Za-z0-9+.-]*://[^\\s]+", "(?:gh[pousr]_|github_pat_|glpat-|sk-)[A-Za-z0-9_-]*", "(?i)\\b[0-9a-f]{64}\\b", "(?i)(?:authorization|proxy-authorization)\\s*[:=][^\\r\\n]*", "(?i)(?:password|access_token|refresh_token|device_code|code_verifier|private-token)\\s*[:=]\\s*[^\\s]+"] {
             if let regex = try? NSRegularExpression(pattern: pattern) { value = regex.stringByReplacingMatches(in: value, range: NSRange(value.startIndex..., in: value), withTemplate: "[redacted]") }
         }
         return String(value.suffix(32_768)).replacingOccurrences(of: "\r", with: "\n")
@@ -56,9 +56,10 @@ final class GitNetworkObservation {
     let repository: String
     let repositoryPath: String?
     let cancellation = GitNetworkCancellation()
-    let secrets: [String]
+    private var secrets: [String]
     private var lastOutput = ""
     private var finished = false
+    private var nextCredentialCheck = Date.distantPast
     init?(arguments: [String], context: GitNetworkContext?, root: URL) {
         var index = 0
         while index < arguments.count, arguments[index] == "-c", index + 1 < arguments.count { index += 2 }
@@ -70,10 +71,21 @@ final class GitNetworkObservation {
         self.context = context; self.command = ["lfs", "submodule"].contains(command) ? command + " " + subcommand : command
         repository = command == "clone" ? URL(fileURLWithPath: arguments.last ?? root.path).lastPathComponent : root.lastPathComponent
         repositoryPath = command == "clone" ? nil : root.path
-        secrets = context.credential.flatMap { try? GitCredentialVault.read($0.id).secret }.map { [$0] } ?? []
+        secrets = context.credential.flatMap { try? GitCredentialVault.read($0.id) }.map { [$0.secret, $0.oauth?.refreshToken ?? ""] } ?? []
         send(.running, output: "Starting " + command + "…")
     }
+    func prepareCredential() throws {
+        // Git invokes the exact-host helper only if this transport actually needs
+        // that HTTPS account. An expired HTTPS profile must not block SSH/other hosts.
+        if cancellation.isCancelled { throw GitFailure("Network operation cancelled before Git started.") }
+    }
     func progress(stdout: URL, stderr: URL) {
+        if Date() >= nextCredentialCheck {
+            if let id = context.credential?.id, let value = try? GitCredentialVault.read(id) {
+                for secret in [value.secret, value.oauth?.refreshToken ?? ""] where !secret.isEmpty && !secrets.contains(secret) { secrets.append(secret) }
+            }
+            nextCredentialCheck = Date().addingTimeInterval(1)
+        }
         func tail(_ url: URL) -> String {
             guard let handle = try? FileHandle(forReadingFrom: url) else { return "" }
             defer { try? handle.close() }

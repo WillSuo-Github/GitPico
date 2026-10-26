@@ -116,7 +116,7 @@ Open existing repositories; inspect status/diffs; stage/unstage/commit; browse a
 
 ## Remaining
 
-- OAuth browser login, in-app SSH-key onboarding and Pull Requests; hosted-provider authentication acceptance remains pending.
+- Enterprise/self-managed OAuth onboarding, in-app SSH-key onboarding and Pull Requests; user-authorized hosted-provider acceptance remains pending.
 - Image/binary diff rendering, external tool GUI/directory-diff acceptance, symlink/submodule conflict handling.
 - Rebase merge/root ranges, a broader undo model for non-history actions, all-ref file lineage, merge-commit patch export and richer Blame navigation.
 - Remaining drag variants and native acceptance, real tag signing and remote authentication acceptance; expanded patch conversion/link support, external-main-Git storage migration and arbitrary corrupted-pointer reconstruction, hosted LFS authentication/locking, LFS history migration/pruning, external Git Flow CLI extensions/hooks, custom workflows, stacked branches and Graphite.
@@ -174,3 +174,10 @@ Do not represent unimplemented controls as working. Verify write operations in d
 - GitHub/GitLab/other HTTPS PAT profiles live in Keychain, with per-repository assignment, identity verification, exact-host Git credential helper, token rotation and remote read tests. System SSH remains supported; OAuth and SSH-key creation/unlocking are outside this batch.
 - Shared network activity records running/completed Git transports, phase progress/output, failures and explicit cancellation, with redacted bounded local history. Retrying Fetch is scoped to its original repository; Push/Pull are not automatically retried. Opt-in five-minute background Fetch avoids prompts and preserves worktree/index/HEAD.
 - Immutable commit-detail reads run concurrently. Background branch-render measurements, disposable Git integration, temporary Keychain helper acceptance and suppressed light/dark panel captures are recorded in [validation](VALIDATION-MATURITY-2026-10-26.md). Foreground mouse/keyboard/VoiceOver, real hosted authentication and macOS 26 runtime remain unverified.
+
+## GitHub and GitLab OAuth — 2026-10-26
+
+- Registered GitPico OAuth apps under the user's GitHub and GitLab accounts. Public Client IDs are bundled; no Client Secret is required or embedded. GitHub Device Flow is enabled; GitLab is a non-confidential public client with read_user/write_repository scopes and an exact gitpico callback.
+- Native Authentication offers GitHub device authorization and GitLab browser PKCE, one-time state/code validation, explicit cancellation/timeouts, identity verification before Keychain saving and reconnect without changing repository bindings. Existing PAT profiles decode unchanged; Clone and repository pickers identify OAuth profiles.
+- Keychain retains access/refresh tokens, expiration and issuer/client configuration. The exact-host Git helper renews expired OAuth credentials on demand, with cross-process locking and token-rotation preservation. SSH and unrelated HTTPS hosts do not require the selected OAuth profile to be renewed. Provider revocation remains explicit in the user's authorized-app settings.
+- [Registration, background regression, Keychain/helper coverage and remaining user acceptance](VALIDATION-OAUTH-2026-10-26.md). No foreground GitPico testing or automatic acceptance of provider repository grants was performed.
