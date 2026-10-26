@@ -11,6 +11,7 @@ struct GitHistoryReader: HistoryReading {
 }
 struct HistoryGroup: Identifiable, Sendable { let id: String; let title: String; var commits: [Commit] }
 struct HistoryPresentation: Sendable {
+    let id = UUID()
     let page: CommitHistoryPage
     let graph: [String:GraphRow]
     let graphWidth: Double
@@ -22,10 +23,19 @@ struct HistoryPresentation: Sendable {
         let style = Date.FormatStyle().month(.wide).year()
         var previousMonth: DateComponents?
         let calendar = Calendar.current
+        var monthOccurrences: [String: Int] = [:]
         for commit in page.commits {
             let month = calendar.dateComponents([.year,.month], from: commit.date)
             if month == previousMonth { groups[groups.count - 1].commits.append(commit) }
-            else { groups.append(HistoryGroup(id: commit.hash, title: commit.date.formatted(style).uppercased(), commits: [commit])); previousMonth = month }
+            else {
+                // A different branch tip must not replace the section and all its shared rows.
+                // Topological order may revisit a month, so distinguish its contiguous runs.
+                let key = "\(month.era ?? 0)-\(month.year ?? 0)-\(month.month ?? 0)"
+                let occurrence = monthOccurrences[key, default: 0]
+                monthOccurrences[key] = occurrence + 1
+                groups.append(HistoryGroup(id: "\(key):\(occurrence)", title: commit.date.formatted(style).uppercased(), commits: [commit]))
+                previousMonth = month
+            }
         }
         return Self(page: page, graph: graph, graphWidth: Double(max(1,graph.values.map(\.laneCount).max() ?? 1) * 13 + 16), groups: groups)
     }
@@ -63,7 +73,7 @@ extension RepositoryStore {
     }
     func showHistory(_ value: HistoryPresentation, preservingSelection: Bool) {
         let previousSelection = selectedCommit?.hash
-        historyPresentation = value
+        if historyPresentation.id != value.id { historyPresentation = value }
         if preservingSelection, let selectedCommit, value.page.commits.contains(where: { $0.hash == selectedCommit.hash }) {
             if commitDetail == nil && !isLoadingDiff { selectCommit(selectedCommit) }
             revealHistorySelection()
@@ -75,7 +85,7 @@ extension RepositoryStore {
         if !historyNeedsReveal, previousSelection != selectedCommit?.hash { historyNeedsReveal = true; pendingHistorySelection = nil }
         revealHistorySelection()
     }
-    func requestHistory(preservingSelection: Bool = true, debounce: Duration = .milliseconds(40)) {
+    func requestHistory(preservingSelection: Bool = true, debounce: Duration = .zero) {
         guard let repository, isHistoryDestination else { return }
         cancelHistoryPreview()
         let generation = historyGeneration, token = repositoryToken, target = destination, reference = destination.ref, options = historyOptions, reader = historyReader
@@ -88,7 +98,9 @@ extension RepositoryStore {
         isLoadingHistory = cached == nil; historyError = nil
         historyTask = Task { [weak self] in
             do {
-                try await Task.sleep(for: debounce)
+                if debounce > .zero { try await Task.sleep(for: debounce) }
+                else { await Task.yield() }
+                try Task.checkCancellation()
                 let revision = try await reader.resolve(reference, in: repository)
                 try Task.checkCancellation()
                 guard let self, self.historyGeneration == generation, self.repositoryToken == token, self.destination == target, self.historyOptions == options else { return }

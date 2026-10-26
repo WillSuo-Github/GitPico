@@ -1,12 +1,12 @@
 import Foundation
 
-public struct GraphEdge: Sendable {
+public struct GraphEdge: Sendable, Equatable {
     public let from: Int
     public let to: Int
     public let color: Int
 }
 
-public struct GraphRow: Sendable {
+public struct GraphRow: Sendable, Equatable {
     public let lane: Int
     public let color: Int
     public let incoming: [GraphEdge]

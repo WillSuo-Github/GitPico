@@ -1,0 +1,80 @@
+{
+  "build" : "20261026114147",
+  "chooserMenuDisabled" : true,
+  "closeTabMenuWorks" : true,
+  "closeTabShortcut" : "w",
+  "findUsesToolbarSearch" : true,
+  "fixtureError" : "",
+  "frontmostBundle" : "com.google.Chrome",
+  "frontmostProcessIdentifier" : 13859,
+  "isActive" : false,
+  "menuTitles" : [
+    "GitPico",
+    "File",
+    "Edit",
+    "View",
+    "Repository",
+    "Branch",
+    "Commit",
+    "Working Copy",
+    "Navigate",
+    "Window",
+    "Help"
+  ],
+  "multipleTabBarVisible" : true,
+  "nativeSelectionMatchesModel" : true,
+  "nativeStartupVerification" : true,
+  "nativeTabBarVisible" : false,
+  "newTabMenuWorks" : true,
+  "newTabShortcut" : "t",
+  "processIdentifier" : 95630,
+  "quickActionsUseToolbarSearch" : true,
+  "repositoriesMenuReusesCurrentTab" : true,
+  "repositoryMenuContextWorks" : true,
+  "repositoryMenuEnabled" : true,
+  "repositoryOpenPhases" : [
+    {
+      "name" : "snapshot",
+      "seconds" : 0.036615124999999998
+    },
+    {
+      "name" : "automatic-stash",
+      "seconds" : 0.013098959
+    },
+    {
+      "name" : "remotes",
+      "seconds" : 0.189902083
+    },
+    {
+      "name" : "organization",
+      "seconds" : 0.0093067080000000003
+    },
+    {
+      "name" : "undo",
+      "seconds" : 0.030499749999999999
+    },
+    {
+      "name" : "rebase",
+      "seconds" : 0.0075004169999999997
+    },
+    {
+      "name" : "related",
+      "seconds" : 0.023935749999999999
+    },
+    {
+      "name" : "workflow",
+      "seconds" : 0.021330834
+    },
+    {
+      "name" : "working-list",
+      "seconds" : 0.00069966699999999995
+    }
+  ],
+  "repositoryOpenSeconds" : 0.33402237499999998,
+  "repositoryReady" : true,
+  "returnedMenuEnabled" : true,
+  "singleTabBarHidden" : true,
+  "singleTabBarHiddenAfterClose" : true,
+  "version" : "0.01",
+  "visibleWindows" : 0
+}

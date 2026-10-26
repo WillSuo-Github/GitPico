@@ -1,5 +1,6 @@
 import Foundation
 import GitCore
+import Observation
 import Testing
 @testable import GitPico
 
@@ -51,6 +52,43 @@ actor RecordingHistoryReader: HistoryReading {
     #expect(try await f.repository.headPosition() == head)
     #expect(try Data(contentsOf: url.appendingPathComponent(".git/index")) == index)
     #expect(try String(contentsOf: url.appendingPathComponent("local-0"), encoding: .utf8) == "untracked")
+}
+
+@Test @MainActor func cachedTipValidationDoesNotPublishTheSameHistoryTwice() async throws {
+    let f = try await PreviewFixture.make(); defer { f.clean() }
+    f.store.navigate(.reference("refs/heads/preview/branch-1")); try await settle(f.store)
+    f.store.navigate(.workingCopy)
+    f.store.navigate(.reference("refs/heads/preview/branch-1"))
+    // Observe after the immediate cache hit. Revalidation may read Git, but must
+    // not invalidate the list again when it resolves to the very same page.
+    let changed = HistoryPublicationFlag()
+    withObservationTracking { _ = f.store.historyPresentation } onChange: { changed.mark() }
+    try await settle(f.store)
+    #expect(!changed.value)
+}
+
+private final class HistoryPublicationFlag: @unchecked Sendable {
+    private let lock = NSLock()
+    private var changed = false
+    func mark() { lock.lock(); defer { lock.unlock() }; changed = true }
+    var value: Bool { lock.lock(); defer { lock.unlock() }; return changed }
+}
+
+@Test func monthSectionsKeepIdentityAcrossBranchTipsAndDisambiguateRuns() throws {
+    func commit(_ hash: Character, timestamp: String) throws -> Commit {
+        let fields = [String(repeating: String(hash), count: 40), "", "Preview Test", "preview@example.invalid", timestamp, "Section test", "", ""]
+        return try #require(GitParser.commits(Data((fields.joined(separator: "\0") + "\n").utf8)).first)
+    }
+    let first = try commit("a", timestamp: "1700000000")
+    let second = try commit("b", timestamp: "1700001000")
+    let olderMonth = try commit("c", timestamp: "1690000000")
+    let branchA = HistoryPresentation.make(CommitHistoryPage(commits: [first, second], hasMore: false), firstParent: false)
+    let branchB = HistoryPresentation.make(CommitHistoryPage(commits: [second], hasMore: false), firstParent: false)
+    #expect(branchA.groups.first?.id == branchB.groups.first?.id)
+    let interleaved = HistoryPresentation.make(CommitHistoryPage(commits: [first, olderMonth, second], hasMore: false), firstParent: false)
+    #expect(interleaved.groups.count == 3)
+    #expect(Set(interleaved.groups.map(\.id)).count == 3)
+    #expect(interleaved.groups.flatMap(\.commits).map(\.hash) == [first.hash, olderMonth.hash, second.hash])
 }
 
 @Test @MainActor func previewCacheRevalidatesMovedTipAndExplicitRefresh() async throws {

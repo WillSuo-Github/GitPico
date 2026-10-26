@@ -5,7 +5,6 @@ struct HistoryView: View {
     @Bindable var store: RepositoryStore
     @State private var preferences = AppPreferences.shared
     var commits: [Commit] { store.visibleCommits }
-    var groups: [HistoryGroup] { preferences.historyGroups ? store.historyPresentation.groups : [HistoryGroup(id: "all", title: "", commits: commits)] }
     var body: some View {
         PersistentSplitView(name: "history", width: 320) {
             VStack(spacing: 0) {
@@ -35,36 +34,14 @@ struct HistoryView: View {
                     HStack { Image(systemName: "exclamationmark.triangle"); Text(failure).lineLimit(2); Spacer(); Button("Retry") { store.requestHistory() } }
                         .font(.caption).padding(8).background(Pico.warning.opacity(0.1))
                 }
-                let graph = store.historyPresentation.graph
-                let width = CGFloat(store.historyPresentation.graphWidth)
-                ScrollViewReader { proxy in
-                List(selection: Binding(get: { store.selectedCommit?.id }, set: { id in if let commit = commits.first(where: { $0.id == id }) { store.selectCommit(commit) } })) {
-                    ForEach(groups) { group in
-                        Section {
-                            ForEach(group.commits) { commit in
-                                CommitRow(commit: commit, graph: graph[commit.hash], graphWidth: width, compact: preferences.historyCompact, showGraph: preferences.historyShowGraph && store.search.isEmpty, selected: store.selectedCommit?.id == commit.id, canModifyHistory: store.canIntegrate, cherryPick: { store.integrationRequest = IntegrationRequest(action: .cherryPick, revision: commit.hash) }, interactiveRebase: commit.parents.isEmpty || store.snapshot?.operation != RepositoryOperation.none ? nil : { store.rebaseRequest = RebaseRequest(base: commit.parents.first) }, restore: { store.recoveryRequest = RecoveryRequest(action: .restore(commit.hash)) }, recoverBranch: { store.recoveryRequest = RecoveryRequest(action: .branch(commit.hash)) }, revert: { store.integrationRequest = IntegrationRequest(action: .revert, revision: commit.hash) }, compare: { store.navigate(.comparison(commit.hash)) }, savePatch: { store.localChange(.export(.commit(commit.hash), [])) }, exportFiles: { store.historical(.export, revision: commit.hash) }, archiveFiles: { store.historical(.archive, revision: commit.hash) })
-                                    .picoDrag(store, .commit(commit))
-                                    .picoDrop(store, .commit(commit, .squash))
-                                    .tag(commit.id).id(commit.id).listRowSeparator(.hidden).listRowInsets(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 4))
-                            }
-                        } header: { if !group.title.isEmpty { SectionCaption(group.title).padding(.vertical, 2) } }
+                HistoryCommitTable(store: store, presentation: store.historyPresentation, grouped: preferences.historyGroups, compact: preferences.historyCompact, showGraph: preferences.historyShowGraph && store.search.isEmpty, canModifyHistory: store.canIntegrate, selection: store.selectedCommit?.hash, reveal: store.historyReveal)
+                    .overlay { if commits.isEmpty { if store.isLoadingHistory { ProgressView("Loading history…") } else { EmptyPane(title: store.historyError ?? (store.search.isEmpty ? "No commits yet" : "No matching commits"), subtitle: store.search.isEmpty ? "" : "Try a different message, author or hash.", icon: store.search.isEmpty ? "clock" : "magnifyingglass") } } }
+                if store.historyPresentation.page.hasMore {
+                    if store.historyOptions.limit < 20_000 {
+                        Button("Load More · \(commits.count) shown", action: store.loadMoreHistory).frame(maxWidth: .infinity).padding(8).disabled(store.isLoadingHistory || store.isBusy)
+                    } else {
+                        Text("Showing the first 20,000 matches. Narrow the search to find older commits.").font(.caption).foregroundStyle(.secondary).padding(8)
                     }
-                    if store.historyPresentation.page.hasMore && store.historyOptions.limit < 20_000 {
-                        Button("Load More · \(commits.count) shown", action: store.loadMoreHistory).frame(maxWidth: .infinity).disabled(store.isLoadingHistory || store.isBusy)
-                    }
-                    if store.historyPresentation.page.hasMore && store.historyOptions.limit >= 20_000 {
-                        Text("Showing the first 20,000 matches. Narrow the search to find older commits.").font(.caption).foregroundStyle(.secondary)
-                    }
-                }.listStyle(.plain).environment(\.defaultMinListRowHeight, preferences.historyCompact ? 32 : 50)
-                .overlay { if commits.isEmpty { if store.isLoadingHistory { ProgressView("Loading history…") } else { EmptyPane(title: store.historyError ?? (store.search.isEmpty ? "No commits yet" : "No matching commits"), subtitle: store.search.isEmpty ? "" : "Try a different message, author or hash.", icon: store.search.isEmpty ? "clock" : "magnifyingglass") } } }
-                .onChange(of: store.historyReveal, initial: true) {
-                    guard let request = store.historyReveal else { return }
-                    Task { @MainActor in
-                        await Task.yield()
-                        guard store.historyReveal == request else { return }
-                        proxy.scrollTo(request.hash, anchor: request.atTop ? .top : .center)
-                    }
-                }
                 }
             }
         } trailing: {
@@ -72,5 +49,33 @@ struct HistoryView: View {
         }
         .onChange(of: store.historyOptions.firstParent) { store.requestHistory() }
         .onChange(of: store.historyOptions.sortByDate) { store.requestHistory() }
+    }
+}
+
+/// Built only when a context menu opens, rather than for every history row update.
+struct HistoryCommitActions: View {
+    let store: RepositoryStore
+    let commit: Commit
+    let canModifyHistory: Bool
+    var body: some View {
+        Section {
+            Button("Cherry-Pick Commit…") { store.integrationRequest = IntegrationRequest(action: .cherryPick, revision: commit.hash) }
+            Button("Revert Commit…") { store.integrationRequest = IntegrationRequest(action: .revert, revision: commit.hash) }
+            Button("Compare with Revision…") { store.navigate(.comparison(commit.hash)) }
+            if !commit.parents.isEmpty {
+                Button("Interactively Rebase from Here…") { store.rebaseRequest = RebaseRequest(base: commit.parents.first) }
+            }
+            Button("Restore HEAD Here…") { store.recoveryRequest = RecoveryRequest(action: .restore(commit.hash)) }
+            Button("Create Branch Here…") { store.recoveryRequest = RecoveryRequest(action: .branch(commit.hash)) }
+        }.disabled(!canModifyHistory)
+        Section {
+            Button("Export Files at Revision…") { store.historical(.export, revision: commit.hash) }
+            Button("Archive Files as ZIP…") { store.historical(.archive, revision: commit.hash) }
+            Button("Save Patch as File…") { store.localChange(.export(.commit(commit.hash), [])) }
+        }
+        Section {
+            Button("Copy Commit Hash") { Pico.copy(commit.hash) }
+            Button("Copy Commit Subject") { Pico.copy(commit.subject) }
+        }
     }
 }

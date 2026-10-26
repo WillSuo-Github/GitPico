@@ -25,7 +25,7 @@ struct CommitDetailView: View {
                 if tree, let repository = store.repository { HistoricTreeView(store: store, repository: repository, commit: commit, showHistory: { store.navigate(.fileHistory($0, commit.hash)) }).id(commit.hash) }
                 else if let detail = store.commitDetail {
                     ScrollView {
-                        VStack(alignment: .leading, spacing: 0) {
+                        LazyVStack(alignment: .leading, spacing: 0) {
                             CommitSummaryHeader(message: detail.message, author: detail.metadata.author, email: detail.metadata.authorEmail, date: detail.metadata.authorDate, decorations: commit.decorations) {
                                 HStack(spacing: 6) {
                                     Text(commit.parents.count > 1 ? "Parents" : "Parent").foregroundStyle(.secondary)
@@ -50,8 +50,8 @@ struct CommitDetailView: View {
                             ChangedFilesHeader(count: detail.files.count, additions: detail.additions, deletions: detail.deletions, allExpanded: !detail.files.isEmpty && expandedFiles.count == detail.files.count) {
                                 expandedFiles = expandedFiles.count == detail.files.count ? [] : Set(detail.files.map(\.path))
                             }
-                            ForEach(detail.files) { file in
-                                if let repository = store.repository {
+                            if let repository = store.repository {
+                                ForEach(detail.files) { file in
                                     CommitFileDisclosure(store: store, repository: repository, commit: commit, file: file, showHistory: { store.navigate(.fileHistory(file.path, commit.hash)) }, stats: detail.statistics[file.path], expanded: Binding(get: { expandedFiles.contains(file.path) }, set: { if $0 { expandedFiles.insert(file.path) } else { expandedFiles.remove(file.path) } }))
                                 }
                             }

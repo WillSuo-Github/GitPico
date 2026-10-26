@@ -20,16 +20,21 @@ enum PicoDropTarget { case workingCopy, stashes, branches, tags, remote(String),
 
 extension RepositoryStore {
     func dragProvider(_ action: PicoDragAction) -> NSItemProvider {
-        Logger(subsystem: "com.willsuo.GitPico", category: "DragDrop").debug("Drag source created")
-        let token = PicoDragToken(id: UUID(), repository: repositoryToken)
-        if dragActions.count > 512 { dragActions.removeAll() }
-        dragActions[token.id] = action
+        let token = makeDragToken(action)
         let provider = NSItemProvider()
         let data = try? JSONEncoder().encode(token)
         provider.registerDataRepresentation(forTypeIdentifier: UTType.picoDrag.identifier, visibility: .ownProcess) { completion in
             completion(data, nil); return nil
         }
         return provider
+    }
+
+    func makeDragToken(_ action: PicoDragAction) -> PicoDragToken {
+        Logger(subsystem: "com.willsuo.GitPico", category: "DragDrop").debug("Drag source created")
+        let token = PicoDragToken(id: UUID(), repository: repositoryToken)
+        if dragActions.count > 512 { dragActions.removeAll() }
+        dragActions[token.id] = action
+        return token
     }
 
     func dragAction(_ token: PicoDragToken) -> PicoDragAction? {

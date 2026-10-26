@@ -1,0 +1,11 @@
+{
+  "Sources/GitCore/CommitGraph.swift": "b448857f1d99c9d12d83c82a7a94bc58078501be22fa6bbb8ef162b5076c769f",
+  "Sources/GitPico/Stores/DragActions.swift": "626b975b369e925ee7ea060f26b9a79a19b4de2a2d61e95da35295232fada60a",
+  "Sources/GitPico/Stores/HistoryPreview.swift": "ed9a91eb9e0706714bbe50f15e2b972d7e9894f195ae1c3cf0b496cfeffaca07",
+  "Sources/GitPico/Views/CommitDetailView.swift": "490e9f9894508b9d1a18b087e8d16607765de766fcf1cf38b98e45b4d952c493",
+  "Sources/GitPico/Views/HistoryView.swift": "29a79fa5a28241b3a979700b0764b996a70194521c7fdd5fb2675ca5fc7ef21a",
+  "Sources/GitPico/Views/HistoryCommitTable.swift": "5340f9b70566e1c163f4bcf153a78a9f5f5fdf845a287555b6b9e0bee804e204",
+  "Tests/GitPicoTests/BranchPreviewPerformanceTests.swift": "a8093fb4422068e9be175f3831c4bc189f823a93885200008347cf2ae1709a4d",
+  "Tests/GitPicoTests/HistoryPreviewTests.swift": "1ab0b84f1e079ad71cbe3e1f3d7470cd7f27e4c855cd0d1d43adab2c399f0bca",
+  "Tests/GitPicoTests/HistoryCommitTableTests.swift": "71bce5c82a42dbf99bb27ca56efeb7e853d25cdc03ad07aee4c753c539d01b19"
+}

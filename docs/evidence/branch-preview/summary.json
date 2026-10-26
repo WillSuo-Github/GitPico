@@ -1,0 +1,83 @@
+{
+  "tests": {
+    "passed": 113,
+    "failed": 0,
+    "skipped": 11
+  },
+  "stagedBuild": "20261026114147",
+  "benchmarkMethod": "Suppressed Debug window; 3000 base commits, 120 branches, 500-row page; median of 6 revisits after 3 first visits. Main actor gap is a 5 ms scheduled task interval, not displayed FPS. Large before/after isolates eager versus lazy detail after native history table changes.",
+  "metrics": {
+    "render-before": {
+      "selectionSeconds": {
+        "firstVisitMedianMs": 0.487917,
+        "revisitMedianMs": 1.8323125
+      },
+      "historySeconds": {
+        "firstVisitMedianMs": 171.673709,
+        "revisitMedianMs": 137.344479
+      },
+      "detailSeconds": {
+        "firstVisitMedianMs": 207.362084,
+        "revisitMedianMs": 137.34593750000002
+      },
+      "maximumMainActorGapSeconds": {
+        "firstVisitMedianMs": 64.0595,
+        "revisitMedianMs": 82.0128745
+      }
+    },
+    "render-after": {
+      "selectionSeconds": {
+        "firstVisitMedianMs": 0.09562499999999999,
+        "revisitMedianMs": 0.2952295
+      },
+      "historySeconds": {
+        "firstVisitMedianMs": 70.97775,
+        "revisitMedianMs": 44.5420835
+      },
+      "detailSeconds": {
+        "firstVisitMedianMs": 101.46416699999999,
+        "revisitMedianMs": 44.542750500000004
+      },
+      "maximumMainActorGapSeconds": {
+        "firstVisitMedianMs": 23.781291,
+        "revisitMedianMs": 30.623333499999998
+      }
+    },
+    "large-eager-detail": {
+      "selectionSeconds": {
+        "firstVisitMedianMs": 0.092542,
+        "revisitMedianMs": 0.11247850000000001
+      },
+      "historySeconds": {
+        "firstVisitMedianMs": 198.252917,
+        "revisitMedianMs": 639.2062709999999
+      },
+      "detailSeconds": {
+        "firstVisitMedianMs": 774.556875,
+        "revisitMedianMs": 639.206958
+      },
+      "maximumMainActorGapSeconds": {
+        "firstVisitMedianMs": 544.783375,
+        "revisitMedianMs": 617.209854
+      }
+    },
+    "large-lazy-detail": {
+      "selectionSeconds": {
+        "firstVisitMedianMs": 0.087,
+        "revisitMedianMs": 0.12562500000000001
+      },
+      "historySeconds": {
+        "firstVisitMedianMs": 74.15208299999999,
+        "revisitMedianMs": 48.418875
+      },
+      "detailSeconds": {
+        "firstVisitMedianMs": 152.837375,
+        "revisitMedianMs": 48.419437499999994
+      },
+      "maximumMainActorGapSeconds": {
+        "firstVisitMedianMs": 33.700250000000004,
+        "revisitMedianMs": 36.129625499999996
+      }
+    }
+  }
+}

@@ -1,5 +1,7 @@
+import AppKit
 import Foundation
 import GitCore
+import SwiftUI
 import Testing
 @testable import GitPico
 
@@ -56,5 +58,73 @@ import Testing
     if let output = ProcessInfo.processInfo.environment["GITPICO_PREVIEW_BENCHMARK_REPORT"] {
         let value: [String:Any] = ["commits":600,"branches":120,"untrackedFiles":2000,"samples":samples,"headUnchanged":true]
         try JSONSerialization.data(withJSONObject: value, options: [.prettyPrinted,.sortedKeys]).write(to: URL(fileURLWithPath: output), options: .atomic)
+    }
+}
+
+@Test(.enabled(if: ProcessInfo.processInfo.environment["GITPICO_RUN_PREVIEW_RENDER_BENCHMARK"] == "1", "Explicit suppressed history rendering benchmark only."))
+@MainActor func branchPreviewRenderPerformanceBenchmark() async throws {
+    let f = try await PreviewFixture.make(commits: 3000, branches: 120); defer { f.clean() }
+    let changedFiles = Int(ProcessInfo.processInfo.environment["GITPICO_PREVIEW_RENDER_CHANGED_FILES"] ?? "0") ?? 0
+    if changedFiles > 0 {
+        var stream = "blob\nmark :1\ndata 8\npreview\n\n"
+        for index in [5,70,105] {
+            let message = "Large preview \(index)\n"
+            stream += "commit refs/heads/preview/branch-\(index)\ncommitter Preview Test <preview@example.invalid> \(1_700_010_000 + index) +0000\ndata \(message.utf8.count)\n" + message + "from \(f.tips[index])\n"
+            for file in 0..<changedFiles { stream += "M 100644 :1 preview-\(file).txt\n" }
+            stream += "\n"
+        }
+        _ = try await GitProcess.run(["fast-import", "--quiet"], at: f.repository.root, input: Data(stream.utf8))
+        f.store.snapshot = try await f.repository.snapshot(countHistory: false)
+    }
+    let window = RepositoryNativeWindow(tabID: UUID(), permitsPresentation: false)
+    window.setFrame(NSRect(x: -10000, y: -10000, width: 1200, height: 850), display: false)
+    window.contentView = NSHostingView(rootView: HistoryView(store: f.store))
+    defer { window.contentView = nil; window.close() }
+    var maximumGap = 0.0
+    let heartbeat = Task { @MainActor in
+        var previous = ContinuousClock.now
+        while !Task.isCancelled {
+            do { try await Task.sleep(for: .milliseconds(5)) } catch { break }
+            let now = ContinuousClock.now
+            maximumGap = max(maximumGap, previous.duration(to: now).secondsValue)
+            previous = now
+        }
+    }
+    defer { heartbeat.cancel() }
+    var samples: [[String: Any]] = []
+    let rounds = Int(ProcessInfo.processInfo.environment["GITPICO_PREVIEW_RENDER_ROUNDS"] ?? "3") ?? 3
+    for index in (0..<rounds).flatMap({ _ in [5,70,105] }) {
+        maximumGap = 0
+        let start = ContinuousClock.now
+        f.store.navigate(.reference("refs/heads/preview/branch-\(index)"))
+        let selectionSeconds = start.duration(to: .now).secondsValue
+        await f.store.historyTask?.value
+        let historySeconds = start.duration(to: .now).secondsValue
+        await f.store.detailTask?.value
+        let detailSeconds = start.duration(to: .now).secondsValue
+        let layoutStart = ContinuousClock.now
+        window.contentView?.layoutSubtreeIfNeeded()
+        let layoutSeconds = layoutStart.duration(to: .now).secondsValue
+        try await Task.sleep(for: .milliseconds(100))
+        samples.append(["branch":index, "selectionSeconds":selectionSeconds, "historySeconds":historySeconds, "detailSeconds":detailSeconds, "layoutSeconds":layoutSeconds, "maximumMainActorGapSeconds":maximumGap])
+        #expect(f.store.selectedCommit?.hash == f.store.previewedReference?.hash)
+        if changedFiles > 0 { #expect(f.store.commitDetail?.files.count == changedFiles) }
+    }
+    #expect(!NSApp.isActive && !window.isVisible)
+    if let output = ProcessInfo.processInfo.environment["GITPICO_PREVIEW_RENDER_BENCHMARK_REPORT"] {
+        try JSONSerialization.data(withJSONObject: ["commits":3000,"branches":120,"changedFiles":changedFiles,"samples":samples], options: [.prettyPrinted,.sortedKeys]).write(to: URL(fileURLWithPath: output))
+    }
+    if let path = ProcessInfo.processInfo.environment["GITPICO_PREVIEW_RENDER_CAPTURE_DIRECTORY"] {
+        let directory = URL(fileURLWithPath: path)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        for dark in [false, true] {
+            window.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
+            try await Task.sleep(for: .milliseconds(150))
+            let view = try #require(window.contentView?.superview)
+            view.layoutSubtreeIfNeeded()
+            let bitmap = try #require(view.bitmapImageRepForCachingDisplay(in: view.bounds))
+            view.cacheDisplay(in: view.bounds, to: bitmap)
+            try #require(bitmap.representation(using: .png, properties: [:])).write(to: directory.appendingPathComponent("history-\(dark ? "dark" : "light").png"))
+        }
     }
 }

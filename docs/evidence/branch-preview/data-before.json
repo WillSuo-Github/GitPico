@@ -1,0 +1,32 @@
+{
+  "branches" : 120,
+  "commits" : 600,
+  "headUnchanged" : true,
+  "samples" : [
+    {
+      "branch" : 5,
+      "seconds" : 0.074936208000000004
+    },
+    {
+      "branch" : 70,
+      "seconds" : 0.068389749999999999
+    },
+    {
+      "branch" : 105,
+      "seconds" : 0.067777500000000004
+    },
+    {
+      "branch" : 5,
+      "seconds" : 3.875e-05
+    },
+    {
+      "branch" : 70,
+      "seconds" : 1.6042e-05
+    },
+    {
+      "branch" : 105,
+      "seconds" : 1.4416999999999999e-05
+    }
+  ],
+  "untrackedFiles" : 2000
+}
