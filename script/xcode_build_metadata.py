@@ -40,7 +40,7 @@ def generate_metadata(environment):
             raise ValueError('Update feed must be an HTTPS URL without embedded credentials or fragment.')
         if len(base64.b64decode(key, validate=True)) != 32:
             raise ValueError('Update verification key must be a base64 Ed25519 public key.')
-        values.update(SUFeedURL=feed, SUPublicEDKey=key, SUEnableAutomaticChecks=False, SUAutomaticallyUpdate=False, SUVerifyUpdateBeforeExtraction=True, SURequireSignedFeed=True, SUShowReleaseNotes=False)
+        values.update(SUFeedURL=feed, SUPublicEDKey=key, SUEnableAutomaticChecks=True, SUAutomaticallyUpdate=True, SUScheduledCheckInterval=3600, SUVerifyUpdateBeforeExtraction=True, SURequireSignedFeed=True, SUShowReleaseNotes=False)
     derived.parent.mkdir(parents=True, exist_ok=True)
     temporary = derived.with_suffix('.plist.tmp')
     temporary.write_bytes(plistlib.dumps(values))

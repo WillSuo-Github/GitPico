@@ -67,7 +67,9 @@ class ReleaseMetadataTests(unittest.TestCase):
             value = plistlib.loads((root / 'derived/GitPico-Info.plist').read_bytes())
             self.assertEqual(value['SUFeedURL'], 'https://github.com/example/private/releases/latest/download/appcast.xml')
             self.assertTrue(value['SURequireSignedFeed'])
-            self.assertFalse(value['SUEnableAutomaticChecks'])
+            self.assertTrue(value['SUEnableAutomaticChecks'])
+            self.assertTrue(value['SUAutomaticallyUpdate'])
+            self.assertEqual(value['SUScheduledCheckInterval'], 3600)
 
     def test_public_feed_uses_direct_download_without_rest_quota(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -92,7 +94,9 @@ class ReleaseMetadataTests(unittest.TestCase):
             self.assertEqual(value['SUPublicEDKey'], key)
             self.assertEqual(value['SUFeedURL'], 'https://github.com/example/private/releases/latest/download/appcast.xml')
             self.assertTrue(value['SURequireSignedFeed'])
-            self.assertFalse(value['SUEnableAutomaticChecks'])
+            self.assertTrue(value['SUEnableAutomaticChecks'])
+            self.assertTrue(value['SUAutomaticallyUpdate'])
+            self.assertEqual(value['SUScheduledCheckInterval'], 3600)
             env['GITPICO_UPDATE_PUBLIC_KEY'] = ''
             generate_metadata(env)
             value = plistlib.loads((root / 'derived/GitPico-Info.plist').read_bytes())

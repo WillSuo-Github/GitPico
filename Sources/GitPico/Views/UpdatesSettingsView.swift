@@ -13,6 +13,8 @@ struct UpdatesSettingsView: View {
                 }
                 Text(updater.status).font(.callout).foregroundStyle(.secondary)
                 Toggle("Automatically check for updates", isOn: $updater.automaticallyChecks).disabled(!updater.configured)
+                Toggle("Download updates in the background and install on quit", isOn: $updater.automaticallyInstalls).disabled(!updater.configured || !updater.automaticallyChecks)
+                if updater.configured { Text("GitPico checks every hour.").font(.caption).foregroundStyle(.secondary) }
                 Button("Check for Updates…", action: updater.check).disabled(!updater.canCheck)
             }
             Section("Support") {

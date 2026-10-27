@@ -19,6 +19,10 @@ import Sparkle
         get { _ = preferenceRevision; return controller?.updater.automaticallyChecksForUpdates ?? false }
         set { controller?.updater.automaticallyChecksForUpdates = newValue; preferenceRevision += 1 }
     }
+    var automaticallyInstalls: Bool {
+        get { _ = preferenceRevision; return controller?.updater.automaticallyDownloadsUpdates ?? false }
+        set { controller?.updater.automaticallyDownloadsUpdates = newValue; preferenceRevision += 1 }
+    }
     func startIfConfigured() {
         guard controller == nil, !ProcessInfo.processInfo.arguments.contains("--background-testing"), !NativeStartupVerification.enabled,
               let raw = Bundle.main.object(forInfoDictionaryKey: "SUFeedURL") as? String,
