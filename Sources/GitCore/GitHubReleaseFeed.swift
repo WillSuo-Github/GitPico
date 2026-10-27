@@ -6,20 +6,27 @@ public struct GitHubReleaseFeed: Sendable {
     public let releaseURL: URL
     public let tag: String
     public func permits(_ url: URL) -> Bool { assets.contains(url) && url.scheme == "https" && url.host == "api.github.com" && url.user == nil && url.password == nil }
+    public func configurePublicDownload(_ request: NSMutableURLRequest) throws {
+        request.setValue(nil, forHTTPHeaderField: "Authorization")
+        request.setValue(nil, forHTTPHeaderField: "Cookie")
+        request.httpShouldHandleCookies = false
+        guard let url = request.url, permits(url) else { throw GitFailure("The update archive is not an asset of the verified GitHub Release.") }
+        request.setValue("application/octet-stream", forHTTPHeaderField: "Accept")
+    }
 }
 public struct GitHubReleaseFeedClient: Sendable {
     private let transport: any OAuthHTTPTransport
     public init(transport: any OAuthHTTPTransport = OAuthHTTPSClient(maximumResponseBytes: 1024 * 1024)) { self.transport = transport }
-    public func feedDownloadURL(_ release: GitHubReleaseFeed, credential: GitStoredCredential) async throws -> URL {
+    public func feedDownloadURL(_ release: GitHubReleaseFeed, credential: GitStoredCredential? = nil) async throws -> URL {
         let url = release.feedURL
         let path = url.path.split(separator: "/")
-        guard credential.host == "github.com", url.scheme == "https", url.host == "api.github.com",
+        guard credential == nil || credential?.host == "github.com", url.scheme == "https", url.host == "api.github.com",
               url.port == nil, url.user == nil, url.password == nil, url.query == nil, url.fragment == nil,
               path.count == 6, path[0] == "repos", path[3] == "releases", path[4] == "assets", Int(path[5]).map({ $0 > 0 }) == true else {
             throw GitFailure("The update feed is not a verified GitHub release asset.")
         }
         var request = URLRequest(url: url)
-        request.setValue("Bearer " + credential.secret, forHTTPHeaderField: "Authorization")
+        if let credential { request.setValue("Bearer " + credential.secret, forHTTPHeaderField: "Authorization") }
         request.setValue("application/octet-stream", forHTTPHeaderField: "Accept")
         request.setValue("GitPico", forHTTPHeaderField: "User-Agent")
         let response = try await transport.send(request)
@@ -34,18 +41,18 @@ public struct GitHubReleaseFeedClient: Sendable {
         }
         return destination
     }
-    public func latest(project: String, credential: GitStoredCredential) async throws -> GitHubReleaseFeed {
+    public func latest(project: String, credential: GitStoredCredential? = nil) async throws -> GitHubReleaseFeed {
         let parts = project.split(separator: "/", omittingEmptySubsequences: false)
-        guard credential.host == "github.com", parts.count == 2,
-              parts.allSatisfy({ !$0.isEmpty && $0 != "." && $0 != ".." && $0.allSatisfy({ $0.isASCII && ($0.isLetter || $0.isNumber || $0 == "-" || $0 == "_" || $0 == ".") }) }) else { throw GitFailure("Choose a github.com account and a valid owner/repository for updates.") }
+        guard credential == nil || credential?.host == "github.com", parts.count == 2,
+              parts.allSatisfy({ !$0.isEmpty && $0 != "." && $0 != ".." && $0.allSatisfy({ $0.isASCII && ($0.isLetter || $0.isNumber || $0 == "-" || $0 == "_" || $0 == ".") }) }) else { throw GitFailure("Choose a valid GitHub owner/repository for updates.") }
         let base = "https://api.github.com/repos/" + project
         var request = URLRequest(url: URL(string: base + "/releases/latest")!)
-        request.setValue("Bearer " + credential.secret, forHTTPHeaderField: "Authorization")
+        if let credential { request.setValue("Bearer " + credential.secret, forHTTPHeaderField: "Authorization") }
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
         request.setValue("GitPico", forHTTPHeaderField: "User-Agent")
         let response = try await transport.send(request)
         guard response.status == 200 else {
-            throw GitFailure(response.status == 404 ? "No published update release is available, or this account cannot read the private repository." : "GitHub update lookup failed (HTTP \(response.status)). Check the selected account and network.")
+            throw GitFailure(response.status == 404 ? "No published update release is available, or the repository is not publicly accessible." : "GitHub update lookup failed (HTTP \(response.status)). Check your network or try again later.")
         }
         guard let object = try JSONSerialization.jsonObject(with: response.data) as? [String: Any],
               object["draft"] as? Bool == false, object["prerelease"] as? Bool == false,

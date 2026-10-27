@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bind an appcast to the exact uploaded private GitHub archive asset."""
+"""Bind an appcast to the exact uploaded GitHub archive asset."""
 import sys
 import xml.etree.ElementTree as ET
 

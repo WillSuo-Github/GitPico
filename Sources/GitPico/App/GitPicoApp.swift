@@ -25,7 +25,7 @@ struct GitPicoApp: App {
         if NativeStartupVerification.enabled {
             Task { await NativeStartupVerification.finish(repositoryWindows) }
         } else {
-            UpdateController.shared.startIfConfigured(authentication: workspace.authentication)
+            UpdateController.shared.startIfConfigured()
             workspace.startMonitoring()
             let notifications = NSWorkspace.shared.notificationCenter
             notifications.addObserver(self, selector: #selector(systemWillSleep(_:)), name: NSWorkspace.willSleepNotification, object: nil)

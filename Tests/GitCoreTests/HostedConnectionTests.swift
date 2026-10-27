@@ -79,3 +79,35 @@ private actor TransientPollTransport: OAuthHTTPTransport {
     let metadata = ReviewTransport([OAuthHTTPResponse(status: 200, data: Data("{}".utf8))])
     await #expect(throws: GitFailure.self) { try await GitHubReleaseFeedClient(transport: metadata).feedDownloadURL(release, credential: credential) }
 }
+
+@Test func publicGitHubUpdatesResolveWithoutAuthorizationOrCookiesAndKeepAssetValidation() async throws {
+    let object: [String: Any] = ["draft": false, "prerelease": false, "tag_name": "build-20261027000000", "assets": [
+        ["id": 10, "name": "appcast.xml", "browser_download_url": "https://other.invalid/feed"],
+        ["id": 11, "name": "GitPico-20261027000000.zip"]]]
+    let destination = URL(string: "https://release-assets.githubusercontent.com/fixture/appcast.xml?signature=fixture")!
+    let transport = try ReviewTransport([reviewResponse(object), OAuthHTTPResponse(status: 302, data: Data(), redirectURL: destination)])
+    let client = GitHubReleaseFeedClient(transport: transport)
+    let release = try await client.latest(project: "example/public")
+    #expect(try await client.feedDownloadURL(release) == destination)
+    let requests = await transport.requests
+    #expect(requests.count == 2)
+    #expect(requests.allSatisfy { $0.value(forHTTPHeaderField: "Authorization") == nil && $0.value(forHTTPHeaderField: "Cookie") == nil })
+    #expect(requests[1].value(forHTTPHeaderField: "Accept") == "application/octet-stream")
+    #expect(release.permits(URL(string: "https://api.github.com/repos/example/public/releases/assets/11")!))
+    #expect(!release.permits(URL(string: "https://api.github.com/repos/example/other/releases/assets/11")!))
+    #expect(!release.permits(URL(string: "https://other.invalid/archive.zip")!))
+    let archive = NSMutableURLRequest(url: try #require(release.assets.first))
+    archive.setValue("Bearer stale-account", forHTTPHeaderField: "Authorization")
+    archive.setValue("stale-cookie", forHTTPHeaderField: "Cookie")
+    try release.configurePublicDownload(archive)
+    #expect(archive.value(forHTTPHeaderField: "Authorization") == nil && archive.value(forHTTPHeaderField: "Cookie") == nil)
+    #expect(!archive.httpShouldHandleCookies && archive.value(forHTTPHeaderField: "Accept") == "application/octet-stream")
+    let unrelated = NSMutableURLRequest(url: URL(string: "https://other.invalid/archive.zip")!)
+    unrelated.setValue("Bearer stale-account", forHTTPHeaderField: "Authorization")
+    #expect(throws: GitFailure.self) { try release.configurePublicDownload(unrelated) }
+    #expect(unrelated.value(forHTTPHeaderField: "Authorization") == nil)
+    await #expect(throws: GitFailure.self) { try await client.latest(project: "example/../public") }
+    let invalid = GitHubReleaseFeed(feedURL: URL(string: "https://other.invalid/appcast.xml")!, assets: [], releaseURL: release.releaseURL, tag: release.tag)
+    await #expect(throws: GitFailure.self) { try await client.feedDownloadURL(invalid) }
+    #expect(await transport.requests.count == 2)
+}

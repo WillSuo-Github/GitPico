@@ -82,26 +82,16 @@ private actor DeniedUpdateTransport: OAuthHTTPTransport {
     #expect(cancelled && !flow.preparing && presenter.events == ["preparing", "dismiss"])
 }
 
-@Test(.enabled(if: ProcessInfo.processInfo.environment["GITPICO_DIAGNOSE_PRIVATE_UPDATE"] == "1", "Explicit noninteractive existing-account update diagnosis only."))
-@MainActor func diagnoseExistingPrivateUpdateAccountWithoutWindows() async throws {
-    let file = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("GitPico/authentication.json")
-    let authentication = AuthenticationStore(file: file)
-    var phase = "account selection"
-    var report: [String: Any] = ["succeeded": false]
-    do {
-        let profiles = authentication.profiles.filter { $0.provider == .github && $0.host == "github.com" }
-        let selected = UpdateController.shared.selectedProfile
-        guard let profile = profiles.first(where: { $0.id == selected }) ?? (profiles.count == 1 ? profiles.first : nil) else { throw GitFailure("Select a GitHub update account.") }
-        phase = "account authentication"
-        let credential = profile.isOAuth ? try await OAuthCredentialRefresher.shared.credential(profile.id) : try authentication.vault.read(profile.id)
-        phase = "latest release lookup"
-        let client = GitHubReleaseFeedClient()
-        let release = try await client.latest(project: "WillSuo-Github/GitPico", credential: credential)
-        phase = "signed feed resolution"
-        _ = try await client.feedDownloadURL(release, credential: credential)
-        report = ["succeeded": true, "tag": release.tag, "archiveCount": release.assets.count]
-    } catch { report["phase"] = phase; report["error"] = GitLogRedaction.clean(error.localizedDescription) }
-    let output = URL(fileURLWithPath: try #require(ProcessInfo.processInfo.environment["GITPICO_UPDATE_DIAGNOSTIC_OUTPUT"]))
-    try JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys]).write(to: output, options: .atomic)
+@Test(.enabled(if: ProcessInfo.processInfo.environment["GITPICO_VERIFY_PUBLIC_UPDATES"] == "1", "Explicit anonymous public update lookup only."))
+@MainActor func publicUpdatesResolveWithoutAnyAccountOrWindow() async throws {
+    let client = GitHubReleaseFeedClient()
+    let release = try await client.latest(project: "WillSuo-Github/GitPico")
+    let url = try await client.feedDownloadURL(release)
+    #expect(["release-assets.githubusercontent.com", "objects.githubusercontent.com"].contains(url.host))
+    #expect(!release.assets.isEmpty)
+    if let path = ProcessInfo.processInfo.environment["GITPICO_UPDATE_DIAGNOSTIC_OUTPUT"] {
+        let report: [String: Any] = ["succeeded": true, "anonymous": true, "tag": release.tag, "archiveCount": release.assets.count]
+        try JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys]).write(to: URL(fileURLWithPath: path), options: .atomic)
+    }
     #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
 }

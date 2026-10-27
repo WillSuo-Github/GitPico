@@ -3,7 +3,7 @@ set -euo pipefail
 
 if [[ "${1:-}" == "--help" || $# -ne 1 ]]; then
   echo 'Usage: script/publish_github_release.sh dist/releases/<build>'
-  echo 'Creates/resumes a PRIVATE GitHub draft release, binds appcast URLs to its asset IDs and re-signs the feed.'
+  echo 'Creates/resumes a GitHub draft release, binds appcast URLs to its asset IDs and re-signs the feed.'
   echo 'Required: a clean committed checkout, gh access, the matching Sparkle Keychain key and a notarized package.'
   echo 'Does not publish the draft. Review it in GitHub before making it the latest release.'
   exit 0
@@ -15,7 +15,7 @@ OUTPUT_DIR="$(cd "$1" && pwd)"
 BUILD_ID="$(basename "$OUTPUT_DIR")"
 [[ "$BUILD_ID" =~ ^[0-9]{14}$ ]] || { echo 'Expected a date build directory.' >&2; exit 1; }
 REPOSITORY='WillSuo-Github/GitPico'
-[[ "$(gh api "repos/$REPOSITORY" --jq .private)" == true ]] || { echo 'The configured GitPico repository must remain private.' >&2; exit 1; }
+[[ "$(gh api "repos/$REPOSITORY" --jq .visibility)" == public ]] || { echo 'The GitPico update repository must be public for account-free downloads.' >&2; exit 1; }
 TAG="build-$BUILD_ID"
 ZIP_NAME="GitPico-$BUILD_ID.zip"
 [[ -f "$OUTPUT_DIR/$ZIP_NAME" && -f "$OUTPUT_DIR/appcast.xml" && -f "$OUTPUT_DIR/notarization.json" && -f "$OUTPUT_DIR/manifest.json" ]] || { echo 'Prepare the notarized package and source manifest first.' >&2; exit 1; }
@@ -62,7 +62,7 @@ PY
 )"
 python3 "$ROOT_DIR/script/prepare_github_appcast.py" "$OUTPUT_DIR/appcast.xml" "$BUILD_ID" "$REPOSITORY" "$ASSET_ID"
 SPARKLE_BIN="${GITPICO_SPARKLE_BIN:-$ROOT_DIR/.build/distribution-derived/SourcePackages/artifacts/sparkle/Sparkle/bin}"
-# Re-generating the appcast replaces private asset IDs with download-prefix URLs.
+# Re-generating the appcast replaces exact asset IDs with download-prefix URLs.
 # Sign the edited XML directly so the authenticated asset binding is preserved.
 "$SPARKLE_BIN/sign_update" --account "${GITPICO_SPARKLE_ACCOUNT:-com.willsuo.GitPico.updates}" "$OUTPUT_DIR/appcast.xml"
 "$SPARKLE_BIN/sign_update" --account "${GITPICO_SPARKLE_ACCOUNT:-com.willsuo.GitPico.updates}" --verify "$OUTPUT_DIR/appcast.xml"
@@ -71,7 +71,7 @@ python3 - "$OUTPUT_DIR/appcast.xml" "$REPOSITORY" "$ASSET_ID" <<'PY'
 import sys,xml.etree.ElementTree as E
 expected='https://api.github.com/repos/'+sys.argv[2]+'/releases/assets/'+sys.argv[3]
 if not any(e.get('url')==expected for e in E.parse(sys.argv[1]).findall('.//enclosure')):
-    raise SystemExit('Appcast generation changed the private asset URL; inspect before uploading.')
+    raise SystemExit('Appcast generation changed the verified asset URL; inspect before uploading.')
 PY
 gh release upload "$TAG" "$OUTPUT_DIR/appcast.xml" --repo "$REPOSITORY" --clobber
-echo "Prepared private GitHub draft release $TAG. Review before publishing; no draft was published."
+echo "Prepared GitHub draft release $TAG. Review before publishing; no draft was published."
