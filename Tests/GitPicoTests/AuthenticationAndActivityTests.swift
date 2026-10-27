@@ -82,7 +82,10 @@ private final class MemoryCredentialVault: CredentialStoring, Sendable {
     activity.receive(event(.succeeded, "Done"))
     activity.receive(event(.running, "Late progress"))
     #expect(activity.records.first?.phase == .succeeded && activity.records.first?.output == "Done")
-    try await Task.sleep(for: .milliseconds(350))
+    // Saves are debounced and written off the main actor; wait for the file instead of a fixed delay.
+    let deadline = Date().addingTimeInterval(5)
+    while !FileManager.default.fileExists(atPath: activity.file.path), Date() < deadline { try await Task.sleep(for: .milliseconds(20)) }
+    #expect(FileManager.default.fileExists(atPath: activity.file.path))
     let restored = NetworkActivityStore(directory: directory)
     #expect(restored.records.first?.phase == .succeeded)
     let running = NetworkActivityRecord(id: UUID(), command: "push", repository: "Fixture", started: Date(), phase: .running, output: "Pending")
