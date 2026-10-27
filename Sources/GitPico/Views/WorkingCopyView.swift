@@ -46,12 +46,13 @@ struct WorkingCopyView: View {
     }
 }
 
-/// Branch → upstream, change counts, sorting/visibility options and Stage All.
+/// Branch → upstream, change counts, sorting/visibility options and bulk staging.
 struct WorkingListHeader: View {
     @Bindable var store: RepositoryStore
     var upstream: String? { store.snapshot?.references.first(where: \.isCurrent)?.upstream.nilIfEmpty }
     var body: some View {
         let unstagedCount = store.unstaged.count, stagedCount = store.staged.count
+        let unstageAll = unstagedCount == 0 && stagedCount > 0
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
                 Text("Changes").font(.system(size: 13, weight: .semibold))
@@ -67,9 +68,12 @@ struct WorkingListHeader: View {
                     Button("Unstage All") { store.unstage(store.staged) }.disabled(store.isBusy || store.staged.isEmpty)
                 } label: { Image(systemName: "line.3.horizontal.decrease.circle") }
                     .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Sort and file visibility")
-                Button("Stage All") { store.stage(store.unstaged.filter { !$0.isConflicted }) }
-                    .controlSize(.small).disabled(store.isBusy || store.unstaged.allSatisfy(\.isConflicted))
-                    .help("Stage every changed file, including files hidden by the filter")
+                Button(unstageAll ? "Unstage All" : "Stage All") {
+                    if unstageAll { store.unstage(store.staged) }
+                    else { store.stage(store.unstaged.filter { !$0.isConflicted }) }
+                }
+                    .controlSize(.small).disabled(store.isBusy || (!unstageAll && store.unstaged.allSatisfy(\.isConflicted)))
+                    .help(unstageAll ? "Unstage every staged file, including files hidden by the filter" : "Stage every changed file, including files hidden by the filter")
             }
             HStack(spacing: 6) {
                 Image(systemName: "arrow.triangle.branch").imageScale(.small)
