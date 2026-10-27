@@ -69,6 +69,16 @@ class ReleaseMetadataTests(unittest.TestCase):
             self.assertTrue(value['SURequireSignedFeed'])
             self.assertFalse(value['SUEnableAutomaticChecks'])
 
+    def test_public_feed_uses_direct_download_without_rest_quota(self):
+        with tempfile.TemporaryDirectory() as folder:
+            file = Path(folder) / 'appcast.xml'
+            signature = base64.b64encode(bytes(64)).decode()
+            file.write_text('<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"><channel><item><sparkle:version>20261027170000</sparkle:version><enclosure url="https://other.invalid/archive.zip" sparkle:edSignature="' + signature + '" length="42" /></item></channel></rss>')
+            prepare(file, '20261027170000', 'example/public', '123', 'public')
+            validate(file, '20261027170000')
+            self.assertEqual(ET.parse(file).find('.//enclosure').get('url'), 'https://github.com/example/public/releases/download/build-20261027170000/GitPico-20261027170000.zip')
+            with self.assertRaises(ValueError): prepare(file, '20261027170000', 'example/public', '123', 'other')
+
     def test_normal_xcode_build_uses_committed_public_update_configuration(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)

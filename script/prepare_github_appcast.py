@@ -4,10 +4,12 @@ import sys
 import xml.etree.ElementTree as ET
 
 
-def prepare(file, build, project, asset_id):
+def prepare(file, build, project, asset_id, access='api'):
     parts = project.split('/')
     if len(parts) != 2 or not all(part and part not in ('.', '..') and all(c.isascii() and (c.isalnum() or c in '-_.') for c in part) for part in parts) or not str(asset_id).isdigit() or int(asset_id) <= 0:
         raise ValueError('Invalid GitHub repository or release asset identifier.')
+    if access not in ('api', 'public') or len(build) != 14 or not build.isascii() or not build.isdigit():
+        raise ValueError('Invalid release access mode or date build number.')
     sparkle = 'http://www.andymatuschak.org/xml-namespaces/sparkle'
     ET.register_namespace('sparkle', sparkle)
     tree = ET.parse(file)
@@ -17,7 +19,8 @@ def prepare(file, build, project, asset_id):
         if enclosure is None: continue
         version = enclosure.get('{' + sparkle + '}version') or item.findtext('{' + sparkle + '}version')
         if version == build:
-            enclosure.set('url', 'https://api.github.com/repos/' + project + '/releases/assets/' + str(asset_id))
+            address = ('https://github.com/' + project + '/releases/download/build-' + build + '/GitPico-' + build + '.zip') if access == 'public' else ('https://api.github.com/repos/' + project + '/releases/assets/' + str(asset_id))
+            enclosure.set('url', address)
             found = True
             for link in item.findall('{' + sparkle + '}releaseNotesLink'):
                 item.remove(link)

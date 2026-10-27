@@ -27,8 +27,8 @@ struct RepositoryCommands: Commands {
                 }.disabled(store.isBusy || store.isOpeningRepository)
             }
             CommandGroup(after: .appInfo) {
-                Button(updater.preparing ? "Checking for Updates…" : "Check for Updates…", action: updater.check)
-                    .disabled(!updater.canCheck || updater.preparing)
+                Button("Check for Updates…", action: updater.check)
+                    .disabled(!updater.canCheck)
                 Button("Export Diagnostics…") { DiagnosticExporter.export(store: store) { store.connectionTestMessage = $0 } }
             }
             CommandMenu("Repository") {

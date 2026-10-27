@@ -3,7 +3,7 @@ set -euo pipefail
 
 if [[ "${1:-}" == "--help" || $# -ne 1 ]]; then
   echo 'Usage: script/publish_github_release.sh dist/releases/<build>'
-  echo 'Creates/resumes a GitHub draft release, binds appcast URLs to its asset IDs and re-signs the feed.'
+  echo 'Creates/resumes a GitHub draft release with signed public download URLs.'
   echo 'Required: a clean committed checkout, gh access, the matching Sparkle Keychain key and a notarized package.'
   echo 'Does not publish the draft. Review it in GitHub before making it the latest release.'
   exit 0
@@ -60,16 +60,15 @@ if len(values)!=1: raise SystemExit('Expected exactly one uploaded archive asset
 print(values[0])
 PY
 )"
-python3 "$ROOT_DIR/script/prepare_github_appcast.py" "$OUTPUT_DIR/appcast.xml" "$BUILD_ID" "$REPOSITORY" "$ASSET_ID"
+python3 "$ROOT_DIR/script/prepare_github_appcast.py" "$OUTPUT_DIR/appcast.xml" "$BUILD_ID" "$REPOSITORY" "$ASSET_ID" public
 SPARKLE_BIN="${GITPICO_SPARKLE_BIN:-$ROOT_DIR/.build/distribution-derived/SourcePackages/artifacts/sparkle/Sparkle/bin}"
-# Re-generating the appcast replaces exact asset IDs with download-prefix URLs.
-# Sign the edited XML directly so the authenticated asset binding is preserved.
+# Sign the edited XML directly to preserve the exact public build download URL.
 "$SPARKLE_BIN/sign_update" --account "${GITPICO_SPARKLE_ACCOUNT:-com.willsuo.GitPico.updates}" "$OUTPUT_DIR/appcast.xml"
 "$SPARKLE_BIN/sign_update" --account "${GITPICO_SPARKLE_ACCOUNT:-com.willsuo.GitPico.updates}" --verify "$OUTPUT_DIR/appcast.xml"
 python3 "$ROOT_DIR/script/validate_appcast.py" "$OUTPUT_DIR/appcast.xml" "$BUILD_ID"
-python3 - "$OUTPUT_DIR/appcast.xml" "$REPOSITORY" "$ASSET_ID" <<'PY'
+python3 - "$OUTPUT_DIR/appcast.xml" "$REPOSITORY" "$BUILD_ID" <<'PY'
 import sys,xml.etree.ElementTree as E
-expected='https://api.github.com/repos/'+sys.argv[2]+'/releases/assets/'+sys.argv[3]
+expected='https://github.com/'+sys.argv[2]+'/releases/download/build-'+sys.argv[3]+'/GitPico-'+sys.argv[3]+'.zip'
 if not any(e.get('url')==expected for e in E.parse(sys.argv[1]).findall('.//enclosure')):
     raise SystemExit('Appcast generation changed the verified asset URL; inspect before uploading.')
 PY

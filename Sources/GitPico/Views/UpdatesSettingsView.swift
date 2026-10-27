@@ -13,8 +13,7 @@ struct UpdatesSettingsView: View {
                 }
                 Text(updater.status).font(.callout).foregroundStyle(.secondary)
                 Toggle("Automatically check for updates", isOn: $updater.automaticallyChecks).disabled(!updater.configured)
-                Button("Check for Updates…", action: updater.check).disabled(!updater.canCheck || updater.preparing)
-                if updater.preparing { ProgressView().controlSize(.small) }
+                Button("Check for Updates…", action: updater.check).disabled(!updater.canCheck)
             }
             Section("Support") {
                 Text("Export app/build and repository state with sanitized recent network diagnostics. File contents, commit messages, account credentials and private keys are excluded.").font(.callout).foregroundStyle(.secondary)
