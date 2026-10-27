@@ -2,21 +2,22 @@ import AppKit
 import GitCore
 import SwiftUI
 
-/// Toolbar order follows frequency: navigation, history safety (Undo/Redo), remote sync,
-/// branch & integration, stash, then search. Refresh lives in the status bar (⌘R).
+/// Repository navigation and Undo/Redo lead, the branch occupies the center,
+/// and remote sync, stash and search trail. Refresh lives in the status bar (⌘R).
 struct RepositoryToolbar: ToolbarContent {
     @Bindable var store: RepositoryStore
     var body: some ToolbarContent {
         if store.snapshot == nil && store.workspace == nil {
             ToolbarItem(placement: .navigation) { RepositoryMenu(store: store) }
         }
+        if store.workspace != nil {
+            ToolbarItemGroup(placement: .navigation) {
+                Button(action: store.goBack) { Label("Previous Repository", systemImage: "chevron.left") }.disabled(!store.canGoBack).help("Back to previous repository (⌘[)")
+                Button(action: store.goForward) { Label("Next Repository", systemImage: "chevron.right") }.disabled(!store.canGoForward).help("Forward to next repository (⌘])")
+            }
+        }
         if let snapshot = store.snapshot, !store.isChoosingRepository {
             ToolbarItemGroup(placement: .navigation) {
-                Button(action: store.goBack) { Label("Back", systemImage: "chevron.left") }.disabled(store.backStack.isEmpty || (store.isBusy && !store.isBackgroundFetching)).help("Back (⌘[)")
-                Button(action: store.goForward) { Label("Forward", systemImage: "chevron.right") }.disabled(store.forwardStack.isEmpty || (store.isBusy && !store.isBackgroundFetching)).help("Forward (⌘])")
-            }
-            ToolbarSpacer(.flexible, placement: .primaryAction)
-            ToolbarItemGroup(placement: .primaryAction) {
                 Button {
                     if let record = store.undoAvailability?.undo { store.recoveryRequest = RecoveryRequest(action: .undo(record, false)) }
                 } label: { Label("Undo", systemImage: "arrow.uturn.backward") }
@@ -28,7 +29,7 @@ struct RepositoryToolbar: ToolbarContent {
                 .help(store.undoAvailability?.redo.map { "Redo " + $0.title + " (⇧⌥⌘Z)" } ?? "No Git operation to redo")
                 .disabled(store.isBusy || store.undoAvailability?.redo == nil)
             }
-            ToolbarSpacer(.fixed, placement: .primaryAction)
+            ToolbarItem(id: "repository.branch", placement: .principal) { BranchNavigationMenu(store: store) }
             ToolbarItemGroup(placement: .primaryAction) {
                 Group {
                     Button { store.sync(.fetch) } label: { Label("Fetch", systemImage: "arrow.down.circle") }.help("Fetch all remotes")
@@ -39,10 +40,9 @@ struct RepositoryToolbar: ToolbarContent {
                 }.disabled(!store.canUseRepository || snapshot.remotes.isEmpty)
             }
             ToolbarSpacer(.fixed, placement: .primaryAction)
-            ToolbarItem(placement: .primaryAction) { BranchNavigationMenu(store: store) }
             ToolbarItem(placement: .primaryAction) { StashToolbarMenu(store: store, stashes: snapshot.stashes) }
             ToolbarSpacer(.fixed, placement: .primaryAction)
-            ToolbarItem(placement: .primaryAction) {
+            ToolbarItem(id: "repository.search", placement: .primaryAction) {
                 RepositorySearchView(store: store).frame(width: 240)
             }
         }

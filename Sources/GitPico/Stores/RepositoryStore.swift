@@ -46,8 +46,6 @@ enum Destination: Hashable, Sendable, Codable {
 final class RepositoryStore {
     @ObservationIgnored weak var workspace: RepositoryWorkspace?
     var sidebarFilter = "" { didSet { workspace?.scheduleSessionSave() } }
-    var backStack: [Destination] = []
-    var forwardStack: [Destination] = []
     @ObservationIgnored var navigationBookmarks: [Destination:NavigationBookmark] = [:]
     @ObservationIgnored var navigationBookmarkOrder: [Destination] = []
     @ObservationIgnored var pendingHistorySelection: String?
@@ -278,7 +276,7 @@ final class RepositoryStore {
             organization = try await timing.measure("organization") { try await repo.referenceOrganization() }
             undoAvailability = try await timing.measure("undo") { try await repo.undoAvailability() }
             rebaseProgress = try await timing.measure("rebase") { try await repo.rebaseProgress() }
-            backStack = []; forwardStack = []; navigationBookmarks = [:]; navigationBookmarkOrder = []; pendingHistorySelection = nil; historyNeedsReveal = false; historyReveal = nil; draftBeforeAmend = nil
+            navigationBookmarks = [:]; navigationBookmarkOrder = []; pendingHistorySelection = nil; historyNeedsReveal = false; historyReveal = nil; draftBeforeAmend = nil
             destination = .workingCopy; search = ""; historyOptions = HistoryOptions(); amend = false; signOff = false; configuration = nil
             selectedChange = nil; selectedCommit = nil; selectedStash = nil
             commitDetail = nil; selectedCommitPath = nil; diff = ""
@@ -340,10 +338,9 @@ final class RepositoryStore {
         }
     }
 
-    func navigate(_ value: Destination, record: Bool = true) {
+    func navigate(_ value: Destination) {
         guard (!isBusy || isBackgroundFetching), value != destination else { return }
         rememberNavigation()
-        if record { backStack.append(destination); if backStack.count > 100 { backStack.removeFirst() }; forwardStack = [] }
         cancelPreviewWork(); searchFocusRequest = nil; detailToken = UUID(); destination = value; restoreNavigation(value)
         selectedCommit = nil; commitDetail = nil; selectedChange = nil
         selectedStash = nil; selectedCommitPath = nil; diff = ""; isLoadingDiff = false

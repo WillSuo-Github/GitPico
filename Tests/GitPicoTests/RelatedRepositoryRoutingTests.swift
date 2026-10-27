@@ -42,7 +42,7 @@ import Testing
     #expect(f.store.submoduleRequest == nil)
     f.store.runQuickAction(module, repositoryToken: f.store.repositoryToken)
     guard case .add = f.store.submoduleRequest?.action else { Issue.record("Expected a submodule review"); return }
-    f.store.navigate(.worktrees); f.store.navigate(.submodules); f.store.goBack()
+    f.store.navigate(.worktrees); f.store.navigate(.submodules); f.store.navigate(.worktrees)
     #expect(f.store.destination == .worktrees)
 }
 

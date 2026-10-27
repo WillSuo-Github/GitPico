@@ -165,8 +165,8 @@ private final class HistoryPublicationFlag: @unchecked Sendable {
     #expect(f.store.selectedCommit?.hash == f.tips[6])
     #expect(await reader.pages == 1)
     #expect(await reader.resolutions == 1)
-    #expect(f.store.backStack.count == 6)
-    f.store.goBack(); try await settle(f.store)
+    #expect(!f.store.canGoBack && !f.store.canGoForward)
+    f.store.navigate(.reference("refs/heads/preview/branch-5")); try await settle(f.store)
     #expect(f.store.selectedCommit?.hash == f.tips[5])
 }
 

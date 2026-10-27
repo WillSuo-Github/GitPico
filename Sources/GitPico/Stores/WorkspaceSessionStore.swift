@@ -14,8 +14,6 @@ struct RepositorySessionState: Codable, Equatable {
     var showAll: Bool
     var showIgnored: Bool
     var bookmarks: [Destination: NavigationBookmark]
-    var back: [Destination]
-    var forward: [Destination]
 }
 struct WorkspaceSessionTab: Codable {
     var id: UUID
@@ -36,6 +34,7 @@ struct WorkspaceSession: Codable {
     var tabs: [WorkspaceSessionTab]
     var selected: UUID
     var windows: [WorkspaceWindowGroup]
+    var repositoryVisits: RepositoryVisitHistory? = nil
 }
 
 @MainActor final class WorkspaceSessionStore {
@@ -83,6 +82,11 @@ struct WorkspaceSession: Codable {
               ids.count == session.tabs.count, ids.contains(session.selected),
               session.tabs.allSatisfy({ tab in tab.path.map { $0.hasPrefix("/") && !$0.utf8.contains(0) } ?? true }),
               session.windows.count <= 128 else { throw GitFailure("Saved workspace is invalid or from an unsupported version.") }
+        if let visits = session.repositoryVisits {
+            let paths = visits.back + visits.forward + [visits.current].compactMap { $0 }
+            guard visits.back.count + visits.forward.count <= 100,
+                  paths.allSatisfy({ $0.hasPrefix("/") && !$0.utf8.contains(0) }) else { throw GitFailure("Saved repository visits are invalid.") }
+        }
         let grouped = session.windows.flatMap(\.tabs)
         guard Set(grouped).count == grouped.count, Set(grouped).isSubset(of: ids), session.windows.allSatisfy({ group in
             !group.tabs.isEmpty && group.tabs.contains(group.selected) && [group.x, group.y, group.width, group.height].allSatisfy(\.isFinite) && group.width >= 500 && group.height >= 300 && group.width <= 20000 && group.height <= 20000
@@ -95,16 +99,15 @@ extension RepositoryStore {
         RepositorySessionState(destination: destination, search: search, sidebarFilter: sidebarFilter, options: historyOptions,
             commitHash: selectedCommit?.hash, commitPath: selectedCommitPath, workingPath: selectedChange,
             workingSelection: selectedWorkingFiles, staged: stagedDiff, showAll: showAllFiles, showIgnored: showIgnoredFiles,
-            bookmarks: navigationBookmarks, back: Array(backStack.suffix(32)), forward: Array(forwardStack.suffix(32)))
+            bookmarks: navigationBookmarks)
     }
     func restoreSessionState(_ state: RepositorySessionState) async {
         guard snapshot != nil else { return }
         let target = state.destination.ref.map { name in snapshot?.references.contains(where: { $0.fullName == name }) == true ? state.destination : .history } ?? state.destination
-        navigate(target, record: false)
+        navigate(target)
         historyOptions = state.options; historyOptions.limit = min(20000, max(500, state.options.limit))
         search = state.search; sidebarFilter = state.sidebarFilter
         navigationBookmarks = state.bookmarks; navigationBookmarkOrder = Array(state.bookmarks.keys)
-        backStack = state.back; forwardStack = state.forward
         showAllFiles = state.showAll; showIgnoredFiles = state.showIgnored
         if isHistoryDestination {
             pendingHistorySelection = state.commitHash

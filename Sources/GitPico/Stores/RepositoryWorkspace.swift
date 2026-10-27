@@ -46,7 +46,11 @@ extension RepositoryWindowRouting {
     var sessionSaveWarning: String?
     @ObservationIgnored let session: WorkspaceSessionStore
     @ObservationIgnored private var sessionTask: Task<Void, Never>?
-    @ObservationIgnored private var restoringSession = false
+    @ObservationIgnored var restoringSession = false
+    var repositoryVisits = RepositoryVisitHistory()
+    var isNavigatingRepositories = false
+    @ObservationIgnored var repositoryStates: [String: RepositorySessionState] = [:]
+    @ObservationIgnored var repositoryStateOrder: [String] = []
     @ObservationIgnored let drafts: RepositoryDraftStore
     @ObservationIgnored private let makeStore: (RepositoryLibrary) -> RepositoryStore
     @ObservationIgnored private var draftTask: Task<Void, Never>?
@@ -86,10 +90,12 @@ extension RepositoryWindowRouting {
         let tab = RepositoryTab(store: store); tabs.append(tab); select(tab.id)
         return tab
     }
-    func select(_ id: UUID) {
+    func select(_ id: UUID, recordingVisit: Bool = true) {
         guard tabs.contains(where: { $0.id == id }) else { return }
+        if selectedID != id { rememberRepositoryState(activeTab) }
         activeStore.searchFocusRequest = nil
         selectedID = id; activeStore.searchFocusRequest = nil
+        if recordingVisit { recordRepositoryVisit(activeTab) }
         windowRouting?.workspaceChanged()
         scheduleSessionSave()
     }
@@ -115,6 +121,7 @@ extension RepositoryWindowRouting {
         let tab = tabs[index]
         guard !tab.isBusy else { error = "Wait for this tab's repository operation to finish before closing it."; return false }
         if tab.root != nil {
+            rememberRepositoryState(tab)
             do { try tab.store.flushConflictDrafts() }
             catch { self.error = "The tab was kept open because its conflict drafts could not be saved. " + error.localizedDescription; return false }
             recordDraft(tab.store)
@@ -139,24 +146,26 @@ extension RepositoryWindowRouting {
             await restoreSavedSession()
         }
     }
-    func open(_ url: URL, from source: RepositoryStore? = nil, replacing: Bool = false) async {
+    func open(_ url: URL, from source: RepositoryStore? = nil, replacing: Bool = false, recordingVisit: Bool = true) async {
         guard let origin = originTab(from: source) else { return }
         if origin.isOpening { return }
         guard !origin.isBusy else { error = "Wait for this tab's repository operation before opening another repository."; return }
         let target = origin
-        select(target.id)
+        rememberRepositoryState(target)
         target.isOpening = true
+        select(target.id, recordingVisit: false)
         defer { target.isOpening = false; scheduleSessionSave() }
         do {
             let repository = try await GitRepository.open(url), root = await repository.root
             if let existing = tabs.first(where: { $0.id != target.id && $0.root?.path == root.path }) {
                 if !existing.isOpening { existing.isChoosingRepository = false }
-                select(existing.id)
+                select(existing.id, recordingVisit: recordingVisit)
                 if target.root == nil { target.isOpening = false; _ = close(target.id) }
                 return
             }
             if !replacing, target.root?.path == root.path, target.store.snapshot?.root.path == root.path {
                 target.isChoosingRepository = false
+                if recordingVisit, !restoringSession { repositoryVisits.visit(root.path) }
                 return
             }
             if let previous = target.root {
@@ -169,7 +178,9 @@ extension RepositoryWindowRouting {
             await target.store.openInPlace(root, openedRepository: repository)
             if target.store.snapshot?.root.path != root.path { target.root = target.store.snapshot?.root; return }
             if let saved { target.store.commitSubject = saved.subject; target.store.commitBody = saved.body }
+            if let state = repositoryStates[root.path], !replacing { await target.store.restoreSessionState(state) }
             target.isChoosingRepository = false
+            if recordingVisit, selectedID == target.id, !restoringSession { repositoryVisits.visit(root.path) }
         } catch { target.store.error = error.localizedDescription }
     }
     func chooseRepository(from store: RepositoryStore) {
@@ -223,7 +234,7 @@ extension RepositoryWindowRouting {
     func saveSession() {
         guard !restoringSession, !tabs.contains(where: \.isOpening) else { return }
         do {
-            try session.save(WorkspaceSession(tabs: tabs.map { WorkspaceSessionTab(id: $0.id, path: $0.root?.path, choosing: $0.isChoosingRepository, navigation: $0.store.sessionState) }, selected: selectedID, windows: windowRouting?.sessionWindows() ?? []))
+            try session.save(WorkspaceSession(tabs: tabs.map { WorkspaceSessionTab(id: $0.id, path: $0.root?.path, choosing: $0.isChoosingRepository, navigation: $0.store.sessionState) }, selected: selectedID, windows: windowRouting?.sessionWindows() ?? [], repositoryVisits: repositoryVisits))
             sessionSaveWarning = nil
         } catch { sessionSaveWarning = error.localizedDescription }
     }
@@ -253,6 +264,7 @@ extension RepositoryWindowRouting {
             }
         }
         if tabs.contains(where: { $0.id == saved.selected }) { selectedID = saved.selected }
+        repositoryVisits = saved.repositoryVisits ?? RepositoryVisitHistory(current: activeTab.root?.path)
         windowRouting?.workspaceChanged()
         windowRouting?.restoreWindows(saved.windows)
         if !failures.isEmpty { error = "Some saved repositories could not be reopened. Their tabs were kept for recovery:\n" + failures.joined(separator: "\n") }

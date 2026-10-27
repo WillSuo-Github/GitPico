@@ -30,14 +30,6 @@ extension RepositoryStore {
         }
     }
 
-    func goBack() {
-        guard (!isBusy || isBackgroundFetching), let target = backStack.popLast() else { return }
-        forwardStack.append(destination); navigate(target, record: false)
-    }
-    func goForward() {
-        guard (!isBusy || isBackgroundFetching), let target = forwardStack.popLast() else { return }
-        backStack.append(destination); navigate(target, record: false)
-    }
     func syncAll() {
         guard canSynchronize, let snapshot else { return }
         pullRequest = PullReviewRequest(head: snapshot.head, upstream: snapshot.references.first(where: \.isCurrent)?.upstream ?? "", pushAfter: true)

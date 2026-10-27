@@ -9,7 +9,7 @@ import Testing
     #expect(store.historyError == nil && store.error == nil)
 }
 
-@Test @MainActor func backForwardRestoresQueryPageOptionsAndSelectedCommit() async throws {
+@Test @MainActor func revisitingPagesRestoresQueryPageOptionsWithoutRepositoryVisits() async throws {
     let f = try await PreviewFixture.make(); defer { f.clean() }
     f.store.navigate(.reference("refs/heads/preview/branch-1")); await finishPreview(f.store)
     f.store.search = "Preview commit 1"; await f.store.searchHistory(); await finishPreview(f.store)
@@ -21,16 +21,16 @@ import Testing
     f.store.navigate(.reference("refs/heads/preview/branch-5")); await finishPreview(f.store)
     let second = try #require(f.store.visibleCommits.dropFirst().first)
     f.store.selectCommit(second)
-    f.store.goBack(); await finishPreview(f.store)
+    f.store.navigate(.reference("refs/heads/preview/branch-1")); await finishPreview(f.store)
     #expect(f.store.search == "Preview commit 1" && f.store.historyOptions == firstOptions)
     #expect(f.store.selectedCommit?.hash == first.hash)
     #expect(f.store.historyReveal?.hash == first.hash && f.store.historyReveal?.atTop == false)
-    f.store.goForward(); await finishPreview(f.store)
+    f.store.navigate(.reference("refs/heads/preview/branch-5")); await finishPreview(f.store)
     #expect(f.store.search.isEmpty && f.store.selectedCommit?.hash == second.hash)
-    f.store.goBack(); f.store.navigate(.workingCopy)
-    #expect(f.store.forwardStack.isEmpty)
+    f.store.navigate(.workingCopy)
+    #expect(!f.store.canGoBack && !f.store.canGoForward)
     await f.store.open(f.repository.root)
-    #expect(f.store.navigationBookmarks.isEmpty && f.store.backStack.isEmpty)
+    #expect(f.store.navigationBookmarks.isEmpty && !f.store.canGoBack)
 }
 
 actor GatedTipReader: HistoryReading {
@@ -93,7 +93,7 @@ actor GatedTipReader: HistoryReading {
         #expect(f.store.searchFocusRequest == nil)
     }
     f.store.cancelPreviewWork()
-    #expect(f.store.backStack.count == 100)
+    #expect(!f.store.canGoBack && !f.store.canGoForward)
     #expect(f.store.navigationBookmarks.count == 32)
     #expect(f.store.navigationBookmarkOrder.count == 32)
 }
@@ -103,7 +103,7 @@ actor GatedTipReader: HistoryReading {
     f.store.navigate(.history); await finishPreview(f.store)
     f.store.search = "Preview commit 17"
     f.store.navigate(.workingCopy)
-    f.store.goBack(); await finishPreview(f.store)
+    f.store.navigate(.history); await finishPreview(f.store)
     #expect(f.store.historyOptions.query == f.store.search)
     #expect(f.store.visibleCommits.map(\.subject) == ["Preview commit 17"])
 }
@@ -113,7 +113,7 @@ actor GatedTipReader: HistoryReading {
     f.store.selectCommit(try #require(f.store.visibleCommits.dropFirst(3).first))
     f.store.navigate(.workingCopy)
     _ = try await GitProcess.run(["update-ref", "refs/heads/preview/branch-1", f.tips[6]], at: f.repository.root)
-    f.store.goBack(); await finishPreview(f.store)
+    f.store.navigate(.reference("refs/heads/preview/branch-1")); await finishPreview(f.store)
     #expect(f.store.selectedCommit?.hash == f.tips[6])
     #expect(f.store.historyReveal?.hash == f.tips[6] && f.store.historyReveal?.atTop == true)
 }

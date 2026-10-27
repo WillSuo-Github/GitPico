@@ -95,6 +95,109 @@ import Testing
     func clean() { workspace.shutdown(); for tab in workspace.tabs { tab.store.cancelPreviewWork(); tab.store.metadataTask?.cancel() }; f.clean() }
 }
 
+@Test @MainActor func repositoryVisitsIgnorePagesAndRestoreDraftsAndLatestLocation() async throws {
+    let t = try await TabFixture.make(); defer { t.clean() }
+    let w = t.workspace, first = await t.f.repository.root
+    await w.open(first)
+    let store = w.activeStore
+    store.commitSubject = "Keep repository A draft"
+    store.navigate(.history); await store.historyTask?.value; await store.detailTask?.value
+    let hash = store.selectedCommit?.hash
+    store.navigate(.workingCopy); store.navigate(.history)
+    await store.historyTask?.value; await store.detailTask?.value
+    #expect(w.repositoryVisits.back.isEmpty && !store.canGoBack)
+    await w.open(t.second)
+    #expect(w.repositoryVisits.back == [first.path] && store.canGoBack)
+    store.commitSubject = "Keep repository B draft"
+    await w.navigateRepositories(.back, from: store)
+    #expect(w.activeStore === store && w.tabs.count == 1)
+    #expect(store.snapshot?.root == first && store.destination == .history)
+    #expect(store.commitSubject == "Keep repository A draft" && store.selectedCommit?.hash == hash)
+    #expect(!store.canGoBack && store.canGoForward)
+    store.navigate(.workingCopy)
+    #expect(store.canGoForward)
+    await w.navigateRepositories(.forward, from: store)
+    #expect(store.snapshot?.root.path == t.second.resolvingSymlinksInPath().path)
+    #expect(store.commitSubject == "Keep repository B draft" && store.canGoBack && !store.canGoForward)
+}
+
+@Test @MainActor func repositoryVisitsReuseOpenTabsAndDoNotConsumeFailedOrBusyNavigation() async throws {
+    let t = try await TabFixture.make(); defer { t.clean() }
+    let w = t.workspace, root = await t.f.repository.root
+    await w.open(root)
+    let first = w.activeTab
+    w.newTab(); await w.open(t.second)
+    let second = w.activeTab
+    await w.navigateRepositories(.back, from: second.store)
+    #expect(w.selectedID == first.id && w.tabs.count == 2 && w.activeStore === first.store)
+    let visits = w.repositoryVisits
+    first.store.isBusy = true
+    await w.navigateRepositories(.forward, from: first.store)
+    #expect(w.repositoryVisits == visits && w.selectedID == first.id)
+    first.store.isBusy = false
+    await w.open(t.f.root.appendingPathComponent("Missing Repository"))
+    #expect(w.repositoryVisits == visits && w.selectedID == first.id && first.store.canGoForward)
+    first.store.error = nil
+    await w.navigateRepositories(.forward, from: first.store)
+    #expect(w.selectedID == second.id && w.tabs.count == 2)
+    w.select(first.id)
+    #expect(w.repositoryVisits.current == root.path && w.repositoryVisits.back.last == t.second.resolvingSymlinksInPath().path)
+}
+
+@Test @MainActor func failedBackKeepsVisitsAndOnlySuccessfulNewRepositoriesClearForward() async throws {
+    let t = try await TabFixture.make(); defer { t.clean() }
+    let w = t.workspace, first = await t.f.repository.root
+    await w.open(t.second); await w.open(first)
+    let moved = t.f.root.appendingPathComponent("Temporarily Moved")
+    try FileManager.default.moveItem(at: t.second, to: moved)
+    let visits = w.repositoryVisits
+    await w.navigateRepositories(.back, from: w.activeStore)
+    #expect(w.repositoryVisits == visits && w.activeStore.snapshot?.root == first)
+    try FileManager.default.moveItem(at: moved, to: t.second)
+    w.activeStore.error = nil
+    await w.navigateRepositories(.back, from: w.activeStore)
+    #expect(w.activeStore.canGoForward)
+    await w.open(t.second)
+    #expect(w.activeStore.canGoForward)
+    let third = t.f.root.appendingPathComponent("Third Repository")
+    _ = try await GitRepository.create(at: third)
+    await w.open(third)
+    #expect(!w.activeStore.canGoForward && w.repositoryVisits.current == third.resolvingSymlinksInPath().path)
+}
+
+@Test @MainActor func repositoryVisitsPersistAndOlderPageHistoryDoesNotBecomeRepositoryVisits() async throws {
+    let t = try await TabFixture.make(); defer { t.clean() }
+    let w = t.workspace
+    await w.open(await t.f.repository.root); await w.open(t.second)
+    w.saveSession()
+    let visits = w.repositoryVisits
+    let restored = RepositoryWorkspace(library: w.library, draftsFile: w.drafts.file)
+    defer { restored.shutdown() }
+    await restored.restoreSavedSession()
+    #expect(restored.repositoryVisits == visits && restored.activeStore.canGoBack)
+    await restored.navigateRepositories(.back, from: restored.activeStore)
+    #expect(restored.activeStore.snapshot?.root == (await t.f.repository.root))
+    let data = try Data(contentsOf: w.session.file)
+    var legacy = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+    legacy.removeValue(forKey: "repositoryVisits")
+    var tabs = try #require(legacy["tabs"] as? [[String: Any]])
+    for index in tabs.indices {
+        var navigation = try #require(tabs[index]["navigation"] as? [String: Any])
+        navigation["back"] = []; navigation["forward"] = []
+        tabs[index]["navigation"] = navigation
+    }
+    legacy["tabs"] = tabs
+    let decoded = try JSONDecoder().decode(WorkspaceSession.self, from: JSONSerialization.data(withJSONObject: legacy))
+    #expect(decoded.repositoryVisits == nil && !decoded.tabs.isEmpty)
+}
+
+@Test func repositoryVisitsDeduplicateAndBoundHistory() {
+    var visits = RepositoryVisitHistory()
+    for index in 0..<150 { visits.visit("/fixture/\(index)"); visits.visit("/fixture/\(index)") }
+    #expect(visits.back.count == 100 && visits.current == "/fixture/149" && visits.forward.isEmpty)
+    #expect(visits.back.first == "/fixture/49")
+}
+
 @Test @MainActor func repositoryTabsPreserveIndependentDraftSelectionAndWarmHistory() async throws {
     let t = try await TabFixture.make(); defer { t.clean() }
     let w = t.workspace
