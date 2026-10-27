@@ -258,12 +258,12 @@ struct WorkingDiffView: View {
                 } else if let repository = store.repository, BinaryComparisonView.isImageCandidate(file.path) || store.diff.contains("Binary files ") {
                     BinaryComparisonView(repository: repository, path: file.path, originalPath: store.stagedDiff ? file.originalPath : nil,
                         left: store.stagedDiff ? (store.snapshot?.hasHEAD == true ? .revision("HEAD") : .empty) : .index,
-                        right: store.stagedDiff ? .index : .workingCopy, version: store.lastUpdated)
+                        right: store.stagedDiff ? .index : .workingCopy, version: store.lastUpdated).id(store.repositoryToken.uuidString + file.path)
                 } else {
-                ChunkDiffView(text: store.diff, isLoading: store.isLoadingDiff, chunkAction: store.ignoreWhitespace ? nil : { store.stageChunk($0) }, lineAction: store.ignoreWhitespace ? nil : { store.stageLines($0) }, actionTitle: store.stagedDiff ? "Unstage Chunk" : "Stage Chunk", leftTitle: store.stagedDiff ? "HEAD" : "Index", rightTitle: store.stagedDiff ? "Index" : "Working Copy", disabled: store.isBusy,
+                ChunkDiffView(prepared: store.workingPreparedDiff, isLoading: store.isLoadingDiff, chunkAction: store.ignoreWhitespace ? nil : { store.stageChunk($0) }, lineAction: store.ignoreWhitespace ? nil : { store.stageLines($0) }, actionTitle: store.stagedDiff ? "Unstage Chunk" : "Stage Chunk", leftTitle: store.stagedDiff ? "HEAD" : "Index", rightTitle: store.stagedDiff ? "Index" : "Working Copy", disabled: store.isBusy,
                               discardChunk: store.stagedDiff || store.ignoreWhitespace ? nil : { store.localChange(.chunk(file, store.diff, $0, store.diffContext)) },
                               discardLines: store.stagedDiff || store.ignoreWhitespace ? nil : { store.localChange(.lines(file, store.diff, $0, store.diffContext)) },
-                              exportLines: store.ignoreWhitespace ? nil : { store.localChange(.exportLines(file, store.diff, $0, store.stagedDiff, store.diffContext)) }).id(store.repositoryToken.uuidString + file.path + (store.stagedDiff ? ".staged" : ".unstaged"))
+                              exportLines: store.ignoreWhitespace ? nil : { store.localChange(.exportLines(file, store.diff, $0, store.stagedDiff, store.diffContext)) }).id(store.repositoryToken.uuidString + file.path)
                 }
             } else if let path = store.selectedChange, let repository = store.repository {
                 WorkingFilePreview(repository: repository, path: path).id(store.repositoryToken.uuidString + path)

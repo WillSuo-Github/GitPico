@@ -3,7 +3,7 @@ import GitCore
 import SwiftUI
 
 struct ChunkDiffView: View {
-    let text: String
+    let prepared: PreparedPatch?
     var isLoading = false
     var chunkAction: ((Int) -> Void)? = nil
     var lineAction: ((Set<PatchLineID>) -> Void)? = nil
@@ -16,13 +16,13 @@ struct ChunkDiffView: View {
     var exportLines: ((Set<PatchLineID>) -> Void)? = nil
     @State private var preferences = AppPreferences.shared
     @State private var selectedLines = PatchLineSelection()
-    @State private var prepared: PreparedPatch?
+    private var text: String { prepared?.source ?? "" }
 
     var body: some View {
         Group {
-        if isLoading { ProgressView("Loading changes…").frame(maxWidth: .infinity, maxHeight: .infinity) }
+        if isLoading && prepared == nil { ProgressView("Loading changes…").frame(maxWidth: .infinity, maxHeight: .infinity) }
         else if text.isEmpty { EmptyPane(title: "No textual changes", subtitle: "Select the other diff version if this file is partially staged.", icon: "doc.text.magnifyingglass") }
-        else if let prepared, prepared.source == text {
+        else if let prepared {
             let patch = prepared.patch
             let previews = prepared.previews
             VStack(spacing: 0) {
@@ -90,20 +90,15 @@ struct ChunkDiffView: View {
                     }.defaultScrollAnchor(.topLeading)
                 }.background(Color(nsColor: .textBackgroundColor))
             }
-        } else { ProgressView("Preparing diff…").frame(maxWidth: .infinity, maxHeight: .infinity) }
         }
+        }
+        .disabled(disabled || isLoading)
         .onChange(of: text) { selectedLines.clear() }
-        .task(id: text) {
-            guard !text.isEmpty else { prepared = nil; return }
-            let source = text
-            let value = await Task.detached(priority: .userInitiated) { PreparedPatch.make(source) }.value
-            guard !Task.isCancelled else { return }
-            prepared = value
-        }
+        .onChange(of: leftTitle) { selectedLines.clear() }
     }
 
     func toggle(_ line: DiffLine, in hunk: PatchHunk, prepared: PreparedPatch) {
-        guard !disabled else { return }
+        guard !disabled, !isLoading else { return }
         selectedLines.toggle(PatchLineID(hunk: hunk.id, line: line.id), extending: NSEvent.modifierFlags.contains(.shift), order: prepared.selectableOrder)
     }
 

@@ -110,7 +110,7 @@ actor RecordingWorkingReader: WorkingDiffReading {
     var blocked = false
     var waiting = false
     var continuation: CheckedContinuation<Void,Never>?
-    func block() { blocked = true }
+    func block() { blocked = true; waiting = false }
     func release() { blocked = false; continuation?.resume(); continuation = nil }
     func diff(_ change: FileChange, staged: Bool, context: Int, ignoreWhitespace: Bool, in repository: GitRepository) async throws -> String {
         reads += 1
@@ -134,10 +134,76 @@ actor RecordingWorkingReader: WorkingDiffReading {
     f.store.setWorkingSelection(["b.txt"]); await f.store.detailTask?.value
     await reader.release(); await previous?.value
     #expect(f.store.diff.contains("BBB") && !f.store.diff.contains("AAA"))
+    #expect(f.store.workingPreparedDiff?.source == f.store.diff)
     f.store.selectChange(try #require(f.store.currentChange), staged: false); await f.store.detailTask?.value
     #expect(await reader.reads == 2)
     f.store.diffContext = 3; f.store.selectChange(try #require(f.store.currentChange), staged: false); await f.store.detailTask?.value
     #expect(await reader.reads == 3)
+}
+
+@Test @MainActor func stagingAndUnstagingKeepPreparedPreviewUntilReplacementIsReady() async throws {
+    let reader = RecordingWorkingReader()
+    let f = try await WorkingAppFixture.make(reader: reader); defer { f.clean() }
+    try await f.write("a.txt", "edited\n"); try await f.sync()
+    f.store.setWorkingSelection(["a.txt"]); await f.store.detailTask?.value
+    let original = f.store.diff
+    #expect(!original.isEmpty && f.store.workingPreparedDiff?.source == original)
+    for staged in [true, false] {
+        await reader.block()
+        f.store.toggleWorkingFile(try #require(f.store.currentChange))
+        await f.store.operationTask?.value
+        let deadline = Date().addingTimeInterval(5)
+        while !(await reader.waiting) && Date() < deadline { try await Task.sleep(for: .milliseconds(5)) }
+        let waiting = await reader.waiting
+        #expect(waiting)
+        #expect(f.store.stagedDiff == staged && f.store.isLoadingDiff)
+        #expect(f.store.diff == original && f.store.workingPreparedDiff?.source == original)
+        // A delayed read must not allow an action against the retained patch.
+        let operation = f.store.operationTask
+        f.store.stageChunk(0)
+        #expect(!f.store.isBusy)
+        await operation?.value
+        await reader.release(); await f.store.detailTask?.value
+        #expect(!f.store.isLoadingDiff && f.store.diffError == nil)
+        #expect(f.store.workingPreparedDiff?.source == f.store.diff && f.store.diff.contains("+edited"))
+        #expect(try await GitProcess.run(["show", ":a.txt"], at: f.repository.root).text == (staged ? "edited\n" : "original\n"))
+    }
+    #expect(await reader.reads == 3)
+}
+
+@Test @MainActor func partialStagingPublishesPreparedRemainingDiffWithoutBlankingPreview() async throws {
+    let reader = RecordingWorkingReader()
+    let f = try await WorkingAppFixture.make(reader: reader); defer { f.clean() }
+    try await f.write("a.txt", "first\nsecond\n"); try await f.sync()
+    f.store.setWorkingSelection(["a.txt"]); await f.store.detailTask?.value
+    let original = f.store.diff, prepared = try #require(f.store.workingPreparedDiff)
+    let ids = Set(prepared.previews.flatMap { preview in preview.lines.compactMap { line -> PatchLineID? in
+        line.kind == .deletion || line.text == "+first" ? PatchLineID(hunk: preview.id, line: line.id) : nil
+    } })
+    await reader.block(); f.store.stageLines(ids); await f.store.operationTask?.value
+    #expect(f.store.isLoadingDiff && f.store.diff == original && f.store.workingPreparedDiff?.source == original)
+    await reader.release(); await f.store.detailTask?.value
+    #expect(f.store.error == nil && !f.store.isLoadingDiff && !f.store.stagedDiff)
+    #expect(f.store.diff != original && f.store.diff.contains("+second"))
+    #expect(f.store.workingPreparedDiff?.source == f.store.diff)
+    #expect(try await GitProcess.run(["show", ":a.txt"], at: f.repository.root).text == "first\n")
+}
+
+@Test @MainActor func automaticDiffRefreshKeepsPreviewAndDetectsEditsWithUnchangedStatus() async throws {
+    let reader = RecordingWorkingReader()
+    let f = try await WorkingAppFixture.make(reader: reader); defer { f.clean() }
+    try await f.write("a.txt", "first edit\n"); try await f.sync()
+    f.store.setWorkingSelection(["a.txt"]); await f.store.detailTask?.value
+    let original = f.store.diff, status = f.store.changes
+    try await f.write("a.txt", "second edit\n")
+    await reader.block(); await f.store.refreshAutomatically()
+    #expect(f.store.changes == status)
+    #expect(f.store.isLoadingDiff && f.store.diff == original && f.store.workingPreparedDiff?.source == original)
+    await reader.release(); await f.store.detailTask?.value
+    #expect(!f.store.isLoadingDiff && f.store.diff.contains("+second edit"))
+    #expect(f.store.workingPreparedDiff?.source == f.store.diff)
+    f.store.setWorkingSelection([])
+    #expect(f.store.diff.isEmpty && f.store.workingPreparedDiff == nil)
 }
 
 @Test func preparedPatchSelectionUsesOnlyVisibleChangedLines() {

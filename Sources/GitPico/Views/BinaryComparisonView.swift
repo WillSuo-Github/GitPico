@@ -46,6 +46,7 @@ struct BinaryComparisonView: View {
     let right: BinaryFileSource
     var version: Date? = nil
     @State private var sides: [BinaryPreviewSide] = []
+    @State private var previewPath: String?
     @State private var failure: String?
     @State private var overlay = false
     @State private var opacity = 0.5
@@ -76,7 +77,8 @@ struct BinaryComparisonView: View {
                 } else { ProgressView("Loading file comparison…").frame(maxWidth: .infinity).padding(30) }
             }.padding(16)
         }.task(id: BinaryPreviewRequest(path: path, original: originalPath, left: left, right: right, version: version)) {
-            sides = []; failure = nil
+            if previewPath != path { sides = []; previewPath = path }
+            failure = nil
             do {
                 let comparison = try await repository.binaryComparison(path: path, originalPath: originalPath, left: left, right: right)
                 let result = await Task.detached(priority: .userInitiated) { [BinaryPreviewSide.make(comparison.left), BinaryPreviewSide.make(comparison.right)] }.value

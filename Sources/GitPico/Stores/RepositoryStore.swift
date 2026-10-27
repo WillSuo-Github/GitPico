@@ -129,6 +129,7 @@ final class RepositoryStore {
     var commitWarning: String?
     var commitFeedback: String?
     var diffError: String?
+    var workingPreparedDiff: PreparedPatch?
     @ObservationIgnored var workingDiffRequest: WorkingDiffRequest?
     var externalToolRequest: ExternalToolRequest?
     var showingExternalToolSettings = false
@@ -350,7 +351,7 @@ final class RepositoryStore {
         requestDeferredMetadata(value)
     }
 
-    func clearBrowserSelection() { detailTask?.cancel(); detailToken = UUID(); workingDiffRequest = nil; selectedChange = nil; diff = ""; diffError = nil; isLoadingDiff = false }
+    func clearBrowserSelection() { detailTask?.cancel(); detailToken = UUID(); workingDiffRequest = nil; workingPreparedDiff = nil; selectedChange = nil; diff = ""; diffError = nil; isLoadingDiff = false }
 
     func selectBrowserFile(_ file: WorkingFileEntry) {
         if let change = file.change { selectChange(change, staged: change.isStaged && !change.isUnstaged) }
@@ -361,10 +362,30 @@ final class RepositoryStore {
         let staged = staged ? change.isStaged : !change.isUnstaged && change.isStaged
         let request = WorkingDiffRequest(path: change.path, staged: staged, context: diffContext, whitespace: ignoreWhitespace)
         if workingDiffRequest == request, selectedChange == change.path, diffError == nil { return }
+        guard let repository else { return }
+        let previous = selectedChange == change.path ? workingPreparedDiff : nil
         selectedChange = change.path; stagedDiff = staged
         workingDiffRequest = request
+        // Keep this file visible until its replacement has been read and prepared.
+        if previous == nil { diff = ""; workingPreparedDiff = nil }
+        detailTask?.cancel()
+        let token = UUID(); detailToken = token; isLoadingDiff = true; diffError = nil
         let context = diffContext, whitespace = ignoreWhitespace, reader = workingDiffReader
-        loadDiff(inlineError: true) { try await reader.diff(change, staged: staged, context: context, ignoreWhitespace: whitespace, in: $0) }
+        detailTask = Task {
+            do {
+                let value = try await reader.diff(change, staged: staged, context: context, ignoreWhitespace: whitespace, in: repository)
+                guard !Task.isCancelled, detailToken == token else { return }
+                let prepared: PreparedPatch
+                if let previous, previous.source == value { prepared = previous }
+                else { prepared = await Task.detached(priority: .userInitiated) { PreparedPatch.make(value) }.value }
+                guard !Task.isCancelled, detailToken == token else { return }
+                workingPreparedDiff = prepared; diff = value; isLoadingDiff = false
+            } catch is CancellationError { }
+            catch {
+                guard detailToken == token else { return }
+                diffError = error.localizedDescription; isLoadingDiff = false
+            }
+        }
     }
 
     func selectCommit(_ commit: Commit) {
