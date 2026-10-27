@@ -7,10 +7,30 @@ enum AICommitLanguage: String, CaseIterable, Codable, Identifiable {
     var id: String { rawValue }
 }
 struct AICommitSettings: Codable, Equatable {
-    var provider: AICommitProvider = .codex
+    /// nil follows the first CLI detected on this Mac.
+    var provider: AICommitProvider?
     var language: AICommitLanguage = .english
     var executables: [String: String] = [:]
-    var executableOverride: String { executables[provider.rawValue] ?? "" }
+    /// nil uses the built-in Conventional Commits guidelines.
+    var instructions: String?
+    init() {}
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        provider = try values.decodeIfPresent(AICommitProvider.self, forKey: .provider)
+        language = try values.decodeIfPresent(AICommitLanguage.self, forKey: .language) ?? .english
+        executables = try values.decodeIfPresent([String: String].self, forKey: .executables) ?? [:]
+        instructions = try values.decodeIfPresent(String.self, forKey: .instructions)
+    }
+    func executableOverride(for provider: AICommitProvider) -> String { executables[provider.rawValue] ?? "" }
+    func executable(for provider: AICommitProvider) -> URL? { provider.executable(override: executableOverride(for: provider)) }
+    func resolvedProvider(detect: (AICommitProvider) -> URL? = { _ in nil }) -> AICommitProvider {
+        provider ?? AICommitProvider.allCases.first { detect($0) != nil } ?? .codex
+    }
+    var resolvedProvider: AICommitProvider { resolvedProvider(detect: executable(for:)) }
+    var effectiveInstructions: String {
+        let text = instructions?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return text.isEmpty ? AICommitContext.defaultInstructions : text
+    }
 }
 @MainActor @Observable final class AICommitPreferences {
     static let shared = AICommitPreferences()
@@ -37,6 +57,7 @@ struct AICommitSettings: Codable, Equatable {
         guard valid else { throw GitFailure("AI commit settings could not be loaded. Preserve the existing file and repair it before saving.") }
         guard try read() == original else { throw GitFailure("AI commit settings changed outside this window. Reopen the app before saving.") }
         guard value.executables.values.allSatisfy({ $0.utf8.count <= 4096 && !$0.contains("\0") }) else { throw GitFailure("The CLI path is too long or invalid.") }
+        guard (value.instructions?.utf8.count ?? 0) <= 16 * 1024, value.instructions?.contains("\0") != true else { throw GitFailure("The commit message prompt must be under 16 KB.") }
         try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
         let data = try JSONEncoder().encode(value)
         try data.write(to: file, options: .atomic)

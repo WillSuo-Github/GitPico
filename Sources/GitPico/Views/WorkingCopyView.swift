@@ -138,7 +138,7 @@ struct CommitComposer: View {
     @State private var workflows = CommitWorkflowLibrary.shared
     @State private var insertion: CommitTemplateInsertion?
     @State private var showBody = false
-    @State private var showingAICommit = false
+    @State private var ai = AICommitSession()
     @FocusState private var subjectFocused: Bool
     var commitTitle: String {
         if store.amend { return "Amend Commit" }
@@ -151,10 +151,14 @@ struct CommitComposer: View {
                 HStack(spacing: 6) {
                     TextField("Summary", text: $store.commitSubject).textFieldStyle(.plain).font(.system(size: 13, weight: .medium)).focused($subjectFocused).accessibilityLabel("Commit summary")
                     if !store.commitSubject.isEmpty { Text("\(store.commitSubject.count)").font(.system(size: 10).monospacedDigit()).foregroundStyle(store.commitSubject.count > 72 ? Pico.warning : Color.secondary.opacity(0.6)).help("Summary length; 50–72 characters reads best in logs") }
-                    Button { showingAICommit = true } label: { Label("AI", systemImage: "sparkles") }
+                    Button(action: toggleAI) {
+                        if ai.isGenerating { HStack(spacing: 4) { ProgressView().controlSize(.mini); Text("Stop") } }
+                        else { Label("AI", systemImage: "sparkles") }
+                    }
                         .buttonStyle(.plain).foregroundStyle(Color.accentColor)
-                        .help("Generate a commit message or configure your AI tool…")
-                        .accessibilityLabel("Generate commit message with AI")
+                        .disabled(!ai.isGenerating && store.aiCommitUnavailableReason != nil)
+                        .help(aiHelp)
+                        .accessibilityLabel(ai.isGenerating ? "Stop generating commit message" : "Generate commit message with AI")
                     Button { showBody.toggle() } label: { Image(systemName: "text.alignleft").foregroundStyle(showBody || !store.commitBody.isEmpty ? Color.accentColor : .secondary) }
                         .buttonStyle(.plain).help(showBody ? "Hide description" : "Add a description")
                 }.padding(.horizontal, 10).frame(height: 32)
@@ -199,6 +203,15 @@ struct CommitComposer: View {
                 Button(commitTitle, action: store.commit).buttonStyle(.borderedProminent).disabled(!store.canCommit)
                     .help(store.commitUnavailableReason ?? "Commit staged changes (⌘Return)")
             }.controlSize(.regular)
+            if let error = ai.error {
+                HStack(alignment: .firstTextBaseline, spacing: 5) {
+                    Image(systemName: "sparkles").imageScale(.small)
+                    Text(error).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
+                    Spacer(minLength: 0)
+                    SettingsLink { Text("AI Settings") }.buttonStyle(.link)
+                    Button { ai.error = nil } label: { Image(systemName: "xmark") }.buttonStyle(.plain).help("Dismiss")
+                }.font(.system(size: 11)).foregroundStyle(Pico.warning)
+            }
             if let message = statusMessage {
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
                     Image(systemName: message.icon).imageScale(.small)
@@ -212,7 +225,23 @@ struct CommitComposer: View {
         .background(.bar).overlay(alignment: .top) { Divider() }
         .disabled(store.isBusy && !store.isBackgroundFetching).onChange(of: store.amend) { store.updateAmend() }
         .sheet(item: $insertion) { CommitTemplateInsertionView(store: store, insertion: $0) }
-        .sheet(isPresented: $showingAICommit) { AICommitMessageSheet(store: store) }
+        .onDisappear { ai.cancel() }
+        .onChange(of: store.snapshot?.root) { ai.cancel(); ai.error = nil }
+    }
+    private func toggleAI() {
+        if ai.isGenerating { ai.cancel(); return }
+        let settings = AICommitPreferences.shared.value, provider = settings.resolvedProvider
+        guard let executable = settings.executable(for: provider) else {
+            ai.error = provider.title + " was not found. Install a supported AI CLI or choose one in Settings → AI Commits."
+            return
+        }
+        ai.generate(in: store, settings: settings, provider: provider, executable: executable)
+    }
+    var aiHelp: String {
+        if ai.isGenerating { return "Stop generating" }
+        if let reason = store.aiCommitUnavailableReason { return reason }
+        let action = store.commitSubject.isEmpty && store.commitBody.isEmpty ? "Write" : "Replace"
+        return action + " the commit message with " + AICommitPreferences.shared.value.resolvedProvider.title
     }
     var identityLine: String {
         guard let identity = store.snapshot?.identity, !identity.name.isEmpty else { return "No Git identity configured" }
