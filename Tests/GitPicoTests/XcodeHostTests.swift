@@ -9,7 +9,7 @@ import Testing
     #expect(NSApplication.shared.activationPolicy() == .prohibited)
     #expect(!NSApplication.shared.isActive)
     #expect(NSApplication.shared.windows.filter(\.isVisible).isEmpty)
-    #expect(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String == "0.01")
+    #expect(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String == "0.0.1")
     let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? ""
     #expect(build.count == 14 && build.allSatisfy(\.isNumber))
     #expect(Bundle.main.object(forInfoDictionaryKey: "LSMinimumSystemVersion") as? String == "26.0")

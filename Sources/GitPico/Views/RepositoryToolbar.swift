@@ -2,8 +2,8 @@ import AppKit
 import GitCore
 import SwiftUI
 
-/// Repository navigation and Undo/Redo lead, the branch occupies the center,
-/// and remote sync, stash and search trail. Refresh lives in the status bar (⌘R).
+/// Repository navigation and Undo/Redo lead; an open center separates remote sync,
+/// stash and search on the trailing side. Refresh lives in the status bar (⌘R).
 struct RepositoryToolbar: ToolbarContent {
     @Bindable var store: RepositoryStore
     var body: some ToolbarContent {
@@ -29,7 +29,11 @@ struct RepositoryToolbar: ToolbarContent {
                 .help(store.undoAvailability?.redo.map { "Redo " + $0.title + " (⇧⌥⌘Z)" } ?? "No Git operation to redo")
                 .disabled(store.isBusy || store.undoAvailability?.redo == nil)
             }
-            ToolbarItem(id: "repository.branch", placement: .principal) { BranchNavigationMenu(store: store) }
+            // An empty principal view preserves AppKit's trailing action layout.
+            // ToolbarSpacer alone is folded away when there is no principal item.
+            ToolbarItem(id: "repository.centerSpacing", placement: .principal) {
+                Color.clear.frame(width: 1, height: 1).allowsHitTesting(false).accessibilityHidden(true)
+            }.sharedBackgroundVisibility(.hidden)
             ToolbarItemGroup(placement: .primaryAction) {
                 Group {
                     Button { store.sync(.fetch) } label: { Label("Fetch", systemImage: "arrow.down.circle") }.help("Fetch all remotes")

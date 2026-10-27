@@ -3,7 +3,7 @@ import Foundation
 import Testing
 @testable import GitPico
 
-@Test @MainActor func repositoryToolbarSeparatesNavigationBranchAndTrailingToolsWithoutActivation() async throws {
+@Test @MainActor func repositoryToolbarKeepsCenterEmptyAndTrailingToolsRightAlignedWithoutActivation() async throws {
     let f = try await WorkingAppFixture.make(); defer { f.clean() }
     let workspace = RepositoryWorkspace(library: f.store.library)
     await workspace.open(await f.repository.root)
@@ -17,11 +17,9 @@ import Testing
         let view = try #require(window.contentView?.superview)
         view.layoutSubtreeIfNeeded()
         let toolbar = try #require(window.toolbar)
-        let branch = try #require(toolbar.items.first { $0.itemIdentifier.rawValue.contains("repository.branch") }?.view)
+        #expect(!toolbar.items.contains { $0.itemIdentifier.rawValue.contains("repository.branch") })
         let search = try #require(toolbar.items.first { $0.itemIdentifier.rawValue.contains("repository.search") }?.view)
-        let branchRect = branch.convert(branch.bounds, to: nil)
         let searchRect = search.convert(search.bounds, to: nil)
-        #expect(branchRect.maxX <= searchRect.minX)
         if width == 1440 { #expect(searchRect.maxX > width - 60 && searchRect.midX > width * 0.75) }
         if let path = ProcessInfo.processInfo.environment["GITPICO_TOOLBAR_LAYOUT_CAPTURE"] {
             let folder = URL(fileURLWithPath: path)

@@ -67,7 +67,7 @@ struct SettingsView: View {
     let tools: ExternalToolPreferences
     let store: RepositoryStore
     @State private var preferences = AppPreferences.shared
-    var version: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.01" }
+    var version: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Development" }
     var build: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "Development" }
     var body: some View {
         TabView {

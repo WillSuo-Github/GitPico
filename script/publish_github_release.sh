@@ -37,11 +37,20 @@ python3 - "$OUTPUT_DIR/notarization.json" <<'PY'
 import json, sys
 if json.load(open(sys.argv[1])).get('status') != 'Accepted': raise SystemExit('Notarization must be Accepted.')
 PY
+MARKETING_VERSION="$(python3 - "$OUTPUT_DIR/$ZIP_NAME" <<'PYVERSION'
+import plistlib, re, sys, zipfile
+with zipfile.ZipFile(sys.argv[1]) as archive:
+    version = plistlib.loads(archive.read('GitPico.app/Contents/Info.plist'))['CFBundleShortVersionString']
+if not re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+', version):
+    raise SystemExit('Expected a three-component marketing version in the release package.')
+print(version)
+PYVERSION
+)"
 if gh release view "$TAG" --repo "$REPOSITORY" --json isDraft > "$OUTPUT_DIR/draft-status.json" 2>/dev/null; then
   [[ "$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["isDraft"])' "$OUTPUT_DIR/draft-status.json")" == True ]] || { echo 'This release is already published. Generate a new build instead.' >&2; exit 1; }
 else
   gh release create "$TAG" --repo "$REPOSITORY" --target "$(git rev-parse HEAD)" --draft \
-    --title "GitPico 0.01 ($BUILD_ID)" --notes "Development build $BUILD_ID. Review validation, signing and update results before publication."
+    --title "GitPico $MARKETING_VERSION ($BUILD_ID)" --notes "Development build $BUILD_ID. Review validation, signing and update results before publication."
 fi
 mkdir -p "$OUTPUT_DIR/remote-check"
 if ! gh release download "$TAG" --repo "$REPOSITORY" --pattern "$ZIP_NAME" --dir "$OUTPUT_DIR/remote-check" --clobber >/dev/null 2>&1; then

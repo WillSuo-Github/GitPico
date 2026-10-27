@@ -86,6 +86,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0166CE655851FE6743890207 /* prepare_github_appcast.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = prepare_github_appcast.py; sourceTree = "<group>"; };
+		018C9911644D360B9111D16F /* publish_github_release.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = publish_github_release.sh; sourceTree = "<group>"; };
+		0B0699B711A45337145E7A7B /* Distribution.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Distribution.json; sourceTree = "<group>"; };
 		2C56CCE6D9A4A9BED8FBBE16 /* GitCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GitCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4661EB29625887B29D7A2FB4 /* create_history_demo.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = create_history_demo.py; sourceTree = "<group>"; };
 		51C44E63A5EF1E2DB119D6AB /* GitPico-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "GitPico-Info.plist"; sourceTree = "<group>"; };
@@ -97,13 +100,21 @@
 		7767F213F5F2E80F41DFA026 /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 		8077BB6AADA7FD152EC3D241 /* xcode_build_metadata.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = xcode_build_metadata.py; sourceTree = "<group>"; };
 		82BC667E1CCE1AB2D5CCA5E6 /* create_demo.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = create_demo.sh; sourceTree = "<group>"; };
+		9149AADA7DDB18DA7C338481 /* test_notarization.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = test_notarization.py; sourceTree = "<group>"; };
 		93B53209B3D5A6E63E1200A0 /* project.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = project.yml; sourceTree = "<group>"; };
 		98EA577E49C3224AD5EC70EF /* GitPicoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GitPicoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A028AD36B6515DB25344F13E /* select_github_draft.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = select_github_draft.py; sourceTree = "<group>"; };
 		A6B05CF827D25B77F396230D /* GitCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GitCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AFFD843E6532C7ADF959F8ED /* create_review_demo.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = create_review_demo.py; sourceTree = "<group>"; };
 		B704ABDA06CD1B93A9122BC7 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		C679F428586F8E7004CA94E8 /* test_release_metadata.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = test_release_metadata.py; sourceTree = "<group>"; };
+		CE87BED98E9373A8548F1202 /* normalize_notarization.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = normalize_notarization.py; sourceTree = "<group>"; };
 		D140537807E8C5A02FA44B95 /* create_management_demo.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = create_management_demo.py; sourceTree = "<group>"; };
 		D29218C28ABAB9B6605694A0 /* create_inspection_demo.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = create_inspection_demo.py; sourceTree = "<group>"; };
+		D3D0B0829371AAF0838E48C1 /* test_select_github_draft.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = test_select_github_draft.py; sourceTree = "<group>"; };
+		E3AB7B68980C1E6F9AD513B2 /* validate_appcast.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = validate_appcast.py; sourceTree = "<group>"; };
+		E693A6537E3DC31A66023BB8 /* SparklePublicKey.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = SparklePublicKey.txt; sourceTree = "<group>"; };
+		ED514829C4797E0791205C4B /* package_release.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = package_release.sh; sourceTree = "<group>"; };
 		F6EC6DEE1AC58244AB51332E /* build_and_run.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = build_and_run.sh; sourceTree = "<group>"; };
 		F7FA56219B78DF89B47065FC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FE067960E19E32FCB749C0C5 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
@@ -112,21 +123,41 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8D10202DF3DEE6CDAEA46A01 /* GitCoreTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			name = GitCoreTests;
 			path = GitCoreTests;
 			sourceTree = "<group>";
 		};
 		9B11ED1689853F07EE4AE0FB /* GitPicoTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			name = GitPicoTests;
 			path = GitPicoTests;
 			sourceTree = "<group>";
 		};
 		AD29611DDD7777B1770F39FA /* GitPico */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			name = GitPico;
 			path = GitPico;
 			sourceTree = "<group>";
 		};
 		D1AEE0EE9C0AE2B9473D6188 /* GitCore */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			name = GitCore;
 			path = GitCore;
 			sourceTree = "<group>";
 		};
@@ -180,7 +211,9 @@
 		52786BFEA9F883C04619B2ED /* Configuration */ = {
 			isa = PBXGroup;
 			children = (
+				0B0699B711A45337145E7A7B /* Distribution.json */,
 				51C44E63A5EF1E2DB119D6AB /* GitPico-Info.plist */,
+				E693A6537E3DC31A66023BB8 /* SparklePublicKey.txt */,
 			);
 			path = Configuration;
 			sourceTree = "<group>";
@@ -215,9 +248,26 @@
 				D140537807E8C5A02FA44B95 /* create_management_demo.py */,
 				AFFD843E6532C7ADF959F8ED /* create_review_demo.py */,
 				6F0DA3352C2870946B394675 /* generate_project.sh */,
+				CE87BED98E9373A8548F1202 /* normalize_notarization.py */,
+				ED514829C4797E0791205C4B /* package_release.sh */,
+				0166CE655851FE6743890207 /* prepare_github_appcast.py */,
+				018C9911644D360B9111D16F /* publish_github_release.sh */,
+				A028AD36B6515DB25344F13E /* select_github_draft.py */,
+				E3AB7B68980C1E6F9AD513B2 /* validate_appcast.py */,
 				8077BB6AADA7FD152EC3D241 /* xcode_build_metadata.py */,
+				8DB64CEA50C59C65357AA6C2 /* tests */,
 			);
 			path = script;
+			sourceTree = "<group>";
+		};
+		8DB64CEA50C59C65357AA6C2 /* tests */ = {
+			isa = PBXGroup;
+			children = (
+				9149AADA7DDB18DA7C338481 /* test_notarization.py */,
+				C679F428586F8E7004CA94E8 /* test_release_metadata.py */,
+				D3D0B0829371AAF0838E48C1 /* test_select_github_draft.py */,
+			);
+			path = tests;
 			sourceTree = "<group>";
 		};
 		A9DDA25FC7FD135F5194DDC0 /* Tests */ = {
@@ -533,11 +583,8 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "$(DERIVED_FILE_DIR)/GitPico-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MARKETING_VERSION = 0.01;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.willsuo.GitPico;
 				SDKROOT = macosx;
 			};
@@ -731,11 +778,8 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "$(DERIVED_FILE_DIR)/GitPico-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MARKETING_VERSION = 0.01;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.willsuo.GitPico;
 				SDKROOT = macosx;
 			};

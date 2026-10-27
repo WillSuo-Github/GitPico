@@ -18,13 +18,13 @@ class ReleaseMetadataTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             (root / 'Configuration').mkdir()
-            (root / 'Configuration/GitPico-Info.plist').write_bytes(plistlib.dumps({'CFBundleShortVersionString': '0.01', 'LSMinimumSystemVersion': '26.0'}))
+            (root / 'Configuration/GitPico-Info.plist').write_bytes(plistlib.dumps({'CFBundleShortVersionString': '0.0.1', 'LSMinimumSystemVersion': '26.0'}))
             env = {'SRCROOT': folder, 'DERIVED_FILE_DIR': str(root / 'derived'),
                    'GITPICO_UPDATE_FEED_URL': 'https://updates.example.invalid/appcast.xml',
                    'GITPICO_UPDATE_PUBLIC_KEY': base64.b64encode(bytes(32)).decode()}
             build = generate_metadata(env)
             value = plistlib.loads((root / 'derived/GitPico-Info.plist').read_bytes())
-            self.assertEqual(value['CFBundleShortVersionString'], '0.01')
+            self.assertEqual(value['CFBundleShortVersionString'], '0.0.1')
             self.assertEqual(value['LSMinimumSystemVersion'], '26.0')
             self.assertEqual(len(build), 14)
             self.assertTrue(value['SUVerifyUpdateBeforeExtraction'])
@@ -62,7 +62,7 @@ class ReleaseMetadataTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             (root / 'Configuration').mkdir()
-            (root / 'Configuration/GitPico-Info.plist').write_bytes(plistlib.dumps({'GitPicoUpdateRepository': 'example/private', 'CFBundleShortVersionString': '0.01'}))
+            (root / 'Configuration/GitPico-Info.plist').write_bytes(plistlib.dumps({'GitPicoUpdateRepository': 'example/private', 'CFBundleShortVersionString': '0.0.1'}))
             generate_metadata({'SRCROOT': folder, 'DERIVED_FILE_DIR': str(root / 'derived'), 'GITPICO_UPDATE_PUBLIC_KEY': base64.b64encode(bytes(32)).decode()})
             value = plistlib.loads((root / 'derived/GitPico-Info.plist').read_bytes())
             self.assertEqual(value['SUFeedURL'], 'https://github.com/example/private/releases/latest/download/appcast.xml')
@@ -83,7 +83,7 @@ class ReleaseMetadataTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             (root / 'Configuration').mkdir()
-            (root / 'Configuration/GitPico-Info.plist').write_bytes(plistlib.dumps({'GitPicoUpdateRepository': 'example/private', 'CFBundleShortVersionString': '0.01'}))
+            (root / 'Configuration/GitPico-Info.plist').write_bytes(plistlib.dumps({'GitPicoUpdateRepository': 'example/private', 'CFBundleShortVersionString': '0.0.1'}))
             key = base64.b64encode(bytes(32)).decode()
             (root / 'Configuration/SparklePublicKey.txt').write_text(key + '\n')
             env = {'SRCROOT': folder, 'DERIVED_FILE_DIR': str(root / 'derived')}

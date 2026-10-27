@@ -6,7 +6,7 @@ Validation, builds, signing, notarization and packaging run locally. GitHub Acti
 
 ## Publisher setup
 
-Keep marketing version `0.01` until release preparation is explicitly requested. Builds receive Shanghai date/time build numbers. Packages target macOS 26.0 and both arm64/x86_64.
+Keep marketing version `0.0.1` until release preparation is explicitly requested. Builds receive Shanghai date/time build numbers. Packages target macOS 26.0 and both arm64/x86_64.
 
 Set these values locally, using the intended Apple Developer account:
 
