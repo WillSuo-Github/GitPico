@@ -170,7 +170,7 @@ struct HistoryCommitTable: NSViewRepresentable {
                 cell.textField?.stringValue = title
                 return cell
             case .commit(let commit):
-                let content = HistoryCommitAppearance(commit: commit, graph: input.presentation.graph[commit.hash], graphWidth: CGFloat(input.presentation.graphWidth), compact: input.compact, showGraph: input.showGraph, selected: tableView.isRowSelected(row))
+                let content = HistoryCommitAppearance(commit: commit, graph: input.presentation.graph[commit.hash], graphWidth: CGFloat(input.presentation.graphWidth), compact: input.compact, showGraph: input.showGraph)
                 let cell = tableView.makeView(withIdentifier: HistoryCommitCell.reuseID, owner: nil) as? HistoryCommitCell ?? HistoryCommitCell()
                 cell.configure(content, store: input.store)
                 return cell
@@ -186,13 +186,12 @@ final class HistoryTableView: NSTableView {
     }
 }
 
-private struct HistoryCommitAppearance: Equatable {
+private struct HistoryCommitAppearance {
     let commit: Commit
     let graph: GraphRow?
     let graphWidth: CGFloat
     let compact: Bool
     let showGraph: Bool
-    let selected: Bool
 }
 
 /// Lightweight drawing keeps cached branch changes out of SwiftUI cell layout.
@@ -201,30 +200,113 @@ private final class HistoryCommitCell: NSTableCellView {
     private var content: HistoryCommitAppearance?
     private let drop = NativePicoDropView(frame: .zero)
     override var isFlipped: Bool { true }
-    override var backgroundStyle: NSView.BackgroundStyle { didSet { needsDisplay = true } }
+    private let subjectLabel = HistoryCommitCell.label(size: 12.5, weight: .medium)
+    private let authorLabel = HistoryCommitCell.label(size: 11)
+    private let hashLabel = HistoryCommitCell.label(size: 10.5, monospaced: true)
+    private let dateLabel = HistoryCommitCell.label(size: 11, alignment: .right)
+    private let badgeLabel = HistoryCommitCell.label(size: 9.5, weight: .semibold)
+    private let badgeCountLabel = HistoryCommitCell.label(size: 9.5)
+    private var labels: [NSTextField] { [subjectLabel, authorLabel, hashLabel, dateLabel, badgeLabel, badgeCountLabel] }
+    override var backgroundStyle: NSView.BackgroundStyle {
+        didSet { updateTextColors(); needsDisplay = true }
+    }
+    private static func label(size: CGFloat, weight: NSFont.Weight = .regular, monospaced: Bool = false, alignment: NSTextAlignment = .left) -> NSTextField {
+        let field = NSTextField(labelWithString: "")
+        field.font = monospaced ? .monospacedSystemFont(ofSize: size, weight: weight) : .systemFont(ofSize: size, weight: weight)
+        field.alignment = alignment
+        field.lineBreakMode = .byTruncatingTail
+        field.maximumNumberOfLines = 1
+        field.cell?.usesSingleLineMode = true
+        field.setAccessibilityElement(false)
+        return field
+    }
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         identifier = Self.reuseID
         drop.frame = bounds
         drop.autoresizingMask = [.width, .height]
+        // Text fields retain their own display lifecycle when AppKit reuses or
+        // partially invalidates a row. Only the graph and avatar are custom drawn.
+        for label in labels { addSubview(label) }
         addSubview(drop)
         setAccessibilityElement(true)
     }
     required init?(coder: NSCoder) { nil }
     func configure(_ content: HistoryCommitAppearance, store: RepositoryStore) {
-        if self.content != content { self.content = content; needsDisplay = true }
+        self.content = content
+        subjectLabel.stringValue = content.commit.subject
+        authorLabel.stringValue = content.commit.author
+        hashLabel.stringValue = " · " + content.commit.shortHash
+        dateLabel.stringValue = content.commit.date.picoRelative
+        let badge = referenceBadge(content.commit.decorations)
+        badgeLabel.stringValue = badge.label
+        badgeCountLabel.stringValue = content.commit.decorations.count > 1 ? "+\(content.commit.decorations.count - 1)" : ""
+        updateTextColors()
+        needsLayout = true
+        needsDisplay = true
         let target = PicoDropTarget.commit(content.commit, .squash)
         drop.validate = { [weak store] in store?.canAcceptDrop($0, on: target) == true }
         drop.accept = { [weak store] in store?.acceptDrop($0, on: target, point: $1, height: $2) == true }
         setAccessibilityLabel(content.commit.subject + ", " + content.commit.author + ", " + content.commit.shortHash)
         toolTip = content.commit.subject + "\n" + content.commit.author + " · " + content.commit.date.formatted(date: .complete, time: .shortened)
     }
+    override func setFrameSize(_ newSize: NSSize) {
+        super.setFrameSize(newSize)
+        needsLayout = true
+        needsDisplay = true
+    }
+    private var emphasized: Bool { backgroundStyle == .emphasized }
+    private func updateTextColors() {
+        // AppKit supplies the actual row highlight state, including focus changes.
+        // A key-window check can disagree with the selection background.
+        subjectLabel.textColor = emphasized ? .alternateSelectedControlTextColor : .labelColor
+        let secondary: NSColor = emphasized ? .alternateSelectedControlTextColor : .secondaryLabelColor
+        for label in [authorLabel, hashLabel, dateLabel, badgeCountLabel] { label.textColor = secondary }
+        if let content {
+            let badge = referenceBadge(content.commit.decorations)
+            badgeLabel.textColor = emphasized ? .alternateSelectedControlTextColor : badge.head ? .white : badge.tint
+        }
+    }
+    private var textOrigin: CGFloat {
+        guard let content else { return 12 }
+        var x: CGFloat = 12
+        if content.showGraph, let graph = content.graph {
+            x = 4 + min(content.graphWidth, CGFloat(max(1, graph.laneCount)) * 13 + 16, 110) + 9
+        }
+        return x + (content.compact ? 20 : 26) + 9
+    }
+    private func textWidth(_ label: NSTextField) -> CGFloat {
+        // Single-line text cells need their drawing insets in addition to the
+        // intrinsic glyph width, otherwise even an exact-fit hash is ellipsized.
+        ceil(label.intrinsicContentSize.width) + 4
+    }
+    override func layout() {
+        super.layout()
+        guard let content else { return }
+        let x = textOrigin
+        let top = content.compact ? (bounds.height - 16) / 2 : 7.0
+        let badge = badgeRect(content.commit.decorations, y: top)
+        let reserve = content.commit.decorations.isEmpty ? 0 : bounds.width - badge.minX - 12 + 6
+        subjectLabel.frame = NSRect(x: x, y: top, width: max(0, bounds.width - 12 - x - reserve), height: 17)
+        badgeLabel.isHidden = content.commit.decorations.isEmpty
+        badgeCountLabel.isHidden = content.commit.decorations.count <= 1
+        badgeLabel.frame = NSRect(x: badge.minX + 16, y: badge.minY + 1, width: max(0, badge.width - 19), height: 13)
+        badgeCountLabel.frame = NSRect(x: badge.maxX + 3, y: badge.minY, width: 20, height: 15)
+        for label in [authorLabel, hashLabel, dateLabel] { label.isHidden = content.compact }
+        if !content.compact {
+            let available = max(0, bounds.width - 12 - x)
+            let dateWidth = min(130, textWidth(dateLabel), max(0, available * 0.45))
+            dateLabel.frame = NSRect(x: bounds.width - 12 - dateWidth, y: 28, width: dateWidth, height: 15)
+            let metadataWidth = max(0, dateLabel.frame.minX - x - 9)
+            let hashWidth = min(textWidth(hashLabel), metadataWidth)
+            let authorWidth = max(0, min(textWidth(authorLabel), metadataWidth - hashWidth))
+            authorLabel.frame = NSRect(x: x, y: 28, width: authorWidth, height: 15)
+            hashLabel.frame = NSRect(x: x + authorWidth, y: 28, width: hashWidth, height: 15)
+        }
+    }
     override func draw(_ dirtyRect: NSRect) {
         guard let content else { return }
         let commit = content.commit, compact = content.compact
-        let selectedText: NSColor = window?.isKeyWindow == true ? .alternateSelectedControlTextColor : .unemphasizedSelectedTextColor
-        let primary: NSColor = content.selected ? selectedText : .labelColor
-        let secondary: NSColor = content.selected ? selectedText.withAlphaComponent(0.75) : .secondaryLabelColor
         var x: CGFloat = 12
         if content.showGraph, let graph = content.graph {
             let width = min(content.graphWidth, CGFloat(max(1, graph.laneCount)) * 13 + 16, 110)
@@ -238,23 +320,8 @@ private final class HistoryCommitCell: NSTableCellView {
         NSGradient(starting: tint.withAlphaComponent(0.85), ending: tint)?.draw(in: circle, angle: 90)
         NSColor.white.withAlphaComponent(0.18).setStroke(); circle.lineWidth = 0.5; circle.stroke()
         drawText(Pico.monogram(commit.author), in: avatar.insetBy(dx: 1, dy: size * 0.23), font: .systemFont(ofSize: size * 0.38, weight: .semibold), color: .white, alignment: .center)
-        x += size + 9
         let top = compact ? (bounds.height - 16) / 2 : 7.0
-        let badgeWidth = drawBadge(commit.decorations, y: top, selected: content.selected, textColor: selectedText)
-        drawText(commit.subject, in: NSRect(x: x, y: top, width: max(0, bounds.width - 12 - x - badgeWidth), height: 17), font: .systemFont(ofSize: 12.5, weight: .medium), color: primary)
-        if !compact {
-            let date = commit.date.picoRelative
-            let dateWidth = min(130, (date as NSString).size(withAttributes: [.font: NSFont.systemFont(ofSize: 11)]).width)
-            let dateRect = NSRect(x: max(x, bounds.width - 12 - dateWidth), y: 28, width: dateWidth, height: 15)
-            drawText(date, in: dateRect, font: .systemFont(ofSize: 11), color: secondary, alignment: .right)
-            let hashFont = NSFont.monospacedSystemFont(ofSize: 10.5, weight: .regular)
-            let hashText = " · " + commit.shortHash
-            let hashWidth = (hashText as NSString).size(withAttributes: [.font: hashFont]).width
-            let available = max(0, dateRect.minX - x - 9)
-            let authorWidth = max(0, min((commit.author as NSString).size(withAttributes: [.font: NSFont.systemFont(ofSize: 11)]).width, available - hashWidth))
-            drawText(commit.author, in: NSRect(x: x, y: 28, width: authorWidth, height: 15), font: .systemFont(ofSize: 11), color: secondary)
-            drawText(hashText, in: NSRect(x: x + authorWidth, y: 28, width: min(hashWidth, available - authorWidth), height: 15), font: hashFont, color: secondary)
-        }
+        drawBadge(commit.decorations, y: top)
     }
 
     private func drawText(_ text: String, in rect: NSRect, font: NSFont, color: NSColor, alignment: NSTextAlignment = .left) {
@@ -264,26 +331,30 @@ private final class HistoryCommitCell: NSTableCellView {
         (text as NSString).draw(in: rect, withAttributes: [.font: font, .foregroundColor: color, .paragraphStyle: style])
     }
 
-    private func drawBadge(_ decorations: [String], y: CGFloat, selected: Bool, textColor: NSColor) -> CGFloat {
-        guard !decorations.isEmpty else { return 0 }
+    private func referenceBadge(_ decorations: [String]) -> (label: String, head: Bool, tag: Bool, tint: NSColor) {
         let head = decorations.contains { $0.hasPrefix("HEAD") }
         let tag = !head && decorations.first?.hasPrefix("tag: ") == true
         let label = decorations.first(where: { $0.hasPrefix("HEAD -> ") }).map { String($0.dropFirst(8)) }
             ?? (head ? "HEAD" : (decorations.first ?? "").replacingOccurrences(of: "tag: ", with: ""))
-        let tint = head ? NSColor.controlAccentColor : NSColor(tag ? Pico.warning : Pico.modified)
+        return (label, head, tag, head ? .controlAccentColor : NSColor(tag ? Pico.warning : Pico.modified))
+    }
+    private func badgeRect(_ decorations: [String], y: CGFloat) -> NSRect {
         let extra: CGFloat = decorations.count > 1 ? 22 : 0
-        let width = min(108, (label as NSString).size(withAttributes: [.font: NSFont.systemFont(ofSize: 9.5, weight: .semibold)]).width + 22)
-        let rect = NSRect(x: max(0, bounds.width - 12 - width - extra), y: y + 1, width: width, height: 15)
-        (selected ? textColor.withAlphaComponent(0.2) : head ? tint : tint.withAlphaComponent(0.15)).setFill()
+        // Leave room for the subject even when the table is narrow or the graph is wide.
+        let width = min(108, textWidth(badgeLabel) + 22, max(0, bounds.width - textOrigin - 100 - extra - 18))
+        return NSRect(x: max(0, bounds.width - 12 - width - extra), y: y + 1, width: width, height: 15)
+    }
+    private func drawBadge(_ decorations: [String], y: CGFloat) {
+        guard !decorations.isEmpty else { return }
+        let badge = referenceBadge(decorations)
+        let rect = badgeRect(decorations, y: y)
+        guard rect.width >= 22 else { return }
+        let selectedText = NSColor.alternateSelectedControlTextColor
+        (emphasized ? selectedText.withAlphaComponent(0.2) : badge.head ? badge.tint : badge.tint.withAlphaComponent(0.15)).setFill()
         NSBezierPath(roundedRect: rect, xRadius: 7.5, yRadius: 7.5).fill()
-        let ink: NSColor = selected ? textColor : head ? .white : tint
-        let image = NSImage(systemSymbolName: tag ? "tag.fill" : head ? "smallcircle.filled.circle" : "arrow.triangle.branch", accessibilityDescription: nil)
+        let ink: NSColor = emphasized ? selectedText : badge.head ? .white : badge.tint
+        let image = NSImage(systemSymbolName: badge.tag ? "tag.fill" : badge.head ? "smallcircle.filled.circle" : "arrow.triangle.branch", accessibilityDescription: nil)
         image?.withSymbolConfiguration(.init(pointSize: 9, weight: .semibold))?.withSymbolConfiguration(.init(paletteColors: [ink]))?.draw(in: NSRect(x: rect.minX + 4, y: rect.minY + 3, width: 9, height: 9), from: .zero, operation: .sourceOver, fraction: 1, respectFlipped: true, hints: nil)
-        drawText(label, in: NSRect(x: rect.minX + 16, y: rect.minY + 1, width: width - 19, height: 13), font: .systemFont(ofSize: 9.5, weight: .semibold), color: ink)
-        if decorations.count > 1 {
-            drawText("+\(decorations.count - 1)", in: NSRect(x: rect.maxX + 3, y: rect.minY, width: 20, height: 15), font: .systemFont(ofSize: 9.5), color: selected ? textColor : .secondaryLabelColor)
-        }
-        return width + extra + 6
     }
 
     private func drawGraph(_ row: GraphRow, in rect: NSRect) {
