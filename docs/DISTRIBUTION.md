@@ -2,6 +2,8 @@
 
 GitPico uses the private `WillSuo-Github/GitPico` repository for temporary distribution. This document describes the implemented workflow; no release is published by building or running tests.
 
+Validation, builds, signing, notarization and packaging run locally. GitHub Actions CI is intentionally removed; GitHub hosts the source and release assets. Release preparation uses a clean, committed `main` checkout.
+
 ## Publisher setup
 
 Keep marketing version `0.01` until release preparation is explicitly requested. Builds receive Shanghai date/time build numbers. Packages target macOS 26.0 and both arm64/x86_64.
@@ -40,6 +42,6 @@ Normal Xcode/local builds load the committed public key and derive the GitHub fe
 
 The Developer ID/notarization/stapling/Gatekeeper pipeline and the private update/install/relaunch loop passed for builds `20261027001805` → `20261027002242`; both were published privately under explicit authorization. The first pre-fix loop failed because Sparkle received JSON metadata and its release was returned to draft. Older builds containing that resolver bug require manual installation of a fixed package. See [exact results and evidence](COMPLETION-2026-10-26.md).
 
-The latest macOS 26 arm64/Intel CI jobs were prevented from starting by GitHub account billing/spending limits. Earlier arm64 passes do not establish newest-source acceptance, and the earlier Intel timeout remains unresolved. Update rollback/recovery, physical IME/VoiceOver, prolonged sleep/network/revocation behavior and wider production acceptance remain separate gates.
+Removing CI does not establish platform/runtime acceptance. Record the actual local host and architectures tested for each release; a universal archive alone does not prove runtime behavior on both architectures. Update rollback/recovery, physical IME/VoiceOver, prolonged sleep/network/revocation behavior and wider production acceptance remain separate gates. Earlier CI results remain in their historical validation records.
 
 References: [Sparkle publishing](https://sparkle-project.org/documentation/publishing/), [GitHub release assets](https://docs.github.com/en/rest/releases/assets), [Sparkle updater delegate](https://sparkle-project.org/documentation/api-reference/Protocols/SPUUpdaterDelegate.html).

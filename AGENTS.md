@@ -14,3 +14,8 @@
 - Regenerate target, scheme or build-setting changes through `./script/generate_project.sh` (XcodeGen 2.46+). Opening and building the saved project must not require XcodeGen.
 - Xcode generates the app Info.plist in DerivedData through `script/xcode_build_metadata.py`; never mutate the source plist or project file to increment a build. Keep marketing version `0.01` and the macOS target `26.0`.
 - Keep the shared scheme's Test action windowless (`--background-testing`); its Run action must launch the normal app when explicitly invoked by the user.
+
+## Local validation and releases
+
+- Run validation, builds, Developer ID signing, notarization and packaging locally. Do not add or enable GitHub Actions CI unless the user explicitly requests it.
+- Prepare releases from a clean, committed `main` checkout using `script/package_release.sh`, then upload the signed package and appcast to GitHub Releases. Verify uploaded assets and the signed feed before publishing an authorized release as Latest.
