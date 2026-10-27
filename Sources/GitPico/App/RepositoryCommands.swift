@@ -41,7 +41,7 @@ struct RepositoryCommands: Commands {
                 Divider()
                 Group {
                     Button("Fetch") { store.sync(.fetch) }
-                    Button("Pull…") { store.sync(.pull) }.disabled(!store.canIntegrate)
+                    Button("Pull…") { store.reviewPull() }.disabled(!store.canIntegrate)
                     Button("Push") { store.sync(.push) }.disabled(!store.canIntegrate)
                     Button("Synchronize (Fetch, Pull, Push)", action: store.syncAll).disabled(!store.canSynchronize)
                 }.disabled(!store.canUseRepository || store.managedRemotes.isEmpty)

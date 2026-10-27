@@ -1,18 +1,17 @@
 import Foundation
 
 public enum PullPolicy: Int, Codable, CaseIterable, Sendable {
-    case fastForwardOnly, merge, rebase
+    // Raw values stay stable for saved preferences; the former fast-forward-only value (0) now falls back to merge.
+    case merge = 1, rebase = 2
     public var title: String {
         switch self {
-        case .fastForwardOnly: "Fast-forward only"
         case .merge: "Merge"
         case .rebase: "Rebase"
         }
     }
     public var explanation: String {
         switch self {
-        case .fastForwardOnly: "Update only when no local commits need integrating. Divergence stops safely."
-        case .merge: "Preserve local commit hashes. Create a merge commit when the branches diverge."
+        case .merge: "Fast-forward when possible. Create a merge commit when the branches diverge; local commit hashes are preserved."
         case .rebase: "Replay local commits on top of the upstream branch. Local commit hashes change."
         }
     }
@@ -39,7 +38,6 @@ extension GitRepository {
         guard before.hash != nil, try await currentOperation() == .none else { throw GitFailure("Finish the current integration before pulling.") }
         let flags: [String]
         switch policy {
-        case .fastForwardOnly: flags = ["--no-rebase", "--ff-only", "--no-autostash"]
         case .merge: flags = ["--no-rebase", "--ff", "--no-edit", "--no-autostash"]
         case .rebase: flags = ["--rebase", "--no-autostash"]
         }

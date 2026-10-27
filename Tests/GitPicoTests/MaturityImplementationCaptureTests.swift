@@ -26,7 +26,7 @@ import Testing
     try png(.systemBlue).write(to: root.appendingPathComponent("Preview.png"))
     let snapshot = try #require(f.store.snapshot)
     let panels: [(String, AnyView, NSSize)] = [
-        ("pull", AnyView(PullReviewSheet(store: f.store, request: PullReviewRequest(head: snapshot.head, upstream: "origin/main"))), NSSize(width: 580, height: 480)),
+        ("pull", AnyView(PullReviewSheet(store: f.store, request: PullReviewRequest(head: snapshot.head, upstream: "origin/main"))), NSSize(width: 560, height: 600)),
         ("binary-image", AnyView(BinaryComparisonView(repository: f.repository, path: "Preview.png", left: .index, right: .workingCopy)), NSSize(width: 1000, height: 620)),
         ("updates", AnyView(UpdatesSettingsView(store: f.store)), NSSize(width: 740, height: 570)),
         ("commit-template", AnyView(CommitTemplateInsertionView(store: f.store, insertion: CommitTemplateInsertion(name: "Feature Template", text: "Feature summary\n\nMotivation\n\nImplementation\n\nValidation", root: root))), NSSize(width: 580, height: 400))

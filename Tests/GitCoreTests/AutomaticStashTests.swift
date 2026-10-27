@@ -133,7 +133,7 @@ private func localDraft(_ f: Fixture) async throws {
     _ = try await GitProcess.run(["commit", "-m", "Incoming change"], at: peer)
     _ = try await GitProcess.run(["push"], at: peer)
     try await localDraft(f)
-    try await f.repo.performWithAutomaticStash(title: "Pull", restoreAfter: true) { try await $0.sync(.pull) }
+    try await f.repo.performWithAutomaticStash(title: "Pull", restoreAfter: true) { try await $0.pull(policy: .merge) }
     #expect(try String(contentsOf: f.url.appendingPathComponent("remote.txt"), encoding: .utf8) == "incoming\n")
     #expect(try await f.git(["show", ":readme.txt"]).text == "staged draft\n")
     #expect(try String(contentsOf: f.url.appendingPathComponent("readme.txt"), encoding: .utf8) == "working draft\n")

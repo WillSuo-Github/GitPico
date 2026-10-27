@@ -55,12 +55,14 @@ import Testing
     try await git(["push", "origin", "main"], at: peer)
     f.store.sync(.fetch); await f.finish()
     #expect(try status().text == "HEAD | ↓1")
-    f.store.sync(.pull)
+    f.store.reviewPull()
     let pull = try #require(f.store.pullRequest)
     f.store.pullRequest = nil
-    f.store.runPull(pull, policy: .fastForwardOnly); await f.finish()
+    f.store.runPull(pull, policy: .merge); await f.finish()
     let pulled = try status()
     #expect(f.store.error == nil && pulled.text == "HEAD")
+    // Merge pulls without local commits fast-forward instead of creating a merge commit.
+    #expect(f.store.snapshot?.commits.first?.parents.count == 1)
     try await git(["switch", "--detach"]); try await f.sync()
     #expect(BranchSyncStatus.current(current, snapshot: f.store.snapshot) == nil)
     #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)

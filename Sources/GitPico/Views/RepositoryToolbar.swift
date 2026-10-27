@@ -37,7 +37,7 @@ struct RepositoryToolbar: ToolbarContent {
             ToolbarItemGroup(placement: .primaryAction) {
                 Group {
                     Button { store.sync(.fetch) } label: { Label("Fetch", systemImage: "arrow.down.circle") }.help("Fetch all remotes")
-                    Button { store.sync(.pull) } label: { Label("Pull", systemImage: "arrow.down") }
+                    Button { store.reviewPull() } label: { Label("Pull", systemImage: "arrow.down") }
                         .help("Review Pull strategy (" + AppPreferences.shared.pullPolicy.title + ")").disabled(!store.canIntegrate)
                     Button { store.sync(.push) } label: { Label("Push", systemImage: "arrow.up") }
                         .help(snapshot.ahead > 0 ? "Push \(snapshot.ahead) outgoing commits" : "Push current branch").disabled(!store.canIntegrate)

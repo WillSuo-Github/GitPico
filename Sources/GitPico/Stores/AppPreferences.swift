@@ -7,7 +7,7 @@ final class AppPreferences {
     static let shared = AppPreferences()
     var offerAutomaticStash = true { didSet { save() } }
     var backgroundFetch = false { didSet { save() } }
-    var pullPolicy: PullPolicy = .fastForwardOnly { didSet { save() } }
+    var pullPolicy: PullPolicy = .merge { didSet { save() } }
     var resumeWorkspace = true { didSet { save() } }
     var diffFontSize = 12.0 { didSet { save() } }
     var splitDiff = false { didSet { save() } }
@@ -26,7 +26,7 @@ final class AppPreferences {
         if let data = try? Data(contentsOf: file), let values = try? JSONDecoder().decode([String: Double].self, from: data) {
             offerAutomaticStash = values["offerAutomaticStash"] != 0
             backgroundFetch = values["backgroundFetch"] == 1
-            pullPolicy = PullPolicy(rawValue: Int(values["pullPolicy"] ?? 0)) ?? .fastForwardOnly
+            pullPolicy = PullPolicy(rawValue: Int(values["pullPolicy"] ?? 1)) ?? .merge
             resumeWorkspace = values["resumeWorkspace"] != 0
             diffFontSize = min(18, max(10, values["fontSize"] ?? 12))
             splitDiff = values["splitDiff"] == 1

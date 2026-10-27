@@ -192,7 +192,7 @@ struct Fixture: Sendable {
     #expect(try await f.repo.configuration().remotes.first?.fetchURL == remote.path)
     _ = try await f.git(["push", "-u", "origin", "main"])
     try await f.repo.sync(.fetch)
-    try await f.repo.sync(.pull)
+    try await f.repo.pull(policy: .merge)
     try f.write("readme.txt", "next\n")
     let changes = try await f.repo.snapshot().changes.filter { $0.path == "readme.txt" }
     try await f.repo.stage(changes)

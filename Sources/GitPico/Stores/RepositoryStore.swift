@@ -499,11 +499,14 @@ final class RepositoryStore {
 
     func sync(_ action: GitRepository.SyncAction) {
         guard canUseRepository, snapshot?.remotes.isEmpty == false, action == .fetch || canIntegrate else { return }
-        if action == .pull, let snapshot {
-            pullRequest = PullReviewRequest(head: snapshot.head, upstream: snapshot.references.first(where: \.isCurrent)?.upstream ?? "")
-        } else if action == .push, let current = snapshot?.references.first(where: \.isCurrent), current.isLocal, current.upstream.isEmpty {
+        if action == .push, let current = snapshot?.references.first(where: \.isCurrent), current.isLocal, current.upstream.isEmpty {
             manage(.publish(current, nil, nil, false))
         } else { protectedPerform("\(action.rawValue.capitalized)…", protect: false) { try await $0.sync(action) } }
+    }
+    /// Pull always goes through the strategy review sheet.
+    func reviewPull() {
+        guard canUseRepository, canIntegrate, let snapshot, !snapshot.remotes.isEmpty else { return }
+        pullRequest = PullReviewRequest(head: snapshot.head, upstream: snapshot.references.first(where: \.isCurrent)?.upstream ?? "")
     }
     func switchBranch(_ ref: Reference) {
         guard checkoutUnavailableReason(ref) == nil else { return }

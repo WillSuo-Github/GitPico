@@ -69,23 +69,18 @@ import Testing
         for args in [["add", "remote.txt"], ["commit", "-m", "Remote change"], ["push", "origin", "main"]] { _ = try await GitProcess.run(args, at: peer) }
         try await f.git(["commit", "--allow-empty", "-m", "Local change"])
         let before = try await f.repo.headPosition()
-        if policy == .fastForwardOnly {
-            await #expect(throws: GitFailure.self) { try await f.repo.pull(policy: policy, expectedHead: before) }
-            #expect(try await f.repo.headPosition() == before)
-        } else {
-            try await f.repo.pull(policy: policy, expectedHead: before)
-            let state = try await f.repo.snapshot()
-            #expect(state.operation == .none && state.changes.isEmpty && state.behind == 0)
-            #expect(try String(contentsOf: f.url.appendingPathComponent("remote.txt"), encoding: .utf8) == "remote\n")
-            #expect(state.commits[0].parents.count == (policy == .merge ? 2 : 1))
-            if policy == .merge {
-                let merge = state.commits[0]
-                let first = try await f.repo.compareRevisions(left: merge.parents[0], right: merge.hash)
-                let second = try await f.repo.compareRevisions(left: merge.parents[1], right: merge.hash)
-                #expect(first.files.contains { $0.path == "remote.txt" })
-                #expect(second.files.isEmpty)
-            }
-            #expect(try String(contentsOf: f.url.appendingPathComponent("readme.txt"), encoding: .utf8) == "original\n")
+        try await f.repo.pull(policy: policy, expectedHead: before)
+        let state = try await f.repo.snapshot()
+        #expect(state.operation == .none && state.changes.isEmpty && state.behind == 0)
+        #expect(try String(contentsOf: f.url.appendingPathComponent("remote.txt"), encoding: .utf8) == "remote\n")
+        #expect(state.commits[0].parents.count == (policy == .merge ? 2 : 1))
+        if policy == .merge {
+            let merge = state.commits[0]
+            let first = try await f.repo.compareRevisions(left: merge.parents[0], right: merge.hash)
+            let second = try await f.repo.compareRevisions(left: merge.parents[1], right: merge.hash)
+            #expect(first.files.contains { $0.path == "remote.txt" })
+            #expect(second.files.isEmpty)
         }
+        #expect(try String(contentsOf: f.url.appendingPathComponent("readme.txt"), encoding: .utf8) == "original\n")
     }
 }

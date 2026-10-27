@@ -128,12 +128,11 @@ public actor GitRepository {
         _ = try await GitProcess.run(["switch", "-c", name], at: root)
     }
 
-    public enum SyncAction: String, Sendable { case fetch, pull, push }
+    public enum SyncAction: String, Sendable { case fetch, push }
     public func sync(_ action: SyncAction) async throws {
         let arguments: [String]
         switch action {
         case .fetch: arguments = ["fetch", "--all"]
-        case .pull: arguments = ["pull", "--ff-only"]
         case .push: arguments = ["push"]
         }
         _ = try await GitProcess.run(arguments, at: root, timeout: 120)
