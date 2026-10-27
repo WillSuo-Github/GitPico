@@ -31,6 +31,16 @@ Background modes preserve any already-running GitPico instance. `--verify` check
 
 The Codex Run action uses this same script. It builds the **GitPico** Xcode scheme into `.build/xcode`, then stages the complete signed app, including GitCore, at `dist/GitPico.app`.
 
+## AI commit messages
+
+Stage changes, then click the **sparkles** button beside the commit summary. Choose **Codex CLI**, **Claude Code**, **Antigravity (`agy`)**, or **GitHub Copilot CLI** and the message language. GitPico detects executables in PATH and common local installation directories; the sheet also accepts a custom executable path. It remembers the selected tool, language, and paths in Application Support.
+
+Install and sign in to the chosen CLI in Terminal first. Generation uses its existing login and default model, so it may consume that account's subscription allowance or API credits. The staged diff is sent to that CLI's configured AI service. GitPico supplies no unstaged or untracked content and launches the CLI in a private temporary directory instead of the repository. Requests larger than 96 KB are rejected with a smaller-staging suggestion.
+
+Review and edit the generated summary and description, then choose **Use Message** (or **Replace Draft**). Generation never commits automatically. A changed index, branch, HEAD, commit mode, or manually edited draft prevents an old suggestion from replacing current work. Closing the sheet or choosing **Stop** cancels generation; failures keep the existing commit draft.
+
+The adapters use the installed CLIs' non-interactive interfaces: [Codex exec](https://learn.chatgpt.com/docs/non-interactive-mode), [Claude print mode](https://code.claude.com/docs/en/cli-reference), [Antigravity headless mode](https://antigravity.google/docs/cli/headless/), and [Copilot prompt mode](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-programmatic-reference). CLI versions must support the flags used by the adapters. Tests normally use local stub executables; paid live integration is opt-in through `TEST_RUNNER_GITPICO_VERIFY_AI_COMMIT_LIVE=1` with synthetic changes only.
+
 `project.yml` is the reproducible project definition. Only target/build-setting/scheme changes need `./script/generate_project.sh` with XcodeGen 2.46+; normal Xcode builds and source-file additions do not. Update the definition and saved `.xcodeproj` together. See [native project validation](docs/VALIDATION-XCODE-PROJECT-2026-10-24.md).
 
 `dist/PicoDemo` is a real repository, preserved across launches so its edits and commits remain available.

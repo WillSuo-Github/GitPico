@@ -138,6 +138,7 @@ struct CommitComposer: View {
     @State private var workflows = CommitWorkflowLibrary.shared
     @State private var insertion: CommitTemplateInsertion?
     @State private var showBody = false
+    @State private var showingAICommit = false
     @FocusState private var subjectFocused: Bool
     var commitTitle: String {
         if store.amend { return "Amend Commit" }
@@ -150,6 +151,9 @@ struct CommitComposer: View {
                 HStack(spacing: 6) {
                     TextField("Summary", text: $store.commitSubject).textFieldStyle(.plain).font(.system(size: 13, weight: .medium)).focused($subjectFocused).accessibilityLabel("Commit summary")
                     if !store.commitSubject.isEmpty { Text("\(store.commitSubject.count)").font(.system(size: 10).monospacedDigit()).foregroundStyle(store.commitSubject.count > 72 ? Pico.warning : Color.secondary.opacity(0.6)).help("Summary length; 50–72 characters reads best in logs") }
+                    Button { showingAICommit = true } label: { Image(systemName: "sparkles") }
+                        .buttonStyle(.plain).help(store.staged.isEmpty ? "Stage changes to generate a commit message with AI" : "Generate commit message with AI…").accessibilityLabel("Generate commit message with AI")
+                        .disabled(store.staged.isEmpty || store.changes.contains(where: \.isConflicted))
                     Button { showBody.toggle() } label: { Image(systemName: "text.alignleft").foregroundStyle(showBody || !store.commitBody.isEmpty ? Color.accentColor : .secondary) }
                         .buttonStyle(.plain).help(showBody ? "Hide description" : "Add a description")
                 }.padding(.horizontal, 10).frame(height: 32)
@@ -207,6 +211,7 @@ struct CommitComposer: View {
         .background(.bar).overlay(alignment: .top) { Divider() }
         .disabled(store.isBusy && !store.isBackgroundFetching).onChange(of: store.amend) { store.updateAmend() }
         .sheet(item: $insertion) { CommitTemplateInsertionView(store: store, insertion: $0) }
+        .sheet(isPresented: $showingAICommit) { AICommitMessageSheet(store: store) }
     }
     var identityLine: String {
         guard let identity = store.snapshot?.identity, !identity.name.isEmpty else { return "No Git identity configured" }
