@@ -4,6 +4,7 @@ import SwiftUI
 
 struct RepositoryCommands: Commands {
     @Bindable var store: RepositoryStore
+    @Bindable private var updater = UpdateController.shared
     var body: some Commands {
             CommandGroup(replacing: .newItem) {
                 if let workspace = store.workspace {
@@ -26,7 +27,8 @@ struct RepositoryCommands: Commands {
                 }.disabled(store.isBusy || store.isOpeningRepository)
             }
             CommandGroup(after: .appInfo) {
-                Button("Check for Updates…", action: UpdateController.shared.check).disabled(!UpdateController.shared.canCheck)
+                Button(updater.preparing ? "Checking for Updates…" : "Check for Updates…", action: updater.check)
+                    .disabled(!updater.canCheck || updater.preparing)
                 Button("Export Diagnostics…") { DiagnosticExporter.export(store: store) { store.connectionTestMessage = $0 } }
             }
             CommandMenu("Repository") {

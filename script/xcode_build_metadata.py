@@ -29,6 +29,9 @@ def generate_metadata(environment):
     values['CFBundleVersion'] = build_number(datetime.now(ZoneInfo('Asia/Shanghai')), max(previous, default=''))
     feed = environment.get('GITPICO_UPDATE_FEED_URL', '').strip()
     key = environment.get('GITPICO_UPDATE_PUBLIC_KEY', '').strip()
+    public_key_file = source / 'Configuration/SparklePublicKey.txt'
+    if 'GITPICO_UPDATE_PUBLIC_KEY' not in environment and values.get('GitPicoUpdateRepository') and public_key_file.is_file():
+        key = public_key_file.read_text().strip()
     if key and not feed and values.get('GitPicoUpdateRepository'):
         feed = 'https://github.com/' + values['GitPicoUpdateRepository'] + '/releases/latest/download/appcast.xml'
     if feed or key:

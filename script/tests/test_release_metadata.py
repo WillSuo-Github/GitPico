@@ -69,6 +69,26 @@ class ReleaseMetadataTests(unittest.TestCase):
             self.assertTrue(value['SURequireSignedFeed'])
             self.assertFalse(value['SUEnableAutomaticChecks'])
 
+    def test_normal_xcode_build_uses_committed_public_update_configuration(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / 'Configuration').mkdir()
+            (root / 'Configuration/GitPico-Info.plist').write_bytes(plistlib.dumps({'GitPicoUpdateRepository': 'example/private', 'CFBundleShortVersionString': '0.01'}))
+            key = base64.b64encode(bytes(32)).decode()
+            (root / 'Configuration/SparklePublicKey.txt').write_text(key + '\n')
+            env = {'SRCROOT': folder, 'DERIVED_FILE_DIR': str(root / 'derived')}
+            generate_metadata(env)
+            value = plistlib.loads((root / 'derived/GitPico-Info.plist').read_bytes())
+            self.assertEqual(value['SUPublicEDKey'], key)
+            self.assertEqual(value['SUFeedURL'], 'https://github.com/example/private/releases/latest/download/appcast.xml')
+            self.assertTrue(value['SURequireSignedFeed'])
+            self.assertFalse(value['SUEnableAutomaticChecks'])
+            env['GITPICO_UPDATE_PUBLIC_KEY'] = ''
+            generate_metadata(env)
+            value = plistlib.loads((root / 'derived/GitPico-Info.plist').read_bytes())
+            self.assertNotIn('SUFeedURL', value)
+            self.assertNotIn('SUPublicEDKey', value)
+
 
 if __name__ == '__main__':
     unittest.main()

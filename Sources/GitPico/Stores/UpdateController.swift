@@ -10,7 +10,8 @@ import Sparkle
     private(set) var configured = false
     private(set) var canCheck = false
     private(set) var status = "Updates are not configured for this development build."
-    private(set) var preparing = false
+    private var preparingFeed = false
+    var preparing: Bool { preparingFeed || manualCheck.preparing }
     var selectedProfile: UUID? {
         didSet { UserDefaults.standard.set(selectedProfile?.uuidString, forKey: "GitPico.UpdateProfile"); prepared = nil; preparedFeedURL = nil; preparedCredential = nil; readyForCheck = false; controller?.updater.httpHeaders = nil }
     }
@@ -22,6 +23,7 @@ import Sparkle
     @ObservationIgnored private var preparedFeedURL: URL?
     @ObservationIgnored private var preparedCredential: GitStoredCredential?
     @ObservationIgnored private var readyForCheck = false
+    @ObservationIgnored private let manualCheck = ManualUpdateCheck()
     private var preferenceRevision = 0
     private override init() { selectedProfile = UserDefaults.standard.string(forKey: "GitPico.UpdateProfile").flatMap(UUID.init(uuidString:)); super.init() }
     var automaticallyChecks: Bool {
@@ -41,25 +43,49 @@ import Sparkle
         status = githubProject == nil ? "Updates are verified using the publisher's update signature." : "Updates use GitHub Releases. Select an account with access to the private repository."
     }
     func check() {
-        guard canCheck, !preparing else { return }
-        Task { if await prepareGitHubFeed() { readyForCheck = true; controller?.checkForUpdates(nil) } }
+        guard canCheck, !preparing, let controller else { return }
+        // An existing Sparkle session may already be showing an update or download.
+        if controller.updater.sessionInProgress { controller.checkForUpdates(nil); return }
+        status = "Checking for updates…"
+        manualCheck.start(presenter: controller, prepare: { [weak self] in
+            guard let self else { throw CancellationError() }
+            try await self.prepareGitHubFeed()
+            self.readyForCheck = true
+        }, cancelled: { [weak self] in
+            self?.clearPreparedFeed(); self?.status = "Update check cancelled."
+        })
     }
-    private func prepareGitHubFeed() async -> Bool {
-        guard let project = githubProject else { return true }
-        guard !preparing, let authentication else { return false }
-        preparing = true; defer { preparing = false }
+    private func clearPreparedFeed() {
+        prepared = nil; preparedFeedURL = nil; preparedCredential = nil; readyForCheck = false; controller?.updater.httpHeaders = nil
+    }
+    private func prepareGitHubFeed() async throws {
+        guard let project = githubProject else { return }
+        guard !preparingFeed, let authentication else { throw GitFailure("Update checking is already being prepared. Try again shortly.") }
+        let profileSelection = selectedProfile
+        preparingFeed = true; defer { preparingFeed = false }
+        var phase = "authenticating the GitHub account"
         do {
             let profiles = authentication.profiles.filter { $0.provider == .github && $0.host == "github.com" }
             guard let profile = profiles.first(where: { $0.id == selectedProfile }) ?? (profiles.count == 1 ? profiles.first : nil) else { throw GitFailure("Select a GitHub account with access to the update repository in Updates & Support.") }
             let credential = profile.isOAuth ? try await OAuthCredentialRefresher.shared.credential(profile.id) : try authentication.vault.read(profile.id)
             let client = GitHubReleaseFeedClient()
+            phase = "looking up the latest GitHub Release"
             let release = try await client.latest(project: project, credential: credential)
+            phase = "resolving the signed update feed"
             let feedURL = try await client.feedDownloadURL(release, credential: credential)
+            try Task.checkCancellation()
+            guard selectedProfile == profileSelection, authentication.profiles.contains(profile) else {
+                throw GitFailure("The update account changed while checking. Check again with the selected account.")
+            }
             prepared = release; preparedFeedURL = feedURL; preparedCredential = credential
             controller?.updater.httpHeaders = nil
             status = "Checking signed GitHub Release “" + (prepared?.tag ?? "") + "”."
-            return true
-        } catch { prepared = nil; preparedFeedURL = nil; preparedCredential = nil; controller?.updater.httpHeaders = nil; status = GitLogRedaction.clean(error.localizedDescription); return false }
+        } catch {
+            clearPreparedFeed()
+            if error is CancellationError { throw error }
+            status = "Could not check for updates while " + phase + ". " + GitLogRedaction.clean(error.localizedDescription)
+            throw GitFailure(status)
+        }
     }
     func feedURLString(for updater: SPUUpdater) -> String? { preparedFeedURL?.absoluteString }
     func updater(_ updater: SPUUpdater, mayPerform updateCheck: SPUUpdateCheck) throws {
@@ -67,8 +93,11 @@ import Sparkle
         if readyForCheck, prepared != nil { readyForCheck = false; return }
         if !preparing {
             Task {
-                if await prepareGitHubFeed(), updater.automaticallyChecksForUpdates {
-                    readyForCheck = true; updater.checkForUpdatesInBackground()
+                do {
+                    try await prepareGitHubFeed()
+                    if updater.automaticallyChecksForUpdates { readyForCheck = true; updater.checkForUpdatesInBackground() }
+                } catch {
+                    // Scheduled checks keep their failure in Settings; manual checks show it above.
                 }
             }
         }
