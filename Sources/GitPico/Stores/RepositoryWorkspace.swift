@@ -136,6 +136,12 @@ extension RepositoryWindowRouting {
         scheduleSessionSave()
         return true
     }
+    /// True when launch will replace the initial chooser tab with saved repositories.
+    var willRestoreSession: Bool {
+        let args = ProcessInfo.processInfo.arguments
+        guard !didStartup, AppPreferences.shared.resumeWorkspace, !args.contains("--repository"), !args.contains("--background-testing"), !NativeStartupVerification.enabled else { return false }
+        return session.saved?.tabs.contains { $0.path != nil } == true
+    }
     func startup() async {
         guard !didStartup else { return }; didStartup = true
         let args = ProcessInfo.processInfo.arguments

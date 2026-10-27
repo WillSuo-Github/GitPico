@@ -21,6 +21,8 @@ struct GitPicoApp: App {
     }
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(NativeStartupVerification.enabled ? .prohibited : .regular)
+        let restoring = workspace.willRestoreSession
+        if restoring { repositoryWindows.holdPresentation() }
         repositoryWindows.start()
         if NativeStartupVerification.enabled {
             Task { await NativeStartupVerification.finish(repositoryWindows) }
@@ -30,7 +32,17 @@ struct GitPicoApp: App {
             let notifications = NSWorkspace.shared.notificationCenter
             notifications.addObserver(self, selector: #selector(systemWillSleep(_:)), name: NSWorkspace.willSleepNotification, object: nil)
             notifications.addObserver(self, selector: #selector(systemDidWake(_:)), name: NSWorkspace.didWakeNotification, object: nil)
-            Task { await workspace.startup() }
+            Task { [repositoryWindows] in
+                await workspace.startup()
+                repositoryWindows.releasePresentation()
+            }
+            if restoring {
+                // Slow repositories should not leave the app without a window; show their opening state instead.
+                Task { [repositoryWindows] in
+                    try? await Task.sleep(for: .seconds(3))
+                    repositoryWindows.releasePresentation()
+                }
+            }
             NSApp.activate(ignoringOtherApps: true)
         }
     }

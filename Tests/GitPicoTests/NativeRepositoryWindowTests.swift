@@ -18,6 +18,26 @@ import Testing
     #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
 }
 
+@Test @MainActor func heldLaunchDefersNativeTabSelectionUntilPresentation() async throws {
+    let f = try await NativeTabFixture.make(); defer { f.clean() }
+    let first = f.workspace.activeTab.id
+    let second = f.workspace.newTab().id
+    let firstWindow = try #require(f.windows.window(for: first)), secondWindow = try #require(f.windows.window(for: second))
+    #expect(firstWindow.tabGroup?.selectedWindow === secondWindow)
+    f.windows.holdPresentation()
+    // Selecting a tab in a hidden native group would order it on screen, so the choice waits for release.
+    f.workspace.select(first)
+    #expect(f.windows.presentationHeld && f.workspace.selectedID == first)
+    #expect(firstWindow.tabGroup?.selectedWindow === secondWindow)
+    f.windows.releasePresentation()
+    #expect(!f.windows.presentationHeld)
+    #expect(firstWindow.tabGroup?.selectedWindow === firstWindow && f.workspace.selectedID == first)
+    f.windows.holdPresentation()
+    f.windows.reopen()
+    #expect(!f.windows.presentationHeld)
+    #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
+}
+
 @MainActor private struct NativeTabFixture {
     let base: WorkingAppFixture
     let workspace: RepositoryWorkspace

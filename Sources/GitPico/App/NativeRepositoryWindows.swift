@@ -15,6 +15,9 @@ import SwiftUI
     private var membershipUpdateScheduled = false
     private var lastSelectedID: UUID?
     private var preparedAnchorID: UUID?
+    /// While a saved session is restored at launch, windows are built and arranged hidden, then shown once in their final state.
+    private(set) var presentationHeld = false
+    private var heldSelections: [UUID] = []
     var hasRepositoryWindows: Bool { !controllers.isEmpty }
 
     init(workspace: RepositoryWorkspace, permitsPresentation: Bool = true) {
@@ -39,7 +42,37 @@ import SwiftUI
     func newTab(from id: UUID) {
         workspace.newTab(from: id)
     }
+    func holdPresentation() { presentationHeld = true }
+    func releasePresentation() {
+        guard presentationHeld else { return }
+        presentationHeld = false
+        synchronizing = true
+        // Show one window per native group (the last recorded selection wins), with the active group last.
+        func group(_ window: RepositoryNativeWindow) -> ObjectIdentifier { window.tabGroup.map(ObjectIdentifier.init) ?? ObjectIdentifier(window) }
+        var fronts: [ObjectIdentifier: RepositoryNativeWindow] = [:]
+        for id in heldSelections where !nativeClosing.contains(id) {
+            if let window = window(for: id) { fronts[group(window)] = window }
+        }
+        heldSelections.removeAll()
+        for window in controllers.values.compactMap({ $0.window as? RepositoryNativeWindow }) where fronts[group(window)] == nil {
+            fronts[group(window)] = window.tabGroup?.selectedWindow as? RepositoryNativeWindow ?? window
+        }
+        let active = window(for: workspace.selectedID).map(group)
+        let ordered = fronts.filter { $0.key != active }.map(\.value) + fronts.filter { $0.key == active }.map(\.value)
+        for window in ordered {
+            if window.tabGroup?.selectedWindow !== window { window.tabGroup?.selectedWindow = window }
+            if permitsPresentation { window.orderFront(nil) }
+        }
+        synchronizing = false
+        workspaceChanged()
+    }
+    /// Selecting a tab of a hidden native group orders it on screen, so a held launch only records the choice.
+    private func selectInGroup(_ window: RepositoryNativeWindow) {
+        if presentationHeld { heldSelections.append(window.tabID); return }
+        window.tabGroup?.selectedWindow = window
+    }
     func reopen() {
+        if presentationHeld { releasePresentation(); return }
         closedChoosers.remove(workspace.selectedID)
         workspaceChanged()
     }
@@ -80,8 +113,8 @@ import SwiftUI
         observeGroups()
         if let window = window(for: workspace.selectedID), !nativeClosing.contains(window.tabID) {
             lastSelectedID = window.tabID
-            if window.tabGroup?.selectedWindow !== window { window.tabGroup?.selectedWindow = window }
-            if permitsPresentation, !window.isKeyWindow { window.makeKeyAndOrderFront(nil) }
+            if window.tabGroup?.selectedWindow !== window { selectInGroup(window) }
+            if permitsPresentation, !presentationHeld, !window.isKeyWindow { window.makeKeyAndOrderFront(nil) }
         }
     }
     private func makeWindow(_ tab: RepositoryTab) -> RepositoryNativeWindow {
@@ -220,7 +253,7 @@ import SwiftUI
                 if !NSScreen.screens.contains(where: { $0.visibleFrame.intersects(frame) }), let screen = NSScreen.main { frame.origin = screen.visibleFrame.origin }
                 for window in windows { window.setFrame(frame, display: false) }
             }
-            if let selected = window(for: group.selected) { anchor.tabGroup?.selectedWindow = selected }
+            if let selected = window(for: group.selected) { selectInGroup(selected) }
         }
     }
     func shouldClose(_ window: RepositoryNativeWindow) -> Bool {
