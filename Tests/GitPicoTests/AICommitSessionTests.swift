@@ -90,23 +90,75 @@ private actor AICommitTestGenerator: AICommitGenerating {
     #expect(try Data(contentsOf: file) == broken)
 }
 
+@Test @MainActor func aiCommitSetupBeforeStagingDoesNotInvokeCLIAndExplainsGenerationBlockers() async throws {
+    let f = try await WorkingAppFixture.make(); defer { f.clean() }
+    let preferences = AICommitPreferences(file: f.root.appendingPathComponent("ai.json"))
+    var settings = AICommitSettings(); settings.provider = .claude; settings.language = .chinese
+    settings.executables["claude"] = "/custom path/claude"
+    try preferences.save(settings)
+    #expect(AICommitPreferences(file: f.root.appendingPathComponent("ai.json")).value == settings)
+    let generator = AICommitTestGenerator(), session = AICommitSession(generator: generator)
+    session.generate(in: f.store, settings: preferences.value, executable: URL(fileURLWithPath: "/stub"))
+    #expect(session.task == nil)
+    #expect(await generator.started == false)
+    #expect(session.error?.contains("Stage at least one change") == true)
+    try await f.write("a.txt", "staged\n")
+    _ = try await GitProcess.run(["add", "a.txt"], at: f.repository.root); try await f.sync()
+    #expect(f.store.aiCommitUnavailableReason == nil)
+    session.generate(in: f.store, settings: preferences.value, executable: URL(fileURLWithPath: "/stub"))
+    await session.task?.value
+    #expect(session.error == nil && session.hasMessage)
+    #expect(await generator.started)
+    let prompt = await generator.prompt
+    #expect(prompt.contains("Simplified Chinese"))
+}
+
+@Test @MainActor func aiCommitGenerationExplainsConflictsEvenWhenOtherChangesAreStaged() async throws {
+    let f = try await WorkingAppFixture.make(); defer { f.clean() }
+    let branch = try await f.repository.headPosition().branch
+    _ = try await GitProcess.run(["checkout", "-b", "ai-conflict"], at: f.repository.root)
+    try await f.write("a.txt", "other branch\n")
+    _ = try await GitProcess.run(["commit", "-am", "Change other branch"], at: f.repository.root)
+    _ = try await GitProcess.run(["checkout", branch], at: f.repository.root)
+    try await f.write("a.txt", "current branch\n")
+    _ = try await GitProcess.run(["commit", "-am", "Change current branch"], at: f.repository.root)
+    _ = try await GitProcess.run(["merge", "ai-conflict"], at: f.repository.root, allowed: [1])
+    try await f.write("b.txt", "separately staged\n")
+    _ = try await GitProcess.run(["add", "b.txt"], at: f.repository.root); try await f.sync()
+    #expect(!f.store.staged.isEmpty && f.store.changes.contains(where: \.isConflicted))
+    let generator = AICommitTestGenerator(), session = AICommitSession(generator: generator)
+    session.generate(in: f.store, settings: AICommitSettings(), executable: URL(fileURLWithPath: "/stub"))
+    #expect(session.error?.contains("Resolve and stage conflicted files") == true)
+    #expect(session.task == nil)
+    #expect(await generator.started == false)
+}
+
 @Test(.enabled(if: ProcessInfo.processInfo.environment["GITPICO_RENDER_AI_COMMIT"] == "1", "Explicit offscreen AI commit UI capture only."))
 @MainActor func renderAICommitEntryAndSuggestionWithoutWindows() async throws {
     let f = try await aiCommitFixture(); defer { f.clean() }
     let output = URL(fileURLWithPath: try #require(ProcessInfo.processInfo.environment["GITPICO_AI_COMMIT_OUTPUT"]))
     try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
-    let preferences = AICommitPreferences(file: f.root.appendingPathComponent("ai-settings.json")), session = AICommitSession(generator: AICommitTestGenerator())
+    let preferences = AICommitPreferences(file: f.root.appendingPathComponent("ai-settings.json"))
+    var session = AICommitSession(generator: AICommitTestGenerator())
     let window = RepositoryNativeWindow(tabID: UUID(), permitsPresentation: false)
     window.tabbingMode = .disallowed; window.styleMask = [.borderless]; window.contentMinSize = .zero
     window.appearance = NSAppearance(named: .aqua)
     defer { window.contentView = nil; window.close() }
-    for step in ["entry", "setup", "suggestion"] {
+    for step in ["entry", "setup", "suggestion", "settings", "unstaged-entry", "unstaged-setup"] {
+        if step == "unstaged-entry" {
+            _ = try await GitProcess.run(["reset", "HEAD", "--", "a.txt"], at: f.repository.root)
+            try await f.sync()
+            session = AICommitSession(generator: AICommitTestGenerator())
+        }
         if step == "suggestion" {
             session.generate(in: f.store, settings: AICommitSettings(), executable: URL(fileURLWithPath: "/stub")); await session.task?.value
         }
-        let width: CGFloat = step == "entry" ? 340 : 600, height: CGFloat = step == "entry" ? 190 : 620
+        let entry = step.hasSuffix("entry")
+        let width: CGFloat = entry ? 340 : (step == "settings" ? 740 : 600)
+        let height: CGFloat = entry ? 210 : (step == "settings" ? 570 : 760)
         let content = Group {
-            if step == "entry" { CommitComposer(store: f.store) }
+            if entry { CommitComposer(store: f.store) }
+            else if step == "settings" { AICommitSettingsView(preferences: preferences) }
             else { AICommitMessageSheet(store: f.store, preferences: preferences, session: session) }
         }.frame(width: width, height: height).background(Color(nsColor: .windowBackgroundColor)).environment(\.colorScheme, .light)
         let host = NSHostingView(rootView: content); window.contentView = host

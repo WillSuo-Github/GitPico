@@ -35,7 +35,7 @@ Validation and release preparation run locally; this repository does not use Git
 
 ## AI commit messages
 
-Stage changes, then click the **sparkles** button beside the commit summary. Choose **Codex CLI**, **Claude Code**, **Antigravity (`agy`)**, or **GitHub Copilot CLI** and the message language. GitPico detects executables in PATH and common local installation directories; the sheet also accepts a custom executable path. It remembers the selected tool, language, and paths in Application Support.
+Open **Settings → AI Commits** to configure generation, or click **AI** beside the commit summary, even before staging changes. Choose **Codex CLI**, **Claude Code**, **Antigravity (`agy`)**, or **GitHub Copilot CLI** and the message language. GitPico detects executables in PATH and common local installation directories; the sheet also accepts a custom executable path. Choose **Save Settings** in either location, or generate from the commit sheet, to remember the selected tool, language, and paths in Application Support. Generation requires at least one staged change and no unresolved conflicts; the sheet explains any unavailable state.
 
 Install and sign in to the chosen CLI in Terminal first. Generation uses its existing login and default model, so it may consume that account's subscription allowance or API credits. The staged diff is sent to that CLI's configured AI service. GitPico supplies no unstaged or untracked content and launches the CLI in a private temporary directory instead of the repository. Requests larger than 96 KB are rejected with a smaller-staging suggestion.
 

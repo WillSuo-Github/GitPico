@@ -111,6 +111,7 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .tabItem { Label("General", systemImage: "gearshape") }
         CommitWorkflowSettingsView().tabItem { Label("Commits", systemImage: "doc.text") }
+        AICommitSettingsView().tabItem { Label("AI Commits", systemImage: "sparkles") }
         ExternalToolSettingsView(preferences: tools).tabItem { Label("External Tools", systemImage: "arrow.left.arrow.right") }
         AuthenticationSettingsView(store: store).tabItem { Label("Authentication", systemImage: "person.badge.key") }
         SSHKeysSettingsView().tabItem { Label("SSH Keys", systemImage: "key") }

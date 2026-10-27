@@ -2,6 +2,16 @@ import Foundation
 import GitCore
 import Observation
 
+extension RepositoryStore {
+    var aiCommitUnavailableReason: String? {
+        if repository == nil { return "Open a repository before generating a commit message." }
+        if isBusy { return "Wait for the current repository operation to finish before generating a message." }
+        if changes.contains(where: \.isConflicted) { return "Resolve and stage conflicted files before generating a commit message." }
+        if staged.isEmpty { return "Stage at least one change in Working Copy before generating a commit message. You can configure your AI tool now." }
+        return nil
+    }
+}
+
 @MainActor @Observable final class AICommitSession {
     private(set) var isGenerating = false
     private(set) var isApplying = false
@@ -20,7 +30,9 @@ import Observation
     init(generator: any AICommitGenerating = AICommitCLI()) { self.generator = generator }
 
     func generate(in store: RepositoryStore, settings: AICommitSettings, executable: URL) {
-        guard !store.isBusy, !isGenerating, !isApplying, let repository = store.repository else { return }
+        guard !isGenerating, !isApplying else { return }
+        if let reason = store.aiCommitUnavailableReason { error = reason; return }
+        guard let repository = store.repository else { return }
         cancel()
         let generation = generation, token = store.repositoryToken
         let subject = store.commitSubject, description = store.commitBody, amend = store.amend
