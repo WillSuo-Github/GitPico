@@ -152,8 +152,8 @@ struct RepositoryCommands: Commands {
                 Button("External Tool Settings…") { store.showingExternalToolSettings = true }
                 Button("External Tool Sessions…") { store.externalTool(.sessions) }.disabled(!store.canUseRepository)
                 Divider()
-                Button("Back to Previous Repository", action: store.goBack).keyboardShortcut("[").disabled(!store.canGoBack)
-                Button("Forward to Next Repository", action: store.goForward).keyboardShortcut("]").disabled(!store.canGoForward)
+                Button("Back", action: store.goBack).keyboardShortcut("[").disabled(!store.canGoBack)
+                Button("Forward", action: store.goForward).keyboardShortcut("]").disabled(!store.canGoForward)
                 Divider()
                 Button("File History…") { store.navigate(.fileHistory("", "HEAD")) }.disabled(!store.canBrowseHistory)
                 Button("Compare Revisions…") { store.navigate(.comparison("HEAD")) }.disabled(!store.canBrowseHistory)

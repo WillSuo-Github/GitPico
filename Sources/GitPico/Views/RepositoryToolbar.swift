@@ -12,8 +12,8 @@ struct RepositoryToolbar: ToolbarContent {
         }
         if store.workspace != nil {
             ToolbarItemGroup(placement: .navigation) {
-                Button(action: store.goBack) { Label("Previous Repository", systemImage: "chevron.backward") }.disabled(!store.canGoBack).help("Back to previous repository (⌘[)")
-                Button(action: store.goForward) { Label("Next Repository", systemImage: "chevron.forward") }.disabled(!store.canGoForward).help("Forward to next repository (⌘])")
+                Button(action: store.goBack) { Label("Back", systemImage: "chevron.backward") }.disabled(!store.canGoBack).help(Text(verbatim: String(localized: "Back") + " (⌘[)"))
+                Button(action: store.goForward) { Label("Forward", systemImage: "chevron.forward") }.disabled(!store.canGoForward).help(Text(verbatim: String(localized: "Forward") + " (⌘])"))
             }
         }
         if let snapshot = store.snapshot, !store.isChoosingRepository {

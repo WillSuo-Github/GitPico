@@ -101,6 +101,23 @@ import Testing
     #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
 }
 
+@Test @MainActor func nativeWindowHistoryNavigatesThroughLibraryWithoutCreatingOrShowingWindows() async throws {
+    let f = try await NativeTabFixture.make(); defer { f.clean() }
+    let w = f.workspace, tab = w.activeTab
+    let window = try #require(f.windows.window(for: tab.id))
+    tab.store.commitSubject = "Keep native navigation draft"
+    await w.navigateRepositories(.back, from: tab.store)
+    f.windows.updateDescriptor(tab.id)
+    #expect(tab.showsRepositoryPicker && window.title == String(localized: "Repositories"))
+    #expect(window.titlebarAppearsTransparent && !tab.store.canGoBack && tab.store.canGoForward)
+    await w.navigateRepositories(.forward, from: tab.store)
+    f.windows.updateDescriptor(tab.id)
+    #expect(!tab.showsRepositoryPicker && window.title == tab.title && !window.titlebarAppearsTransparent)
+    #expect(tab.store.commitSubject == "Keep native navigation draft")
+    #expect(w.tabs.count == 1 && f.windows.window(for: tab.id) === window)
+    #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
+}
+
 @Test @MainActor func nativeWindowCloseProtectsDraftAndReopensLastChooser() async throws {
     let f = try await NativeTabFixture.make(corruptDrafts: true); defer { f.clean() }
     let w = f.workspace, original = w.activeTab

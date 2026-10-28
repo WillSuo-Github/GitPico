@@ -104,12 +104,13 @@ extension RepositoryWindowRouting {
         guard let index = tabs.firstIndex(where: { $0.id == selectedID }) else { return }
         select(tabs[(index + offset % tabs.count + tabs.count) % tabs.count].id)
     }
-    func showRepositories(from store: RepositoryStore? = nil) {
+    func showRepositories(from store: RepositoryStore? = nil, recordingVisit: Bool = true) {
         guard let tab = originTab(from: store) else { return }
         guard !tab.isBusy else { error = String(localized: "Wait for this tab's repository operation before choosing another repository."); return }
+        rememberRepositoryState(tab)
         tab.store.searchFocusRequest = nil
         tab.isChoosingRepository = true
-        select(tab.id)
+        select(tab.id, recordingVisit: recordingVisit)
     }
     func returnToRepository(from store: RepositoryStore) {
         guard let tab = tab(for: store), tab.root != nil, !tab.isBusy else { return }
@@ -270,7 +271,9 @@ extension RepositoryWindowRouting {
             }
         }
         if tabs.contains(where: { $0.id == saved.selected }) { selectedID = saved.selected }
-        repositoryVisits = saved.repositoryVisits ?? RepositoryVisitHistory(current: activeTab.root?.path)
+        repositoryVisits = saved.repositoryVisits ?? RepositoryVisitHistory(current: activeTab.showsRepositoryPicker ? .library : activeTab.root.map { .repository($0.path) })
+        // Older sessions could show the library while their history still pointed at a repository.
+        if activeTab.showsRepositoryPicker { repositoryVisits.visit(.library) }
         windowRouting?.workspaceChanged()
         windowRouting?.restoreWindows(saved.windows)
         if !failures.isEmpty { error = String(localized: "Some saved repositories could not be reopened. Their tabs were kept for recovery:\n\(failures.joined(separator: "\n"))") }

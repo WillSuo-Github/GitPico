@@ -83,9 +83,9 @@ struct WorkspaceSession: Codable {
               session.tabs.allSatisfy({ tab in tab.path.map { $0.hasPrefix("/") && !$0.utf8.contains(0) } ?? true }),
               session.windows.count <= 128 else { throw appFailure("Saved workspace is invalid or from an unsupported version.") }
         if let visits = session.repositoryVisits {
-            let paths = visits.back + visits.forward + [visits.current].compactMap { $0 }
+            let destinations = visits.back + visits.forward + [visits.current].compactMap { $0 }
             guard visits.back.count + visits.forward.count <= 100,
-                  paths.allSatisfy({ $0.hasPrefix("/") && !$0.utf8.contains(0) }) else { throw appFailure("Saved repository visits are invalid.") }
+                  destinations.allSatisfy(\.isValid) else { throw appFailure("Saved repository visits are invalid.") }
         }
         let grouped = session.windows.flatMap(\.tabs)
         guard Set(grouped).count == grouped.count, Set(grouped).isSubset(of: ids), session.windows.allSatisfy({ group in
