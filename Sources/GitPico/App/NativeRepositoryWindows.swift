@@ -123,7 +123,7 @@ import SwiftUI
         let content = RepositoryWorkspaceView(workspace: workspace, tab: tab, presentsAlerts: permitsPresentation) { [weak self] in
             self?.updateDescriptor(tab.id)
         }
-        window.contentViewController = NSHostingController(rootView: content)
+        window.contentViewController = NSHostingController(rootView: content.environment(\.layoutDirection, AppLocalization.layoutDirection))
         window.setFrame(NSRect(origin: window.frame.origin, size: NSSize(width: 1420, height: 900)), display: false)
         if permitsPresentation {
             if let source = lastSelectedID.flatMap({ self.window(for: $0) }) { window.setFrame(source.frame, display: false) }
@@ -142,10 +142,10 @@ import SwiftUI
     }
     func updateDescriptor(_ id: UUID) {
         guard let tab = workspace.tabs.first(where: { $0.id == id }), let window = window(for: id) else { return }
-        let title = tab.root == nil ? "Repositories" : tab.title
+        let title = tab.root == nil ? String(localized: "Repositories") : tab.title
         window.title = title
         window.tab.title = title
-        window.tab.toolTip = tab.showsRepositoryPicker ? "Choose a repository" : (tab.root?.path ?? "Choose a repository")
+        window.tab.toolTip = tab.showsRepositoryPicker ? String(localized: "Choose a repository") : (tab.root?.path ?? String(localized: "Choose a repository"))
         let attachment = NSTextAttachment()
         attachment.image = NSImage(systemSymbolName: tab.showsRepositoryPicker ? "square.grid.2x2" : "folder", accessibilityDescription: nil)
         attachment.bounds = NSRect(x: 0, y: -2, width: 13, height: 13)

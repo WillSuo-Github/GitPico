@@ -14,7 +14,7 @@ struct ToolbarSearchSuggestions: View {
                 ScrollView {
                     VStack(spacing: 2) {
                         if let title = state.contextTitle {
-                            suggestion(title: title, subtitle: "Filter this view · Return", icon: "magnifyingglass", selected: state.selection == nil, action: session.filterCurrentView)
+                            suggestion(title: title, subtitle: String(localized: "Filter this view · Return"), icon: "magnifyingglass", selected: state.selection == nil, action: session.filterCurrentView)
                             Divider().padding(.horizontal, 8)
                         }
                         ForEach(state.results) { item in
@@ -32,7 +32,7 @@ struct ToolbarSearchSuggestions: View {
                 HStack { Text(failure).lineLimit(1); Spacer(); Button("Retry", action: session.retry) }.font(.caption).foregroundStyle(.secondary).padding(8)
             }
             Divider()
-            HStack(spacing: 10) { keycap("↑↓", "Select"); keycap("↩", "Run"); keycap("esc", "Close"); Spacer(); keycap(">", "Actions") }.padding(.horizontal, 12).padding(.vertical, 7)
+            HStack(spacing: 10) { keycap("↑↓", String(localized: "Select")); keycap("↩", String(localized: "Run")); keycap("esc", String(localized: "Close")); Spacer(); keycap(">", String(localized: "Actions")) }.padding(.horizontal, 12).padding(.vertical, 7)
         }.background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
     private func keycap(_ key: String, _ label: String) -> some View {
@@ -53,6 +53,6 @@ struct ToolbarSearchSuggestions: View {
                 Spacer(minLength: 0)
             }.padding(.horizontal, 9).frame(height: 46).contentShape(Rectangle())
                 .background(selected ? Color.accentColor.opacity(0.14) : Color.clear, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-        }.buttonStyle(.plain).accessibilityLabel(title + ", " + subtitle)
+        }.buttonStyle(.plain).accessibilityLabel("\(title), \(subtitle)")
     }
 }

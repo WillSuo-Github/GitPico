@@ -9,7 +9,7 @@ struct RepositorySearchView: View {
         _session = State(initialValue: ToolbarSearchSession(store: store))
     }
     var body: some View {
-        ToolbarSearchField(text: Binding(get: { session.text }, set: { session.updateText($0) }), placeholder: store.destination.searchPlaceholder.map { $0 + " or actions" } ?? "Search files, branches or actions", focusRequest: $store.searchFocusRequest, selectAllOnFocus: !session.actionsOnly, session: session, presentation: session.presentation)
+        ToolbarSearchField(text: Binding(get: { session.text }, set: { session.updateText($0) }), placeholder: store.destination.searchWithActionsPlaceholder, focusRequest: $store.searchFocusRequest, selectAllOnFocus: !session.actionsOnly, session: session, presentation: session.presentation)
             .disabled(!store.canUseRepository && !store.isBackgroundFetching)
             .help("Search this view, files, branches, commits and actions. Type > for actions. ⌘F to search; ⌘⇧A for actions.")
             .onChange(of: store.searchActionsRequest, initial: true) {

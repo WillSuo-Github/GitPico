@@ -47,7 +47,7 @@ struct ExternalToolSettingsView: View {
             HStack {
                 TextField("Absolute executable path", text: path).textFieldStyle(.roundedBorder)
                 Button("Choose…") {
-                    let panel = NSOpenPanel(); panel.title = "Choose Tool Executable"; panel.canChooseDirectories = false; panel.canChooseFiles = true; panel.treatsFilePackagesAsDirectories = true
+                    let panel = NSOpenPanel(); panel.title = String(localized: "Choose Tool Executable"); panel.canChooseDirectories = false; panel.canChooseFiles = true; panel.treatsFilePackagesAsDirectories = true
                     panel.begin { result in if result == .OK, let url = panel.url { path.wrappedValue = url.path } }
                 }
             }

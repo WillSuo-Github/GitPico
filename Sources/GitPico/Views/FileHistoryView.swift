@@ -28,13 +28,13 @@ struct FileHistoryView: View {
     var body: some View {
         PersistentSplitView(name: "fileHistory", width: 320) {
             VStack(spacing: 0) {
-                PaneBar(title: path.isEmpty ? "File History" : (path as NSString).lastPathComponent, subtitle: path.isEmpty ? "No file chosen" : "\(history?.revisions.count ?? 0)\(history?.hasMore == true ? "+" : "") commits · " + ((path as NSString).deletingLastPathComponent.nilIfEmpty ?? "repository root"), icon: "doc.text.magnifyingglass") {
+                PaneBar(title: path.isEmpty ? "File History" : "\((path as NSString).lastPathComponent)", subtitle: path.isEmpty ? String(localized: "No file chosen") : String(localized: "\(history?.revisions.count ?? 0)\(history?.hasMore == true ? "+" : "") commits · \((path as NSString).deletingLastPathComponent.nilIfEmpty ?? String(localized: "repository root"))"), icon: "doc.text.magnifyingglass") {
                     Toggle("All Refs", isOn: $allReferences).toggleStyle(.checkbox).controlSize(.small).help("Include local branches, remote-tracking branches and tags, following earlier names where discovered.")
                     Button("Choose…") { showingFiles = true }.controlSize(.small).help("Choose another tracked file")
                 }
                 if let error { InspectionErrorView(message: error) }
                 else if isLoading && history == nil { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
-                else if path.isEmpty { EmptyPane(title: "File History", subtitle: "Choose a tracked file to inspect its commits, including earlier names.", icon: "doc.text.magnifyingglass") }
+                else if path.isEmpty { EmptyPane(title: String(localized: "File History"), subtitle: String(localized: "Choose a tracked file to inspect its commits, including earlier names."), icon: "doc.text.magnifyingglass") }
                 else {
                     List(selection: $selected) {
                             ForEach(filtered) { entry in
@@ -68,7 +68,7 @@ struct FileHistoryView: View {
                     if let current {
                         Menu("Actions") {
                             if let source = sourceRevision(current) {
-                                if current.isDeleted { Text("Version before deletion · " + String(source.prefix(8))) }
+                                if current.isDeleted { Text("Version before deletion · \(String(source.prefix(8)))") }
                                 HistoricalFileMenu(store: store, revision: source, paths: [current.path], destination: path)
                                 Divider()
                             }
@@ -87,10 +87,10 @@ struct FileHistoryView: View {
                         AuthorAvatar(name: current.commit.author, size: 26)
                         VStack(alignment: .leading, spacing: 1) {
                             Text(current.commit.subject).font(.system(size: 13, weight: .semibold)).lineLimit(1)
-                            Text(current.commit.author + " · " + current.commit.date.picoRelative + (current.path != path ? " · as " + current.path : "")).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+                            Text(current.path != path ? "\(current.commit.author) · \(current.commit.date.picoRelative) · \(current.path)" : "\(current.commit.author) · \(current.commit.date.picoRelative)").font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
                         }
                         Spacer(minLength: 0)
-                        if current.isDeleted { Chip(text: "Deleted here", tint: Pico.deletion) }
+                        if current.isDeleted { Chip(text: String(localized: "Deleted here"), tint: Pico.deletion) }
                     }.padding(.horizontal, 14).padding(.vertical, 9)
                     Divider()
                     if loadingPreview { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
@@ -98,7 +98,7 @@ struct FileHistoryView: View {
                     else if mode == "Diff" { DiffView(text: preview, title: current.path, showsHeader: false) }
                     else if mode == "Blame" { BlameView(lines: blame, inspect: { hash in Task { do { inspectedCommit = try await repository.commit(at: hash) } catch { previewError = error.localizedDescription } } }) }
                     else { InspectionTextView(text: preview) }
-                } else { EmptyPane(title: "Select a revision", subtitle: "Pick a commit to see how this file changed, its full contents or line-by-line blame.", icon: "doc.text") }
+                } else { EmptyPane(title: String(localized: "Select a revision"), subtitle: String(localized: "Pick a commit to see how this file changed, its full contents or line-by-line blame."), icon: "doc.text") }
             }
         }
         .task(id: "\(limit):\(allReferences)") { await loadHistory() }
@@ -135,7 +135,7 @@ struct FileHistoryView: View {
             if mode == "Diff" {
                 let value = try await repository.fileRevisionDiff(current)
                 guard !Task.isCancelled else { return }; preview = value
-            } else if current.isDeleted { previewError = "This commit deleted the file. Select an earlier revision to inspect its contents." }
+            } else if current.isDeleted { previewError = String(localized: "This commit deleted the file. Select an earlier revision to inspect its contents.") }
             else if mode == "Blame" {
                 let value = try await repository.blame(path: current.path, revision: current.commit.hash, ignoreWhitespace: ignoreWhitespace)
                 guard !Task.isCancelled else { return }; blame = value
@@ -209,7 +209,7 @@ struct BlameView: View {
                             .frame(minWidth: geometry.size.width, alignment: .leading).background(line.number.isMultiple(of: 2) ? Color.secondary.opacity(0.035) : .clear)
                     }
                 }
-            }.defaultScrollAnchor(.topLeading)
+            }.defaultScrollAnchor(.topLeading).environment(\.layoutDirection, .leftToRight)
         }
     }
 }
@@ -218,7 +218,7 @@ struct InspectionTextView: View {
     let text: String
     var body: some View {
         GeometryReader { geometry in
-            ScrollView([.horizontal, .vertical]) { Text(text.isEmpty ? "Empty file" : text).font(.system(size: 12, design: .monospaced)).textSelection(.enabled).padding(14).frame(minWidth: geometry.size.width, minHeight: geometry.size.height, alignment: .topLeading) }.defaultScrollAnchor(.topLeading)
+            ScrollView([.horizontal, .vertical]) { Text(text.isEmpty ? String(localized: "Empty file") : text).font(.system(size: 12, design: .monospaced)).textSelection(.enabled).padding(14).frame(minWidth: geometry.size.width, minHeight: geometry.size.height, alignment: .topLeading) }.defaultScrollAnchor(.topLeading).environment(\.layoutDirection, .leftToRight)
         }
     }
 }

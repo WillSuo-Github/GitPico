@@ -18,7 +18,7 @@ struct WelcomeView: View {
                     SectionCaption("Recent Repositories")
                     ForEach(store.recentPaths.prefix(5), id: \.self) { path in
                         Button { Task { await store.open(URL(fileURLWithPath: path)) } } label: {
-                            HStack { RepositoryGlyph(name: store.library.displayName(for: path), size: 24); Text(store.library.displayName(for: path)); Spacer(); Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary) }
+                            HStack { RepositoryGlyph(name: store.library.displayName(for: path), size: 24); Text(store.library.displayName(for: path)); Spacer(); Image(systemName: "chevron.forward").font(.caption).foregroundStyle(.tertiary) }
                                 .contentShape(Rectangle()).padding(.vertical, 5)
                         }.buttonStyle(.plain).help(path)
                     }

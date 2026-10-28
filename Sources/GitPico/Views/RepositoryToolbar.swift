@@ -12,8 +12,8 @@ struct RepositoryToolbar: ToolbarContent {
         }
         if store.workspace != nil {
             ToolbarItemGroup(placement: .navigation) {
-                Button(action: store.goBack) { Label("Previous Repository", systemImage: "chevron.left") }.disabled(!store.canGoBack).help("Back to previous repository (⌘[)")
-                Button(action: store.goForward) { Label("Next Repository", systemImage: "chevron.right") }.disabled(!store.canGoForward).help("Forward to next repository (⌘])")
+                Button(action: store.goBack) { Label("Previous Repository", systemImage: "chevron.backward") }.disabled(!store.canGoBack).help("Back to previous repository (⌘[)")
+                Button(action: store.goForward) { Label("Next Repository", systemImage: "chevron.forward") }.disabled(!store.canGoForward).help("Forward to next repository (⌘])")
             }
         }
         if let snapshot = store.snapshot, !store.isChoosingRepository {
@@ -21,12 +21,12 @@ struct RepositoryToolbar: ToolbarContent {
                 Button {
                     if let record = store.undoAvailability?.undo { store.recoveryRequest = RecoveryRequest(action: .undo(record, false)) }
                 } label: { Label("Undo", systemImage: "arrow.uturn.backward") }
-                .help(store.undoAvailability?.undo.map { "Undo " + $0.title + " (⌥⌘Z)" } ?? "No Git operation to undo")
+                .help(store.undoAvailability?.undo.map { String(localized: "Undo \($0.title) (⌥⌘Z)") } ?? String(localized: "No Git operation to undo"))
                 .disabled(store.isBusy || store.undoAvailability?.undo == nil)
                 Button {
                     if let record = store.undoAvailability?.redo { store.recoveryRequest = RecoveryRequest(action: .undo(record, true)) }
                 } label: { Label("Redo", systemImage: "arrow.uturn.forward") }
-                .help(store.undoAvailability?.redo.map { "Redo " + $0.title + " (⇧⌥⌘Z)" } ?? "No Git operation to redo")
+                .help(store.undoAvailability?.redo.map { String(localized: "Redo \($0.title) (⇧⌥⌘Z)") } ?? String(localized: "No Git operation to redo"))
                 .disabled(store.isBusy || store.undoAvailability?.redo == nil)
             }
             // An empty principal view preserves AppKit's trailing action layout.
@@ -38,7 +38,7 @@ struct RepositoryToolbar: ToolbarContent {
                 Group {
                     Button { store.sync(.fetch) } label: { Label("Fetch", systemImage: "arrow.down.circle") }.help("Fetch all remotes")
                     Button { store.reviewPull() } label: { Label("Pull", systemImage: "arrow.down") }
-                        .help("Review Pull strategy (" + AppPreferences.shared.pullPolicy.title + ")").disabled(!store.canIntegrate)
+                        .help("Review Pull strategy (\(AppPreferences.shared.pullPolicy.title))").disabled(!store.canIntegrate)
                     Button { store.sync(.push) } label: { Label("Push", systemImage: "arrow.up") }
                         .help(snapshot.ahead > 0 ? "Push \(snapshot.ahead) outgoing commits" : "Push current branch").disabled(!store.canIntegrate)
                 }.disabled(!store.canUseRepository || snapshot.remotes.isEmpty)

@@ -21,9 +21,9 @@ struct DiffView: View {
             if isLoading {
                 ProgressView("Loading changes…").frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if title == nil {
-                EmptyPane(title: "No file selected", subtitle: "Select a file to inspect its changes.", icon: "doc")
+                EmptyPane(title: String(localized: "No file selected"), subtitle: String(localized: "Select a file to inspect its changes."), icon: "doc")
             } else if text.isEmpty {
-                EmptyPane(title: "No textual changes", subtitle: "This file may have only metadata or conflict changes.", icon: "doc.text.magnifyingglass")
+                EmptyPane(title: String(localized: "No textual changes"), subtitle: String(localized: "This file may have only metadata or conflict changes."), icon: "doc.text.magnifyingglass")
             } else {
                 let document = DiffDocument(text)
                 let lines = document.lines.filter { !$0.isFileHeader }
@@ -83,6 +83,7 @@ struct DiffLineView: View {
         .font(.system(size: fontSize, design: .monospaced)).padding(.vertical, 1.5)
         .background(tint.opacity(line.kind == .hunk ? 0.06 : 0.11))
         .overlay(alignment: .leading) { if isChange { Rectangle().fill(tint).frame(width: 2) } }
+        .environment(\.layoutDirection, .leftToRight)
     }
 }
 

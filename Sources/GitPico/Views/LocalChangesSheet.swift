@@ -20,7 +20,7 @@ struct LocalChangesSheet: View {
     var isExport: Bool {
         switch request.action { case .export, .exportLines: true; default: false }
     }
-    var title: String {
+    var title: LocalizedStringResource {
         switch request.action {
         case .discard: "Discard Local Changes"
         case .forceAdd: "Force Add Ignored Files"
@@ -65,11 +65,11 @@ struct LocalChangesSheet: View {
                         VStack(alignment: .leading, spacing: 3) {
                             Text(record.title).font(.callout.bold())
                             Text(record.date.formatted(date: .abbreviated, time: .standard)).font(.caption).foregroundStyle(.secondary)
-                            Text("\(record.paths.count) files · \(record.state.capitalized)").font(.caption2).foregroundStyle(.secondary)
+                            Text("\(record.paths.count) files · \(String(localized: operationStateTitle(record.state)))").font(.caption2).foregroundStyle(.secondary)
                         }.tag(record.id)
                     }.frame(width: 265)
                     Divider()
-                    ScrollView { Text(selected?.paths.joined(separator: "\n") ?? "Select a backup to inspect its files.").font(.system(.callout, design: .monospaced)).frame(maxWidth: .infinity, alignment: .leading).padding(12).textSelection(.enabled) }
+                    ScrollView { Text(selected?.paths.joined(separator: "\n") ?? String(localized: "Select a backup to inspect its files.")).font(.system(.callout, design: .monospaced)).frame(maxWidth: .infinity, alignment: .leading).padding(12).textSelection(.enabled) }
                 }.frame(height: 280).overlay { if backups.isEmpty { ContentUnavailableView("No local change backups", systemImage: "clock.arrow.circlepath") } }
             } else {
                 if let plan { Text("\(plan.paths.count) affected files").font(.caption.bold()); Text(plan.paths.joined(separator: " · ")).font(.caption).foregroundStyle(.secondary).lineLimit(3) }
@@ -94,7 +94,7 @@ struct LocalChangesSheet: View {
             .task(id: scope.rawValue + destination.rawValue + String(reverse)) { await prepare() }
     }
     func prepare() async {
-        guard let repository = store.repository, store.repositoryToken == request.repositoryToken else { failure = "The repository changed. Reopen this dialog."; loading = false; return }
+        guard let repository = store.repository, store.repositoryToken == request.repositoryToken else { failure = String(localized: "The repository changed. Reopen this dialog."); loading = false; return }
         let generation = UUID(); preparationID = generation
         let chosenScope = scope, chosenDestination = destination, chosenReverse = reverse
         loading = true; failure = nil; plan = nil; patch = nil
@@ -115,7 +115,7 @@ struct LocalChangesSheet: View {
             }
             try Task.checkCancellation()
             guard preparationID == generation else { return }
-            guard store.repositoryToken == request.repositoryToken else { throw GitFailure("The repository changed. Reopen this dialog.") }
+            guard store.repositoryToken == request.repositoryToken else { throw appFailure("The repository changed. Reopen this dialog.") }
             plan = preparedPlan; patch = preparedPatch
             if let preparedBackups {
                 backups = preparedBackups

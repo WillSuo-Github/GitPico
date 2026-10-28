@@ -29,7 +29,7 @@ struct CommitIdentityProfile: Codable, Identifiable, Equatable {
             try checkStorage()
             if FileManager.default.fileExists(atPath: file.path) {
                 let data = try Data(contentsOf: file)
-                guard data.count <= 2 * 1024 * 1024 else { throw GitFailure("Commit workflow storage exceeds 2 MB.") }
+                guard data.count <= 2 * 1024 * 1024 else { throw appFailure("Commit workflow storage exceeds 2 MB.") }
                 let value = try JSONDecoder().decode(Archive.self, from: data)
                 try validate(value); archive = value; diskData = data
             }
@@ -54,22 +54,22 @@ struct CommitIdentityProfile: Codable, Identifiable, Equatable {
         guard value.version == 1, value.templates.count <= 100, value.identities.count <= 100,
               Set(value.templates.map(\.id)).count == value.templates.count, Set(value.identities.map(\.id)).count == value.identities.count,
               value.templates.allSatisfy({ !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && $0.name.count <= 100 && $0.text.utf8.count <= 256 * 1024 && !$0.text.utf8.contains(0) }),
-              value.identities.allSatisfy({ [$0.label, $0.name, $0.email].allSatisfy { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && $0.count <= 200 && !$0.contains(where: { $0.isNewline || $0 == "\0" }) } }) else { throw GitFailure("Invalid commit workflow library. Use named templates up to 256 KB and single-line identities; at most 100 of each.") }
+              value.identities.allSatisfy({ [$0.label, $0.name, $0.email].allSatisfy { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && $0.count <= 200 && !$0.contains(where: { $0.isNewline || $0 == "\0" }) } }) else { throw appFailure("Invalid commit workflow library. Use named templates up to 256 KB and single-line identities; at most 100 of each.") }
     }
     private func checkStorage() throws {
         for current in [file, file.deletingLastPathComponent()] {
             if let type = try? FileManager.default.attributesOfItem(atPath: current.path)[.type] as? FileAttributeType {
-                guard type != .typeSymbolicLink, current != file || type == .typeRegular else { throw GitFailure("Commit workflow storage must not contain symbolic links or nonregular files.") }
+                guard type != .typeSymbolicLink, current != file || type == .typeRegular else { throw appFailure("Commit workflow storage must not contain symbolic links or nonregular files.") }
             }
         }
     }
     private func persist(_ value: Archive) throws {
-        guard loaded else { throw GitFailure("Commit workflow storage could not be loaded. Preserve it and reopen after repairing it.") }
+        guard loaded else { throw appFailure("Commit workflow storage could not be loaded. Preserve it and reopen after repairing it.") }
         try validate(value); try checkStorage()
         let current = FileManager.default.fileExists(atPath: file.path) ? try Data(contentsOf: file) : nil
-        guard current == diskData else { throw GitFailure("Commit workflows changed outside this window. Reopen the app before saving.") }
+        guard current == diskData else { throw appFailure("Commit workflows changed outside this window. Reopen the app before saving.") }
         let data = try JSONEncoder().encode(value)
-        guard data.count <= 2 * 1024 * 1024 else { throw GitFailure("Commit workflow storage exceeds 2 MB.") }
+        guard data.count <= 2 * 1024 * 1024 else { throw appFailure("Commit workflow storage exceeds 2 MB.") }
         try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
         try data.write(to: file, options: .atomic)
         try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: file.path)

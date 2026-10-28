@@ -1,0 +1,9 @@
+{
+  "sourceLanguage": "en",
+  "localizations": [
+    "ar", "ca", "cs", "da", "de", "el", "es", "es-419", "fi", "fr", "fr-CA",
+    "he", "hi", "hr", "hu", "id", "it", "ja", "ko", "ms", "nl", "no", "pl",
+    "pt-BR", "pt-PT", "ro", "ru", "sk", "sl", "sv", "th", "tr", "uk", "vi",
+    "zh-Hans", "zh-Hant", "zh-HK"
+  ]
+}

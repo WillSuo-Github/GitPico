@@ -9,7 +9,7 @@ import Sparkle
     static let shared = UpdateController()
     private(set) var configured = false
     private(set) var canCheck = false
-    private(set) var status = "Updates are not configured for this development build."
+    private(set) var status = String(localized: "Updates are not configured for this development build.")
     var githubProject: String? { Bundle.main.object(forInfoDictionaryKey: "GitPicoUpdateRepository") as? String }
     @ObservationIgnored private var controller: SPUStandardUpdaterController?
     @ObservationIgnored private var observation: AnyCancellable?
@@ -30,7 +30,7 @@ import Sparkle
               let key = Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") as? String, Data(base64Encoded: key)?.count == 32 else { return }
         if let project = githubProject {
             guard let source = try? GitHubPublicRelease(project: project), source.feedURL == url else {
-                status = "The public GitHub update feed URL does not match the configured repository."
+                status = String(localized: "The public GitHub update feed URL does not match the configured repository.")
                 return
             }
         }
@@ -38,7 +38,7 @@ import Sparkle
         self.controller = controller; configured = true
         observation = controller.updater.publisher(for: \.canCheckForUpdates).receive(on: DispatchQueue.main).sink { [weak self] value in self?.canCheck = value }
         controller.startUpdater()
-        status = githubProject == nil ? "Updates are verified using the publisher's update signature." : "Updates use public GitHub Releases. No account is required."
+        status = githubProject == nil ? String(localized: "Updates are verified using the publisher's update signature.") : String(localized: "Updates use public GitHub Releases. No account is required.")
     }
     func check() {
         guard canCheck, let controller else { return }
@@ -51,7 +51,7 @@ import Sparkle
         guard let project = githubProject else { return }
         let source = try GitHubPublicRelease(project: project)
         guard let url = updateItem.fileURL, source.permits(url, build: updateItem.versionString) else {
-            throw GitFailure("The update archive is not the expected public GitHub release download.")
+            throw appFailure("The update archive is not the expected public GitHub release download.")
         }
     }
     func updater(_ updater: SPUUpdater, willDownloadUpdate item: SUAppcastItem, with request: NSMutableURLRequest) {

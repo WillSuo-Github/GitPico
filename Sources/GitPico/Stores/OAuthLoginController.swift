@@ -16,7 +16,7 @@ import Observation
     }
     func start(_ configuration: OAuthConfiguration, authentication: AuthenticationStore, root: URL?, reconnecting: AuthenticationProfile? = nil, showDevice: @escaping @MainActor (URL) -> Void = { _ in }, saved: @escaping @MainActor () -> Void) {
         guard !isRunning else { return }
-        isRunning = true; failure = nil; deviceChallenge = nil; message = "Starting secure sign-in…"
+        isRunning = true; failure = nil; deviceChallenge = nil; message = String(localized: "Starting secure sign-in…")
         task = Task { [weak self] in
             guard let self else { return }
             defer { isRunning = false; deviceChallenge = nil; task = nil }
@@ -27,28 +27,28 @@ import Observation
                     let client = OAuthDeviceAuthorization(transport: transport)
                     let challenge = try await client.start(configuration)
                     try Task.checkCancellation()
-                    deviceChallenge = challenge; message = "Enter this one-time code on GitHub, then return here."
+                    deviceChallenge = challenge; message = String(localized: "Enter this one-time code on GitHub, then return here.")
                     showDevice(challenge.verificationURL)
                     grant = try await client.wait(challenge, configuration: configuration, sleep: sleep)
                 } else {
                     let pkce = try OAuthPKCE()
-                    message = "Complete authorization in the secure browser window."
+                    message = String(localized: "Complete authorization in the secure browser window.")
                     let callback = try await browser.authenticate(pkce.authorizationURL(configuration), callbackScheme: "gitpico")
                     grant = try await OAuthCodeAuthorization(transport: transport).exchange(callback: callback, pkce: pkce, configuration: configuration)
                 }
                 try Task.checkCancellation()
                 try grant.requireRepositoryScopes(configuration.provider)
-                deviceChallenge = nil; message = "Verifying your account…"
+                deviceChallenge = nil; message = String(localized: "Verifying your account…")
                 let credential = GitStoredCredential(host: configuration.host, username: "", secret: grant.accessToken, oauth: grant.authorization(configuration))
                 let profile = AuthenticationProfile(id: UUID(), provider: configuration.provider == .github ? .github : .gitlab, host: configuration.host, username: "", method: .oauth)
                 let response = try await transport.send(HostingAccountClient.request(profile, credential: credential))
-                guard response.status == 200 else { throw GitFailure("The provider could not verify this account. No credential was saved; sign in again.") }
+                guard response.status == 200 else { throw appFailure("The provider could not verify this account. No credential was saved; sign in again.") }
                 let account = try HostingAccountClient.account(response.data)
                 try Task.checkCancellation()
                 _ = try authentication.completeOAuth(configuration, grant: grant, username: account.login, root: root, reconnecting: reconnecting)
-                message = "Signed in as " + account.login + ". Credentials are saved in Keychain."
+                message = String(localized: "Signed in as \(account.login). Credentials are saved in Keychain.")
                 saved()
-            } catch is CancellationError { message = "Sign-in cancelled. No account was changed." }
+            } catch is CancellationError { message = String(localized: "Sign-in cancelled. No account was changed.") }
             catch { failure = GitLogRedaction.clean(error.localizedDescription); message = nil }
         }
     }

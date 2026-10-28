@@ -114,7 +114,7 @@ extension GitRepository {
         } else { editorText = "#!/bin/sh\nexec /bin/cp " + shellQuote(planURL.path) + " \"$1\"\n" }
         try Data(editorText.utf8).write(to: editor, options: .atomic)
         try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: editor.path)
-        try await beginHistoryAction("Interactive Rebase", operation: .rebase)
+        try await beginHistoryAction(localized("Interactive Rebase"), operation: .rebase)
         do {
             let range = plan.base == "--root" ? ["--root"] : [plan.base]
             let destination = onto.isEmpty ? [] : ["--onto", onto]

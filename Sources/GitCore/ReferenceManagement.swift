@@ -64,7 +64,7 @@ extension GitRepository {
             let result = try await GitProcess.run(["merge-base", "--is-ancestor", ref.hash, "HEAD"], at: root, allowed: [0, 1])
             guard result.status == 0 else { throw GitFailure("This branch has commits not merged into HEAD. Review them or explicitly allow deletion of an unmerged branch.") }
         }
-        _ = try await backupReference(fullName: ref.fullName, hash: ref.hash, title: "Deleted branch " + ref.name)
+        _ = try await backupReference(fullName: ref.fullName, hash: ref.hash, title: localized("Deleted branch \(ref.name)"))
         _ = try await GitProcess.run(["update-ref", "-d", ref.fullName, ref.hash], at: root)
         _ = try await GitProcess.run(["config", "--local", "--remove-section", "branch." + ref.name], at: root, allowed: [0, 128, 5])
         var organization = try await referenceOrganization()
@@ -111,7 +111,7 @@ extension GitRepository {
     public func deleteTag(_ ref: Reference) async throws {
         guard ref.isTag else { throw GitFailure("Choose a local tag.") }
         try await requireIdleManagement(); try await requireReference(ref)
-        _ = try await backupReference(fullName: ref.fullName, hash: ref.hash, title: "Deleted tag " + ref.name)
+        _ = try await backupReference(fullName: ref.fullName, hash: ref.hash, title: localized("Deleted tag \(ref.name)"))
         _ = try await GitProcess.run(["update-ref", "-d", ref.fullName, ref.hash], at: root)
     }
 

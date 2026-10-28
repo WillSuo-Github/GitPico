@@ -12,14 +12,14 @@ struct CommitWorkflowSettingsView: View {
                 ForEach(library.templates) { item in
                     HStack { Text(item.name); Spacer(); Button("Edit…") { template = item }; Button("Delete", role: .destructive) { edit { try library.remove(template: item.id) } } }
                 }
-                Button("New Template…") { template = CommitTemplate(name: "New Template", text: "") }
+                Button("New Template…") { template = CommitTemplate(name: String(localized: "New Template"), text: "") }
                 Text("Templates are shared across repositories. In the commit options menu, preview a saved template or the repository's Git commit.template before inserting it.").font(.caption).foregroundStyle(.secondary)
             }
             Section("Commit Identities") {
                 ForEach(library.identities) { item in
-                    HStack { VStack(alignment: .leading) { Text(item.label); Text(item.name + " <" + item.email + ">").font(.caption).foregroundStyle(.secondary) }; Spacer(); Button("Edit…") { identity = item }; Button("Delete", role: .destructive) { edit { try library.remove(identity: item.id) } } }
+                    HStack { VStack(alignment: .leading) { Text(item.label); Text("\(item.name) <\(item.email)>").font(.caption).foregroundStyle(.secondary) }; Spacer(); Button("Edit…") { identity = item }; Button("Delete", role: .destructive) { edit { try library.remove(identity: item.id) } } }
                 }
-                Button("New Identity…") { identity = CommitIdentityProfile(label: "Personal", name: "", email: "") }
+                Button("New Identity…") { identity = CommitIdentityProfile(label: String(localized: "Personal"), name: "", email: "") }
                 Text("Selecting a profile applies it to the current repository's local Git configuration. Other repositories retain their identities.").font(.caption).foregroundStyle(.secondary)
             }
             if let error = error ?? library.error { Text(error).foregroundStyle(Pico.deletion).textSelection(.enabled) }
@@ -70,7 +70,7 @@ struct CommitTemplateInsertionView: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SheetTitle(insertion.name, icon: "doc.text")
+            SheetTitle("\(insertion.name)", icon: "doc.text")
             ScrollView { Text(insertion.text).font(.system(.body, design: .monospaced)).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading) }.frame(height: 240)
             Text("Append keeps your current draft. Replace uses the first line as the summary and the remaining text as the description.").font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             HStack {
@@ -99,7 +99,7 @@ struct SignatureVerificationView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             HStack {
-                Label(result?.state.rawValue ?? "Signature not checked", systemImage: "signature")
+                Label(result?.state.title ?? String(localized: "Signature not checked"), systemImage: "signature")
                 Spacer()
                 Button(checking ? "Verifying…" : "Verify Signature") {
                     checking = true

@@ -69,7 +69,7 @@ public struct SSHKeyManager: Sendable {
             }
             let text = String(decoding: (try output.fileHandleForReading.readToEnd()) ?? Data(), as: UTF8.self)
             let failure = String(decoding: (try errors.fileHandleForReading.readToEnd()) ?? Data(), as: UTF8.self)
-            guard process.terminationStatus == 0 else { throw GitFailure("SSH command failed. " + GitLogRedaction.clean(failure) + " Unlock encrypted keys using your system SSH agent when needed.") }
+            guard process.terminationStatus == 0 else { throw GitFailure("SSH command failed. \(GitLogRedaction.clean(failure)) Unlock encrypted keys using your system SSH agent when needed.") }
             return String(text.prefix(32_768)).trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

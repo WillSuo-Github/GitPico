@@ -8,7 +8,7 @@ struct UpdatesSettingsView: View {
         Form {
             Section("Software Updates") {
                 if let project = updater.githubProject {
-                    Text("GitHub Releases · " + project).font(.callout)
+                    Text("GitHub Releases · \(project)").font(.callout)
                     Text("Updates are downloaded from public releases. No GitHub account or token is required. Update archives and feeds are verified with the publisher's Ed25519 key.").font(.caption).foregroundStyle(.secondary)
                 }
                 Text(updater.status).font(.callout).foregroundStyle(.secondary)

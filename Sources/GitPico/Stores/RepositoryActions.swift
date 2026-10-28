@@ -11,7 +11,7 @@ struct IntegrationRequest: Identifiable {
 extension RepositoryStore {
     func createRepository(at url: URL, source: String?, recursive: Bool = false, allowLocalTransport: Bool = false, lfs: LFSCloneMode = .inherit, profileID: UUID? = nil) {
         guard !isBusy else { return }
-        isBusy = true; activity = source == nil ? "Creating repository…" : "Cloning repository…"
+        isBusy = true; activity = source == nil ? String(localized: "Creating repository…") : String(localized: "Cloning repository…")
         Task {
             do {
                 let context = networkContext(profileID: profileID, useAssignment: false)
@@ -21,7 +21,7 @@ extension RepositoryStore {
                 var assignmentWarning: String?
                 if let profileID {
                     do { try authentication.assign(profileID, to: await created.root) }
-                    catch { assignmentWarning = "Repository created, but the authentication assignment could not be saved. Choose the account again in Authentication. " + error.localizedDescription }
+                    catch { assignmentWarning = String(localized: "Repository created, but the authentication assignment could not be saved. Choose the account again in Authentication. \(error.localizedDescription)") }
                 }
                 isBusy = false; activity = ""
                 await open(url)
@@ -92,7 +92,7 @@ extension RepositoryStore {
     }
 
     func integrate(_ request: IntegrationRequest, revision: String, mainline: Int? = nil, expectedHead: HeadPosition? = nil) {
-        protectedPerform("\(request.action.rawValue.capitalized)…", refresh: .workingTree) { try await $0.integrate(request.action, revision: revision, mainline: mainline, expectedHead: request.expectedHead ?? expectedHead) }
+        protectedPerform("\(request.action.progressTitle)", refresh: .workingTree) { try await $0.integrate(request.action, revision: revision, mainline: mainline, expectedHead: request.expectedHead ?? expectedHead) }
     }
 
     func abortOperation() { perform("Aborting operation…", refresh: .workingTree) { try await $0.abortOperation() } }

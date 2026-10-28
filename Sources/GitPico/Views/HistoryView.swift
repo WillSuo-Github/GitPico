@@ -8,16 +8,16 @@ struct HistoryView: View {
     var body: some View {
         PersistentSplitView(name: "history", width: 320) {
             VStack(spacing: 0) {
-                PaneBar(title: store.destination.ref == nil ? "All Branches" : store.destination.title,
-                        subtitle: store.destination.ref == nil ? "Branches, remotes and tags · \(commits.count)\(store.historyPresentation.page.hasMore ? "+" : "") commits" : "\(commits.count)\(store.historyPresentation.page.hasMore ? "+" : "") commits",
+                PaneBar(title: store.destination.ref == nil ? "All Branches" : "\(store.destination.title)",
+                        subtitle: store.destination.ref == nil ? String(localized: "Branches, remotes and tags · \(commits.count)\(store.historyPresentation.page.hasMore ? "+" : "") commits") : String(localized: "\(commits.count)\(store.historyPresentation.page.hasMore ? "+" : "") commits"),
                         icon: store.destination.ref == nil ? "clock.arrow.circlepath" : "arrow.triangle.branch") {
                     if let ref = store.previewedReference, !ref.isCurrent {
-                        Chip(text: "Preview", icon: "eye", tint: .secondary)
+                        Chip(text: String(localized: "Preview"), icon: "eye", tint: .secondary)
                             .help("Viewing this revision does not change the checked-out branch.")
                         if ref.isLocal {
                             Button("Check Out") { store.switchBranch(ref) }.controlSize(.small)
                                 .disabled(store.checkoutUnavailableReason(ref) != nil)
-                                .help(store.checkoutUnavailableReason(ref) ?? ("Switch the working copy to " + ref.name))
+                                .help(store.checkoutUnavailableReason(ref) ?? (String(localized: "Switch the working copy to \(ref.name)")))
                         }
                     }
                     if store.isLoadingHistory { ProgressView().controlSize(.mini).help("Loading history…") }
@@ -37,7 +37,7 @@ struct HistoryView: View {
                         .font(.caption).padding(8).background(Pico.warning.opacity(0.1))
                 }
                 HistoryCommitTable(store: store, presentation: store.historyPresentation, grouped: preferences.historyGroups, compact: preferences.historyCompact, showGraph: preferences.historyShowGraph && store.search.isEmpty, canModifyHistory: store.canIntegrate, selection: store.selectedCommit?.hash, reveal: store.historyReveal)
-                    .overlay { if commits.isEmpty { if store.isLoadingHistory { ProgressView("Loading history…") } else { EmptyPane(title: store.historyError ?? (store.search.isEmpty ? "No commits yet" : "No matching commits"), subtitle: store.search.isEmpty ? "" : "Try a different message, author or hash.", icon: store.search.isEmpty ? "clock" : "magnifyingglass") } } }
+                    .overlay { if commits.isEmpty { if store.isLoadingHistory { ProgressView("Loading history…") } else { EmptyPane(title: store.historyError ?? (store.search.isEmpty ? String(localized: "No commits yet") : String(localized: "No matching commits")), subtitle: store.search.isEmpty ? "" : String(localized: "Try a different message, author or hash."), icon: store.search.isEmpty ? "clock" : "magnifyingglass") } } }
                 if store.historyPresentation.page.hasMore {
                     if store.historyOptions.limit < 20_000 {
                         Button("Load More · \(commits.count) shown", action: store.loadMoreHistory).frame(maxWidth: .infinity).padding(8).disabled(store.isLoadingHistory || store.isBusy)

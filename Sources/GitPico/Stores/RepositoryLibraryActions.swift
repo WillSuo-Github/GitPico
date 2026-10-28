@@ -5,14 +5,14 @@ extension RepositoryStore {
     func chooseLibraryRepository(relocating id: UUID? = nil) {
         guard !isBusy else { return }
         let panel = NSOpenPanel()
-        panel.title = id == nil ? "Add Local Repository" : "Locate Repository"
+        panel.title = id == nil ? String(localized: "Add Local Repository") : String(localized: "Locate Repository")
         panel.canChooseFiles = false; panel.canChooseDirectories = true
-        panel.prompt = id == nil ? "Add Repository" : "Use Location"
+        panel.prompt = id == nil ? String(localized: "Add Repository") : String(localized: "Use Location")
         panel.begin { [weak self] result in
             guard result == .OK, let url = panel.url else { return }
             Task { @MainActor in
                 guard let self, !self.isBusy else { return }
-                self.isBusy = true; self.activity = "Checking repository…"
+                self.isBusy = true; self.activity = String(localized: "Checking repository…")
                 defer { self.isBusy = false; self.activity = "" }
                 do {
                     let repository = try await GitRepository.open(url), root = await repository.root
@@ -24,7 +24,7 @@ extension RepositoryStore {
     }
     func openSavedRepository(_ entry: SavedRepository) async {
         guard !isBusy, let current = library.document.repositories.first(where: { $0.id == entry.id }), current.path == entry.path else {
-            if !isBusy { error = "The saved repository changed. Refresh the repository list." }
+            if !isBusy { error = String(localized: "The saved repository changed. Refresh the repository list.") }
             return
         }
         await open(URL(fileURLWithPath: current.path))

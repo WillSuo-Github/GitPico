@@ -12,32 +12,46 @@ enum Destination: Hashable, Sendable, Codable {
     case worktrees, submodules, workingCopy, history, reflog, stashes, branchesReview, repositorySettings, reference(String), fileHistory(String, String), comparison(String)
     var title: String {
         switch self {
-        case .worktrees: "Worktrees"
-        case .submodules: "Submodules"
-        case .workingCopy: "Working Copy"
-        case .history: "History"
-        case .reflog: "Reflog"
-        case .stashes: "Stashes"
-        case .branchesReview: "Branches Review"
-        case .repositorySettings: "Settings"
-        case .fileHistory(let path, _): path.isEmpty ? "File History" : "File History – " + path
-        case .comparison: "Compare Revisions"
+        case .worktrees: String(localized: "Worktrees")
+        case .submodules: String(localized: "Submodules")
+        case .workingCopy: String(localized: "Working Copy")
+        case .history: String(localized: "History")
+        case .reflog: String(localized: "Reflog")
+        case .stashes: String(localized: "Stashes")
+        case .branchesReview: String(localized: "Branches Review")
+        case .repositorySettings: String(localized: "Settings")
+        case .fileHistory(let path, _): path.isEmpty ? String(localized: "File History") : String(localized: "File History – \(path)")
+        case .comparison: String(localized: "Compare Revisions")
         case .reference(let ref): ref.replacingOccurrences(of: "refs/heads/", with: "").replacingOccurrences(of: "refs/remotes/", with: "").replacingOccurrences(of: "refs/tags/", with: "")
         }
     }
     var ref: String? { if case .reference(let ref) = self { ref } else { nil } }
     var searchPlaceholder: String? {
         switch self {
-        case .workingCopy: "Search for File"
-        case .history, .reference: "Search for Message"
-        case .reflog: "Search Reflog"
-        case .branchesReview: "Search for Branch with Name"
-        case .stashes: "Search for Stash"
-        case .worktrees: "Search Worktrees"
-        case .submodules: "Search Submodules"
+        case .workingCopy: String(localized: "Search for File")
+        case .history, .reference: String(localized: "Search for Message")
+        case .reflog: String(localized: "Search Reflog")
+        case .branchesReview: String(localized: "Search for Branch with Name")
+        case .stashes: String(localized: "Search for Stash")
+        case .worktrees: String(localized: "Search Worktrees")
+        case .submodules: String(localized: "Search Submodules")
         case .repositorySettings: nil
-        case .fileHistory: "Search Loaded File History"
+        case .fileHistory: String(localized: "Search Loaded File History")
         case .comparison: nil
+        }
+    }
+    /// Toolbar placeholder when the field also offers Quick Actions.
+    var searchWithActionsPlaceholder: String {
+        switch self {
+        case .workingCopy: String(localized: "Search for File or actions")
+        case .history, .reference: String(localized: "Search for Message or actions")
+        case .reflog: String(localized: "Search Reflog or actions")
+        case .branchesReview: String(localized: "Search for Branch with Name or actions")
+        case .stashes: String(localized: "Search for Stash or actions")
+        case .worktrees: String(localized: "Search Worktrees or actions")
+        case .submodules: String(localized: "Search Submodules or actions")
+        case .fileHistory: String(localized: "Search Loaded File History or actions")
+        case .repositorySettings, .comparison: String(localized: "Search files, branches or actions")
         }
     }
 }
@@ -228,11 +242,11 @@ final class RepositoryStore {
         if let workspace { workspace.chooseRepository(from: self); return }
         guard !isBusy else { return }
         let panel = NSOpenPanel()
-        panel.title = "Open Git Repository"
-        panel.message = "Choose a Git working directory."
+        panel.title = String(localized: "Open Git Repository")
+        panel.message = String(localized: "Choose a Git working directory.")
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
-        panel.prompt = "Open Repository"
+        panel.prompt = String(localized: "Open Repository")
         panel.begin { [weak self] result in
             guard result == .OK, let url = panel.url else { return }
             Task { @MainActor in await self?.open(url) }
@@ -256,7 +270,7 @@ final class RepositoryStore {
     func openInPlace(_ url: URL, openedRepository: GitRepository? = nil) async {
         guard !isBusy else { return }
         do { try flushConflictDrafts() } catch { self.error = error.localizedDescription; return }
-        isBusy = true; activity = "Opening repository…"
+        isBusy = true; activity = String(localized: "Opening repository…")
         let timing = RepositoryOpenTiming(); var succeeded = false
         defer { isBusy = false; activity = ""; lastOpenReport = timing.finish(succeeded: succeeded) }
         do {
@@ -284,7 +298,7 @@ final class RepositoryStore {
             conflictDraftArchive = nil; conflictDrafts = [:]
             await loadConflictDrafts(at: data.root)
             do { try library.recordOpened(data.root) }
-            catch { self.error = "Repository opened, but the library could not be saved: " + error.localizedDescription }
+            catch { self.error = String(localized: "Repository opened, but the library could not be saved: \(error.localizedDescription)") }
             await timing.measure("related") { await loadRelatedRepositories() }
             await timing.measure("workflow") { await loadWorkflowState() }
             await timing.measure("working-list") { await rebuildWorkingList() }
@@ -296,7 +310,7 @@ final class RepositoryStore {
     func refresh() {
         guard !isBusy, repository != nil else { return }
         cancelPreviewWork(); clearHistoryCache(); commitDetailCache = [:]
-        isBusy = true; activity = "Refreshing…"
+        isBusy = true; activity = String(localized: "Refreshing…")
         operationTask = Task {
             defer { isBusy = false; activity = "" }
             do { try await reload() } catch { self.error = error.localizedDescription }
@@ -435,10 +449,10 @@ final class RepositoryStore {
         }
     }
 
-    func perform(_ title: String, refresh: MutationRefresh = .full, action: @escaping @Sendable (GitRepository) async throws -> Void) {
+    func perform(_ title: String.LocalizationValue, refresh: MutationRefresh = .full, action: @escaping @Sendable (GitRepository) async throws -> Void) {
         guard !isBusy, let repository else { return }
         cancelPreviewWork(); commitFeedback = nil; commitWarning = nil
-        isBusy = true; activity = title
+        isBusy = true; activity = String(localized: title)
         operationTask = Task {
             defer { isBusy = false; activity = "" }
             do { try await action(repository) }
@@ -452,7 +466,7 @@ final class RepositoryStore {
                 case .workingTree: try await reloadIncrementally(history: false, includingRecovery: true)
                 }
             } catch {
-                self.error = [self.error, "Repository refresh failed. " + error.localizedDescription].compactMap { $0 }.joined(separator: "\n\n")
+                self.error = [self.error, String(localized: "Repository refresh failed. \(error.localizedDescription)")].compactMap { $0 }.joined(separator: "\n\n")
             }
             await showActiveWork()
         }
@@ -478,19 +492,19 @@ final class RepositoryStore {
         let message = commitSubject + (commitBody.isEmpty ? "" : "\n\n" + commitBody)
         let shouldAmend = amend; let shouldSignOff = signOff
         commitFeedback = nil; commitWarning = nil; cancelPreviewWork()
-        isBusy = true; activity = "Creating commit…"
+        isBusy = true; activity = String(localized: "Creating commit…")
         operationTask = Task {
             defer { isBusy = false; activity = "" }
             let outcome: CommitOutcome
             do { outcome = try await repository.commit(message: message, amend: shouldAmend, signOff: shouldSignOff) }
             catch { self.error = error.localizedDescription; try? await reloadIncrementally(history: false); return }
             draftBeforeAmend = nil; commitSubject = ""; commitBody = ""; amend = false; diff = ""
-            commitFeedback = shouldAmend ? "Commit amended." : "Commit created."
+            commitFeedback = shouldAmend ? String(localized: "Commit amended.") : String(localized: "Commit created.")
             commitWarning = outcome.undoWarning
             do { try await reloadIncrementally(history: true) }
             catch {
                 undoAvailability = nil
-                commitWarning = [commitWarning, "The commit was created, but repository refresh failed. " + error.localizedDescription].compactMap { $0 }.joined(separator: "\n")
+                commitWarning = [commitWarning, String(localized: "The commit was created, but repository refresh failed. \(error.localizedDescription)")].compactMap { $0 }.joined(separator: "\n")
                 await rebuildWorkingList()
                 if let file = currentChange { selectChange(file, staged: file.isStaged && !file.isUnstaged) }
             }
@@ -501,7 +515,7 @@ final class RepositoryStore {
         guard canUseRepository, snapshot?.remotes.isEmpty == false, action == .fetch || canIntegrate else { return }
         if action == .push, let current = snapshot?.references.first(where: \.isCurrent), current.isLocal, current.upstream.isEmpty {
             manage(.publish(current, nil, nil, false))
-        } else { protectedPerform("\(action.rawValue.capitalized)…", protect: false) { try await $0.sync(action) } }
+        } else { protectedPerform(action == .fetch ? "Fetch…" : "Push…", protect: false) { try await $0.sync(action) } }
     }
     /// Pull always goes through the strategy review sheet.
     func reviewPull() {

@@ -55,7 +55,7 @@ struct CommitRow: View {
             .padding(.leading, graph == nil || !showGraph ? 12 : 4).padding(.trailing, 12).frame(height: compact ? 32 : 50)
             .contentShape(Rectangle())
             .accessibilityElement(children: .combine)
-            .accessibilityLabel(commit.subject + ", " + commit.author + ", " + commit.shortHash)
+            .accessibilityLabel("\(commit.subject), \(commit.author), \(commit.shortHash)")
         .contextMenu {
             Section {
             if let cherryPick { Button("Cherry-Pick Commit…", action: cherryPick) }

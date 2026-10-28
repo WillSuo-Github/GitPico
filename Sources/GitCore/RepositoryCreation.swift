@@ -16,7 +16,7 @@ extension GitRepository {
             if lfs != .inherit { try await GitRepository(root: parent).requireLFS() }
             let filters = lfs == .inherit ? [] : Self.lfsFilters.keys.sorted().flatMap { ["-c", $0 + "=" + Self.lfsFilters[$0]!] }
             do { _ = try await GitProcess.run(policy + ["clone"] + filters + (recursive ? ["--recurse-submodules"] : []) + ["--", source, destination.path], at: parent, timeout: 120, lfsEnvironment: lfs == .inherit ? [:] : ["GIT_LFS_SKIP_SMUDGE": lfs == .pointersOnly ? "1" : "0"]) }
-            catch { throw GitFailure(error.localizedDescription + "\nThe destination may contain a partial clone; existing files were kept. Open it to retry submodule initialization.") }
+            catch { throw GitFailure("\(error.localizedDescription)\nThe destination may contain a partial clone; existing files were kept. Open it to retry submodule initialization.") }
         } else {
             try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: false)
             _ = try await GitProcess.run(["init", "-b", "main"], at: destination)

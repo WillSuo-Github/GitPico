@@ -4,14 +4,14 @@ import Foundation
 public enum HistoricalExport {
     static func validatePath(_ path: String) throws {
         let parts = path.components(separatedBy: "/")
-        guard !path.isEmpty, !path.utf8.contains(0), !path.hasPrefix("/"), parts.allSatisfy({ !$0.isEmpty && $0 != "." && $0 != ".." && $0.precomposedStringWithCanonicalMapping.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) != ".git" }) else { throw GitFailure("Unsafe historical export path: " + path) }
+        guard !path.isEmpty, !path.utf8.contains(0), !path.hasPrefix("/"), parts.allSatisfy({ !$0.isEmpty && $0 != "." && $0 != ".." && $0.precomposedStringWithCanonicalMapping.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) != ".git" }) else { throw GitFailure("Unsafe historical export path: \(path)") }
     }
 
     static func validateLink(_ file: HistoricalFile) throws -> String {
-        guard let target = String(data: file.data, encoding: .utf8), !target.isEmpty, !target.hasPrefix("/"), !target.utf8.contains(0), target.utf8.count <= 4096 else { throw GitFailure("An exported link has an absolute or unsupported target: " + file.path) }
+        guard let target = String(data: file.data, encoding: .utf8), !target.isEmpty, !target.hasPrefix("/"), !target.utf8.contains(0), target.utf8.count <= 4096 else { throw GitFailure("An exported link has an absolute or unsupported target: \(file.path)") }
         var parts = Array(file.path.split(separator: "/").dropLast().map(String.init))
         for part in target.components(separatedBy: "/") {
-            if part == ".." { guard !parts.isEmpty else { throw GitFailure("An exported link would escape its destination: " + file.path) }; parts.removeLast() }
+            if part == ".." { guard !parts.isEmpty else { throw GitFailure("An exported link would escape its destination: \(file.path)") }; parts.removeLast() }
             else if part != "." && !part.isEmpty { parts.append(part) }
         }
         if !parts.isEmpty { try validatePath(parts.joined(separator: "/")) }

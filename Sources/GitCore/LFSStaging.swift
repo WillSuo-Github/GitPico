@@ -69,7 +69,7 @@ extension GitRepository {
         let lease = try await acquireRelatedManagementLock(); defer { releaseRelatedManagementLock(lease) }
         try await requireIdleManagement()
         guard plan.repository == root.path, try await headPosition() == plan.head, try plan.paths.map(lfsInput) == plan.inputs, try await lfsAttributes(plan.paths) == plan.attributes, try await lfsFilterConfiguration() == plan.filters else { throw GitFailure("LFS conversion inputs changed. Review the files again.") }
-        var record = LFSChangeRecord(id: UUID(), date: Date(), title: "Stage LFS Conversion · \(plan.paths.count) file(s)", repository: root.path, head: plan.head, state: "applying", before: [plan.before], after: [plan.after])
+        var record = LFSChangeRecord(id: UUID(), date: Date(), title: localized("Stage LFS Conversion · \(plan.paths.count) file(s)"), repository: root.path, head: plan.head, state: "applying", before: [plan.before], after: [plan.after])
         try await pinManagementIndex(plan.before.data, id: record.id, side: "lfs-before")
         try await pinManagementIndex(plan.after.data, id: record.id, side: "lfs-after")
         try await writeExtensionRecord(record, name: "lfs/changes/" + record.id.uuidString + ".json")

@@ -25,7 +25,7 @@ private final class BackgroundVerificationDelegate: NSObject, NSApplicationDeleg
             try? await Task.sleep(for: .milliseconds(300))
             let args = ProcessInfo.processInfo.arguments
             guard let index = args.firstIndex(of: "--verification-output"), args.indices.contains(index + 1) else { return }
-            let value: [String: Any] = [
+            var value: [String: Any] = [
                 "backgroundTesting": true,
                 "processIdentifier": ProcessInfo.processInfo.processIdentifier,
                 "frontmostProcessIdentifier": NSWorkspace.shared.frontmostApplication?.processIdentifier ?? -1,
@@ -35,6 +35,16 @@ private final class BackgroundVerificationDelegate: NSObject, NSApplicationDeleg
                 "version": Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown",
                 "build": Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "unknown"
             ]
+            if args.contains("--verify-localizations") {
+                value["localization"] = [
+                    "preferredLanguages": Bundle.main.preferredLocalizations,
+                    "workingCopy": String(localized: "Working Copy"),
+                    "modifiedStatus": localizedFileStatus("Modified"),
+                    "appError": appFailure("Result is not UTF-8 text.").message,
+                    "oneChangedFile": String(localized: "\(1) changed files"),
+                    "threeChangedFiles": String(localized: "\(3) changed files")
+                ]
+            }
             if let data = try? JSONSerialization.data(withJSONObject: value, options: [.prettyPrinted, .sortedKeys]) {
                 try? data.write(to: URL(fileURLWithPath: args[index + 1]), options: .atomic)
             }

@@ -15,7 +15,7 @@ struct ConflictDraftsSheet: View {
             HSplitView {
                 List(store.conflictDrafts.keys.sorted(), id: \.self, selection: $selection) { path in Text(path).lineLimit(2).tag(path) }.frame(minWidth: 200, idealWidth: 240, maxWidth: 280)
                 ScrollView([.horizontal, .vertical]) {
-                    Text(selection.flatMap { store.conflictDrafts[$0]?.text } ?? "Select a saved draft")
+                    Text(selection.flatMap { store.conflictDrafts[$0]?.text } ?? String(localized: "Select a saved draft"))
                         .font(.system(size: 12, design: .monospaced)).textSelection(.enabled).padding(12).frame(maxWidth: .infinity, alignment: .topLeading)
                 }.frame(minWidth: 360)
             }.frame(minHeight: 300)

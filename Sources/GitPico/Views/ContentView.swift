@@ -20,8 +20,8 @@ struct ContentView: View {
             } else { RepositoryDetailView(store: store) }
         }
         .frame(minWidth: showsSidebar ? 1080 : 0, minHeight: showsSidebar ? 680 : 0)
-        .navigationTitle(store.isChoosingRepository ? "Repositories" : store.title)
-        .navigationSubtitle(store.isChoosingRepository ? "Choose a repository" : store.navigationSubtitle)
+        .navigationTitle(store.isChoosingRepository ? String(localized: "Repositories") : store.title)
+        .navigationSubtitle(store.isChoosingRepository ? String(localized: "Choose a repository") : store.navigationSubtitle)
         .toolbar { if store.workspace == nil { RepositoryToolbar(store: store) } }
         .safeAreaInset(edge: .bottom, spacing: 0) { if showsSidebar { RepositoryStatusBar(store: store) } }
         .safeAreaInset(edge: .top, spacing: 0) { if !store.isChoosingRepository { VStack(spacing: 0) { UpstreamRecoveryBanner(store: store); AutomaticStashBanner(store: store); GitFlowOperationBanner(store: store); if store.destination != .workingCopy { OperationBanner(store: store) } } } }
@@ -72,10 +72,10 @@ struct ContentView: View {
 }
 
 struct InputSheet: View {
-    let title: String
-    let caption: String
-    let placeholder: String
-    let button: String
+    let title: LocalizedStringResource
+    let caption: LocalizedStringResource
+    let placeholder: LocalizedStringResource
+    let button: LocalizedStringResource
     let action: (String) -> Void
     @State private var value = ""
     @Environment(\.dismiss) private var dismiss

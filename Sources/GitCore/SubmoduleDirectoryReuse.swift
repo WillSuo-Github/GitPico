@@ -54,7 +54,7 @@ extension GitRepository {
                 if try localAttributes(owner) != nil, ownerPath != target?.resolvingSymlinksInPath().path, !insideTarget,
                    let repo = try? await GitRepository.open(owner), repo.root.path == owner.resolvingSymlinksInPath().path {
                     let actual = try await GitProcess.run(["rev-parse", "--absolute-git-dir"], at: repo.root)
-                    if worktreePath(try gitPathOutput(actual)) == worktreePath(directory.path) { throw GitFailure("The retained repository is still used by another working directory: " + ownerPath + "\nGit storage: " + directory.path + "\nReviewed destination: " + (target?.path ?? targetRoot?.path ?? "none")) }
+                    if worktreePath(try gitPathOutput(actual)) == worktreePath(directory.path) { throw GitFailure("The retained repository is still used by another working directory: \(ownerPath)\nGit storage: \(directory.path)\nReviewed destination: \((target?.path ?? targetRoot?.path ?? "none"))") }
                 }
             }
         }
@@ -105,7 +105,7 @@ extension GitRepository {
         if plan.directory.mode == .existingRepository { pointers = try await GitRepository.open(working).repositoryPointers(includeRoot: true, allowedStorage: commonDirectory()) } else { pointers = [] }
         let metadata = [root.appendingPathComponent(".gitmodules").path, try await localIndexURL().path, try await commonDirectory().appendingPathComponent("config").path]
         let extras = admin.map { $0.path.hasPrefix(working.path + "/") ? [] : [$0.path] } ?? []
-        let backup = try await beginRelatedBackup(title: "Reuse Submodule · " + plan.path, kind: "submodule", original: working.path, current: working.path, pointers: pointers, extraFiles: metadata, extraDirectories: extras)
+        let backup = try await beginRelatedBackup(title: localized("Reuse Submodule · \(plan.path)"), kind: "submodule", original: working.path, current: working.path, pointers: pointers, extraFiles: metadata, extraDirectories: extras)
         do {
             guard try await headPosition() == plan.head, try await submoduleAddIndex() == plan.index else { throw GitFailure("The parent changed while saving reuse recovery data.") }
             if plan.directory.mode == .emptyDirectory || plan.directory.mode == .archiveAndClone {

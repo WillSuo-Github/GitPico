@@ -20,7 +20,7 @@ extension RepositoryStore {
             switch action {
             case .create: current = action
             case .move(let old), .repair(let old), .remove(let old), .lock(let old), .unlock(let old):
-                guard let entry = self.worktrees.first(where: { $0.path == old.path }) else { self.error = "This worktree is no longer available. Refresh the worktree list."; return }
+                guard let entry = self.worktrees.first(where: { $0.path == old.path }) else { self.error = String(localized: "This worktree is no longer available. Refresh the worktree list."); return }
                 switch action { case .move: current = .move(entry); case .repair: current = .repair(entry); case .remove: current = .remove(entry); case .lock: current = .lock(entry); default: current = .unlock(entry) }
             }
             self.worktreeRequest = WorktreeRequest(repositoryToken: self.repositoryToken, action: current)
@@ -32,7 +32,7 @@ extension RepositoryStore {
         withFreshMetadata([.submodules]) {
             var current = action
             if case .manage(let old, let operation) = action {
-                guard let entry = self.submodules.first(where: { $0.path == old.path }) else { self.error = "This submodule is no longer available. Refresh the submodule list."; return }
+                guard let entry = self.submodules.first(where: { $0.path == old.path }) else { self.error = String(localized: "This submodule is no longer available. Refresh the submodule list."); return }
                 current = .manage(entry, operation)
             }
             self.submoduleRequest = SubmoduleRequest(repositoryToken: self.repositoryToken, action: current)
@@ -40,7 +40,7 @@ extension RepositoryStore {
     }
     func openWorktree(_ record: ManagedWorktree) {
         guard !isBusy, let repository else { return }
-        isBusy = true; activity = "Opening worktree…"
+        isBusy = true; activity = String(localized: "Opening worktree…")
         operationTask = Task {
             do { let child = try await repository.checkedWorktree(record); let url = await child.root; isBusy = false; await open(url) }
             catch { self.error = error.localizedDescription; isBusy = false }
@@ -49,7 +49,7 @@ extension RepositoryStore {
     }
     func openSubmodule(_ record: ManagedSubmodule) {
         guard !isBusy, let repository else { return }
-        isBusy = true; activity = "Opening submodule…"
+        isBusy = true; activity = String(localized: "Opening submodule…")
         operationTask = Task {
             do { let child = try await repository.checkedSubmodule(record); let url = await child.root; isBusy = false; await open(url) }
             catch { self.error = error.localizedDescription; isBusy = false }
@@ -57,8 +57,8 @@ extension RepositoryStore {
         }
     }
     func applyWorktreePlan(_ plan: WorktreeCreationPlan, request: WorktreeRequest, openAfter: Bool) {
-        guard !isBusy, let repository, request.repositoryToken == repositoryToken else { error = "The repository changed. Reopen the preview."; return }
-        isBusy = true; activity = "Creating worktree…"
+        guard !isBusy, let repository, request.repositoryToken == repositoryToken else { error = String(localized: "The repository changed. Reopen the preview."); return }
+        isBusy = true; activity = String(localized: "Creating worktree…")
         Task {
             do {
                 let record = try await repository.createWorktree(plan)
@@ -69,11 +69,11 @@ extension RepositoryStore {
         }
     }
     func applySubmodulePlan(_ plan: SubmodulePlan, request: SubmoduleRequest) {
-        guard request.repositoryToken == repositoryToken else { error = "The repository changed. Reopen the preview."; return }
-        perform(plan.operation.rawValue + "…") { try await $0.applySubmodule(plan) }
+        guard request.repositoryToken == repositoryToken else { error = String(localized: "The repository changed. Reopen the preview."); return }
+        perform("\(plan.operation.actionTitle)") { try await $0.applySubmodule(plan) }
     }
     func addSubmodulePlan(_ plan: SubmoduleAdditionPlan, request: SubmoduleRequest) {
-        guard request.repositoryToken == repositoryToken else { error = "The repository changed. Reopen the preview."; return }
+        guard request.repositoryToken == repositoryToken else { error = String(localized: "The repository changed. Reopen the preview."); return }
         perform("Adding submodule…") { try await $0.addSubmodule(plan) }
     }
 }

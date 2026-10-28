@@ -142,7 +142,7 @@ extension GitRepository {
         let destination = try await newWorktreeDestination(destination)
         let pointers = try await child.repositoryPointers(includeRoot: false, allowedStorage: commonDirectory())
         let admin = try await worktreeAdministration(record)
-        var backup = try await beginRelatedBackup(title: "Move Worktree · " + record.name, kind: "worktree", original: record.path, current: destination.path, pointers: pointers, extraFiles: [admin.appendingPathComponent("gitdir").path])
+        var backup = try await beginRelatedBackup(title: localized("Move Worktree") + " · " + record.name, kind: "worktree", original: record.path, current: destination.path, pointers: pointers, extraFiles: [admin.appendingPathComponent("gitdir").path])
         backup.worktree = record; try await saveRelatedBackup(backup)
         try await requireWorktree(record)
         do {
@@ -193,7 +193,7 @@ extension GitRepository {
         let admin = try await worktreeAdministration(record)
         if let hash = record.head { try await checkpoint(hash, id: UUID(), side: "removed-worktree") }
         if let index = try readLocalIndex(admin.appendingPathComponent("index")) { try await pinManagementIndex(index, id: UUID(), side: "removed-worktree-index") }
-        var backup = try await beginRelatedBackup(title: (force ? "Force Remove Worktree · " : "Remove Worktree · ") + record.name, kind: "worktree", original: record.path, current: record.path, pointers: pointers, extraFiles: [admin.appendingPathComponent("gitdir").path], extraDirectories: [admin.path])
+        var backup = try await beginRelatedBackup(title: (force ? localized("Force Remove Worktree") : localized("Remove Worktree")) + " · " + record.name, kind: "worktree", original: record.path, current: record.path, pointers: pointers, extraFiles: [admin.appendingPathComponent("gitdir").path], extraDirectories: [admin.path])
         backup.worktree = record; try await saveRelatedBackup(backup)
         try await requireWorktree(record)
         do {

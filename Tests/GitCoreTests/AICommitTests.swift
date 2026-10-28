@@ -35,7 +35,12 @@ import Testing
     #expect(renamed.diff.contains("asset.bin") && renamed.diff.contains("renamed.bin"))
     try f.write("large.txt", String(repeating: "long line\n", count: 15_000))
     try await f.git(["add", "large.txt"])
-    await #expect(throws: GitFailure.self) { try await f.repo.aiCommitContext() }
+    do {
+        _ = try await f.repo.aiCommitContext()
+        Issue.record("Expected the AI-specific staged diff size failure")
+    } catch let error as GitFailure {
+        #expect(error.message.contains("96 KB maximum"))
+    }
 }
 
 @Test func aiCommitParserRejectsDiagnosticsAndMalformedMessages() throws {

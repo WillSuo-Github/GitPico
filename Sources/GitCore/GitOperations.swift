@@ -22,7 +22,7 @@ extension GitRepository {
         }
         let operation: RepositoryOperation = switch action { case .merge: .merge; case .rebase: .rebase; case .cherryPick: .cherryPick; case .revert: .revert }
         if let expectedHead, try await headPosition() != expectedHead { throw GitFailure("HEAD changed outside this preview. Reopen the operation before continuing.") }
-        try await beginHistoryAction(action.rawValue.capitalized, operation: operation)
+        try await beginHistoryAction(action.title, operation: operation)
         do {
             _ = try await GitProcess.run(args, at: root, timeout: 120)
             try await finishHistoryAction()

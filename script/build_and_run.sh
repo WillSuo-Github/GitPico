@@ -60,7 +60,7 @@ PYVERIFY
     if [[ "$MODE" == "--verify" ]]; then
       NATIVE_VERIFY_OUTPUT="$ROOT_DIR/dist/native-startup-verification.json"
       rm -f "$NATIVE_VERIFY_OUTPUT"
-      /usr/bin/open -g -j -n "$APP_BUNDLE" --args --native-startup-verification --verification-output "$NATIVE_VERIFY_OUTPUT" --verification-exit
+      /usr/bin/open -g -j -n "$APP_BUNDLE" --args -AppleLanguages "(en)" --native-startup-verification --verification-output "$NATIVE_VERIFY_OUTPUT" --verification-exit
       python3 - "$NATIVE_VERIFY_OUTPUT" <<'PYNATIVEVERIFY'
 import json, sys, time
 from pathlib import Path

@@ -7,7 +7,7 @@ struct GitPicoApp: App {
     private var workspace: RepositoryWorkspace { appDelegate.workspace }
 
     var body: some Scene {
-        Settings { SettingsView(tools: workspace.activeStore.toolPreferences, store: workspace.activeStore) }
+        Settings { SettingsView(tools: workspace.activeStore.toolPreferences, store: workspace.activeStore).environment(\.layoutDirection, AppLocalization.layoutDirection) }
             .commands { RepositoryCommands(store: workspace.activeStore) }
     }
 }
@@ -67,7 +67,7 @@ struct GitPicoApp: App {
         }
         workspace.shutdown()
         if workspace.draftSaveWarning != nil {
-            workspace.error = "Drafts could not be saved. Resolve the draft storage error before quitting."
+            workspace.error = String(localized: "Drafts could not be saved. Resolve the draft storage error before quitting.")
             return .terminateCancel
         }
         return .terminateNow
@@ -79,8 +79,8 @@ struct SettingsView: View {
     let tools: ExternalToolPreferences
     let store: RepositoryStore
     @State private var preferences = AppPreferences.shared
-    var version: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Development" }
-    var build: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "Development" }
+    var version: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? String(localized: "Development") }
+    var build: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? String(localized: "Development") }
     var body: some View {
         TabView {
         Form {

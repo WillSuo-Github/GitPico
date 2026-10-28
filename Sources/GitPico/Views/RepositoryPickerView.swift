@@ -19,17 +19,17 @@ struct RepositoryPickerView: View {
             } else { content }
         }
         .disabled(tab.isBusy)
-        .overlay { if tab.isOpening || store.isBusy { ProgressView(tab.isOpening ? "Opening repository…" : store.activity).padding(24).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10)) } }
+        .overlay { if tab.isOpening || store.isBusy { ProgressView(tab.isOpening ? String(localized: "Opening repository…") : store.activity).padding(24).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10)) } }
         .task { if tab.pickerSelection == nil { tab.pickerSelection = entries.first?.id }; searchFocused = true }
         .onChange(of: entries.map(\.id)) { if !entries.contains(where: { $0.id == tab.pickerSelection }) { tab.pickerSelection = entries.first?.id } }
         .onKeyPress(.return) { guard !searchFocused, selection != nil else { return .ignored }; openSelected(); return .handled }
     }
     var filterTitle: String {
         switch tab.pickerFilter {
-        case .all: "All Repositories"
-        case .recent: "Recently Opened"
-        case .favorites: "Favorites"
-        case .ungrouped: "Ungrouped"
+        case .all: String(localized: "All Repositories")
+        case .recent: String(localized: "Recently Opened")
+        case .favorites: String(localized: "Favorites")
+        case .ungrouped: String(localized: "Ungrouped")
         case .group(let id): workspace.library.breadcrumb(id)
         }
     }
@@ -47,13 +47,13 @@ struct RepositoryPickerView: View {
                 Spacer()
             }
             HStack(spacing: 12) {
-                ActionCard(title: "Open Local", subtitle: "A folder on this Mac", icon: "folder", action: store.chooseRepository)
-                ActionCard(title: "Clone", subtitle: "From a remote URL", icon: "arrow.down.circle") { workspace.prepareCreation(clone: true, from: store) }
-                ActionCard(title: "New", subtitle: "Start an empty repository", icon: "plus.square.dashed") { workspace.prepareCreation(clone: false, from: store) }
+                ActionCard(title: String(localized: "Open Local"), subtitle: String(localized: "A folder on this Mac"), icon: "folder", action: store.chooseRepository)
+                ActionCard(title: String(localized: "Clone"), subtitle: String(localized: "From a remote URL"), icon: "arrow.down.circle") { workspace.prepareCreation(clone: true, from: store) }
+                ActionCard(title: String(localized: "New"), subtitle: String(localized: "Start an empty repository"), icon: "plus.square.dashed") { workspace.prepareCreation(clone: false, from: store) }
             }
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 10) {
-                    SectionCaption(filterTitle)
+                    SectionCaption("\(filterTitle)")
                     Text("\(entries.count)").font(.system(size: 10, weight: .semibold)).foregroundStyle(.tertiary)
                     Spacer()
                     HStack(spacing: 6) {
@@ -77,14 +77,14 @@ struct RepositoryPickerView: View {
                                 HStack(spacing: 6) {
                                     Text(entry.name).font(.system(size: 13, weight: .semibold))
                                     if entry.favorite { Image(systemName: "star.fill").font(.system(size: 10)).foregroundStyle(.yellow) }
-                                    if isOpen { Chip(text: "Open", tint: .accentColor) }
+                                    if isOpen { Chip(text: String(localized: "Open"), tint: .accentColor) }
                                 }
                                 Text(Pico.abbreviated(entry.path)).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
                             }
                             Spacer(minLength: 8)
                             if let opened = entry.lastOpened { Text(opened.picoRelative).font(.system(size: 11)).foregroundStyle(.tertiary) }
                             Button { open(entry) } label: { Image(systemName: "arrow.right.circle.fill").font(.system(size: 18)).foregroundStyle(.tint).frame(width: 26, height: 26).contentShape(Rectangle()) }
-                                .buttonStyle(.plain).help("Open " + entry.name).accessibilityLabel("Open " + entry.name)
+                                .buttonStyle(.plain).help("Open \(entry.name)").accessibilityLabel("Open \(entry.name)")
                         }.padding(.vertical, 7).padding(.horizontal, 4).tag(entry.id).contentShape(Rectangle())
                             .contextMenu {
                                 Button("Open") { open(entry) }
@@ -96,7 +96,7 @@ struct RepositoryPickerView: View {
                     .background(Color(nsColor: .controlBackgroundColor).opacity(0.6), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color(nsColor: .separatorColor).opacity(0.6), lineWidth: 0.5))
                     .contextMenu(forSelectionType: UUID.self) { _ in } primaryAction: { ids in if let entry = entries.first(where: { ids.contains($0.id) }) { open(entry) } }
-                    .overlay { if entries.isEmpty { EmptyPane(title: tab.pickerQuery.isEmpty ? "No repositories here yet" : "No matches", subtitle: tab.pickerQuery.isEmpty ? "Open a local repository, clone one, or choose another collection." : "No repository name, path or group matches this search.", icon: tab.pickerQuery.isEmpty ? "tray" : "magnifyingglass") } }
+                    .overlay { if entries.isEmpty { EmptyPane(title: tab.pickerQuery.isEmpty ? String(localized: "No repositories here yet") : String(localized: "No matches"), subtitle: tab.pickerQuery.isEmpty ? String(localized: "Open a local repository, clone one, or choose another collection.") : String(localized: "No repository name, path or group matches this search."), icon: tab.pickerQuery.isEmpty ? "tray" : "magnifyingglass") } }
                 HStack {
                     Label("Double-click or press Return to open", systemImage: "return").font(.caption).foregroundStyle(.tertiary)
                     Spacer()
@@ -117,8 +117,9 @@ struct RepositoryPickerView: View {
     var summary: String {
         let all = workspace.library.matches(filter: .all).count
         let favorites = workspace.library.matches(filter: .favorites).count
-        if all == 0 { return "Open a repository to get started." }
-        return "\(all) saved \(all == 1 ? "repository" : "repositories")" + (favorites > 0 ? " · \(favorites) \(favorites == 1 ? "favorite" : "favorites")" : "")
+        if all == 0 { return String(localized: "Open a repository to get started.") }
+        let saved = String(localized: "\(all) saved repositories")
+        return favorites > 0 ? saved + " · " + String(localized: "\(favorites) favorites") : saved
     }
 
     func openSelected() { if let entry = selection ?? entries.first { open(entry) } }
@@ -149,6 +150,6 @@ struct ActionCard: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain).onHover { value in withAnimation(.easeOut(duration: 0.12)) { hovering = value } }
-        .accessibilityLabel(title + ", " + subtitle)
+        .accessibilityLabel("\(title), \(subtitle)")
     }
 }

@@ -3,7 +3,7 @@ import Foundation
 extension GitRepository {
     public func lfsState() async throws -> LFSState {
         let version = try await GitProcess.run(["lfs", "version"], at: root, allowed: [0, 1, 128])
-        guard version.status == 0 else { return LFSState(available: false, version: "Git LFS is not installed. Install git-lfs and reload.", enabled: false, hookInstalled: false, rules: [], files: [], status: version.error) }
+        guard version.status == 0 else { return LFSState(available: false, version: localized("Git LFS is not installed. Install git-lfs and reload."), enabled: false, hookInstalled: false, rules: [], files: [], status: version.error) }
         let filter = try await GitProcess.run(["config", "--get", "filter.lfs.process"], at: root, allowed: [0, 1])
         struct Rules: Decodable { let patterns: [LFSRule]? }
         struct Files: Decodable { let files: [LFSFile]? }
@@ -39,7 +39,7 @@ extension GitRepository {
             before.append(original)
             if case .enable = change {
                 after.append(ManagementFile(path: config.path, data: try await editedConfiguration(original.data, values: Self.lfsFilters)))
-                title = "Enable Git LFS for This Repository"
+                title = localized("Enable Git LFS for This Repository")
                 if installHook {
                     let hook = try await lfsHookURL(), common = try await commonDirectory()
                     guard hook.path.hasPrefix(common.path + "/hooks/") else { throw GitFailure("The configured hooks directory is external. Enable filters only, then integrate git lfs pre-push into your existing hook manually.") }
@@ -52,11 +52,11 @@ extension GitRepository {
                     before.append(originalHook); after.append(ManagementFile(path: hook.path, data: generated))
                 }
             } else {
-                title = "Disable Git LFS Locally"
+                title = localized("Disable Git LFS Locally")
                 // Local empty overrides prevent inherited filters from silently remaining active.
                 after.append(ManagementFile(path: config.path, data: try await editedConfiguration(original.data, values: ["filter.lfs.clean":"", "filter.lfs.smudge":"", "filter.lfs.process":"", "filter.lfs.required":"false"])))
             }
-            preview = "Changes repository-local filter configuration. Existing history, .gitattributes and cached objects are preserved. Disabling filters does not convert pointer files or remove a pre-push hook."
+            preview = localized("Changes repository-local filter configuration. Existing history, .gitattributes and cached objects are preserved. Disabling filters does not convert pointer files or remove a pre-push hook.")
         case .track(let pattern, _, let source), .untrack(let pattern, let source):
             let filename: Bool
             if case .track(_, let value, _) = change { filename = value } else { filename = false }
@@ -73,7 +73,7 @@ extension GitRepository {
             if case .track = change { args += ["track"] + (filename ? ["--filename"] : []) } else { args += ["untrack"] }
             _ = try await GitProcess.run(args + ["--", pattern], at: scratch)
             before.append(original); after.append(ManagementFile(path: target.path, data: try readLocalIndex(attributes)))
-            title = (args.contains("untrack") ? "Stop LFS Tracking · " : "Track with LFS · ") + pattern
+            title = (args.contains("untrack") ? localized("Stop LFS Tracking") : localized("Track with LFS")) + " · " + pattern
             preview = String(decoding: after[0].data ?? Data(), as: UTF8.self)
         }
         return LFSChangePlan(title: title, paths: before.map(\.path), preview: preview, repository: root.path, head: try await headPosition(), before: before, after: after)

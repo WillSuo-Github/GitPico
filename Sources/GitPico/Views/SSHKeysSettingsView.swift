@@ -22,7 +22,7 @@ struct SSHKeysSettingsView: View {
                         Text(key.fingerprint).font(.caption.monospaced()).textSelection(.enabled)
                         HStack {
                             Button("Copy Public Key") { Pico.copy(key.publicKey) }
-                            Button("Add to SSH Agent") { Task { busy = true; defer { busy = false }; do { try await manager.addToAgent(key); message = "Key added to the SSH agent." } catch { message = error.localizedDescription } } }
+                            Button("Add to SSH Agent") { Task { busy = true; defer { busy = false }; do { try await manager.addToAgent(key); message = String(localized: "Key added to the SSH agent.") } catch { message = error.localizedDescription } } }
                             Button("Reveal") { NSWorkspace.shared.activateFileViewerSelecting([key.publicFile]) }
                         }.disabled(busy)
                     }.padding(.vertical, 5)

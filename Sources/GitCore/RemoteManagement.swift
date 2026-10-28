@@ -56,7 +56,7 @@ extension GitRepository {
     public func removeRemote(_ remote: RemoteConfiguration) async throws {
         try await requireIdleManagement(); try await requireRemote(remote)
         let references = try await references().filter { $0.isRemote && $0.name.hasPrefix(remote.name + "/") && !$0.name.hasSuffix("/HEAD") }
-        for ref in references { _ = try await backupReference(fullName: "refs/heads/" + ref.name, hash: ref.hash, title: "Remote branch before removing " + remote.name) }
+        for ref in references { _ = try await backupReference(fullName: "refs/heads/" + ref.name, hash: ref.hash, title: localized("Remote branch before removing \(remote.name)")) }
         // Preserve every local config value, including custom fetch mappings and tracking settings.
         let config = try await localConfigurationEntries()
         let prefix = "remote." + remote.name + "."
@@ -120,7 +120,7 @@ extension GitRepository {
         if (preview.deletes || preview.forceWithLease), let old = preview.remoteHash {
             let exists = try await GitProcess.run(["cat-file", "-e", old], at: root, allowed: [0, 1, 128])
             if exists.status != 0 { _ = try await GitProcess.run(["fetch", "--no-tags", "--no-write-fetch-head", "--", preview.pushURL, old], at: root, timeout: 120) }
-            _ = try await backupReference(fullName: preview.destination, hash: old, title: "Server reference before " + (preview.deletes ? "deletion: " : "force push: ") + preview.remote.name + "/" + preview.destination)
+            _ = try await backupReference(fullName: preview.destination, hash: old, title: preview.deletes ? localized("Server reference before deletion: \(preview.remote.name)/\(preview.destination)") : localized("Server reference before force push: \(preview.remote.name)/\(preview.destination)"))
         }
         var args = ["push", "--porcelain"]
         if preview.forceWithLease || preview.deletes { args.append("--force-with-lease=" + preview.destination + ":" + (preview.remoteHash ?? "")) }

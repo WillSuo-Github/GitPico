@@ -25,7 +25,7 @@ extension RepositoryStore {
                         self.requestAutomaticRefresh()
                     }
                 }
-                if self.fileMonitor?.isRunning != true { self.automaticRefreshError = "File monitoring could not start. Use Refresh to update this repository." }
+                if self.fileMonitor?.isRunning != true { self.automaticRefreshError = String(localized: "File monitoring could not start. Use Refresh to update this repository.") }
                 else { self.requestAutomaticRefresh() } // Reconcile edits made while FSEvents was starting.
             } catch { self?.automaticRefreshError = error.localizedDescription }
         }
@@ -39,7 +39,7 @@ extension RepositoryStore {
     func fetchInBackground() async {
         guard !isBusy, !isAutomaticallyRefreshing, let repository, snapshot?.remotes.isEmpty == false, let journal = networkActivity, let reservation = journal.reserveBackgroundFetch() else { return }
         let token = repositoryToken
-        lastBackgroundFetch = Date(); isBackgroundFetching = true; isBusy = true; activity = "Fetching remote updates…"
+        lastBackgroundFetch = Date(); isBackgroundFetching = true; isBusy = true; activity = String(localized: "Fetching remote updates…")
         defer { journal.releaseBackgroundFetch(reservation); isBackgroundFetching = false; isBusy = false; activity = ""; requestAutomaticRefresh() }
         var startedNetwork = false
         do {
@@ -53,7 +53,7 @@ extension RepositoryStore {
         } catch {
             if !startedNetwork {
                 let root = await repository.root
-                journal.receive(GitNetworkEvent(id: UUID(), command: "fetch", repository: root.lastPathComponent, repositoryPath: root.path, started: lastBackgroundFetch, phase: .failed, output: "Background Fetch could not start. " + GitLogRedaction.clean(error.localizedDescription), cancellation: GitNetworkCancellation()))
+                journal.receive(GitNetworkEvent(id: UUID(), command: "fetch", repository: root.lastPathComponent, repositoryPath: root.path, started: lastBackgroundFetch, phase: .failed, output: String(localized: "Background Fetch could not start. \(GitLogRedaction.clean(error.localizedDescription))"), cancellation: GitNetworkCancellation()))
             }
             // Started network failures remain in activity history without interrupting editing.
         }

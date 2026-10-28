@@ -58,7 +58,7 @@ struct ToolbarSearchPresentation {
     }
     var hasContext: Bool { !actionsOnly && store.destination.searchPlaceholder != nil }
     var presentation: ToolbarSearchPresentation {
-        ToolbarSearchPresentation(visible: visible && store.canUseRepository, contextTitle: hasContext ? (query.isEmpty ? "Search in " + store.destination.title : "Filter " + store.destination.title + " for “" + query + "”") : nil, results: results, selection: selection, loading: loading || searching, failure: failure, executing: submitted)
+        ToolbarSearchPresentation(visible: visible && store.canUseRepository, contextTitle: hasContext ? (query.isEmpty ? String(localized: "Search in \(store.destination.title)") : String(localized: "Filter \(store.destination.title) for “\(query)”")) : nil, results: results, selection: selection, loading: loading || searching, failure: failure, executing: submitted)
     }
     func beginEditing() {
         guard store.canUseRepository, !submitted else { return }
@@ -142,7 +142,7 @@ struct ToolbarSearchPresentation {
                 if self.focused { self.scheduleResults() }
             } catch {
                 guard let self, !Task.isCancelled, self.indexGeneration == generation, self.store.repositoryToken == key.token else { return }
-                self.failure = "File search unavailable: " + error.localizedDescription; self.loadingKey = nil; self.loading = false
+                self.failure = String(localized: "File search unavailable: \(error.localizedDescription)"); self.loadingKey = nil; self.loading = false
             }
         }
     }
@@ -159,7 +159,7 @@ struct ToolbarSearchPresentation {
             guard (7...64).contains(query.count), query.allSatisfy(\.isHexDigit), let repository else { return }
             if let commit = try? await reader.commit(query, in: repository) {
                 guard !Task.isCancelled, self.queryGeneration == generation, self.store.repositoryToken == token else { return }
-                let item = QuickActionItem(id: "commit:" + commit.hash, title: commit.subject, subtitle: "Commit · " + commit.hash, icon: "clock", target: .commit(commit))
+                let item = QuickActionItem(id: "commit:" + commit.hash, title: commit.subject, subtitle: String(localized: "Commit · \(commit.hash)"), icon: "clock", target: .commit(commit))
                 if !matches.contains(where: { $0.id == item.id }) { self.apply(Array(([item] + matches).prefix(12)), token: token) }
             }
         }

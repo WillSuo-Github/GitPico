@@ -15,23 +15,23 @@ struct ConflictResolverView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            FileTitleBar(path: path, subtitle: "Merge conflict", status: "Conflict") {
+            FileTitleBar(path: path, subtitle: String(localized: "Merge conflict"), status: "Conflict") {
                 if snapshot?.version(1) != nil { Toggle("Show Base", isOn: $showBase).toggleStyle(.button).controlSize(.small) }
                 Button("External Merge…") { store.externalTool(.merge(path)) }.controlSize(.small).disabled(store.isBusy)
                 Button { showReloadConfirmation = true } label: { Image(systemName: "arrow.clockwise") }.buttonStyle(.borderless).help("Reload the conflict from Git").disabled(store.isBusy)
             }
             if let snapshot {
                 if let restoredWarning { Text(restoredWarning).font(.caption).foregroundStyle(Pico.warning).padding(10) }
-                if let error = store.conflictDraftSaveError { Text("Draft not saved: " + error).font(.caption).foregroundStyle(Pico.deletion).padding(8) }
+                if let error = store.conflictDraftSaveError { Text("Draft not saved: \(error)").font(.caption).foregroundStyle(Pico.deletion).padding(8) }
                 if snapshot.operation == .rebase {
                     Label("During a rebase, Current is the branch being rebased onto and Incoming is the commit being replayed.", systemImage: "info.circle")
                         .font(.caption).foregroundStyle(.secondary).padding(.horizontal, 14).padding(.vertical, 7).frame(maxWidth: .infinity, alignment: .leading)
                 }
                 HStack(spacing: 0) {
-                    if showBase { ConflictSourceView(title: "Base", stage: "stage 1", tint: .secondary, version: snapshot.version(1)); Divider() }
-                    ConflictSourceView(title: "Current", stage: "stage 2", tint: Pico.modified, version: snapshot.version(2))
+                    if showBase { ConflictSourceView(title: String(localized: "Base"), stage: String(localized: "stage 1"), tint: .secondary, version: snapshot.version(1)); Divider() }
+                    ConflictSourceView(title: String(localized: "Current"), stage: String(localized: "stage 2"), tint: Pico.modified, version: snapshot.version(2))
                     Divider()
-                    ConflictSourceView(title: "Incoming", stage: "stage 3", tint: .purple, version: snapshot.version(3))
+                    ConflictSourceView(title: String(localized: "Incoming"), stage: String(localized: "stage 3"), tint: .purple, version: snapshot.version(3))
                 }.frame(height: 210)
                 Divider()
                 if snapshot.canEdit {
@@ -40,7 +40,7 @@ struct ConflictResolverView: View {
                             HStack(spacing: 14) {
                                 ForEach(document.regions) { region in
                                     HStack(spacing: 6) {
-                                        Chip(text: "Conflict \(region.id + 1)", icon: "exclamationmark.triangle.fill", tint: Pico.deletion)
+                                        Chip(text: String(localized: "Conflict \(region.id + 1)"), icon: "exclamationmark.triangle.fill", tint: Pico.deletion)
                                         Button("Use Current") { result = document.resolving(region.id, with: .current) }
                                         Button("Use Incoming") { result = document.resolving(region.id, with: .incoming) }
                                         Button("Use Both") { result = document.resolving(region.id, with: .both) }
@@ -54,12 +54,12 @@ struct ConflictResolverView: View {
                     HStack {
                         Text("Result").fontWeight(.semibold)
                         Spacer()
-                        Text(document.hasMarkers ? (document.regions.isEmpty ? "Conflict markers remain · edit the result" : "\(document.regions.count) unresolved \(document.regions.count == 1 ? "block" : "blocks") · edit or choose a version") : "Ready to mark resolved").foregroundStyle(document.hasMarkers ? Pico.warning : Pico.addition)
+                        Text(document.hasMarkers ? (document.regions.isEmpty ? "Conflict markers remain · edit the result" : "\(document.regions.count) unresolved blocks · edit or choose a version") : "Ready to mark resolved").foregroundStyle(document.hasMarkers ? Pico.warning : Pico.addition)
                     }.font(.system(size: 11)).padding(.horizontal, 14).frame(height: 30).background(.bar)
-                    TextEditor(text: $result).font(.system(size: 12, design: .monospaced)).scrollContentBackground(.hidden)
+                    TextEditor(text: $result).font(.system(size: 12, design: .monospaced)).scrollContentBackground(.hidden).environment(\.layoutDirection, .leftToRight)
                         .padding(8).accessibilityLabel("Conflict resolution result")
                 } else {
-                    EmptyPane(title: "Choose a complete version", subtitle: snapshot.versions.contains(where: { $0.mode == "160000" }) ? "Accepting stages the selected Git object only. Nested directories and working files are preserved, including file/submodule type conflicts. Update the working copy separately after resolving." : "Choose Current or Incoming for binary files and symbolic links. Link targets are preserved without reading the target file.", icon: "doc.badge.gearshape")
+                    EmptyPane(title: String(localized: "Choose a complete version"), subtitle: snapshot.versions.contains(where: { $0.mode == "160000" }) ? String(localized: "Accepting stages the selected Git object only. Nested directories and working files are preserved, including file/submodule type conflicts. Update the working copy separately after resolving.") : String(localized: "Choose Current or Incoming for binary files and symbolic links. Link targets are preserved without reading the target file."), icon: "doc.badge.gearshape")
                 }
                 Divider()
                 HStack(spacing: 10) {
@@ -75,7 +75,7 @@ struct ConflictResolverView: View {
                 }.font(.system(size: 11)).controlSize(.small).padding(12).disabled(store.isBusy)
                 Text("Saving also stages this file. Draft edits are automatically saved for recovery after restarting.").font(.caption2).foregroundStyle(.secondary).padding(.bottom, 8)
             } else if let loadError {
-                EmptyPane(title: "Unable to load conflict", subtitle: loadError, icon: "exclamationmark.triangle")
+                EmptyPane(title: String(localized: "Unable to load conflict"), subtitle: loadError, icon: "exclamationmark.triangle")
             } else { ProgressView("Loading conflict versions…").frame(maxWidth: .infinity, maxHeight: .infinity) }
         }
         .task(id: generation) {
@@ -85,8 +85,8 @@ struct ConflictResolverView: View {
                 let current = try? await repository.conflict(path)
                 guard !Task.isCancelled else { return }
                 restoredWarning = current?.indexSignature == draft.snapshot.indexSignature && current?.workingData == draft.snapshot.workingData && current?.operation == draft.snapshot.operation
-                    ? "Recovered saved draft. Review it before marking the conflict resolved."
-                    : "Git or this file changed since the draft was saved. Copy or export the draft before reloading; saving over changed content is blocked."
+                    ? String(localized: "Recovered saved draft. Review it before marking the conflict resolved.")
+                    : String(localized: "Git or this file changed since the draft was saved. Copy or export the draft before reloading; saving over changed content is blocked.")
                 return
             }
             do {
@@ -121,7 +121,7 @@ private struct ConflictSourceView: View {
                 .font(.system(size: 11)).padding(.horizontal, 12).frame(height: 29).background(tint.opacity(0.08)).overlay(alignment: .bottom) { Rectangle().fill(tint.opacity(0.4)).frame(height: 1) }
             GeometryReader { geometry in
                 ScrollView([.horizontal, .vertical]) {
-                    Text(version.map { $0.text ?? "Binary or large file · \($0.data.count) bytes" } ?? "File deleted / absent in this version")
+                    Text(version.map { $0.text ?? String(localized: "Binary or large file · \($0.data.count) bytes") } ?? String(localized: "File deleted / absent in this version"))
                         .font(.system(size: 11, design: .monospaced)).textSelection(.enabled).padding(12)
                         .frame(minWidth: geometry.size.width, minHeight: geometry.size.height, alignment: .topLeading)
                 }.defaultScrollAnchor(.topLeading)

@@ -78,7 +78,7 @@ extension GitRepository {
             if operation == .unlock, target.locked == nil { throw GitFailure("A selected worktree is not locked.") }
             items.append(RelatedBatchItem(id: UUID(), worktree: target, operation: operation.rawValue, value: destination))
         }
-        return RelatedBatchPlan(report: RelatedBatchReport(id: UUID(), date: Date(), repository: root.path, title: operation.rawValue + " Worktrees", recursive: true, localTransport: false, items: items), parent: try await batchParentState(), previous: nil)
+        return RelatedBatchPlan(report: RelatedBatchReport(id: UUID(), date: Date(), repository: root.path, title: localized("Worktrees") + " · " + operation.title, recursive: true, localTransport: false, items: items), parent: try await batchParentState(), previous: nil)
     }
     public func previewSubmoduleBatch(_ targets: [ManagedSubmodule], operation: SubmoduleOperation, value: String = "", recursive: Bool = true, allowLocalTransport: Bool = false) async throws -> RelatedBatchPlan {
         guard !targets.isEmpty, targets.count <= 128, Set(targets.map(\.id)).count == targets.count else { throw GitFailure("Choose 1–128 distinct submodules.") }
@@ -89,7 +89,7 @@ extension GitRepository {
             if operation == .move, !destinations.insert(plan.value).inserted { throw GitFailure("Selected modules have colliding destination names.") }
             items.append(RelatedBatchItem(id: UUID(), submodule: target, operation: operation.rawValue, value: plan.value))
         }
-        return RelatedBatchPlan(report: RelatedBatchReport(id: UUID(), date: Date(), repository: root.path, title: operation.rawValue + " · Submodules", recursive: recursive, localTransport: allowLocalTransport, items: items), parent: try await batchParentState(), previous: nil)
+        return RelatedBatchPlan(report: RelatedBatchReport(id: UUID(), date: Date(), repository: root.path, title: localized("Submodules") + " · " + operation.title, recursive: recursive, localTransport: allowLocalTransport, items: items), parent: try await batchParentState(), previous: nil)
     }
     func currentBatchModule(_ expected: ManagedSubmodule) async throws -> ManagedSubmodule {
         guard let current = try await managedSubmodules().first(where: { $0.id == expected.id }) else { throw GitFailure("A selected submodule disappeared.") }
@@ -154,7 +154,7 @@ extension GitRepository {
                 try await saveRelatedBatch(report); await progress?(report)
             } catch {
                 report.items[index].state = "failed"; report.items[index].diagnostic = error.localizedDescription
-                report.state = "stopped"; report.diagnostic = "Stopped after \(report.items.filter { $0.state == "completed" }.count) completed item(s). " + error.localizedDescription
+                report.state = "stopped"; report.diagnostic = localized("Stopped after \(report.items.filter { $0.state == "completed" }.count) completed item(s). \(error.localizedDescription)")
                 try await saveRelatedBatch(report); await progress?(report); return report
             }
         }

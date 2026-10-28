@@ -3,7 +3,7 @@ import Foundation
 
 public enum DiscardScope: String, CaseIterable, Sendable {
     case unstaged, allLocal
-    public var title: String { self == .unstaged ? "Unstaged Changes Only" : "Staged and Unstaged Changes" }
+    public var title: String { self == .unstaged ? localized("Unstaged Changes Only") : localized("Staged and Unstaged Changes") }
 }
 
 struct LocalFileState: Codable, Equatable, Sendable {
@@ -103,7 +103,7 @@ extension GitRepository {
             }
             if attributes[.type] as? FileAttributeType == .typeSymbolicLink {
                 let target = try FileManager.default.destinationOfSymbolicLink(atPath: url.path)
-                guard !target.isEmpty, target.utf8.count <= 4096, !target.utf8.contains(0) else { throw GitFailure("Invalid symbolic-link target: " + path) }
+                guard !target.isEmpty, target.utf8.count <= 4096, !target.utf8.contains(0) else { throw GitFailure("Invalid symbolic-link target: \(path)") }
                 return LocalFileState(path: path, data: nil, permissions: nil, symbolicLink: target)
             }
             if attributes[.type] as? FileAttributeType == .typeDirectory { return LocalFileState(path: path, data: nil, permissions: nil, directory: true) }
@@ -129,19 +129,19 @@ extension GitRepository {
             let temporary = url.deletingLastPathComponent().appendingPathComponent(".gitpico-link-" + UUID().uuidString)
             defer { try? FileManager.default.removeItem(at: temporary) }
             try FileManager.default.createSymbolicLink(atPath: temporary.path, withDestinationPath: target)
-            guard Darwin.rename(temporary.path, url.path) == 0 else { throw GitFailure("Unable to install the symbolic link: " + state.path) }
+            guard Darwin.rename(temporary.path, url.path) == 0 else { throw GitFailure("Unable to install the symbolic link: \(state.path)") }
             return
         }
         if let data = state.data {
             try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
             let temporary = url.deletingLastPathComponent().appendingPathComponent(".gitpico-" + UUID().uuidString)
             let descriptor = Darwin.open(temporary.path, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW, 0o600)
-            guard descriptor >= 0 else { throw GitFailure("Unable to prepare a replacement for " + state.path) }
+            guard descriptor >= 0 else { throw GitFailure("Unable to prepare a replacement for \(state.path)") }
             let handle = FileHandle(fileDescriptor: descriptor, closeOnDealloc: true)
             defer { try? handle.close(); try? FileManager.default.removeItem(at: temporary) }
             try handle.write(contentsOf: data); try handle.synchronize()
             try FileManager.default.setAttributes([.posixPermissions: state.permissions ?? 0o644], ofItemAtPath: temporary.path)
-            guard Darwin.rename(temporary.path, url.path) == 0 else { throw GitFailure("Unable to replace " + state.path) }
+            guard Darwin.rename(temporary.path, url.path) == 0 else { throw GitFailure("Unable to replace \(state.path)") }
         } else if try localAttributes(url) != nil { try FileManager.default.removeItem(at: url) }
     }
 
@@ -166,7 +166,7 @@ extension GitRepository {
         for path in paths {
             let url = try validateLocalPath(path, allowLeafLink: allowStructural)
             if !allowStructural, let attributes = try localAttributes(url) {
-                guard attributes[.type] as? FileAttributeType == .typeRegular else { throw GitFailure("Choose regular files for this operation: " + path) }
+                guard attributes[.type] as? FileAttributeType == .typeRegular else { throw GitFailure("Choose regular files for this operation: \(path)") }
             }
             guard !paths.contains(where: { $0 != path && $0.hasPrefix(path + "/") }) else { throw GitFailure("Select paths without nested destinations for patch/recovery operations.") }
         }
@@ -226,7 +226,7 @@ extension GitRepository {
         }
         let afterIndex = scope == .allLocal ? try readLocalIndex(temporaryIndex) : index
         guard before != after || index != afterIndex else { throw GitFailure("There are no changes in the selected scope.") }
-        return LocalChangePlan(id: UUID(), title: "Discard \(scope == .unstaged ? "Unstaged" : "Local") Changes", paths: paths, preview: paths.joined(separator: "\n"), repository: root.path, head: head, beforeIndex: index, afterIndex: afterIndex, before: before, after: after)
+        return LocalChangePlan(id: UUID(), title: scope == .unstaged ? localized("Discard Unstaged Changes") : localized("Discard Local Changes"), paths: paths, preview: paths.joined(separator: "\n"), repository: root.path, head: head, beforeIndex: index, afterIndex: afterIndex, before: before, after: after)
     }
 
     func makeLocalScratch() throws -> URL {

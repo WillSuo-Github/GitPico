@@ -8,7 +8,7 @@ struct RemoteSettingsPane: View {
             ForEach(store.managedRemotes) { remote in
                 Section(remote.name) {
                     LabeledContent("Fetch URLs") { Text(remote.fetchURLs.joined(separator: "\n")).textSelection(.enabled) }
-                    LabeledContent("Push URLs") { Text(remote.pushURLs.isEmpty ? "Use fetch URL" : remote.pushURLs.joined(separator: "\n")).textSelection(.enabled) }
+                    LabeledContent("Push URLs") { Text(remote.pushURLs.isEmpty ? String(localized: "Use fetch URL") : remote.pushURLs.joined(separator: "\n")).textSelection(.enabled) }
                     if !remote.refspecs.isEmpty { LabeledContent("Fetch mappings") { Text(remote.refspecs.joined(separator: "\n")).font(.system(size: 11, design: .monospaced)).textSelection(.enabled) } }
                     HStack {
                         Button("Fetch…") { store.manage(.fetch(remote)) }

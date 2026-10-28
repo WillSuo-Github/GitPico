@@ -19,7 +19,7 @@ struct RepositoryStatusBar: View {
                         .help("\(data.ahead) outgoing · \(data.behind) incoming commits")
                 }
                 separator
-                Text(data.changes.isEmpty ? "Clean working copy" : "\(data.changes.count) changed \(data.changes.count == 1 ? "file" : "files")").foregroundStyle(.secondary)
+                Text(data.changes.isEmpty ? "Clean working copy" : "\(data.changes.count) changed files").foregroundStyle(.secondary)
             } else { Text("Ready to open a repository").foregroundStyle(.secondary) }
             Spacer(minLength: 12)
             Button { store.showingNetworkActivity = true } label: {
@@ -27,11 +27,11 @@ struct RepositoryStatusBar: View {
             }.buttonStyle(.borderless).help("Network progress, recent operations and authentication")
             if !store.conflictDrafts.isEmpty || store.conflictDraftSaveError != nil {
                 Button { store.showingConflictDrafts = true } label: { Label("\(store.conflictDrafts.count) drafts", systemImage: store.conflictDraftSaveError == nil ? "doc.badge.clock" : "exclamationmark.triangle") }
-                    .buttonStyle(.borderless).help(store.conflictDraftSaveError ?? "Recover saved conflict edits")
+                    .buttonStyle(.borderless).help(store.conflictDraftSaveError ?? String(localized: "Recover saved conflict edits"))
             }
             if let error = store.automaticRefreshError {
                 Button { store.requestAutomaticRefresh() } label: { Image(systemName: "exclamationmark.arrow.circlepath") }
-                    .buttonStyle(.borderless).help("Automatic refresh paused: " + error + "\nClick to retry.")
+                    .buttonStyle(.borderless).help("Automatic refresh paused: \(error)\nClick to retry.")
             }
             if let data = store.snapshot, !store.isChoosingRepository {
                 Button {
@@ -40,13 +40,13 @@ struct RepositoryStatusBar: View {
                     Label(Pico.abbreviated(data.root.path), systemImage: "folder").lineLimit(1).truncationMode(.middle).foregroundStyle(.tertiary)
                 }
                 .buttonStyle(.plain)
-                .help("Open Repository in Finder\n" + data.root.path)
+                .help("Open Repository in Finder\n\(data.root.path)")
                 .accessibilityLabel("Open Repository in Finder")
                 .accessibilityValue(data.root.path)
                 separator
                 if let updated = store.lastUpdated {
                     TimelineView(.periodic(from: .now, by: 30)) { _ in
-                        Text("Updated " + updated.formatted(.relative(presentation: .named))).foregroundStyle(.tertiary)
+                        Text("Updated \(updated.formatted(.relative(presentation: .named)))").foregroundStyle(.tertiary)
                     }
                 }
                 Button(action: store.refresh) { Image(systemName: "arrow.clockwise") }

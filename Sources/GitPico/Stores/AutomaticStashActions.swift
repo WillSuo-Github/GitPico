@@ -3,16 +3,16 @@ import GitCore
 
 struct AutomaticStashRequest: Identifiable {
     let id = UUID()
-    let title: String
+    let title: String.LocalizationValue
     let refresh: MutationRefresh
     let action: @Sendable (GitRepository) async throws -> Void
 }
 
 extension RepositoryStore {
-    func protectedPerform(_ title: String, protect: Bool = true, refresh: MutationRefresh = .full, action: @escaping @Sendable (GitRepository) async throws -> Void) {
+    func protectedPerform(_ title: String.LocalizationValue, protect: Bool = true, refresh: MutationRefresh = .full, action: @escaping @Sendable (GitRepository) async throws -> Void) {
         guard !isBusy else { return }
         guard protect else { perform(title, refresh: refresh, action: action); return }
-        guard automaticStash == nil else { error = "Review the pending automatic stash before starting another operation."; return }
+        guard automaticStash == nil else { error = String(localized: "Review the pending automatic stash before starting another operation."); return }
         if !changes.isEmpty, AppPreferences.shared.offerAutomaticStash {
             let request = AutomaticStashRequest(title: title, refresh: refresh, action: action)
             if integrationRequest != nil || pullRequest != nil || managementRequest != nil || rebaseRequest != nil || showingBranchSheet {
@@ -28,7 +28,7 @@ extension RepositoryStore {
 
     func runAutomaticStash(_ request: AutomaticStashRequest, message: String, restoreAfter: Bool) {
         perform(request.title, refresh: request.refresh) {
-            try await $0.performWithAutomaticStash(title: request.title, message: message, restoreAfter: restoreAfter, action: request.action)
+            try await $0.performWithAutomaticStash(title: String(localized: request.title), message: message, restoreAfter: restoreAfter, action: request.action)
         }
     }
 

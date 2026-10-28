@@ -33,7 +33,7 @@ struct WorkingFilePreview: View {
     @State private var loading = true
     var body: some View {
         VStack(spacing: 0) {
-            PaneHeader(title: path, subtitle: "Working Copy", icon: "doc.text")
+            PaneHeader(title: "\(path)", subtitle: String(localized: "Working Copy"), icon: "doc.text")
             if loading { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
             else { InspectionTextView(text: text) }
         }.task {
@@ -46,8 +46,8 @@ struct WorkingFilePreview: View {
                 for trim in 0...min(3, excerpt.count) {
                     if let value = String(data: excerpt.dropLast(trim), encoding: .utf8) { preview = value; break }
                 }
-                if !data.contains(0), let preview { text = preview + (data.count > 256 * 1024 ? "\n\n[Preview limited to 256 KB]" : "") }
-                else { text = "Binary file · \(data.count) bytes. Open in an external editor to inspect it." }
+                if !data.contains(0), let preview { text = preview + (data.count > 256 * 1024 ? String(localized: "\n\n[Preview limited to 256 KB]") : "") }
+                else { text = String(localized: "Binary file · \(data.count) bytes. Open in an external editor to inspect it.") }
             } catch { text = error.localizedDescription }
             loading = false
         }

@@ -52,7 +52,7 @@ extension GitRepository {
                 if index == 0, let tag = plan.tag { steps.append(GitFlowStep(operation: "tag", target: tag, source: nil)) }
             }
             if !plan.keepBranch { steps.append(GitFlowStep(operation: "delete", target: plan.branch, source: plan.source)) }
-            var record = GitFlowRecord(id: UUID(), date: Date(), repository: root.path, kind: plan.kind, branch: plan.branch, title: "Finish " + plan.kind.rawValue + " · " + plan.name, tag: plan.tag, message: plan.message, signTag: plan.signTag, state: "ready", next: 0, configuration: plan.configuration, initial: plan.before, expected: plan.before, steps: steps)
+            var record = GitFlowRecord(id: UUID(), date: Date(), repository: root.path, kind: plan.kind, branch: plan.branch, title: plan.kind.finishTitle + " · " + plan.name, tag: plan.tag, message: plan.message, signTag: plan.signTag, state: "ready", next: 0, configuration: plan.configuration, initial: plan.before, expected: plan.before, steps: steps)
             for (index, hash) in Set([plan.source] + plan.targets.compactMap { plan.before.refs["refs/heads/" + $0] }).sorted().enumerated() { try await checkpoint(hash, id: record.id, side: "flow-\(index)") }
             try await saveFlow(record)
             record = try await advanceFlow(record)
@@ -125,7 +125,7 @@ extension GitRepository {
             record.state = "completed"; record.diagnostic = nil; try await closeFlow(record); return record
         } catch {
             record.state = "paused"; record.diagnostic = error.localizedDescription; try? await saveFlow(record)
-            throw GitFailure(error.localizedDescription + "\nGit Flow progress was saved. Resolve the current operation, then use Continue Git Flow; the topic and completed history are retained.")
+            throw GitFailure("\(error.localizedDescription)\nGit Flow progress was saved. Resolve the current operation, then use Continue Git Flow; the topic and completed history are retained.")
         }
     }
     func reconcileFlowStep(_ record: inout GitFlowRecord, step: GitFlowStep, current: GitFlowGuard) async throws -> Bool {
@@ -157,7 +157,7 @@ extension GitRepository {
             try await requireFlowMergeOwnership(saved)
             _ = try await GitProcess.run(["merge", "--abort"], at: root)
         } else { try await requireIdleManagement() }
-        var record = saved; record.state = "stopped"; record.diagnostic = "Earlier completed merges/tags were kept. The topic branch and recovery checkpoints remain available."
+        var record = saved; record.state = "stopped"; record.diagnostic = localized("Earlier completed merges/tags were kept. The topic branch and recovery checkpoints remain available.")
         try await closeFlow(record)
     }
     private func requireFlowMergeOwnership(_ record: GitFlowRecord) async throws {

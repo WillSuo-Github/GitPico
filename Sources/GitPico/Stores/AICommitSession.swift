@@ -4,10 +4,10 @@ import Observation
 
 extension RepositoryStore {
     var aiCommitUnavailableReason: String? {
-        if repository == nil { return "Open a repository before generating a commit message." }
-        if isBusy { return "Wait for the current repository operation to finish before generating a message." }
-        if changes.contains(where: \.isConflicted) { return "Resolve and stage conflicted files before generating a commit message." }
-        if staged.isEmpty { return "Stage at least one change before generating a commit message." }
+        if repository == nil { return String(localized: "Open a repository before generating a commit message.") }
+        if isBusy { return String(localized: "Wait for the current repository operation to finish before generating a message.") }
+        if changes.contains(where: \.isConflicted) { return String(localized: "Resolve and stage conflicted files before generating a commit message.") }
+        if staged.isEmpty { return String(localized: "Stage at least one change before generating a commit message.") }
         return nil
     }
 }
@@ -34,18 +34,18 @@ extension RepositoryStore {
             do {
                 let context = try await repository.aiCommitContext()
                 try Task.checkCancellation()
-                guard store.repositoryToken == token else { throw GitFailure("The repository changed. Generate a new message.") }
+                guard store.repositoryToken == token else { throw appFailure("The repository changed. Generate a new message.") }
                 let prompt = context.prompt(language: settings.language.rawValue, instructions: settings.effectiveInstructions)
                 let message = try await generator.generate(provider: provider, executable: executable, prompt: prompt)
                 try Task.checkCancellation()
                 guard self.generation == generation else { return }
                 guard store.repositoryToken == token, store.amend == amend, !store.isBusy,
                       try await repository.aiCommitFingerprint() == context.fingerprint else {
-                    throw GitFailure("The staged changes or commit mode changed. Generate a new message.")
+                    throw appFailure("The staged changes or commit mode changed. Generate a new message.")
                 }
                 guard self.generation == generation, store.repositoryToken == token else { return }
                 guard store.commitSubject == subject, store.commitBody == description else {
-                    throw GitFailure("You edited the commit message while AI was writing, so it was kept. Click AI again to replace it.")
+                    throw appFailure("You edited the commit message while AI was writing, so it was kept. Click AI again to replace it.")
                 }
                 store.commitSubject = message.summary; store.commitBody = message.body
             } catch is CancellationError { }

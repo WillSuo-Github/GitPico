@@ -135,10 +135,10 @@ struct RepositoryCommands: Commands {
             }
             CommandGroup(after: .undoRedo) {
                 Divider()
-                Button("Undo Git \(store.undoAvailability?.undo?.title ?? "Operation")…") {
+                Button(store.undoAvailability?.undo.map { "Undo \($0.title)…" } ?? "Undo Git Operation…") {
                     if let record = store.undoAvailability?.undo { store.recoveryRequest = RecoveryRequest(action: .undo(record, false)) }
                 }.keyboardShortcut("z", modifiers: [.command, .option]).disabled(store.undoAvailability?.undo == nil || !store.canUseRepository)
-                Button("Redo Git \(store.undoAvailability?.redo?.title ?? "Operation")…") {
+                Button(store.undoAvailability?.redo.map { "Redo \($0.title)…" } ?? "Redo Git Operation…") {
                     if let record = store.undoAvailability?.redo { store.recoveryRequest = RecoveryRequest(action: .undo(record, true)) }
                 }.keyboardShortcut("z", modifiers: [.command, .option, .shift]).disabled(store.undoAvailability?.redo == nil || !store.canUseRepository)
             }

@@ -7,9 +7,11 @@ struct ChunkDiffView: View {
     var isLoading = false
     var chunkAction: ((Int) -> Void)? = nil
     var lineAction: ((Set<PatchLineID>) -> Void)? = nil
-    var actionTitle = "Stage Chunk"
-    var leftTitle = "Original"
-    var rightTitle = "Changed"
+    var unstaging = false
+    var actionTitle = String(localized: "Stage Chunk")
+    var lineActionTitle: LocalizedStringResource { unstaging ? "Unstage Lines" : "Stage Lines" }
+    var leftTitle = String(localized: "Original")
+    var rightTitle = String(localized: "Changed")
     var disabled = false
     var discardChunk: ((Int) -> Void)? = nil
     var discardLines: ((Set<PatchLineID>) -> Void)? = nil
@@ -21,26 +23,26 @@ struct ChunkDiffView: View {
     var body: some View {
         Group {
         if isLoading && prepared == nil { ProgressView("Loading changes…").frame(maxWidth: .infinity, maxHeight: .infinity) }
-        else if text.isEmpty { EmptyPane(title: "No textual changes", subtitle: "Select the other diff version if this file is partially staged.", icon: "doc.text.magnifyingglass") }
+        else if text.isEmpty { EmptyPane(title: String(localized: "No textual changes"), subtitle: String(localized: "Select the other diff version if this file is partially staged."), icon: "doc.text.magnifyingglass") }
         else if let prepared {
             let patch = prepared.patch
             let previews = prepared.previews
             VStack(spacing: 0) {
                 HStack(spacing: 10) {
                     DiffStat(additions: patch.additions, deletions: patch.deletions)
-                    Text("\(patch.hunks.count) \(patch.hunks.count == 1 ? "chunk" : "chunks")").foregroundStyle(.secondary)
+                    Text("\(patch.hunks.count) chunks").foregroundStyle(.secondary)
                     Spacer()
                     if lineAction != nil, patch.supportsChunkStaging {
                         if selectedLines.ids.isEmpty {
                             Label("Click the gutter to pick lines", systemImage: "hand.point.up.left").foregroundStyle(.tertiary)
                         } else {
-                            Text("\(selectedLines.ids.count) \(selectedLines.ids.count == 1 ? "line" : "lines") selected").foregroundStyle(.secondary)
+                            Text("\(selectedLines.ids.count) lines selected").foregroundStyle(.secondary)
                             Menu {
                                 Button("Clear Selection") { selectedLines.clear() }
                                 if let exportLines { Button("Save Lines as Patch…") { exportLines(selectedLines.ids) } }
                             } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
                             if let discardLines { Button("Discard Lines…", role: .destructive) { discardLines(selectedLines.ids) } }
-                            Button(actionTitle.hasPrefix("Unstage") ? "Unstage Lines" : "Stage Lines") { lineAction?(selectedLines.ids) }
+                            Button(lineActionTitle) { lineAction?(selectedLines.ids) }
                                 .buttonStyle(.borderedProminent)
                                 .keyboardShortcut(.return, modifiers: [.command, .shift])
                         }
@@ -51,7 +53,7 @@ struct ChunkDiffView: View {
                     ScrollView(.vertical) {
                         LazyVStack(alignment: .leading, spacing: 0) {
                             if preferences.splitDiff {
-                                HStack(spacing: 0) { Text(leftTitle).frame(maxWidth: .infinity, alignment: .leading); Text(rightTitle).frame(maxWidth: .infinity, alignment: .leading) }.font(.system(size: 10, weight: .semibold)).textCase(.uppercase).tracking(0.5).foregroundStyle(.secondary).padding(.horizontal, 16).frame(height: 24)
+                                HStack(spacing: 0) { Text(leftTitle).frame(maxWidth: .infinity, alignment: .leading); Text(rightTitle).frame(maxWidth: .infinity, alignment: .leading) }.font(.system(size: 10, weight: .semibold)).tracking(0.5).foregroundStyle(.secondary).padding(.horizontal, 16).frame(height: 24).environment(\.layoutDirection, .leftToRight)
                             }
                             if patch.hunks.isEmpty { Text(text).font(.system(size: preferences.diffFontSize, design: .monospaced)).textSelection(.enabled).padding(12) }
                             ForEach(previews) { preview in
@@ -80,6 +82,7 @@ struct ChunkDiffView: View {
                                                     DiffLineView(line: line, fontSize: preferences.diffFontSize)
                                                 }.frame(minWidth: geometry.size.width, alignment: .leading)
                                                     .background(selectedLines.ids.contains(PatchLineID(hunk: hunk.id, line: line.id)) ? Color.accentColor.opacity(0.23) : .clear)
+                                                    .environment(\.layoutDirection, .leftToRight)
                                             }
                                         }
                                     }
@@ -106,6 +109,6 @@ struct ChunkDiffView: View {
 
 extension PatchDocument {
     var summary: String {
-        "\(hunks.count) \(hunks.count == 1 ? "chunk" : "chunks"), \(additions) \(additions == 1 ? "insertion" : "insertions"), \(deletions) \(deletions == 1 ? "deletion" : "deletions")"
+        [String(localized: "\(hunks.count) chunks"), String(localized: "\(additions) insertions"), String(localized: "\(deletions) deletions")].formatted(.list(type: .and, width: .narrow))
     }
 }

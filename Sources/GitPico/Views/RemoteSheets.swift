@@ -10,7 +10,7 @@ struct RemoteEditSheet: View {
     @State private var fetch = ""
     @State private var push = ""
     @Environment(\.dismiss) private var dismiss
-    var title: String { action == .remove ? "Remove Remote" : action == .rename ? "Rename Remote" : remote == nil ? "Add Remote Repository" : "Edit Remote Repository" }
+    var title: LocalizedStringResource { action == .remove ? "Remove Remote" : action == .rename ? "Rename Remote" : remote == nil ? "Add Remote Repository" : "Edit Remote Repository" }
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             SheetTitle(title)
@@ -23,16 +23,16 @@ struct RemoteEditSheet: View {
                 if action == .edit {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Fetch URLs").font(.callout)
-                        TextEditor(text: $fetch).font(.system(size: 12, design: .monospaced)).frame(height: 65).border(.quaternary)
+                        TextEditor(text: $fetch).environment(\.layoutDirection, .leftToRight).font(.system(size: 12, design: .monospaced)).frame(height: 65).border(.quaternary)
                         Text("Push URLs (optional)").font(.callout)
-                        TextEditor(text: $push).font(.system(size: 12, design: .monospaced)).frame(height: 65).border(.quaternary)
+                        TextEditor(text: $push).environment(\.layoutDirection, .leftToRight).font(.system(size: 12, design: .monospaced)).frame(height: 65).border(.quaternary)
                         Text("One URL per line. Without push URLs, Git uses the fetch URL. Existing fetch mappings and other remote settings are preserved.").font(.caption).foregroundStyle(.secondary)
                     }
                 }
             }
             ManagementFooter(title: action == .edit ? (remote == nil ? "Add Remote" : "Save Remote") : title, disabled: store.isBusy || (action != .remove && name.isEmpty) || (action == .edit && fetch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty), destructive: action == .remove) {
                 let name = name, fetch = fetch.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }, push = push.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }, remote = remote, action = action
-                store.perform(title + "…") { repository in
+                store.perform("\(title)…") { repository in
                     switch action {
                     case .edit:
                         if let remote { try await repository.editRemote(remote, fetchURLs: fetch, pushURLs: push) }
@@ -91,7 +91,7 @@ struct RemotePushSheet: View {
     var selectedRemote: RemoteConfiguration? { store.managedRemotes.first { $0.name == remoteID } }
     var refs: [Reference] { (store.snapshot?.references ?? []).filter { $0.isLocal || $0.isTag } }
     var revision: String { deleting ? destinationName : (selectedSource?.isTag == true ? "refs/tags/" : "refs/heads/") + destinationName }
-    var title: String { deleting ? "Delete Remote Reference" : lease ? "Force Push with Lease" : "Publish / Push" }
+    var title: LocalizedStringResource { deleting ? "Delete Remote Reference" : lease ? "Force Push with Lease" : "Publish / Push" }
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             SheetTitle(title)
@@ -100,8 +100,8 @@ struct RemotePushSheet: View {
                     GridRow { Text("Remote").foregroundStyle(.secondary); Text(preview.remote.name) }
                     GridRow { Text("Push URL").foregroundStyle(.secondary); Text(preview.pushURL).textSelection(.enabled).lineLimit(3) }
                     GridRow { Text("Destination").foregroundStyle(.secondary); Text(preview.destination).textSelection(.enabled) }
-                    GridRow { Text("Server object").foregroundStyle(.secondary); Text(preview.remoteHash.map { String($0.prefix(12)) } ?? "Does not exist yet") }
-                    GridRow { Text("New object").foregroundStyle(.secondary); Text(preview.source.map { String($0.hash.prefix(12)) } ?? "Delete") }
+                    GridRow { Text("Server object").foregroundStyle(.secondary); Text(preview.remoteHash.map { String($0.prefix(12)) } ?? String(localized: "Does not exist yet")) }
+                    GridRow { Text("New object").foregroundStyle(.secondary); Text(preview.source.map { String($0.hash.prefix(12)) } ?? String(localized: "Delete")) }
                 }.font(.system(size: 12))
                 if preview.forceWithLease || preview.deletes { Label("Rejected if the server reference changes after this preview.", systemImage: "lock.shield").font(.callout).foregroundStyle(.secondary) }
                 if preview.setUpstream { Text("Sets this local branch's upstream after the push succeeds.").font(.caption).foregroundStyle(.secondary) }
@@ -115,7 +115,7 @@ struct RemotePushSheet: View {
                 Form {
                     Picker("Remote", selection: $remoteID) { ForEach(store.managedRemotes) { Text($0.name).tag($0.name) } }
                     if !deleting {
-                        Picker("Local reference", selection: $sourceID) { ForEach(refs) { Text(($0.isTag ? "Tag · " : "Branch · ") + $0.name).tag($0.id) } }.disabled(source != nil)
+                        Picker("Local reference", selection: $sourceID) { ForEach(refs) { Text($0.isTag ? String(localized: "Tag · \($0.name)") : String(localized: "Branch · \($0.name)")).tag($0.id) } }.disabled(source != nil)
                         TextField(selectedSource?.isTag == true ? "Remote tag" : "Remote branch", text: $destinationName)
                     } else { TextField("Remote Reference (refs/heads/… or refs/tags/…)", text: $destinationName) }
                     Picker("Push URL", selection: $pushURL) { ForEach(urls, id: \.self) { Text($0).tag($0) } }

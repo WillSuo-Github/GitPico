@@ -14,7 +14,7 @@ struct PullReviewSheet: View {
     @State private var policy = AppPreferences.shared.pullPolicy
     @State private var remember = false
     @Environment(\.dismiss) private var dismiss
-    private var branch: String { store.snapshot?.branch ?? "current branch" }
+    private var branch: String { store.snapshot?.branch ?? String(localized: "current branch") }
     private var savedPolicy: PullPolicy { AppPreferences.shared.pullPolicy }
     private var upstreamResolved: Bool { store.snapshot?.unresolvedUpstream == nil && !request.upstream.isEmpty }
     var body: some View {
@@ -36,7 +36,7 @@ struct PullReviewSheet: View {
                 .frame(width: 36, height: 36).background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
             VStack(alignment: .leading, spacing: 2) {
                 Text(request.pushAfter ? "Synchronize Changes" : "Pull Changes").font(.system(size: 17, weight: .bold, design: .rounded))
-                Text(request.pushAfter ? "Fetch, integrate and push “" + branch + "”." : "Fetch and integrate into “" + branch + "”.").font(.system(size: 12)).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+                Text(request.pushAfter ? String(localized: "Fetch, integrate and push “\(branch)”.") : String(localized: "Fetch and integrate into “\(branch)”.")).font(.system(size: 12)).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
             }
         }.accessibilityElement(children: .combine).accessibilityAddTraits(.isHeader)
     }
@@ -44,13 +44,13 @@ struct PullReviewSheet: View {
     /// Upstream → local branch, with the locally known incoming/outgoing counts.
     @ViewBuilder private var route: some View {
         if request.upstream.isEmpty {
-            callout("exclamationmark.triangle.fill", "No tracking branch", "Choose a tracking branch before pulling.", tint: Pico.warning)
+            callout("exclamationmark.triangle.fill", String(localized: "No tracking branch"), String(localized: "Choose a tracking branch before pulling."), tint: Pico.warning)
         } else {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 10) {
-                    endpoint(icon: "cloud", caption: "Upstream", name: request.upstream)
-                    Image(systemName: "arrow.right").font(.system(size: 12, weight: .semibold)).foregroundStyle(.tertiary)
-                    endpoint(icon: "arrow.triangle.branch", caption: "Into", name: branch)
+                    endpoint(icon: "cloud", caption: String(localized: "Upstream"), name: request.upstream)
+                    Image(systemName: "arrow.forward").font(.system(size: 12, weight: .semibold)).foregroundStyle(.tertiary)
+                    endpoint(icon: "arrow.triangle.branch", caption: String(localized: "Into"), name: branch)
                     Spacer(minLength: 4)
                     if upstreamResolved {
                         HStack(spacing: 5) {
@@ -79,7 +79,7 @@ struct PullReviewSheet: View {
                 ForEach(PullPolicy.allCases, id: \.self) { option in strategyRow(option) }
             }
             if policy != savedPolicy {
-                Toggle("Make “" + policy.title + "” the default Pull strategy", isOn: $remember).font(.system(size: 12)).padding(.top, 2)
+                Toggle("Make “\(policy.title)” the default Pull strategy", isOn: $remember).font(.system(size: 12)).padding(.top, 2)
             }
         }
     }
@@ -92,7 +92,7 @@ struct PullReviewSheet: View {
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {
                         Text(option.title).font(.system(size: 13, weight: .semibold))
-                        if option == savedPolicy { Chip(text: "Default") }
+                        if option == savedPolicy { Chip(text: String(localized: "Default")) }
                     }
                     Text(option.explanation).font(.system(size: 11)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                     if option == .rebase && selected {
@@ -157,7 +157,7 @@ struct PullReviewSheet: View {
 extension RepositoryStore {
     func runPull(_ request: PullReviewRequest, policy: PullPolicy) {
         guard canIntegrate else { return }
-        protectedPerform("Pull (" + policy.title + ")…", refresh: .workingTree) {
+        protectedPerform("Pull (\(policy.title))…", refresh: .workingTree) {
             try await $0.pull(policy: policy, expectedHead: request.head, expectedUpstream: request.upstream)
             if request.pushAfter { try await $0.sync(.push) }
         }
@@ -176,7 +176,7 @@ struct UpstreamRecoveryBanner: View {
     let store: RepositoryStore
     var body: some View {
         if let missing = store.snapshot?.unresolvedUpstream {
-            NoticeBanner(icon: "exclamationmark.triangle.fill", title: "Upstream unavailable", message: missing + " is missing locally. Fetch it or select another tracking branch.") {
+            NoticeBanner(icon: "exclamationmark.triangle.fill", title: "Upstream unavailable", message: String(localized: "\(missing) is missing locally. Fetch it or select another tracking branch.")) {
                 Button("Fetch") { store.sync(.fetch) }.disabled(!store.canUseRepository)
                 Button("Tracking Branch…") { store.reviewTrackingBranch() }.disabled(!store.canUseRepository)
             }

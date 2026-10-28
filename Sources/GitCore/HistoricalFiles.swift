@@ -17,13 +17,13 @@ public struct HistoricalSnapshot: Sendable {
     public let files: [HistoricalFile]
     public var totalBytes: Int { files.reduce(0) { $0 + $1.data.count } }
     public var warnings: [String] {
-        files.contains(where: \.isSubmodule) ? ["Submodules are exported as empty directories; their separate repositories are not included."] : []
+        files.contains(where: \.isSubmodule) ? [localized("Submodules are exported as empty directories; their separate repositories are not included.")] : []
     }
 }
 
 public enum HistoricalRestoreTarget: String, CaseIterable, Sendable {
     case workingCopy, both
-    public var title: String { self == .workingCopy ? "Working Copy Only" : "Working Copy and Index" }
+    public var title: String { self == .workingCopy ? localized("Working Copy Only") : localized("Working Copy and Index") }
 }
 
 extension GitRepository {
@@ -38,7 +38,7 @@ extension GitRepository {
             guard let tab = field.firstIndex(of: 9), let path = String(data: field[(tab + 1)...], encoding: .utf8) else { throw GitFailure("Historical export requires UTF-8 filenames.") }
             try HistoricalExport.validatePath(path)
             let header = String(decoding: field[..<tab], as: UTF8.self).split(whereSeparator: \.isWhitespace)
-            guard header.count == 4, ["100644", "100755", "120000", "160000"].contains(String(header[0])) else { throw GitFailure("Unsupported historical tree entry: " + path) }
+            guard header.count == 4, ["100644", "100755", "120000", "160000"].contains(String(header[0])) else { throw GitFailure("Unsupported historical tree entry: \(path)") }
             let size = header[0] == "160000" ? 0 : Int(header[3]) ?? Int.max
             guard size <= 16 * 1024 * 1024, total <= 64 * 1024 * 1024 - size, entries.count < 10_000 else { throw GitFailure("Export supports 10,000 entries, 16 MB per file and 64 MB total. Select a smaller folder.") }
             total += size; entries.append((path, String(header[2]), String(header[0]), size))
@@ -89,8 +89,8 @@ extension GitRepository {
         let afterIndex = target == .both ? try readLocalIndex(temporaryIndex) : index
         try validateLocalStates(before, after)
         guard before != after || index != afterIndex else { throw GitFailure("The selected files already match this revision in the chosen scope.") }
-        let summary = zip(snapshot.files, paths).map { "\($0.path) → \($1)  [\($0.mode), \($0.data.count) bytes]" }.joined(separator: "\n")
-        return LocalChangePlan(id: UUID(), title: "Restore Historical Files", paths: paths, preview: "Revision: \(snapshot.revision)\n\n" + summary,
+        let summary = zip(snapshot.files, paths).map { localized("\($0.path) → \($1)  [\($0.mode), \($0.data.count) bytes]") }.joined(separator: "\n")
+        return LocalChangePlan(id: UUID(), title: localized("Restore Historical Files"), paths: paths, preview: localized("Revision: \(snapshot.revision)\n\n\(summary)"),
                                repository: root.path, head: head, beforeIndex: index, afterIndex: afterIndex, before: before, after: after)
     }
 }

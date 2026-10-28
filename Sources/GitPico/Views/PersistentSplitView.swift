@@ -11,6 +11,7 @@ struct PersistentSplitView<Leading: View, Trailing: View>: View {
     @State private var dragStart: CGFloat?
     @GestureState private var isResizing = false
     @Namespace private var splitCoordinates
+    @Environment(\.layoutDirection) private var layoutDirection
 
     init(name: String, width: CGFloat = 320, minimum: CGFloat = 270, @ViewBuilder leading: () -> Leading, @ViewBuilder trailing: () -> Trailing) {
         self.name = name
@@ -35,7 +36,7 @@ struct PersistentSplitView<Leading: View, Trailing: View>: View {
                                 }
                                 .onChanged { value in
                                     if dragStart == nil { dragStart = actual }
-                                    columnWidth = min(max((dragStart ?? actual) + value.translation.width, minimum), max(minimum, geometry.size.width - 350))
+                                    columnWidth = splitColumnWidth(start: dragStart ?? actual, translation: value.translation.width, minimum: minimum, availableWidth: geometry.size.width, direction: layoutDirection)
                                 }
                                 .onEnded { _ in AppPreferences.shared.setWidth(columnWidth, for: "layout." + name); dragStart = nil })
                     }

@@ -40,7 +40,7 @@ struct InteractiveRebaseSheet: View {
                     ForEach($steps) { $step in
                         HStack(spacing: 10) {
                             Image(systemName: "line.3.horizontal").foregroundStyle(.tertiary)
-                            Text(step.isMerge ? "Merge" : step.action.rawValue.capitalized).font(.system(size: 11, weight: .medium)).frame(width: 75, alignment: .leading)
+                            Text(step.isMerge ? String(localized: "Merge") : step.action.title).font(.system(size: 11, weight: .medium)).frame(width: 75, alignment: .leading)
                                 .foregroundStyle(step.action == .drop ? Color.red : step.action == .pick ? Color.secondary : Color.purple)
                             Text(String(step.hash.prefix(8))).font(.system(size: 11, design: .monospaced)).foregroundStyle(.secondary)
                             Text(step.message.components(separatedBy: "\n").first ?? "").lineLimit(1).strikethrough(step.action == .drop).foregroundStyle(step.action == .drop ? .secondary : .primary)
@@ -64,7 +64,7 @@ struct InteractiveRebaseSheet: View {
                 }.listStyle(.inset).frame(minHeight: 200)
                 if let index = steps.firstIndex(where: { $0.id == selected }) {
                     HStack {
-                        Picker("Action", selection: $steps[index].action) { ForEach(RebaseAction.allCases.filter { plan?.preserveMerges != true || ![.squash, .fixup].contains($0) }, id: \.self) { Text($0.rawValue.capitalized).tag($0) } }.frame(width: 180).disabled(steps[index].isMerge)
+                        Picker("Action", selection: $steps[index].action) { ForEach(RebaseAction.allCases.filter { plan?.preserveMerges != true || ![.squash, .fixup].contains($0) }, id: \.self) { Text($0.title).tag($0) } }.frame(width: 180).disabled(steps[index].isMerge)
                         Button { move(steps[index].id, by: -1) } label: { Image(systemName: "chevron.up") }.accessibilityLabel("Move Selected Commit Earlier").disabled(index == 0)
                         Button { move(steps[index].id, by: 1) } label: { Image(systemName: "chevron.down") }.accessibilityLabel("Move Selected Commit Later").disabled(index == steps.count - 1)
                         Text("Commit message").fontWeight(.medium)
@@ -74,7 +74,7 @@ struct InteractiveRebaseSheet: View {
                     TextEditor(text: $steps[index].message).font(.system(size: 12, design: .monospaced)).frame(height: 100).padding(6).background(.quaternary.opacity(0.15), in: RoundedRectangle(cornerRadius: 5))
                         .disabled(steps[index].action != .reword && steps[index].action != .squash).accessibilityLabel("Rebase commit message")
                 }
-            } else { EmptyPane(title: loading ? "Loading commits…" : "Choose the starting point", subtitle: "Rewrite up to 200 commits, including the root. Merge ranges preserve Git's topology; ordinary commits support Pick, Reword, Edit and Drop.", icon: "arrow.triangle.branch") }
+            } else { EmptyPane(title: loading ? String(localized: "Loading commits…") : String(localized: "Choose the starting point"), subtitle: String(localized: "Rewrite up to 200 commits, including the root. Merge ranges preserve Git's topology; ordinary commits support Pick, Reword, Edit and Drop."), icon: "arrow.triangle.branch") }
             if let error { Text(error).font(.callout).foregroundStyle(.red) }
             if !store.changes.isEmpty { Text(AppPreferences.shared.offerAutomaticStash ? "You will be offered to stash local changes before starting." : "Commit or stash local changes before starting.").foregroundStyle(.orange).font(.callout) }
             HStack {

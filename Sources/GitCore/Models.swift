@@ -12,6 +12,7 @@ public struct FileChange: Identifiable, Hashable, Sendable {
     }
     public var isStaged: Bool { index != " " && index != "?" && !isConflicted }
     public var isUnstaged: Bool { worktree != " " || isUntracked }
+    /// Stable English status name; badges and comparisons rely on it. Use `localizedFileStatus` to display it.
     public var displayStatus: String {
         if isConflicted { return "Conflict" }
         if isUntracked { return "Untracked" }

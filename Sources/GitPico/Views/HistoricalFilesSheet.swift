@@ -19,7 +19,7 @@ struct HistoricalFilesSheet: View {
     var archive: Bool { if case .archive = request.action { true } else { false } }
     var singleFile: Bool { snapshot?.files.count == 1 && request.paths == [snapshot?.files.first?.path ?? ""] }
     var folder: Bool { !restoring && !archive && !singleFile }
-    var title: String { restoring ? "Restore Files in Working Copy" : archive ? "Archive Files at Revision" : "Export Files at Revision" }
+    var title: LocalizedStringResource { restoring ? "Restore Files in Working Copy" : archive ? "Archive Files at Revision" : "Export Files at Revision" }
     var chosen: HistoricalFile? { snapshot?.files.first { $0.path == selected } }
     var validFolderName: Bool { !folderName.isEmpty && folderName != "." && folderName != ".." && !folderName.contains("/") && !folderName.utf8.contains(0) }
 
@@ -47,7 +47,7 @@ struct HistoricalFilesSheet: View {
                         if let file = chosen {
                             if file.isSubmodule { Text("Submodule: \(file.object)\nExported as an empty directory.").font(.callout).padding(12) }
                             else if !file.data.contains(0), let text = String(data: file.data.prefix(64 * 1024), encoding: .utf8) {
-                                Text(text.isEmpty ? "Empty file" : text).font(.system(size: 11, design: .monospaced)).textSelection(.enabled).padding(12)
+                                Text(text.isEmpty ? String(localized: "Empty file") : text).font(.system(size: 11, design: .monospaced)).textSelection(.enabled).padding(12)
                             } else { Text("Binary file · \(file.data.count) bytes\nExports preserve the original bytes.").font(.callout).foregroundStyle(.secondary).padding(12) }
                         }
                     }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -72,11 +72,11 @@ struct HistoricalFilesSheet: View {
         .task(id: destination + target.rawValue) { if snapshot != nil && restoring { await prepareRestore() } }
     }
     func load() async {
-        guard let repository = store.repository, store.repositoryToken == request.repositoryToken else { failure = "The repository changed. Reopen this dialog."; loading = false; return }
+        guard let repository = store.repository, store.repositoryToken == request.repositoryToken else { failure = String(localized: "The repository changed. Reopen this dialog."); loading = false; return }
         do {
             let value = try await repository.historicalSnapshot(revision: request.revision, paths: request.paths)
             try Task.checkCancellation()
-            guard store.repositoryToken == request.repositoryToken else { throw GitFailure("The repository changed. Reopen this dialog.") }
+            guard store.repositoryToken == request.repositoryToken else { throw appFailure("The repository changed. Reopen this dialog.") }
             if case .restore(let suggested) = request.action { destination = suggested ?? value.files.first?.path ?? "" }
             snapshot = value; selected = value.files.first?.path
             folderName = store.title + "-" + value.revision.prefix(8)
@@ -84,7 +84,7 @@ struct HistoricalFilesSheet: View {
             if restoring { await prepareRestore() }
             else {
                 try HistoricalExport.validate(value)
-                if singleFile, !archive, value.files.first?.isRegular != true { failure = "Raw export requires a regular file. Choose Archive to preserve this entry." }
+                if singleFile, !archive, value.files.first?.isRegular != true { failure = String(localized: "Raw export requires a regular file. Choose Archive to preserve this entry.") }
             }
         } catch { if !Task.isCancelled { failure = error.localizedDescription; loading = false } }
     }

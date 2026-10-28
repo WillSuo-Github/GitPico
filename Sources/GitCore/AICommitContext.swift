@@ -48,7 +48,7 @@ extension GitRepository {
         let output: GitOutput
         do {
             output = try await GitProcess.run(["diff", "--cached", "--no-ext-diff", "--no-textconv", "--no-color", "--no-renames", "--unified=3", "--ignore-submodules=none", "--"], at: root, maxOutputBytes: 96 * 1024, cancellable: true)
-        } catch let error as GitFailure where error.message.hasPrefix("Git output exceeds") {
+        } catch let error as GitFailure where error.reason == .outputLimitExceeded {
             throw GitFailure("The staged diff is too large for AI generation (96 KB maximum). Stage a smaller set of changes.")
         }
         guard !output.data.isEmpty else { throw GitFailure("Stage at least one change before generating a commit message.") }

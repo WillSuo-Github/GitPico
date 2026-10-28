@@ -16,12 +16,12 @@ public struct ManagedSubmodule: Codable, Equatable, Identifiable, Sendable {
     public let diagnostic: String?
     let configuration: Data?
     public var status: String {
-        if conflicted { return "Gitlink conflict" }
+        if conflicted { return localized("Gitlink conflict") }
         if let diagnostic { return diagnostic }
-        if !initialized { return "Not initialized" }
-        if dirty { return "Local changes" }
-        if head != recordedHash { return "Different revision" }
-        return "Up to date"
+        if !initialized { return localized("Not initialized") }
+        if dirty { return localized("Local changes") }
+        if head != recordedHash { return localized("Different revision") }
+        return localized("Up to date")
     }
 }
 private struct SubmoduleDefinition: Sendable { let name: String; let path: String; let url: String; let branch: String?; let localURL: String?; let hash: String?; let conflicted: Bool }
@@ -135,9 +135,9 @@ extension GitRepository {
                 head = status.first(where: { $0.hasPrefix("# branch.oid ") }).map { String($0.dropFirst(13)) }
                 if head == "(initial)" { head = nil }
                 dirty = status.contains { !$0.isEmpty && !$0.hasPrefix("# ") }
-            } catch { diagnostic = "Invalid Git configuration: " + error.localizedDescription }
+            } catch { diagnostic = localized("Invalid Git configuration: \(error.localizedDescription)") }
         }
-        if definition.url.isEmpty { diagnostic = "Missing .gitmodules mapping" }
+        if definition.url.isEmpty { diagnostic = localized("Missing .gitmodules mapping") }
         return ManagedSubmodule(name: definition.name, path: definition.path, url: definition.url, configuredURL: definition.localURL, branch: definition.branch, recordedHash: definition.hash, head: head, gitDirectory: directory, initialized: initialized, dirty: dirty, conflicted: definition.conflicted, diagnostic: diagnostic, configuration: configuration)
     }
     public func checkedSubmodule(_ expected: ManagedSubmodule) async throws -> GitRepository {
@@ -241,7 +241,7 @@ extension GitRepository {
         let force = [.forceDeinitialize, .forceRemove, .archiveStorage].contains(plan.operation)
         let extraDirectories: [String]
         if force, try localAttributes(storage) != nil { extraDirectories = [storage.path] } else { extraDirectories = [] }
-        let backup = try await beginRelatedBackup(title: plan.operation.rawValue + " · " + plan.module.path, kind: "submodule", original: original, current: current, pointers: pointers, extraFiles: files, extraDirectories: extraDirectories)
+        let backup = try await beginRelatedBackup(title: plan.operation.title + " · " + plan.module.path, kind: "submodule", original: original, current: current, pointers: pointers, extraFiles: files, extraDirectories: extraDirectories)
         do { try await executeSubmodule(plan); try await finishRelatedBackup(backup) }
         catch { try? await finishRelatedBackup(backup, error: error); throw error }
     }

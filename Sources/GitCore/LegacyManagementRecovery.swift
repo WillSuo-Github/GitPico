@@ -36,7 +36,7 @@ extension GitRepository {
                 try checkManagementAncestors(index)
                 guard try readLocalIndex(index) != nil else { continue }
                 let date = try FileManager.default.attributesOfItem(atPath: folder.path)[.creationDate] as? Date ?? .distantPast
-                result.append(LegacyManagementBackup(id: "worktree:" + id.uuidString, title: "Earlier Worktree Index", date: date, source: index.path))
+                result.append(LegacyManagementBackup(id: "worktree:" + id.uuidString, title: localized("Earlier Worktree Index"), date: date, source: index.path))
             }
         }
         // A missing working directory has only its saved administrative index, just like
@@ -46,7 +46,7 @@ extension GitRepository {
             guard record.before.directories.first(where: { $0.path == summary.originalPath })?.digest == nil,
                   let index = record.before.directories.firstIndex(where: { $0.path.hasPrefix(record.common + "/worktrees/") && $0.digest != nil }) else { continue }
             let source = try await relatedBackupDirectory(summary.id).appendingPathComponent("directory-\(index)/index")
-            if try readLocalIndex(source) != nil { result.append(LegacyManagementBackup(id: "saved-index:" + summary.id.uuidString, title: "Saved Index · " + summary.title, date: summary.date, source: source.path)) }
+            if try readLocalIndex(source) != nil { result.append(LegacyManagementBackup(id: "saved-index:" + summary.id.uuidString, title: localized("Saved Index · \(summary.title)"), date: summary.date, source: source.path)) }
         }
         return result.sorted { $0.date > $1.date }
     }

@@ -115,7 +115,7 @@ extension GitRepository {
             local = index == nil ? Data() : try await GitProcess.run(["cat-file", "--filters", "--path=" + path, ":" + path], at: root).data
             remote = try localFiles([path]).first?.data ?? Data()
         }
-        return try await makeExternalSession(path: path, title: staged ? "HEAD ↔ Index" : "Index ↔ Working Copy", head: head, local: local, remote: remote)
+        return try await makeExternalSession(path: path, title: staged ? localized("HEAD ↔ Index") : localized("Index ↔ Working Copy"), head: head, local: local, remote: remote)
     }
     public func prepareExternalComparison(left: String?, right: String, path: String, originalPath: String? = nil) async throws -> ExternalToolSession {
         let lhs: String?
@@ -135,13 +135,13 @@ extension GitRepository {
         } else { local = nil }
         let remote = try await contents(rhs, path)
         guard local != nil || remote != nil else { throw GitFailure("This file does not exist in either compared revision.") }
-        return try await makeExternalSession(path: path, title: (lhs.map { String($0.prefix(8)) } ?? "Empty") + " ↔ " + rhs.prefix(8), head: headPosition(), local: local ?? Data(), remote: remote ?? Data())
+        return try await makeExternalSession(path: path, title: (lhs.map { String($0.prefix(8)) } ?? localized("Empty")) + " ↔ " + rhs.prefix(8), head: headPosition(), local: local ?? Data(), remote: remote ?? Data())
     }
 
     public func prepareExternalMerge(path: String) async throws -> ExternalToolSession {
         let head = try await headPosition(), snapshot = try await conflict(path)
         guard snapshot.canEdit, let local = snapshot.version(2), let remote = snapshot.version(3) else { throw GitFailure("External merge currently requires regular UTF-8 current/incoming files. Use the whole-file controls for binary or deletion conflicts.") }
-        return try await makeExternalSession(path: path, title: "Resolve Conflict", head: head, local: local.data, remote: remote.data, base: snapshot.version(1)?.data ?? Data(), merged: snapshot.workingData ?? Data(), conflict: snapshot)
+        return try await makeExternalSession(path: path, title: localized("Resolve Conflict"), head: head, local: local.data, remote: remote.data, base: snapshot.version(1)?.data ?? Data(), merged: snapshot.workingData ?? Data(), conflict: snapshot)
     }
     public func applyExternalMerge(_ id: UUID, expectedResult: Data? = nil) async throws {
         var session = try await externalSession(id)

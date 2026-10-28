@@ -32,7 +32,7 @@ struct WorkingCopyView: View {
                 }.listStyle(.plain).disabled(store.isBusy && !store.isBackgroundFetching)
                 .overlay {
                     if files.isEmpty && (store.isLoadingWorkingFiles || store.isBusy) { ProgressView("Loading files…") }
-                    else if files.isEmpty { EmptyPane(title: isFiltered ? "No matching files" : "Nothing to commit", subtitle: isFiltered ? "Change the file filter or refresh." : "Your working copy matches HEAD. Show All Files to browse the tree.", icon: isFiltered ? "line.3.horizontal.decrease.circle" : "checkmark.seal") }
+                    else if files.isEmpty { EmptyPane(title: isFiltered ? String(localized: "No matching files") : String(localized: "Nothing to commit"), subtitle: isFiltered ? String(localized: "Change the file filter or refresh.") : String(localized: "Your working copy matches HEAD. Show All Files to browse the tree."), icon: isFiltered ? "line.3.horizontal.decrease.circle" : "checkmark.seal") }
                 }
                 if store.snapshot?.operation == RepositoryOperation.none {
                     CommitComposer(store: store)
@@ -79,7 +79,7 @@ struct WorkingListHeader: View {
                 Image(systemName: "arrow.triangle.branch").imageScale(.small)
                 Text(store.snapshot?.branch ?? "—").lineLimit(1)
                 Image(systemName: "arrow.right").imageScale(.small).foregroundStyle(.tertiary)
-                Text(upstream ?? "No upstream").lineLimit(1).foregroundStyle(upstream == nil ? .tertiary : .secondary)
+                Text(upstream ?? String(localized: "No upstream")).lineLimit(1).foregroundStyle(upstream == nil ? .tertiary : .secondary)
                 Spacer(minLength: 4)
                 if stagedCount > 0 { Text("\(stagedCount) staged").foregroundStyle(.tint) }
                 if unstagedCount > 0 { Text("\(unstagedCount) unstaged") }
@@ -102,12 +102,12 @@ struct WorkingFileRow: View {
                 Image(systemName: file.isStaged ? (file.isUnstaged ? "minus.square.fill" : "checkmark.square.fill") : "square")
                     .foregroundStyle(isSelected ? selectedText : file.isStaged ? Color.accentColor : Color.secondary)
             }.buttonStyle(.plain).disabled(store.isBusy).help(file.isConflicted ? "Resolve conflict" : file.isStaged && !file.isUnstaged ? "Unstage selected files" : "Stage selected files, including remaining changes")
-            .accessibilityLabel(file.isConflicted ? "Resolve conflict in " + file.path : (file.isStaged && !file.isUnstaged ? "Unstage " : "Stage ") + file.path)
+            .accessibilityLabel(file.isConflicted ? String(localized: "Resolve conflict in \(file.path)") : (file.isStaged && !file.isUnstaged ? String(localized: "Unstage \(file.path)") : String(localized: "Stage \(file.path)")))
             .accessibilityValue(file.isStaged && file.isUnstaged ? "Partially staged" : file.isStaged ? "Staged" : "Unstaged")
             StatusBadge(status: file.displayStatus, selected: isSelected)
             FilePathLabel(path: file.path, selectedText: isSelected ? selectedText : nil)
             Spacer(minLength: 0)
-        }.frame(height: 24).contentShape(Rectangle()).help(file.path + " · " + (file.isStaged && file.isUnstaged ? "Staged and unstaged changes" : file.isStaged ? "Staged" : file.displayStatus))
+        }.frame(height: 24).contentShape(Rectangle()).help(file.path + " · " + (file.isStaged && file.isUnstaged ? String(localized: "Staged and unstaged changes") : file.isStaged ? String(localized: "Staged") : localizedFileStatus(file.displayStatus)))
         .contextMenu {
             LFSFileContextMenu(store: store, path: file.path)
             if file.isConflicted { Button("Resolve Conflict…") { store.selectChange(file, staged: false) } }
@@ -141,9 +141,9 @@ struct CommitComposer: View {
     @State private var ai = AICommitSession()
     @FocusState private var subjectFocused: Bool
     var commitTitle: String {
-        if store.amend { return "Amend Commit" }
+        if store.amend { return String(localized: "Amend Commit") }
         let count = store.staged.count
-        return count == 0 ? "Commit" : "Commit \(count) \(count == 1 ? "File" : "Files")"
+        return count == 0 ? String(localized: "Commit") : String(localized: "Commit \(count) Files")
     }
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -174,9 +174,9 @@ struct CommitComposer: View {
                 Button { store.navigate(.repositorySettings) } label: {
                     HStack(spacing: 5) {
                         AuthorAvatar(name: store.snapshot?.identity.name.nilIfEmpty ?? "?", size: 18)
-                        Text(store.snapshot?.identity.name.nilIfEmpty ?? "No identity").lineLimit(1).foregroundStyle(.secondary)
+                        Text(store.snapshot?.identity.name.nilIfEmpty ?? String(localized: "No identity")).lineLimit(1).foregroundStyle(.secondary)
                     }.contentShape(Rectangle())
-                }.buttonStyle(.plain).font(.system(size: 11)).help(identityLine + "\nEdit the commit identity in Repository Settings")
+                }.buttonStyle(.plain).font(.system(size: 11)).help("\(identityLine)\nEdit the commit identity in Repository Settings")
                 Spacer(minLength: 4)
                 Toggle("Amend", isOn: $store.amend).toggleStyle(.checkbox).font(.system(size: 11)).disabled(store.snapshot?.hasHEAD != true).help("Replace the last commit with the staged changes")
                 Menu {
@@ -189,19 +189,19 @@ struct CommitComposer: View {
                             guard let repository = store.repository else { return }
                             let root = store.snapshot?.root
                             Task {
-                                do { let text = try await repository.configuredCommitTemplate(); guard root == store.snapshot?.root else { return }; insertion = CommitTemplateInsertion(name: "Repository Git Template", text: text, root: root) }
+                                do { let text = try await repository.configuredCommitTemplate(); guard root == store.snapshot?.root else { return }; insertion = CommitTemplateInsertion(name: String(localized: "Repository Git Template"), text: text, root: root) }
                                 catch { store.error = error.localizedDescription }
                             }
                         }
                     }
                     Menu("Use Identity") {
-                        ForEach(workflows.identities) { identity in Button(identity.label + " · " + identity.email) { store.saveIdentity(name: identity.name, email: identity.email) } }
+                        ForEach(workflows.identities) { identity in Button("\(identity.label) · \(identity.email)") { store.saveIdentity(name: identity.name, email: identity.email) } }
                     }.disabled(workflows.identities.isEmpty)
                     Button("Edit Identity…") { store.navigate(.repositorySettings) }
                 } label: { Image(systemName: store.signOff ? "signature" : "ellipsis.circle") }
                     .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help(store.signOff ? "Signed-off-by will be added" : "Commit options")
                 Button(commitTitle, action: store.commit).buttonStyle(.borderedProminent).disabled(!store.canCommit)
-                    .help(store.commitUnavailableReason ?? "Commit staged changes (⌘Return)")
+                    .help(store.commitUnavailableReason ?? String(localized: "Commit staged changes (⌘Return)"))
             }.controlSize(.regular)
             if let error = ai.error {
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
@@ -232,26 +232,26 @@ struct CommitComposer: View {
         if ai.isGenerating { ai.cancel(); return }
         let settings = AICommitPreferences.shared.value, provider = settings.resolvedProvider
         guard let executable = settings.executable(for: provider) else {
-            ai.error = provider.title + " was not found. Install a supported AI CLI or choose one in Settings → AI Commits."
+            ai.error = String(localized: "\(provider.title) was not found. Install a supported AI CLI or choose one in Settings → AI Commits.")
             return
         }
         ai.generate(in: store, settings: settings, provider: provider, executable: executable)
     }
     var aiHelp: String {
-        if ai.isGenerating { return "Stop generating" }
+        if ai.isGenerating { return String(localized: "Stop generating") }
         if let reason = store.aiCommitUnavailableReason { return reason }
-        let action = store.commitSubject.isEmpty && store.commitBody.isEmpty ? "Write" : "Replace"
-        return action + " the commit message with " + AICommitPreferences.shared.value.resolvedProvider.title
+        let tool = AICommitPreferences.shared.value.resolvedProvider.title
+        return store.commitSubject.isEmpty && store.commitBody.isEmpty ? String(localized: "Write the commit message with \(tool)") : String(localized: "Replace the commit message with \(tool)")
     }
     var identityLine: String {
-        guard let identity = store.snapshot?.identity, !identity.name.isEmpty else { return "No Git identity configured" }
+        guard let identity = store.snapshot?.identity, !identity.name.isEmpty else { return String(localized: "No Git identity configured") }
         return identity.name + " <" + identity.email + ">"
     }
     var statusMessage: (text: String, icon: String, color: Color)? {
         if let warning = store.commitWarning { return (warning, "exclamationmark.triangle.fill", Pico.warning) }
         if let feedback = store.commitFeedback { return (feedback, "checkmark.circle.fill", .green) }
-        if store.changes.contains(where: \.isConflicted) { return ("Select a conflicted file to resolve it.", "exclamationmark.triangle.fill", Pico.warning) }
-        if store.amend { return ("Amend replaces the HEAD commit.", "info.circle", Pico.warning) }
+        if store.changes.contains(where: \.isConflicted) { return (String(localized: "Select a conflicted file to resolve it."), "exclamationmark.triangle.fill", Pico.warning) }
+        if store.amend { return (String(localized: "Amend replaces the HEAD commit."), "info.circle", Pico.warning) }
         if let reason = store.commitUnavailableReason { return (reason, "info.circle", .secondary) }
         return nil
     }
@@ -277,7 +277,7 @@ struct WorkingDiffView: View {
             if let file = store.currentChange, file.isConflicted {
                 ConflictResolverView(store: store, path: file.path).id(file.path)
             } else if let file = store.currentChange {
-                FileTitleBar(path: file.path, subtitle: store.stagedDiff ? "HEAD → Index" : "Index → Working Copy", status: file.displayStatus) {
+                FileTitleBar(path: file.path, subtitle: store.stagedDiff ? String(localized: "HEAD → Index") : String(localized: "Index → Working Copy"), status: file.displayStatus) {
                     Picker("Diff version", selection: $store.stagedDiff) { Text("Unstaged").tag(false).disabled(!file.isUnstaged && !file.isConflicted); Text("Staged").tag(true).disabled(!file.isStaged) }
                         .pickerStyle(.segmented).labelsHidden().fixedSize()
                     DiffLayoutPicker()
@@ -299,14 +299,14 @@ struct WorkingDiffView: View {
                         left: store.stagedDiff ? (store.snapshot?.hasHEAD == true ? .revision("HEAD") : .empty) : .index,
                         right: store.stagedDiff ? .index : .workingCopy, version: store.lastUpdated).id(store.repositoryToken.uuidString + file.path)
                 } else {
-                ChunkDiffView(prepared: store.workingPreparedDiff, isLoading: store.isLoadingDiff, chunkAction: store.ignoreWhitespace ? nil : { store.stageChunk($0) }, lineAction: store.ignoreWhitespace ? nil : { store.stageLines($0) }, actionTitle: store.stagedDiff ? "Unstage Chunk" : "Stage Chunk", leftTitle: store.stagedDiff ? "HEAD" : "Index", rightTitle: store.stagedDiff ? "Index" : "Working Copy", disabled: store.isBusy,
+                ChunkDiffView(prepared: store.workingPreparedDiff, isLoading: store.isLoadingDiff, chunkAction: store.ignoreWhitespace ? nil : { store.stageChunk($0) }, lineAction: store.ignoreWhitespace ? nil : { store.stageLines($0) }, unstaging: store.stagedDiff, actionTitle: store.stagedDiff ? String(localized: "Unstage Chunk") : String(localized: "Stage Chunk"), leftTitle: store.stagedDiff ? "HEAD" : String(localized: "Index"), rightTitle: store.stagedDiff ? String(localized: "Index") : String(localized: "Working Copy"), disabled: store.isBusy,
                               discardChunk: store.stagedDiff || store.ignoreWhitespace ? nil : { store.localChange(.chunk(file, store.diff, $0, store.diffContext)) },
                               discardLines: store.stagedDiff || store.ignoreWhitespace ? nil : { store.localChange(.lines(file, store.diff, $0, store.diffContext)) },
                               exportLines: store.ignoreWhitespace ? nil : { store.localChange(.exportLines(file, store.diff, $0, store.stagedDiff, store.diffContext)) }).id(store.repositoryToken.uuidString + file.path)
                 }
             } else if let path = store.selectedChange, let repository = store.repository {
                 WorkingFilePreview(repository: repository, path: path).id(store.repositoryToken.uuidString + path)
-            } else { EmptyPane(title: "Select a file", subtitle: store.changes.isEmpty ? "There are no local changes to review." : "Pick a changed file to review its diff and stage chunks or single lines.", icon: "doc.text.magnifyingglass") }
+            } else { EmptyPane(title: String(localized: "Select a file"), subtitle: store.changes.isEmpty ? String(localized: "There are no local changes to review.") : String(localized: "Pick a changed file to review its diff and stage chunks or single lines."), icon: "doc.text.magnifyingglass") }
         }
         .onChange(of: store.stagedDiff) { _, staged in if let file = store.currentChange { store.selectChange(file, staged: staged) } }
         .onChange(of: store.diffContext) { if let file = store.currentChange { store.selectChange(file, staged: store.stagedDiff) } }
@@ -315,7 +315,7 @@ struct WorkingDiffView: View {
 }
 
 struct PaneHeader: View {
-    let title: String
+    let title: LocalizedStringResource
     var subtitle: String? = nil
     let icon: String
     var body: some View { PaneBar(title: title, subtitle: subtitle, icon: icon) }
@@ -333,7 +333,7 @@ struct StatusBadge: View {
     var body: some View {
         Text(status == "Conflict" ? "!" : status == "Untracked" ? "?" : String(status.prefix(1)))
             .font(.system(size: 9.5, weight: .heavy, design: .rounded)).foregroundStyle(selected ? selectedText : status == "Conflict" ? .white : color).frame(width: 17, height: 17)
-            .background(selected ? AnyShapeStyle(selectedText.opacity(0.18)) : status == "Conflict" ? AnyShapeStyle(color) : AnyShapeStyle(color.opacity(0.16)), in: RoundedRectangle(cornerRadius: 4.5, style: .continuous)).help(status)
+            .background(selected ? AnyShapeStyle(selectedText.opacity(0.18)) : status == "Conflict" ? AnyShapeStyle(color) : AnyShapeStyle(color.opacity(0.16)), in: RoundedRectangle(cornerRadius: 4.5, style: .continuous)).help(localizedFileStatus(status))
     }
 }
 

@@ -21,18 +21,18 @@ struct AICommitSettingsView: View {
             Section {
                 Picker("Tool", selection: Binding(get: { provider }, set: { settings.provider = $0 })) {
                     ForEach(AICommitProvider.allCases) { option in
-                        Text(settings.executable(for: option) == nil ? option.title + " (not found)" : option.title).tag(option)
+                        Text(settings.executable(for: option) == nil ? String(localized: "\(option.title) (not found)") : option.title).tag(option)
                     }
                 }
                 Picker("Language", selection: $settings.language) {
-                    ForEach(AICommitLanguage.allCases) { Text($0.rawValue).tag($0) }
+                    ForEach(AICommitLanguage.allCases) { Text($0.title).tag($0) }
                 }
                 if let executable = settings.executable(for: provider) {
                     LabeledContent("Executable") {
                         Text(executable.path).font(.caption.monospaced()).foregroundStyle(.secondary).textSelection(.enabled).lineLimit(1).truncationMode(.middle)
                     }
                 } else {
-                    Label(provider.title + " was not found. Install it and sign in from Terminal, or choose its executable.", systemImage: "exclamationmark.triangle")
+                    Label("\(provider.title) was not found. Install it and sign in from Terminal, or choose its executable.", systemImage: "exclamationmark.triangle")
                         .font(.callout).foregroundStyle(Pico.warning).fixedSize(horizontal: false, vertical: true)
                 }
                 DisclosureGroup("Custom Executable", isExpanded: $showsExecutable) {
@@ -40,7 +40,7 @@ struct AICommitSettingsView: View {
                         TextField("Executable path", text: Binding(
                             get: { settings.executableOverride(for: provider) },
                             set: { settings.executables[provider.rawValue] = $0.isEmpty ? nil : $0 }
-                        ), prompt: Text("Auto-detect " + provider.command)).labelsHidden().accessibilityLabel("AI CLI executable path")
+                        ), prompt: Text("Auto-detect \(provider.command)")).labelsHidden().accessibilityLabel("AI CLI executable path")
                         Button("Choose…", action: chooseExecutable)
                     }
                 }
@@ -74,7 +74,7 @@ struct AICommitSettingsView: View {
     private func chooseExecutable() {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = false; panel.canChooseFiles = true; panel.allowsMultipleSelection = false
-        panel.message = "Choose the " + provider.command + " executable"
+        panel.message = String(localized: "Choose the \(provider.command) executable")
         if panel.runModal() == .OK, let url = panel.url { settings.executables[provider.rawValue] = url.path }
     }
 }

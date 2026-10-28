@@ -43,7 +43,7 @@ struct RevisionComparisonView: View {
             else if let comparison {
                 PersistentSplitView(name: "comparison", width: 310) {
                     VStack(spacing: 0) {
-                        PaneBar(title: "\(comparison.files.count) changed \(comparison.files.count == 1 ? "file" : "files")", subtitle: "\(comparison.left.prefix(8)) → \(comparison.right.prefix(8))", icon: "doc.on.doc") {
+                        PaneBar(title: "\(comparison.files.count) changed files", subtitle: "\(comparison.left.prefix(8)) → \(comparison.right.prefix(8))", icon: "doc.on.doc") {
                             DiffStat(additions: comparison.statistics.values.reduce(0) { $0 + $1.additions }, deletions: comparison.statistics.values.reduce(0) { $0 + $1.deletions }, showsBar: false)
                         }
                         TextField("Filter files", text: $query).textFieldStyle(.roundedBorder).padding(.horizontal, 10).padding(.vertical, 8)
@@ -53,7 +53,7 @@ struct RevisionComparisonView: View {
                                     StatusBadge(status: file.status)
                                     FilePathLabel(path: file.path)
                                     Spacer(minLength: 0)
-                                    if let stats = comparison.statistics[file.path] { if stats.isBinary { Chip(text: "Binary", tint: .secondary) } else { DiffStat(additions: stats.additions, deletions: stats.deletions, showsBar: false) } }
+                                    if let stats = comparison.statistics[file.path] { if stats.isBinary { Chip(text: String(localized: "Binary"), tint: .secondary) } else { DiffStat(additions: stats.additions, deletions: stats.deletions, showsBar: false) } }
                                 }.tag(file.path).padding(.vertical, 3).contextMenu { Button("Compare in External Tool…") { store.externalTool(.comparison(comparison.left, comparison.right, file.path, comparison.originalPaths[file.path])) } }
                             }
                         }.listStyle(.plain)
@@ -67,12 +67,12 @@ struct RevisionComparisonView: View {
                         } else { DiffView(text: diff, title: selected, isLoading: loadingDiff) }
                     }
                 }
-            } else { EmptyPane(title: "Compare Revisions", subtitle: "Choose any two branches, tags or commit hashes, then press Compare.", icon: "arrow.left.arrow.right") }
+            } else { EmptyPane(title: String(localized: "Compare Revisions"), subtitle: String(localized: "Choose any two branches, tags or commit hashes, then press Compare."), icon: "arrow.left.arrow.right") }
         }
         .task(id: request) { await compare() }
         .task(id: "\(comparison?.left ?? ""):\(comparison?.right ?? ""):\(selected ?? ""):\(context):\(ignoreWhitespace)") { await loadDiff() }
     }
-    private func revisionField(_ title: String, text: Binding<String>) -> some View {
+    private func revisionField(_ title: LocalizedStringResource, text: Binding<String>) -> some View {
         HStack(spacing: 6) {
             Text(title).foregroundStyle(.secondary).font(.system(size: 11, weight: .medium))
             TextField("Branch, tag, or commit", text: text).textFieldStyle(.roundedBorder).font(.system(size: 12, design: .monospaced))

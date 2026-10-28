@@ -33,11 +33,11 @@ private final class NetworkHistoryWriter: @unchecked Sendable {
             }
             let directory = file.deletingLastPathComponent()
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
-            guard (try FileManager.default.attributesOfItem(atPath: directory.path)[.type] as? FileAttributeType) == .typeDirectory else { throw GitFailure("Activity storage is not a regular directory.") }
-            if let attributes = try? FileManager.default.attributesOfItem(atPath: file.path), attributes[.type] as? FileAttributeType != .typeRegular { throw GitFailure("Activity storage is not a regular file.") }
+            guard (try FileManager.default.attributesOfItem(atPath: directory.path)[.type] as? FileAttributeType) == .typeDirectory else { throw appFailure("Activity storage is not a regular directory.") }
+            if let attributes = try? FileManager.default.attributesOfItem(atPath: file.path), attributes[.type] as? FileAttributeType != .typeRegular { throw appFailure("Activity storage is not a regular file.") }
             let temporary = directory.appendingPathComponent("activity-" + UUID().uuidString)
             defer { try? FileManager.default.removeItem(at: temporary) }
-            guard FileManager.default.createFile(atPath: temporary.path, contents: data, attributes: [.posixPermissions: 0o600]), rename(temporary.path, file.path) == 0 else { throw GitFailure("Could not save network activity history.") }
+            guard FileManager.default.createFile(atPath: temporary.path, contents: data, attributes: [.posixPermissions: 0o600]), rename(temporary.path, file.path) == 0 else { throw appFailure("Could not save network activity history.") }
             self.revision = revision
         }
     }
@@ -59,13 +59,13 @@ private final class NetworkHistoryWriter: @unchecked Sendable {
         do {
             if FileManager.default.fileExists(atPath: file.path) {
                 let attributes = try FileManager.default.attributesOfItem(atPath: file.path)
-                guard attributes[.type] as? FileAttributeType == .typeRegular, (attributes[.size] as? NSNumber)?.intValue ?? Int.max < 8 * 1024 * 1024 else { throw GitFailure("Network activity storage is invalid.") }
+                guard attributes[.type] as? FileAttributeType == .typeRegular, (attributes[.size] as? NSNumber)?.intValue ?? Int.max < 8 * 1024 * 1024 else { throw appFailure("Network activity storage is invalid.") }
                 records = Array(try JSONDecoder().decode([NetworkActivityRecord].self, from: Data(contentsOf: file)).prefix(100))
                 for index in records.indices {
                     records[index].output = GitLogRedaction.clean(records[index].output)
                     if records[index].phase == .running {
                         records[index].phase = .failed; records[index].finished = Date()
-                        records[index].output += "\nGitPico was closed before completion was recorded. Inspect the repository and remote before retrying."
+                        records[index].output += String(localized: "\nGitPico was closed before completion was recorded. Inspect the repository and remote before retrying.")
                     }
                 }
             }
@@ -133,13 +133,13 @@ extension RepositoryStore {
     }
     func testRemote(_ name: String) {
         guard !isBusy, let repository else { return }
-        isBusy = true; activity = "Testing remote access…"; connectionTestMessage = "Testing “" + name + "”…"
+        isBusy = true; activity = String(localized: "Testing remote access…"); connectionTestMessage = String(localized: "Testing “\(name)”…")
         operationTask = Task {
             defer { isBusy = false; activity = "" }
             do {
                 _ = try await GitProcess.run(["ls-remote", "--heads", "--", name], at: repository.root, timeout: 30)
-                connectionTestMessage = "Read access to “" + name + "” verified. Push permissions are checked by the server during Push."
-            } catch { connectionTestMessage = "Remote test failed. " + networkFailureAdvice(error.localizedDescription) }
+                connectionTestMessage = String(localized: "Read access to “\(name)” verified. Push permissions are checked by the server during Push.")
+            } catch { connectionTestMessage = String(localized: "Remote test failed. \(networkFailureAdvice(error.localizedDescription))") }
         }
     }
 }

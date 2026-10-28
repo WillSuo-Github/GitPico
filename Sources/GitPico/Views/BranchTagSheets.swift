@@ -83,12 +83,18 @@ struct ReferenceEditSheet: View {
     @State private var name = ""
     @State private var force = false
     @Environment(\.dismiss) private var dismiss
-    var noun: String { reference.isTag ? "Tag" : "Branch" }
-    var title: String { action == .upstream ? "Track Upstream Branch" : (action == .rename ? "Rename " : "Delete ") + noun }
+    var noun: LocalizedStringResource { reference.isTag ? "Tag" : "Branch" }
+    var title: LocalizedStringResource {
+        switch action {
+        case .upstream: "Track Upstream Branch"
+        case .rename: reference.isTag ? "Rename Tag" : "Rename Branch"
+        default: reference.isTag ? "Delete Tag" : "Delete Branch"
+        }
+    }
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             SheetTitle(title)
-            LabeledContent(noun, value: reference.name).textSelection(.enabled)
+            LabeledContent(String(localized: noun), value: reference.name).textSelection(.enabled)
             LabeledContent("Object", value: String(reference.hash.prefix(12))).font(.system(size: 11, design: .monospaced))
             if action == .rename {
                 TextField("New name", text: $name)
@@ -104,7 +110,7 @@ struct ReferenceEditSheet: View {
             }
             ManagementFooter(title: action == .upstream ? "Set Tracking" : title, disabled: store.isBusy || (action == .rename && (name.isEmpty || name == reference.name)), destructive: action == .delete) {
                 let name = name, force = force, ref = reference, action = action
-                store.perform(title + "…") { repository in
+                store.perform("\(title)…") { repository in
                     switch action {
                     case .rename: if ref.isTag { try await repository.renameTag(ref, to: name) } else { try await repository.renameBranch(ref, to: name) }
                     case .delete: if ref.isTag { try await repository.deleteTag(ref) } else { try await repository.deleteBranch(ref, force: force) }
@@ -127,7 +133,7 @@ struct TagInformationSheet: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            SheetTitle(reference.name, icon: "tag")
+            SheetTitle("\(reference.name)", icon: "tag")
             Text(reference.hash).font(.system(size: 11, design: .monospaced)).textSelection(.enabled)
             if let repository = store.repository { SignatureVerificationView(repository: repository, revision: reference.hash, tag: true) }
             ScrollView { Text(text).font(.system(size: 12, design: .monospaced)).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading) }

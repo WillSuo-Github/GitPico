@@ -18,9 +18,9 @@ struct QuickActionItem: Identifiable, Sendable {
 struct QuickActionSearch {
     static func fileItems(_ files: [WorkingFileEntry], hasHEAD: Bool) -> [QuickActionItem] {
         files.flatMap { file in
-            let item = QuickActionItem(id: "file:" + file.path, title: file.path, subtitle: "Working Copy · " + file.status, icon: "doc", target: .file(file.path))
+            let item = QuickActionItem(id: "file:" + file.path, title: file.path, subtitle: String(localized: "Working Copy · \(localizedFileStatus(file.status))"), icon: "doc", target: .file(file.path))
             if file.isTracked && hasHEAD {
-                return [item, QuickActionItem(id: "file-history:" + file.path, title: "File History · " + file.path, subtitle: "Inspect revisions and blame", icon: "clock", target: .history(file.path))]
+                return [item, QuickActionItem(id: "file-history:" + file.path, title: String(localized: "File History · \(file.path)"), subtitle: String(localized: "Inspect revisions and blame"), icon: "clock", target: .history(file.path))]
             }
             return [item]
         }
@@ -57,25 +57,25 @@ extension RepositoryStore {
             case .redo: available = undoAvailability?.redo != nil
             default: available = repository != nil
             }
-            if available { result.append(QuickActionItem(id: "command:" + command.rawValue, title: command.rawValue + "…", subtitle: "Action", icon: "command", target: .command(command))) }
+            if available { result.append(QuickActionItem(id: "command:" + command.rawValue, title: String(localized: command.title) + "…", subtitle: String(localized: "Action"), icon: "command", target: .command(command))) }
         }
         if repository != nil {
-            for destination in [Destination.worktrees, .submodules, .workingCopy, .history, .stashes, .reflog, .branchesReview, .repositorySettings] { result.append(QuickActionItem(id: "destination:" + destination.title, title: "Go to " + destination.title, subtitle: "View", icon: "arrow.right", target: .destination(destination))) }
+            for destination in [Destination.worktrees, .submodules, .workingCopy, .history, .stashes, .reflog, .branchesReview, .repositorySettings] { result.append(QuickActionItem(id: "destination:" + destination.title, title: String(localized: "Go to \(destination.title)"), subtitle: String(localized: "View"), icon: "arrow.right", target: .destination(destination))) }
         }
-        for entry in worktrees where !entry.isBare && entry.prunable == nil { result.append(QuickActionItem(id: "worktree:" + entry.id, title: "Open Worktree · " + entry.name, subtitle: entry.path, icon: "folder.badge.gearshape", target: .worktree(entry))) }
-        for entry in submodules { result.append(QuickActionItem(id: "submodule:" + entry.id, title: (entry.initialized ? "Open Submodule · " : "Initialize Submodule · ") + entry.path, subtitle: entry.status, icon: "shippingbox", target: .submodule(entry))) }
+        for entry in worktrees where !entry.isBare && entry.prunable == nil { result.append(QuickActionItem(id: "worktree:" + entry.id, title: String(localized: "Open Worktree · \(entry.name)"), subtitle: entry.path, icon: "folder.badge.gearshape", target: .worktree(entry))) }
+        for entry in submodules { result.append(QuickActionItem(id: "submodule:" + entry.id, title: entry.initialized ? String(localized: "Open Submodule · \(entry.path)") : String(localized: "Initialize Submodule · \(entry.path)"), subtitle: entry.status, icon: "shippingbox", target: .submodule(entry))) }
         result += QuickActionSearch.fileItems(files, hasHEAD: snapshot?.hasHEAD == true)
         for ref in snapshot?.references ?? [] {
-            result.append(QuickActionItem(id: "ref:" + ref.fullName, title: "History · " + ref.name, subtitle: ref.fullName, icon: "arrow.triangle.branch", target: .reference(ref)))
-            if !ref.isCurrent && (ref.isLocal || ref.isRemote) && !ref.name.hasSuffix("/HEAD") { result.append(QuickActionItem(id: "checkout:" + ref.fullName, title: "Checkout · " + ref.name, subtitle: "Switch branch · " + String(ref.hash.prefix(8)), icon: "arrow.turn.down.right", target: .checkout(ref))) }
+            result.append(QuickActionItem(id: "ref:" + ref.fullName, title: String(localized: "History · \(ref.name)"), subtitle: ref.fullName, icon: "arrow.triangle.branch", target: .reference(ref)))
+            if !ref.isCurrent && (ref.isLocal || ref.isRemote) && !ref.name.hasSuffix("/HEAD") { result.append(QuickActionItem(id: "checkout:" + ref.fullName, title: String(localized: "Checkout · \(ref.name)"), subtitle: String(localized: "Switch branch · \(String(ref.hash.prefix(8)))"), icon: "arrow.turn.down.right", target: .checkout(ref))) }
         }
-        for remote in managedRemotes { result.append(QuickActionItem(id: "remote:" + remote.name, title: "Remote · " + remote.name, subtitle: "Edit configuration", icon: "network", target: .remote(remote))) }
-        for stash in snapshot?.stashes ?? [] { result.append(QuickActionItem(id: "stash:" + stash.id, title: "Apply Stash · " + stash.subject, subtitle: stash.hash, icon: "tray", target: .stash(stash))) }
-        for commit in isHistoryDestination ? visibleCommits : (snapshot?.commits ?? []) { result.append(QuickActionItem(id: "commit:" + commit.hash, title: commit.subject, subtitle: "Commit · " + commit.hash + " · " + commit.author, icon: "clock.arrow.circlepath", target: .commit(commit))) }
+        for remote in managedRemotes { result.append(QuickActionItem(id: "remote:" + remote.name, title: String(localized: "Remote · \(remote.name)"), subtitle: String(localized: "Edit configuration"), icon: "network", target: .remote(remote))) }
+        for stash in snapshot?.stashes ?? [] { result.append(QuickActionItem(id: "stash:" + stash.id, title: String(localized: "Apply Stash · \(stash.subject)"), subtitle: stash.hash, icon: "tray", target: .stash(stash))) }
+        for commit in isHistoryDestination ? visibleCommits : (snapshot?.commits ?? []) { result.append(QuickActionItem(id: "commit:" + commit.hash, title: commit.subject, subtitle: String(localized: "Commit · \(commit.hash) · \(commit.author)"), icon: "clock.arrow.circlepath", target: .commit(commit))) }
         return result
     }
     func runQuickAction(_ item: QuickActionItem, repositoryToken expected: UUID) {
-        guard !isBusy, expected == repositoryToken else { if !isBusy { error = "The repository changed. Reopen Quick Actions." }; return }
+        guard !isBusy, expected == repositoryToken else { if !isBusy { error = String(localized: "The repository changed. Reopen Quick Actions.") }; return }
         switch item.target {
         case .worktree(let entry): openWorktree(entry)
         case .submodule(let entry): if entry.initialized { openSubmodule(entry) } else { manageSubmodule(.manage(entry, .initialize)) }
@@ -91,12 +91,12 @@ extension RepositoryStore {
                     guard token == repositoryToken else { return }
                     workingFileEntries = entries
                     if let entry = entries.first(where: { $0.path == path }) { if entry.assumeUnchanged { showAssumeUnchanged = true }; selectedWorkingFiles = [path]; selectBrowserFile(entry) }
-                    else { error = "The file disappeared. Refresh Quick Actions." }
+                    else { error = String(localized: "The file disappeared. Refresh Quick Actions.") }
                 } catch { if token == repositoryToken { self.error = error.localizedDescription } }
             }
         case .history(let path): navigate(.fileHistory(path, "HEAD"))
         case .checkout(let ref):
-            guard snapshot?.references.contains(where: { $0.fullName == ref.fullName && $0.hash == ref.hash }) == true else { error = "The reference changed. Refresh Quick Actions."; return }
+            guard snapshot?.references.contains(where: { $0.fullName == ref.fullName && $0.hash == ref.hash }) == true else { error = String(localized: "The reference changed. Refresh Quick Actions."); return }
             if ref.isLocal { switchBranch(ref) } else { manage(.createBranch(ref.hash, ref.fullName)) }
         case .reference(let ref): navigate(.reference(ref.fullName))
         case .stash(let stash): stashAction(.apply(stash))

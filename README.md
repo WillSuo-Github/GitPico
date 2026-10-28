@@ -47,6 +47,13 @@ The adapters use the installed CLIs' non-interactive interfaces: [Codex exec](ht
 
 `dist/PicoDemo` is a real repository, preserved across launches so its edits and commits remain available.
 
+## Localization
+
+The interface follows the macOS per-app language, with English plus 37 languages and regional variants.
+App and GitCore text use separate String Catalogs; errors, menus, settings, operation status and count
+plurals share the same validation workflow. Arabic and Hebrew use right-to-left interface layouts while
+diff columns retain their source order. See [localization maintenance](docs/LOCALIZATION.md).
+
 ## Current functionality
 
 - **Completion workflows** (2026-10-26): Settings → Commits manages reusable templates and identity profiles. Commit options preview saved/Git templates before append or explicit replacement, and apply identities only to the current repository. History accepts `author:`, `committer:`, `after:`, `before:`, `path:`, `hash:` and `message:` with quoted values. Commit Details and Tag Information verify GPG/SSH signatures on request. Fixup messages preserve existing draft prose. Root/merge-aware rebase, symbolic-link patch recovery, and index-only gitlink patches are implemented. PR/MR collaboration opens the hosting website. Sleep/wake notifications persist/reconcile workspace state; split diff rows use lazy layout. See [completion validation](docs/COMPLETION-2026-10-26.md) and [parity delta](docs/PARITY-DELTA-2026-10-26.md).

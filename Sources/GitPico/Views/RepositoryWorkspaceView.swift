@@ -27,8 +27,8 @@ struct RepositoryWorkspaceView: View {
             .toolbar {
                 ToolbarItemGroup {
                     if tab.showsRepositoryPicker, tab.root != nil {
-                        Button { workspace.returnToRepository(from: tab.store) } label: { Label("Back to Repository", systemImage: "chevron.left") }
-                            .help("Return to " + (tab.root.map { workspace.library.displayName(for: $0.path) } ?? "repository"))
+                        Button { workspace.returnToRepository(from: tab.store) } label: { Label("Back to Repository", systemImage: "chevron.backward") }
+                            .help("Return to \((tab.root.map { workspace.library.displayName(for: $0.path) } ?? "repository"))")
                     }
                     RepositoryMenu(store: tab.store)
                 }

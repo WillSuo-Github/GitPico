@@ -77,7 +77,7 @@ extension GitRepository {
         try validateInspectionPath(path)
         let commit = try await verifiedCommit(hash)
         let output = try await GitProcess.run(["cat-file", "blob", commit + ":" + path], at: root)
-        guard !output.data.contains(0) else { return "Binary file — text preview unavailable." }
+        guard !output.data.contains(0) else { return localized("Binary file — text preview unavailable.") }
         return output.text
     }
 }

@@ -13,7 +13,7 @@ struct BranchesReviewView: View {
     var baseName: String { branches.first { $0.fullName == base }?.name ?? base }
     var body: some View {
         VStack(spacing: 0) {
-            PaneBar(title: "Branches Review", subtitle: "\(comparisons.count) local \(comparisons.count == 1 ? "branch" : "branches") compared with \(baseName) · \(comparisons.filter(\.isMerged).count) merged", icon: "arrow.left.arrow.right") {
+            PaneBar(title: "Branches Review", subtitle: String(localized: "\(comparisons.count) local branches compared with \(baseName)") + " · " + String(localized: "\(comparisons.filter(\.isMerged).count) merged"), icon: "arrow.left.arrow.right") {
                 Text("Base").foregroundStyle(.secondary).font(.system(size: 11))
                 Picker("Base branch", selection: $base) { ForEach(branches) { Text($0.name).tag($0.fullName) } }.labelsHidden().fixedSize()
             }
@@ -25,14 +25,14 @@ struct BranchesReviewView: View {
                                 .font(.system(size: 14)).foregroundStyle(comparison.isMerged ? Pico.addition : Color.accentColor)
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(comparison.branch.name).font(.system(size: 12.5, weight: .medium)).lineLimit(1).truncationMode(.middle)
-                                Text(comparison.branch.upstream.isEmpty ? "No tracking branch" : comparison.branch.upstream).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
+                                Text(comparison.branch.upstream.isEmpty ? String(localized: "No tracking branch") : comparison.branch.upstream).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
                             }
                             Spacer(minLength: 4)
                             AheadBehind(ahead: comparison.ahead, behind: comparison.behind)
                         }.padding(.vertical, 5).tag(comparison.branch.id)
                     }
                 }.listStyle(.plain)
-                .overlay { if comparisons.isEmpty, failure == nil { EmptyPane(title: branches.count < 2 ? "Only one branch" : "Comparing…", subtitle: branches.count < 2 ? "Create another local branch to review it against \(baseName)." : "", icon: "arrow.triangle.branch") } }
+                .overlay { if comparisons.isEmpty, failure == nil { EmptyPane(title: branches.count < 2 ? String(localized: "Only one branch") : String(localized: "Comparing…"), subtitle: branches.count < 2 ? String(localized: "Create another local branch to review it against \(baseName).") : "", icon: "arrow.triangle.branch") } }
             } trailing: {
                 VStack(alignment: .leading, spacing: 0) {
                     if let item = comparisons.first(where: { $0.branch.id == selected }) {
@@ -46,9 +46,9 @@ struct BranchesReviewView: View {
                                 if !item.branch.isCurrent { Button("Check Out") { store.switchBranch(item.branch) }.controlSize(.small).buttonStyle(.borderedProminent) }
                             }
                             HStack(spacing: 18) {
-                                stat("\(item.ahead)", "ahead", Color.accentColor)
-                                stat("\(item.behind)", "behind", .secondary)
-                                stat("\(item.files.count)", item.files.count == 1 ? "file" : "files", Pico.modified)
+                                stat("\(item.ahead)", String(localized: "ahead"), Color.accentColor)
+                                stat("\(item.behind)", String(localized: "behind"), .secondary)
+                                stat("\(item.files.count)", String(localized: "files", comment: "Label under a changed-file count"), Pico.modified)
                                 Spacer()
                                 Label(item.isMerged ? "Fully merged into \(baseName)" : "Has changes not in \(baseName)", systemImage: item.isMerged ? "checkmark.seal.fill" : "exclamationmark.circle")
                                     .font(.system(size: 12, weight: .medium)).foregroundStyle(item.isMerged ? Pico.addition : Pico.warning)
@@ -64,16 +64,16 @@ struct BranchesReviewView: View {
                                         AuthorAvatar(name: commit.author, size: 24)
                                         VStack(alignment: .leading, spacing: 2) {
                                             Text(commit.subject).font(.system(size: 12.5, weight: .medium)).lineLimit(1)
-                                            Text(commit.author + " · " + commit.shortHash + " · " + commit.date.picoRelative).font(.system(size: 11)).foregroundStyle(.secondary)
+                                            Text("\(commit.author) · \(commit.shortHash) · \(commit.date.picoRelative)").font(.system(size: 11)).foregroundStyle(.secondary)
                                         }
                                         Spacer(minLength: 0)
                                     }.padding(.vertical, 3).contentShape(Rectangle())
                                 }.buttonStyle(.plain)
                             } }
                         }.listStyle(.plain)
-                        .overlay { if (changeset ? item.files.isEmpty : item.commits.isEmpty) { EmptyPane(title: changeset ? "No file differences" : "No unique commits", subtitle: "Everything on this branch is already in \(baseName).", icon: "checkmark.seal") } }
+                        .overlay { if (changeset ? item.files.isEmpty : item.commits.isEmpty) { EmptyPane(title: changeset ? String(localized: "No file differences") : String(localized: "No unique commits"), subtitle: String(localized: "Everything on this branch is already in \(baseName)."), icon: "checkmark.seal") } }
                     } else if let failure { InspectionErrorView(message: failure) }
-                    else { EmptyPane(title: "Select a branch", subtitle: "See how far it has drifted from \(baseName) and what would be merged.", icon: "arrow.triangle.branch") }
+                    else { EmptyPane(title: String(localized: "Select a branch"), subtitle: String(localized: "See how far it has drifted from \(baseName) and what would be merged."), icon: "arrow.triangle.branch") }
                 }.frame(minWidth: 400, maxWidth: .infinity, maxHeight: .infinity)
             }
         }.task(id: base + (store.snapshot?.branch ?? "") + String(store.snapshot?.commits.count ?? 0)) {

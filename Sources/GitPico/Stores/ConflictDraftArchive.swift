@@ -21,7 +21,7 @@ final class ConflictDraftArchive: @unchecked Sendable {
         try await Task.detached { try self.queue.sync {
             let data = try self.read()
             let document = try data.map { try JSONDecoder().decode(Document.self, from: $0) }
-            guard document == nil || document?.root == self.root else { throw GitFailure("Conflict drafts belong to a different repository.") }
+            guard document == nil || document?.root == self.root else { throw appFailure("Conflict drafts belong to a different repository.") }
             let values = document?.drafts ?? [:]
             try self.validate(values)
             self.diskData = data; self.loaded = true
@@ -34,27 +34,27 @@ final class ConflictDraftArchive: @unchecked Sendable {
     func flush(_ values: [String: ConflictDraft], revision: UInt64) throws {
         try queue.sync {
             if !loaded, values.isEmpty { return } // Preserve an unreadable archive without trapping an unedited tab.
-            guard loaded else { throw GitFailure("Conflict draft storage could not be read. Export your edits before closing.") }
+            guard loaded else { throw appFailure("Conflict draft storage could not be read. Export your edits before closing.") }
             guard revision >= savedRevision else { return }
             try validate(values)
             let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
             let data = try encoder.encode(Document(root: root, drafts: values))
-            guard data.count <= 64 * 1024 * 1024 else { throw GitFailure("Conflict drafts exceed 64 MB. Export and remove older drafts.") }
+            guard data.count <= 64 * 1024 * 1024 else { throw appFailure("Conflict drafts exceed 64 MB. Export and remove older drafts.") }
             if values.isEmpty, diskData == nil { savedRevision = revision; return }
             let directory = file.deletingLastPathComponent()
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
             try checkDirectory(directory)
             let fd = Darwin.open(file.path + ".lock", O_CREAT | O_RDWR | O_NOFOLLOW, 0o600)
-            guard fd >= 0 else { throw GitFailure("Cannot lock conflict draft storage.") }
+            guard fd >= 0 else { throw appFailure("Cannot lock conflict draft storage.") }
             defer { Darwin.close(fd) }
-            guard flock(fd, LOCK_EX | LOCK_NB) == 0 else { throw GitFailure("Another process is saving conflict drafts. Try again.") }
+            guard flock(fd, LOCK_EX | LOCK_NB) == 0 else { throw appFailure("Another process is saving conflict drafts. Try again.") }
             defer { flock(fd, LOCK_UN) }
-            guard try read() == diskData else { throw GitFailure("Conflict drafts changed in another process. Keep this window open and export your edits.") }
+            guard try read() == diskData else { throw appFailure("Conflict drafts changed in another process. Keep this window open and export your edits.") }
             if data != diskData {
                 let temporary = directory.appendingPathComponent("draft-" + UUID().uuidString)
                 defer { try? FileManager.default.removeItem(at: temporary) }
-                guard FileManager.default.createFile(atPath: temporary.path, contents: data, attributes: [.posixPermissions: 0o600]) else { throw GitFailure("Cannot save conflict drafts.") }
-                guard rename(temporary.path, file.path) == 0 else { throw GitFailure("Cannot install the saved conflict drafts.") }
+                guard FileManager.default.createFile(atPath: temporary.path, contents: data, attributes: [.posixPermissions: 0o600]) else { throw appFailure("Cannot save conflict drafts.") }
+                guard rename(temporary.path, file.path) == 0 else { throw appFailure("Cannot install the saved conflict drafts.") }
                 diskData = data
             }
             savedRevision = revision
@@ -62,20 +62,20 @@ final class ConflictDraftArchive: @unchecked Sendable {
     }
     private func checkDirectory(_ directory: URL) throws {
         // The app-owned directory must be real; system ancestors such as /var may be links.
-        if let attributes = try? FileManager.default.attributesOfItem(atPath: directory.path), attributes[.type] as? FileAttributeType != .typeDirectory { throw GitFailure("Conflict draft storage is not a regular directory.") }
+        if let attributes = try? FileManager.default.attributesOfItem(atPath: directory.path), attributes[.type] as? FileAttributeType != .typeDirectory { throw appFailure("Conflict draft storage is not a regular directory.") }
     }
     private func read() throws -> Data? {
         try checkDirectory(file.deletingLastPathComponent())
         let attributes: [FileAttributeKey: Any]
         do { attributes = try FileManager.default.attributesOfItem(atPath: file.path) }
         catch let error as CocoaError where error.code == .fileNoSuchFile || error.code == .fileReadNoSuchFile { return nil }
-        guard attributes[.type] as? FileAttributeType == .typeRegular, (attributes[.size] as? NSNumber)?.intValue ?? Int.max <= 64 * 1024 * 1024 else { throw GitFailure("Conflict draft storage is not a regular file under 64 MB.") }
+        guard attributes[.type] as? FileAttributeType == .typeRegular, (attributes[.size] as? NSNumber)?.intValue ?? Int.max <= 64 * 1024 * 1024 else { throw appFailure("Conflict draft storage is not a regular file under 64 MB.") }
         return try Data(contentsOf: file)
     }
     private func validate(_ values: [String: ConflictDraft]) throws {
         guard values.count <= 128, values.allSatisfy({ path, draft in
             !path.isEmpty && !path.hasPrefix("/") && !path.utf8.contains(0) && !path.split(separator: "/").contains("..") && draft.snapshot.path == path && draft.text.utf8.count <= 1_048_576 && draft.snapshot.canEdit
-        }) else { throw GitFailure("Invalid conflict drafts or too many saved edits.") }
+        }) else { throw appFailure("Invalid conflict drafts or too many saved edits.") }
     }
 }
 

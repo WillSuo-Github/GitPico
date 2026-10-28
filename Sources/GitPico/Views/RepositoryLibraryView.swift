@@ -11,7 +11,7 @@ extension RepositoryLibraryDrop: Transferable {
 private struct LibraryEditor: Identifiable {
     enum Kind { case create(UUID?), renameRepository(UUID), renameGroup(UUID) }
     let id = UUID()
-    let title: String
+    let title: LocalizedStringResource
     let value: String
     let kind: Kind
 }
@@ -64,7 +64,7 @@ struct RepositoryLibraryView: View {
                                 Text(Pico.abbreviated(entry.path)).font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
                             }
                             Spacer()
-                            if entry.path == store.snapshot?.root.path { Chip(text: "Open", tint: .accentColor) }
+                            if entry.path == store.snapshot?.root.path { Chip(text: String(localized: "Open"), tint: .accentColor) }
                             Text(library.breadcrumb(entry.group)).font(.caption).foregroundStyle(.tertiary).lineLimit(1)
                         }.padding(.vertical, 4).tag(entry.id).contentShape(Rectangle())
                             .onTapGesture(count: 2) { open(entry) }
@@ -143,7 +143,7 @@ struct RepositoryLibraryView: View {
 }
 
 private struct LibraryNameSheet: View {
-    let title: String
+    let title: LocalizedStringResource
     let initial: String
     let action: (String) -> Void
     @State private var name = ""

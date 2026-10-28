@@ -5,14 +5,14 @@ public enum PullPolicy: Int, Codable, CaseIterable, Sendable {
     case merge = 1, rebase = 2
     public var title: String {
         switch self {
-        case .merge: "Merge"
-        case .rebase: "Rebase"
+        case .merge: localized("Merge")
+        case .rebase: localized("Rebase")
         }
     }
     public var explanation: String {
         switch self {
-        case .merge: "Fast-forward when possible. Create a merge commit when the branches diverge; local commit hashes are preserved."
-        case .rebase: "Replay local commits on top of the upstream branch. Local commit hashes change."
+        case .merge: localized("Fast-forward when possible. Create a merge commit when the branches diverge; local commit hashes are preserved.")
+        case .rebase: localized("Replay local commits on top of the upstream branch. Local commit hashes change.")
         }
     }
 }
@@ -43,8 +43,8 @@ extension GitRepository {
         }
         _ = try await GitProcess.run(["pull"] + flags, at: root, timeout: 120)
         if try await headPosition() != before {
-            do { try await recordHistory(before, title: "Pull (" + policy.title + ")", restoresFiles: false) }
-            catch { throw GitFailure("Pull completed, but its Undo record could not be saved. Inspect History or Reflog before another operation. " + error.localizedDescription) }
+            do { try await recordHistory(before, title: localized("Pull (\(policy.title))"), restoresFiles: false) }
+            catch { throw GitFailure("Pull completed, but its Undo record could not be saved. Inspect History or Reflog before another operation. \(error.localizedDescription)") }
         }
     }
 }

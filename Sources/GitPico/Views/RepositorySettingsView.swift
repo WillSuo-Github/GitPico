@@ -94,7 +94,7 @@ struct IgnoreFileEditor: View {
                 Spacer()
                 Chip(text: kind == .ignores ? ".gitignore" : "info/exclude", icon: "doc.text", tint: .secondary, monospaced: true).help(path)
             }
-            TextEditor(text: $text).font(.system(size: 12, design: .monospaced)).scrollContentBackground(.hidden).padding(8)
+            TextEditor(text: $text).environment(\.layoutDirection, .leftToRight).font(.system(size: 12, design: .monospaced)).scrollContentBackground(.hidden).padding(8)
                 .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(Color(nsColor: .separatorColor), lineWidth: 0.5))
             if let error { Text(error).font(.caption).foregroundStyle(.red).textSelection(.enabled) }

@@ -27,7 +27,7 @@ import SwiftUI
         } else if !links.isEmpty {
             Menu {
                 ForEach(links, id: \.name) { link in
-                    Link(link.name + " · " + link.repository.project, destination: link.repository.reviewsWebURL)
+                    Link("\(link.name) · \(link.repository.project)", destination: link.repository.reviewsWebURL)
                 }
             } label: { Label("Pull / Merge Requests on Web", systemImage: "arrow.up.right.square") }
         }

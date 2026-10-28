@@ -51,7 +51,7 @@ public actor GitRepository {
         if hasHEAD, references.contains(where: { $0.isCurrent && !$0.upstream.isEmpty }) {
             (ahead, behind) = try await upstreamDivergence()
         }
-        return RepositorySnapshot(root: root, branch: branchOutput.status == 0 ? branchOutput.text.trimmingCharacters(in: .newlines).replacingOccurrences(of: "^refs/heads/", with: "", options: .regularExpression) : "Detached HEAD", changes: GitParser.status(statusOutput.data), commits: commits, references: references, stashes: stashOutput, remotes: remotesOutput.text.split(separator: "\n").map(String.init), ahead: ahead, behind: behind, hasHEAD: hasHEAD, identity: try await identity, operation: try await operation, historyCount: historyCount, head: position, historyCountIsExact: reusable?.historyCountIsExact ?? ((countHistory && options.query.isEmpty) || commits.count < options.limit))
+        return RepositorySnapshot(root: root, branch: branchOutput.status == 0 ? branchOutput.text.trimmingCharacters(in: .newlines).replacingOccurrences(of: "^refs/heads/", with: "", options: .regularExpression) : localized("Detached HEAD"), changes: GitParser.status(statusOutput.data), commits: commits, references: references, stashes: stashOutput, remotes: remotesOutput.text.split(separator: "\n").map(String.init), ahead: ahead, behind: behind, hasHEAD: hasHEAD, identity: try await identity, operation: try await operation, historyCount: historyCount, head: position, historyCountIsExact: reusable?.historyCountIsExact ?? ((countHistory && options.query.isEmpty) || commits.count < options.limit))
     }
 
     public func diff(_ change: FileChange, staged: Bool, context: Int = 7, ignoreWhitespace: Bool = false, cancellable: Bool = false) async throws -> String {
@@ -111,11 +111,11 @@ public actor GitRepository {
         guard amend || changes.contains(where: \.isStaged) else { throw GitFailure("Stage at least one change before committing.") }
         _ = try await GitProcess.run(["commit"] + (amend ? ["--amend"] : []) + (signOff ? ["--signoff"] : []) + ["-m", message], at: root, timeout: 120)
         do {
-            try await recordHistory(before, title: amend ? "Amend Commit" : "Commit", restoresFiles: false)
+            try await recordHistory(before, title: amend ? localized("Amend Commit") : localized("Commit"), restoresFiles: false)
             return CommitOutcome(undoWarning: nil)
         } catch {
             // Git has already created the commit. A local journal failure must not invite a retry.
-            return CommitOutcome(undoWarning: "The commit was created, but its Undo record could not be saved. " + error.localizedDescription)
+            return CommitOutcome(undoWarning: localized("The commit was created, but its Undo record could not be saved. \(error.localizedDescription)"))
         }
     }
 

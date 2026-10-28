@@ -108,16 +108,16 @@ struct HashChip: View {
             .padding(.horizontal, 7).padding(.vertical, 3)
             .background(.quaternary.opacity(0.6), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
         }
-        .buttonStyle(.plain).help("Copy " + hash).accessibilityLabel("Copy hash " + hash)
+        .buttonStyle(.plain).help("Copy \(hash)").accessibilityLabel("Copy hash \(hash)")
     }
 }
 
 /// Uppercase caption used above grouped content.
 struct SectionCaption: View {
-    let text: String
-    init(_ text: String) { self.text = text }
+    let text: LocalizedStringResource
+    init(_ text: LocalizedStringResource) { self.text = text }
     var body: some View {
-        Text(text.uppercased()).font(.system(size: 10, weight: .semibold)).tracking(0.6).foregroundStyle(.secondary)
+        Text(String(localized: text).localizedUppercase).font(.system(size: 10, weight: .semibold)).tracking(0.6).foregroundStyle(.secondary)
     }
 }
 
@@ -145,7 +145,7 @@ struct DiffStat: View {
 
 /// Consistent pane header: icon, title, optional subtitle and trailing controls.
 struct PaneBar<Trailing: View>: View {
-    let title: String
+    let title: LocalizedStringResource
     var subtitle: String? = nil
     var icon: String? = nil
     @ViewBuilder var trailing: Trailing
@@ -164,7 +164,7 @@ struct PaneBar<Trailing: View>: View {
     }
 }
 extension PaneBar where Trailing == EmptyView {
-    init(title: String, subtitle: String? = nil, icon: String? = nil) {
+    init(title: LocalizedStringResource, subtitle: String? = nil, icon: String? = nil) {
         self.init(title: title, subtitle: subtitle, icon: icon) { EmptyView() }
     }
 }
@@ -184,7 +184,7 @@ extension View {
 
 /// Compact "label  value" row for metadata grids.
 struct MetadataRow: View {
-    let label: String
+    let label: LocalizedStringResource
     let value: String
     var monospaced = false
     var body: some View {
@@ -207,7 +207,7 @@ extension Date {
 /// Full-width notice under the toolbar for in-progress operations and recoverable warnings.
 struct NoticeBanner<Actions: View>: View {
     let icon: String
-    let title: String
+    let title: LocalizedStringResource
     var message: String? = nil
     var tint: Color = Pico.warning
     @ViewBuilder var actions: Actions
@@ -231,12 +231,13 @@ struct NoticeBanner<Actions: View>: View {
 
 /// Sheet and pane title with a tinted symbol; the symbol is inferred from the title when not given.
 struct SheetTitle: View {
-    let title: String
+    let title: LocalizedStringResource
     var icon: String? = nil
-    init(_ title: String, icon: String? = nil) { self.title = title; self.icon = icon }
+    init(_ title: LocalizedStringResource, icon: String? = nil) { self.title = title; self.icon = icon }
     var symbol: String {
         if let icon { return icon }
-        let text = title.lowercased()
+        // Infer from the English source key so the symbol does not depend on the display language.
+        let text = title.key.lowercased()
         let rules: [(String, String)] = [
             ("discard", "trash"), ("delete", "trash"), ("remove", "trash"), ("clear", "trash"),
             ("recover", "arrow.uturn.backward.circle"), ("undo", "arrow.uturn.backward.circle"), ("redo", "arrow.uturn.forward.circle"), ("restore", "clock.arrow.circlepath"),

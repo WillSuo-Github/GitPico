@@ -55,21 +55,21 @@ extension GitRepository {
         do {
             if plan.operation != .checkout {
                 let command = plan.operation == .push ? "push" : "fetch"
-                await progress?(command == "push" ? "Uploading LFS objects…" : "Downloading LFS objects…")
+                await progress?(command == "push" ? localized("Uploading LFS objects…") : localized("Downloading LFS objects…"))
                 let result = try await GitProcess.run(["lfs", command] + (plan.allObjects ? ["--all"] : []) + [plan.remote, plan.hash], at: root, timeout: 600, lfsEnvironment: env)
                 output += result.text + result.error
             }
             if plan.operation == .checkout || plan.operation == .pull {
                 // Fetching immutable objects must not turn into checkout on an externally switched branch.
                 try await requireLFSTransfer(plan)
-                await progress?("Checking out cached LFS objects; modified working files are kept…")
+                await progress?(localized("Checking out cached LFS objects; modified working files are kept…"))
                 let result = try await GitProcess.run(["lfs", "checkout"], at: root, timeout: 600, lfsEnvironment: env)
                 output += result.text + result.error
             }
             let report = LFSTransferReport(id: id, date: Date(), operation: plan.operation.rawValue, remote: plan.remote, hash: plan.hash, output: output, succeeded: true)
             try await writeExtensionRecord(report, name: "lfs/transfers/" + id.uuidString + ".json")
             poll.cancel(); await poll.value
-            await progress?(output.isEmpty ? "Completed." : output)
+            await progress?(output.isEmpty ? localized("Completed.") : output)
             return report
         } catch {
             let report = LFSTransferReport(id: id, date: Date(), operation: plan.operation.rawValue, remote: plan.remote, hash: plan.hash, output: output + error.localizedDescription, succeeded: false)

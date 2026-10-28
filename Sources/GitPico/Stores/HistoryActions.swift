@@ -22,7 +22,7 @@ extension RepositoryStore {
         commitSubject = "fixup! " + commit.subject
         if !existing.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { commitBody = existing }
         navigate(.workingCopy)
-        commitFeedback = "Fixup message prepared. Stage the correction and commit, then use Autosquash in Interactive Rebase."
+        commitFeedback = String(localized: "Fixup message prepared. Stage the correction and commit, then use Autosquash in Interactive Rebase.")
     }
     func startInteractiveRebase(_ plan: InteractiveRebasePlan) {
         protectedPerform("Interactive Rebase…") { try await $0.startInteractiveRebase(plan) }

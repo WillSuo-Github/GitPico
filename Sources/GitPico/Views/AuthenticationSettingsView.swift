@@ -25,7 +25,7 @@ struct AuthenticationSettingsView: View {
                         Text("System Git / SSH").tag(nil as UUID?)
                         ForEach(store.authentication.profiles) { profile in Text(profile.label).tag(Optional(profile.id)) }
                     }.disabled(oauth.isRunning || store.networkActivity?.runningCount ?? 0 > 0)
-                    Text(root.lastPathComponent + " · HTTPS profiles apply only to their exact host. SSH remotes continue to use system SSH.").font(.caption).foregroundStyle(.secondary)
+                    Text("\(root.lastPathComponent) · HTTPS profiles apply only to their exact host. SSH remotes continue to use system SSH.").font(.caption).foregroundStyle(.secondary)
                 }
             } header: { Text("Connection") }
             Section("Sign In with Your Browser") {
@@ -45,7 +45,7 @@ struct AuthenticationSettingsView: View {
                         Button("Copy Code") { Pico.copy(challenge.userCode) }
                         Link("Open GitHub", destination: challenge.verificationURL)
                     }
-                    Text("Enter this code only at " + challenge.verificationURL.absoluteString + ". It expires at " + challenge.expiresAt.formatted(date: .omitted, time: .shortened) + ".").font(.caption).foregroundStyle(.secondary)
+                    Text("Enter this code only at \(challenge.verificationURL.absoluteString). It expires at \(challenge.expiresAt.formatted(date: .omitted, time: .shortened)).").font(.caption).foregroundStyle(.secondary)
                 }
                 if let message = oauth.message { Text(message).font(.callout).textSelection(.enabled) }
                 if let failure = oauth.failure { Text(failure).font(.callout).foregroundStyle(Pico.deletion).textSelection(.enabled) }
@@ -55,7 +55,7 @@ struct AuthenticationSettingsView: View {
                 TextField("Server hostname", text: $customHost, prompt: Text("git.example.com"))
                 TextField("Public OAuth Client ID", text: $customClientID)
                 Text("Register a public native OAuth application on this server. GitHub requires Device Flow; GitLab requires PKCE with Confidential disabled.").font(.caption).foregroundStyle(.secondary)
-                Text("Callback: gitpico://oauth/" + customProvider.rawValue + "/callback").font(.system(.caption, design: .monospaced)).textSelection(.enabled)
+                Text("Callback: gitpico://oauth/\(customProvider.rawValue)/callback").font(.system(.caption, design: .monospaced)).textSelection(.enabled)
                 Button("Sign In to This Server") {
                     run {
                         let configuration = try OAuthConfiguration(provider: customProvider, host: customHost.trimmingCharacters(in: .whitespacesAndNewlines), clientID: customClientID.trimmingCharacters(in: .whitespacesAndNewlines))
@@ -67,7 +67,7 @@ struct AuthenticationSettingsView: View {
                 if store.authentication.profiles.isEmpty { Text("No saved accounts").foregroundStyle(.secondary) }
                 ForEach(store.authentication.profiles) { profile in
                     HStack {
-                        VStack(alignment: .leading) { Text(profile.username).fontWeight(.medium); Text(profile.provider.rawValue + " · " + profile.host + (profile.isOAuth ? " · OAuth" : " · Token")).font(.caption).foregroundStyle(.secondary) }
+                        VStack(alignment: .leading) { Text(profile.username).fontWeight(.medium); Text(verbatim: String(localized: profile.provider.title) + " · " + profile.host + " · " + (profile.isOAuth ? "OAuth" : String(localized: "Token"))).font(.caption).foregroundStyle(.secondary) }
                         Spacer()
                         if profile.provider != .generic { Button("Verify") { verify(profile) }.disabled(busy || oauth.isRunning) }
                         if profile.isOAuth { Button("Sign In Again…") { reconnect(profile) }.disabled(busy || oauth.isRunning || store.networkActivity?.runningCount ?? 0 > 0) }
@@ -79,7 +79,7 @@ struct AuthenticationSettingsView: View {
                 HStack { Link("GitHub Authorized Apps", destination: URL(string: "https://github.com/settings/applications")!); Link("GitLab Authorized Apps", destination: URL(string: "https://gitlab.com/-/user_settings/applications")!) }
             }
             Section {
-                Picker("Service", selection: $provider) { ForEach(HostingProvider.allCases, id: \.self) { Text($0.rawValue).tag($0) } }
+                Picker("Service", selection: $provider) { ForEach(HostingProvider.allCases, id: \.self) { Text($0.title).tag($0) } }
                     .onChange(of: provider) { if editing == nil { host = provider == .github ? "github.com" : provider == .gitlab ? "gitlab.com" : "" } }.disabled(editing != nil)
                 TextField("Host", text: $host, prompt: Text("git.example.com")).disabled(editing != nil)
                 TextField("Username", text: $username).disabled(editing != nil)
@@ -92,7 +92,7 @@ struct AuthenticationSettingsView: View {
                         run {
                             if let editing { try store.authentication.replaceToken(editing, token: token) }
                             else { _ = try store.authentication.add(provider: provider, host: host, username: username, token: token, for: store.snapshot?.root) }
-                            editing = nil; token = ""; updateContexts(); message = "Account saved. Verify it, then test access to your remote."
+                            editing = nil; token = ""; updateContexts(); message = String(localized: "Account saved. Verify it, then test access to your remote.")
                         }
                     }.disabled(busy || oauth.isRunning || token.isEmpty || username.isEmpty || host.isEmpty || store.networkActivity?.runningCount ?? 0 > 0)
                 }
@@ -111,7 +111,7 @@ struct AuthenticationSettingsView: View {
                     HStack { Text(error).foregroundStyle(Pico.deletion).font(.caption); Button("Reload") { store.authentication.reload(); updateContexts() } }
                 }
                 ForEach(store.managedRemotes) { remote in
-                    Button("Test Remote “" + remote.name + "”") { store.configureNetworkContext(); store.testRemote(remote.name) }.disabled(store.isBusy)
+                    Button("Test Remote “\(remote.name)”") { store.configureNetworkContext(); store.testRemote(remote.name) }.disabled(store.isBusy)
                 }
                 Button("Inspect System Authentication") { inspectSystem() }.disabled(busy || store.repository == nil)
                 HStack {
@@ -143,7 +143,7 @@ struct AuthenticationSettingsView: View {
             do {
                 let vault = store.authentication.vault
                 let credential = try await Task.detached { try vault.read(profile.id) }.value
-                guard let existing = credential.oauth?.configuration else { throw GitFailure("This OAuth credential is missing. Remove the account and sign in again.") }
+                guard let existing = credential.oauth?.configuration else { throw appFailure("This OAuth credential is missing. Remove the account and sign in again.") }
                 let configuration = try OAuthConfiguration(provider: existing.provider, host: existing.host, clientID: existing.clientID)
                 oauth.start(configuration, authentication: store.authentication, root: nil, reconnecting: profile, showDevice: { url in NSWorkspace.shared.open(url) }, saved: updateContexts)
             } catch { message = GitLogRedaction.clean(error.localizedDescription) }
@@ -161,7 +161,7 @@ struct AuthenticationSettingsView: View {
                 let vault = store.authentication.vault
                 let credential = profile.isOAuth ? try await OAuthCredentialRefresher.shared.credential(profile.id) : try await Task.detached { try vault.read(profile.id) }.value
                 let result = try await HostingAccountClient.verify(profile, credential: credential)
-                message = "Signed in as " + result.login + ". " + result.description
+                message = String(localized: "Signed in as \(result.login). \(result.description)")
             } catch { message = GitLogRedaction.clean(error.localizedDescription) }
         }
     }
@@ -175,8 +175,8 @@ struct AuthenticationSettingsView: View {
                     try await GitProcess.run(["config", "--get-all", "credential.helper"], at: repository.root, allowed: [0,1])
                 }
                 let helpers = GitLogRedaction.clean(output.text.trimmingCharacters(in: .whitespacesAndNewlines))
-                let agent = ProcessInfo.processInfo.environment["SSH_AUTH_SOCK"] == nil ? "SSH_AUTH_SOCK is not set for this app. SSH may still use keys configured in your system SSH setup." : "SSH_AUTH_SOCK is set. This does not verify agent connectivity or unlocked keys; use Test Remote to check access."
-                message = "Credential helpers: " + (helpers.isEmpty ? "none configured" : helpers) + "\n" + agent
+                let agent = ProcessInfo.processInfo.environment["SSH_AUTH_SOCK"] == nil ? String(localized: "SSH_AUTH_SOCK is not set for this app. SSH may still use keys configured in your system SSH setup.") : String(localized: "SSH_AUTH_SOCK is set. This does not verify agent connectivity or unlocked keys; use Test Remote to check access.")
+                message = (helpers.isEmpty ? String(localized: "Credential helpers: none configured") : String(localized: "Credential helpers: \(helpers)")) + "\n" + agent
             } catch { message = error.localizedDescription }
         }
     }

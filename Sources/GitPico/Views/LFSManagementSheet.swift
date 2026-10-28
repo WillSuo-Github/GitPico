@@ -32,7 +32,7 @@ struct LFSManagementSheet: View {
                 ForEach(change.paths, id: \.self) { Text($0).font(.caption).textSelection(.enabled) }
                 ScrollView { Text(change.preview).font(.system(size: 12, design: .monospaced)).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading) }.frame(maxHeight: 290)
             } else if let transfer {
-                Text(transfer.operation.rawValue + " · " + transfer.remote).font(.headline)
+                Text("\(transfer.operation.title) · \(transfer.remote)").font(.headline)
                 Text(transfer.hash).font(.caption.monospaced()).textSelection(.enabled)
                 Text(transfer.endpoint).font(.caption).textSelection(.enabled)
                 Text("Transfers immutable LFS objects; Git branches are not pushed or pulled. Pull checks out cached content only after checking HEAD and staging again. Modified working files are kept by Git LFS.").font(.callout).foregroundStyle(.secondary)
@@ -42,7 +42,7 @@ struct LFSManagementSheet: View {
                 switch request.action {
                 case .renormalize(let paths):
                     Text("Convert existing tracked files to LFS").font(.headline)
-                    Text(paths.isEmpty ? "Review up to 128 tracked files that match current LFS attributes." : paths.joined(separator: "\n")).font(.caption)
+                    Text(paths.isEmpty ? String(localized: "Review up to 128 tracked files that match current LFS attributes.") : paths.joined(separator: "\n")).font(.caption)
                     Text("Current file contents will be staged after applying LFS filters. Review the file list before applying.").foregroundStyle(.secondary)
                 case .change(let action):
                     switch action {
@@ -60,14 +60,14 @@ struct LFSManagementSheet: View {
                         Text("Changes only the reviewed .gitattributes. Files and staging are preserved; no historical commits are rewritten. Commit the attributes change and re-stage existing files explicitly when converting them.").foregroundStyle(.secondary)
                     }
                 case .transfer(let operation):
-                    Text(operation.rawValue).font(.headline)
+                    Text(operation.title).font(.headline)
                     if operation != .checkout {
                         Picker("Remote", selection: $remote) { ForEach(store.managedRemotes) { item in Text(item.name).tag(item.name) } }
                         TextField("Revision", text: $revision).textFieldStyle(.roundedBorder)
                         if operation == .fetch || operation == .push { Toggle("Include all LFS objects in history reachable from this revision", isOn: $allObjects).toggleStyle(.checkbox) }
                     }
                 case .restore(let record):
-                    Text("Restore · " + record.title).font(.headline)
+                    Text("Restore · \(record.title)").font(.headline)
                     Text(record.date.formatted()).foregroundStyle(.secondary)
                     ForEach(record.affectedPaths, id: \.self) { Text($0).font(.caption).textSelection(.enabled) }
                     Text("Restores saved local configuration or attributes only while HEAD and the recorded files still match. Later changes are preserved. Saved conversion records restore the earlier index; working file contents are preserved.").foregroundStyle(.secondary)
@@ -90,7 +90,7 @@ struct LFSManagementSheet: View {
         }
     }
     func review() async {
-        guard let repository = store.repository, request.token == store.repositoryToken else { failure = "The repository changed. Reopen this LFS preview."; return }
+        guard let repository = store.repository, request.token == store.repositoryToken else { failure = String(localized: "The repository changed. Reopen this LFS preview."); return }
         loading = true; failure = nil; defer { loading = false }
         do {
             switch request.action {

@@ -41,9 +41,9 @@ public struct OAuthHTTPSClient: OAuthHTTPTransport {
             if Task.isCancelled || (error as? URLError)?.code == .cancelled { throw CancellationError() }
             let code = (error as? URLError)?.code
             if code == .secureConnectionFailed || code == .serverCertificateUntrusted || code == .serverCertificateHasBadDate || code == .serverCertificateHasUnknownRoot {
-                throw OAuthTransportFailure(retryable: false, message: "The secure connection failed. Check the server certificate, system date and proxy. Certificate validation remains enabled.")
+                throw OAuthTransportFailure(retryable: false, message: localized("The secure connection failed. Check the server certificate, system date and proxy. Certificate validation remains enabled."))
             }
-            throw OAuthTransportFailure(retryable: [.timedOut, .networkConnectionLost, .notConnectedToInternet, .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed].contains(code), message: "Could not reach the server. Check your network or proxy and try again.")
+            throw OAuthTransportFailure(retryable: [.timedOut, .networkConnectionLost, .notConnectedToInternet, .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed].contains(code), message: localized("Could not reach the server. Check your network or proxy and try again."))
         }
     }
     private final class NoOAuthRedirects: NSObject, URLSessionTaskDelegate, @unchecked Sendable {

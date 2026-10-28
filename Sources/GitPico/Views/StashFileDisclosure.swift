@@ -65,9 +65,9 @@ struct StashFileDisclosure: View {
                     Toggle("Select \(file.path)", isOn: $selected).labelsHidden().toggleStyle(.checkbox)
                     StatusBadge(status: file.status)
                     FilePathLabel(path: file.path).picoDrag(store, .stashFiles(stash, [file.path])).help("Drag to Working Copy to apply this file")
-                    if file.isUntracked { Chip(text: "Untracked", tint: .teal) }
+                    if file.isUntracked { Chip(text: String(localized: "Untracked"), tint: .teal) }
                     Spacer()
-                    if let statistics { if statistics.isBinary { Chip(text: "Binary", tint: .secondary) } else { DiffStat(additions: statistics.additions, deletions: statistics.deletions) } }
+                    if let statistics { if statistics.isBinary { Chip(text: String(localized: "Binary"), tint: .secondary) } else { DiffStat(additions: statistics.additions, deletions: statistics.deletions) } }
                     Button("Apply File…") { store.stashAction(.files(stash, [file.path])) }.controlSize(.small)
                 }.padding(.vertical, 8)
             }.padding(.horizontal, 14)

@@ -117,7 +117,7 @@ extension GitRepository {
             return reopened
         } catch {
             record.state = "needsRepair"; record.diagnostic = error.localizedDescription; try? saveMainMigration(record)
-            throw GitFailure(error.localizedDescription + "\nRepository data is at " + (FileManager.default.fileExists(atPath: plan.destination.path) ? plan.destination.path : plan.source.path) + ". Migration recovery is saved at " + directory.path + ".")
+            throw GitFailure("\(error.localizedDescription)\nRepository data is at \((FileManager.default.fileExists(atPath: plan.destination.path) ? plan.destination.path : plan.source.path)). Migration recovery is saved at \(directory.path).")
         }
     }
     public func mainRepositoryMigrations() throws -> [MainRepositoryMigrationBackup] {
@@ -205,7 +205,7 @@ extension GitRepository {
             return try await GitRepository.open(original)
         } catch {
             updated.diagnostic = error.localizedDescription; try? saveMainMigration(updated)
-            throw GitFailure(error.localizedDescription + "\nBoth repository copies were kept in " + journal.path + ". Reopen the migration history at its current location to resume.")
+            throw GitFailure("\(error.localizedDescription)\nBoth repository copies were kept in \(journal.path). Reopen the migration history at its current location to resume.")
         }
     }
 }

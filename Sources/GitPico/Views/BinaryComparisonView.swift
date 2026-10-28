@@ -89,7 +89,7 @@ struct BinaryComparisonView: View {
     }
     @ViewBuilder private func preview(_ side: BinaryPreviewSide) -> some View {
         if let bytes = side.thumbnail, let image = NSImage(data: bytes) {
-            Image(nsImage: image).resizable().scaledToFit().accessibilityLabel(side.dimensions.map { "Image, " + $0 } ?? "Image preview")
+            Image(nsImage: image).resizable().scaledToFit().accessibilityLabel(side.dimensions.map { String(localized: "Image, \($0)") } ?? String(localized: "Image preview"))
         } else {
             ContentUnavailableView(side.exists ? "No Image Preview" : "File Absent", systemImage: side.exists ? "doc" : "minus.circle")
         }
@@ -97,9 +97,9 @@ struct BinaryComparisonView: View {
     private func information(_ side: BinaryPreviewSide, title: String) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title).font(.headline)
-            Text(side.exists ? ByteCountFormatter.string(fromByteCount: Int64(side.bytes), countStyle: .file) : "Absent").foregroundStyle(.secondary)
+            Text(side.exists ? ByteCountFormatter.string(fromByteCount: Int64(side.bytes), countStyle: .file) : String(localized: "Absent")).foregroundStyle(.secondary)
             if let dimensions = side.dimensions { Text(dimensions).font(.caption).foregroundStyle(.secondary) }
-            if side.exists { Text("SHA-256 " + side.digest).font(.system(size: 10, design: .monospaced)).textSelection(.enabled) }
+            if side.exists { Text("SHA-256 \(side.digest)").font(.system(size: 10, design: .monospaced)).textSelection(.enabled) }
         }.frame(maxWidth: .infinity, alignment: .leading)
     }
 }

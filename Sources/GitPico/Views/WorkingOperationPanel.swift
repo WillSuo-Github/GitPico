@@ -13,12 +13,12 @@ struct WorkingOperationPanel: View {
                 Image(systemName: "arrow.triangle.merge").font(.system(size: 15, weight: .semibold)).foregroundStyle(Pico.warning)
                     .frame(width: 32, height: 32).background(Pico.warning.opacity(0.15), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
                 VStack(alignment: .leading, spacing: 1) {
-                    Text("\(store.snapshot?.operation.rawValue.capitalized ?? "Integration") in progress").font(.system(size: 13, weight: .semibold))
-                    Text(count > 0 ? "\(count) unresolved \(count == 1 ? "conflict" : "conflicts")" : "All conflicts resolved").font(.system(size: 11, weight: .medium)).foregroundStyle(count > 0 ? Pico.deletion : Pico.addition)
+                    Text((store.snapshot?.operation ?? .none).inProgressTitle).font(.system(size: 13, weight: .semibold))
+                    Text(count > 0 ? "\(count) unresolved conflicts" : "All conflicts resolved").font(.system(size: 11, weight: .medium)).foregroundStyle(count > 0 ? Pico.deletion : Pico.addition)
                 }
                 Spacer(minLength: 0)
                 if let progress = store.rebaseProgress {
-                    Chip(text: "Step \(progress.completed)/\(progress.total)", tint: .secondary)
+                    Chip(text: String(localized: "Step \(progress.completed)/\(progress.total)"), tint: .secondary)
                 }
             }
             if let progress = store.rebaseProgress, progress.total > 0 {

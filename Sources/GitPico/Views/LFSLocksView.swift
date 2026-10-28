@@ -20,7 +20,7 @@ struct LFSLocksView: View {
             if busy { ProgressView().controlSize(.small) }
             List(locks) { lock in
                 HStack {
-                    VStack(alignment: .leading, spacing: 3) { Text(lock.path); Text(lock.owner.name + " · " + (lock.locked_at ?? "Unknown date")).font(.caption).foregroundStyle(.secondary) }
+                    VStack(alignment: .leading, spacing: 3) { Text(lock.path); Text(verbatim: lock.owner.name + " · " + (lock.locked_at ?? String(localized: "Unknown date"))).font(.caption).foregroundStyle(.secondary) }
                     Spacer(); Button("Unlock…") { prepare(.unlock(lock, force: false)) }
                     Menu { Button("Force Unlock…", role: .destructive) { prepare(.unlock(lock, force: true)) } } label: { Image(systemName: "ellipsis.circle") }
                 }.disabled(busy)
@@ -29,7 +29,7 @@ struct LFSLocksView: View {
             HStack { Spacer(); Button("Close") { dismiss() }.keyboardShortcut(.cancelAction) }
         }.padding(22).frame(width: 760).task { await reload() }
         .onChange(of: remote) { if !busy { locks = []; plan = nil; Task { await reload() } } }
-        .confirmationDialog(plan?.action.title ?? "LFS Lock", isPresented: Binding(get: { plan != nil }, set: { if !$0 { plan = nil } })) {
+        .confirmationDialog(plan?.action.title ?? String(localized: "LFS Lock"), isPresented: Binding(get: { plan != nil }, set: { if !$0 { plan = nil } })) {
             if let captured = plan { Button(captured.action.title, role: isForce(captured) ? .destructive : nil) { plan = nil; execute(captured) } }
         } message: {
             if let plan { Text(confirmationMessage(plan)) }
@@ -37,8 +37,8 @@ struct LFSLocksView: View {
     }
     private func isForce(_ plan: LFSLockPlan) -> Bool { if case .unlock(_, true) = plan.action { true } else { false } }
     private func confirmationMessage(_ plan: LFSLockPlan) -> String {
-        let question = "\(plan.action.title) “\(plan.action.path)” on “\(plan.remote)”?"
-        return isForce(plan) ? question + " This may remove another person's lock." : question
+        let question = String(localized: "\(plan.action.title) “\(plan.action.path)” on “\(plan.remote)”?")
+        return isForce(plan) ? String(localized: "\(question) This may remove another person's lock.") : question
     }
     private func prepare(_ action: LFSLockAction) {
         guard let repository = store.repository else { return }
@@ -49,7 +49,7 @@ struct LFSLocksView: View {
         guard let repository = store.repository else { return }
         busy = true
         Task {
-            do { try await repository.runLFSLock(plan); message = "Server lock operation completed." }
+            do { try await repository.runLFSLock(plan); message = String(localized: "Server lock operation completed.") }
             catch { message = GitLogRedaction.clean(error.localizedDescription) }
             busy = false; await reload()
         }

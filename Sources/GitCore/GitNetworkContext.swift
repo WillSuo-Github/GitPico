@@ -72,7 +72,7 @@ final class GitNetworkObservation {
         repository = command == "clone" ? URL(fileURLWithPath: arguments.last ?? root.path).lastPathComponent : root.lastPathComponent
         repositoryPath = command == "clone" ? nil : root.path
         secrets = context.credential.flatMap { try? GitCredentialVault.read($0.id) }.map { [$0.secret, $0.oauth?.refreshToken ?? ""] } ?? []
-        send(.running, output: "Starting " + command + "…")
+        send(.running, output: localized("Starting \(command)…"))
     }
     func prepareCredential() throws {
         // Git invokes the exact-host helper only if this transport actually needs

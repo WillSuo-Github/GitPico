@@ -31,7 +31,7 @@ extension RepositoryWindowRouting {
         if store.library.recentPaths.isEmpty { pickerFilter = .all }
     }
     var showsRepositoryPicker: Bool { isChoosingRepository || root == nil }
-    var title: String { showsRepositoryPicker ? "Repositories" : (root.map { store.library.displayName(for: $0.path) } ?? "Repositories") }
+    var title: String { showsRepositoryPicker ? String(localized: "Repositories") : (root.map { store.library.displayName(for: $0.path) } ?? String(localized: "Repositories")) }
     var isBusy: Bool { isOpening || store.isBusy }
 }
 
@@ -106,7 +106,7 @@ extension RepositoryWindowRouting {
     }
     func showRepositories(from store: RepositoryStore? = nil) {
         guard let tab = originTab(from: store) else { return }
-        guard !tab.isBusy else { error = "Wait for this tab's repository operation before choosing another repository."; return }
+        guard !tab.isBusy else { error = String(localized: "Wait for this tab's repository operation before choosing another repository."); return }
         tab.store.searchFocusRequest = nil
         tab.isChoosingRepository = true
         select(tab.id)
@@ -119,14 +119,14 @@ extension RepositoryWindowRouting {
     @discardableResult func close(_ id: UUID) -> Bool {
         guard let index = tabs.firstIndex(where: { $0.id == id }) else { return false }
         let tab = tabs[index]
-        guard !tab.isBusy else { error = "Wait for this tab's repository operation to finish before closing it."; return false }
+        guard !tab.isBusy else { error = String(localized: "Wait for this tab's repository operation to finish before closing it."); return false }
         if tab.root != nil {
             rememberRepositoryState(tab)
             do { try tab.store.flushConflictDrafts() }
-            catch { self.error = "The tab was kept open because its conflict drafts could not be saved. " + error.localizedDescription; return false }
+            catch { self.error = String(localized: "The tab was kept open because its conflict drafts could not be saved. \(error.localizedDescription)"); return false }
             recordDraft(tab.store)
             do { try drafts.flush(); draftSaveWarning = nil }
-            catch { self.error = "The tab was kept open because its commit draft could not be saved. " + error.localizedDescription; return false }
+            catch { self.error = String(localized: "The tab was kept open because its commit draft could not be saved. \(error.localizedDescription)"); return false }
         }
         tab.store.disconnectNetworkContext(); tab.store.stopAutomaticRefresh(); tab.store.cancelPreviewWork(); tab.store.metadataTask?.cancel()
         tabs.remove(at: index)
@@ -155,7 +155,7 @@ extension RepositoryWindowRouting {
     func open(_ url: URL, from source: RepositoryStore? = nil, replacing: Bool = false, recordingVisit: Bool = true) async {
         guard let origin = originTab(from: source) else { return }
         if origin.isOpening { return }
-        guard !origin.isBusy else { error = "Wait for this tab's repository operation before opening another repository."; return }
+        guard !origin.isBusy else { error = String(localized: "Wait for this tab's repository operation before opening another repository."); return }
         let target = origin
         rememberRepositoryState(target)
         target.isOpening = true
@@ -191,8 +191,8 @@ extension RepositoryWindowRouting {
     }
     func chooseRepository(from store: RepositoryStore) {
         guard let tab = tab(for: store), !tab.isBusy else { return }
-        let panel = NSOpenPanel(); panel.title = "Open Git Repository"
-        panel.message = "Choose a Git working directory."; panel.canChooseDirectories = true; panel.canChooseFiles = false; panel.prompt = "Open Repository"
+        let panel = NSOpenPanel(); panel.title = String(localized: "Open Git Repository")
+        panel.message = String(localized: "Choose a Git working directory."); panel.canChooseDirectories = true; panel.canChooseFiles = false; panel.prompt = String(localized: "Open Repository")
         panel.begin { [weak self, weak store] result in
             guard result == .OK, let url = panel.url else { return }
             Task { @MainActor in guard let self else { return }; await self.open(url, from: store) }
@@ -200,7 +200,7 @@ extension RepositoryWindowRouting {
     }
     func prepareCreation(clone: Bool, from store: RepositoryStore? = nil) {
         guard let target = originTab(from: store) else { return }
-        guard !target.isBusy else { error = "Wait for this tab's repository operation before creating a repository."; return }
+        guard !target.isBusy else { error = String(localized: "Wait for this tab's repository operation before creating a repository."); return }
         showRepositories(from: target.store)
         target.store.creationRequest = RepositoryCreationRequest(clone: clone)
     }
@@ -273,7 +273,7 @@ extension RepositoryWindowRouting {
         repositoryVisits = saved.repositoryVisits ?? RepositoryVisitHistory(current: activeTab.root?.path)
         windowRouting?.workspaceChanged()
         windowRouting?.restoreWindows(saved.windows)
-        if !failures.isEmpty { error = "Some saved repositories could not be reopened. Their tabs were kept for recovery:\n" + failures.joined(separator: "\n") }
+        if !failures.isEmpty { error = String(localized: "Some saved repositories could not be reopened. Their tabs were kept for recovery:\n\(failures.joined(separator: "\n"))") }
     }
     func startMonitoring() {
         monitoringEnabled = true

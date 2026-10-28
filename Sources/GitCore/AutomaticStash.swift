@@ -54,7 +54,7 @@ extension GitRepository {
             let original = error
             if restoreAfter, try await currentOperation() == .none {
                 do { try await finishAutomaticStashIfReady() }
-                catch { throw GitFailure(original.localizedDescription + "\n\n" + error.localizedDescription) }
+                catch { throw GitFailure("\(original.localizedDescription)\n\n\(error.localizedDescription)") }
             }
             throw original
         }
@@ -72,7 +72,7 @@ extension GitRepository {
             _ = try await GitProcess.run(["stash", "apply", "--index", hash], at: root, timeout: 120)
         } catch {
             record.phase = .needsReview; try await saveRecovery(record, name: "automatic-stash.json")
-            throw GitFailure("The operation finished, but automatic stash restoration needs review. Its saved content and staging state are retained. Resolve any conflicts, then finish recovery.\n" + error.localizedDescription)
+            throw GitFailure("The operation finished, but automatic stash restoration needs review. Its saved content and staging state are retained. Resolve any conflicts, then finish recovery.\n\(error.localizedDescription)")
         }
         // Mark before removing the journal: a crash must never replay applied changes.
         record.phase = .needsReview; try await saveRecovery(record, name: "automatic-stash.json")

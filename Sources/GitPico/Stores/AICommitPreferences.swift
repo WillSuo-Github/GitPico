@@ -50,14 +50,14 @@ struct AICommitSettings: Codable, Equatable {
     private func read() throws -> Data? {
         guard FileManager.default.fileExists(atPath: file.path) else { return nil }
         let attributes = try FileManager.default.attributesOfItem(atPath: file.path)
-        guard attributes[.type] as? FileAttributeType == .typeRegular, (attributes[.size] as? NSNumber)?.intValue ?? Int.max <= 64 * 1024 else { throw GitFailure("AI commit settings must be a regular file under 64 KB.") }
+        guard attributes[.type] as? FileAttributeType == .typeRegular, (attributes[.size] as? NSNumber)?.intValue ?? Int.max <= 64 * 1024 else { throw appFailure("AI commit settings must be a regular file under 64 KB.") }
         return try Data(contentsOf: file)
     }
     func save(_ value: AICommitSettings) throws {
-        guard valid else { throw GitFailure("AI commit settings could not be loaded. Preserve the existing file and repair it before saving.") }
-        guard try read() == original else { throw GitFailure("AI commit settings changed outside this window. Reopen the app before saving.") }
-        guard value.executables.values.allSatisfy({ $0.utf8.count <= 4096 && !$0.contains("\0") }) else { throw GitFailure("The CLI path is too long or invalid.") }
-        guard (value.instructions?.utf8.count ?? 0) <= 16 * 1024, value.instructions?.contains("\0") != true else { throw GitFailure("The commit message prompt must be under 16 KB.") }
+        guard valid else { throw appFailure("AI commit settings could not be loaded. Preserve the existing file and repair it before saving.") }
+        guard try read() == original else { throw appFailure("AI commit settings changed outside this window. Reopen the app before saving.") }
+        guard value.executables.values.allSatisfy({ $0.utf8.count <= 4096 && !$0.contains("\0") }) else { throw appFailure("The CLI path is too long or invalid.") }
+        guard (value.instructions?.utf8.count ?? 0) <= 16 * 1024, value.instructions?.contains("\0") != true else { throw appFailure("The commit message prompt must be under 16 KB.") }
         try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
         let data = try JSONEncoder().encode(value)
         try data.write(to: file, options: .atomic)

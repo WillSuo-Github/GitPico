@@ -9,8 +9,8 @@ struct HistoryRecoverySheet: View {
     @State private var branchName = ""
     @State private var error: String?
     @Environment(\.dismiss) private var dismiss
-    var title: String {
-        switch request.action { case .undo(let record, let redo): "\(redo ? "Redo" : "Undo") \(record.title)"; case .restore: "Restore HEAD"; case .branch: "Recover as Branch" }
+    var title: LocalizedStringResource {
+        switch request.action { case .undo(let record, let redo): redo ? "Redo \(record.title)…" : "Undo \(record.title)…"; case .restore: "Restore HEAD"; case .branch: "Recover as Branch" }
     }
     var target: String? {
         switch request.action { case .undo(let record, let redo): (redo ? record.after : record.before).hash; case .restore(let hash), .branch(let hash): hash }
@@ -20,8 +20,8 @@ struct HistoryRecoverySheet: View {
         VStack(alignment: .leading, spacing: 16) {
             SheetTitle(title)
             LabeledContent("Current branch", value: store.snapshot?.branch ?? "")
-            LabeledContent("Current HEAD", value: expected.map { $0.hash.map { String($0.prefix(12)) } ?? "Unborn branch" } ?? "Loading…")
-            LabeledContent("Target", value: target.map { String($0.prefix(12)) } ?? "Before initial commit")
+            LabeledContent("Current HEAD", value: expected.map { $0.hash.map { String($0.prefix(12)) } ?? String(localized: "Unborn branch") } ?? String(localized: "Loading…"))
+            LabeledContent("Target", value: target.map { String($0.prefix(12)) } ?? String(localized: "Before initial commit"))
             switch request.action {
             case .branch:
                 TextField("recovered/my-commit", text: $branchName).textFieldStyle(.roundedBorder)

@@ -25,7 +25,7 @@ struct SplitDiffView: View {
             pane(rows, right: false)
             Rectangle().fill(.separator).frame(width: 1)
             pane(rows, right: true)
-        }.frame(minWidth: minimumWidth)
+        }.frame(minWidth: minimumWidth).environment(\.layoutDirection, .leftToRight)
     }
     func pane(_ rows: [SplitDiffRow], right: Bool) -> some View {
         ScrollView(.horizontal) {
@@ -69,7 +69,15 @@ struct LineSelectionButton: View {
             Image(systemName: selected ? "checkmark.square.fill" : "square")
                 .foregroundStyle(selected ? Color.accentColor : Color.secondary.opacity(0.55)).font(.system(size: 10)).frame(width: 25, height: 19)
         }.buttonStyle(.plain)
-            .accessibilityLabel("\(selected ? "Deselect" : "Select") \(line.kind == .addition ? "added" : "deleted") line \(line.newNumber ?? line.oldNumber ?? 0)")
+            .accessibilityLabel(accessibilityTitle(selected: selected, addition: line.kind == .addition, number: line.newNumber ?? line.oldNumber ?? 0))
             .help("Select line; Shift-click selects a range")
+    }
+    private func accessibilityTitle(selected: Bool, addition: Bool, number: Int) -> String {
+        switch (selected, addition) {
+        case (true, true): String(localized: "Deselect added line \(number)")
+        case (true, false): String(localized: "Deselect deleted line \(number)")
+        case (false, true): String(localized: "Select added line \(number)")
+        case (false, false): String(localized: "Select deleted line \(number)")
+        }
     }
 }

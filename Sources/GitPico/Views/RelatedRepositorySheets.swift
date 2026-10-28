@@ -17,7 +17,7 @@ struct WorktreeManagementSheet: View {
     @State private var reviewed = false
     @State private var loading = false
     @State private var failure: String?
-    var title: String {
+    var title: LocalizedStringResource {
         switch request.action { case .create: "Add Worktree"; case .move: "Move Worktree"; case .repair: "Repair Worktree"; case .remove: "Remove Worktree"; case .lock: "Lock Worktree"; case .unlock: "Unlock Worktree" }
     }
     var entry: ManagedWorktree? {
@@ -28,7 +28,7 @@ struct WorktreeManagementSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             SheetTitle(title, icon: "folder.badge.gearshape")
-            if let entry { relatedField("Worktree", entry.path); relatedField("Branch / HEAD", (entry.branch ?? "Detached HEAD") + " · " + String((entry.head ?? "").prefix(12))) }
+            if let entry { relatedField("Worktree", entry.path); relatedField("Branch / HEAD", (entry.branch ?? String(localized: "Detached HEAD")) + " · " + String((entry.head ?? "").prefix(12))) }
             if !reviewed {
                 if isCreate {
                     Picker("Checkout", selection: $mode) { Text("New branch").tag(WorktreeBranchMode.new); Text("Existing branch").tag(WorktreeBranchMode.existing); Text("Detached HEAD").tag(WorktreeBranchMode.detached) }.pickerStyle(.segmented)
@@ -43,9 +43,9 @@ struct WorktreeManagementSheet: View {
                 }
                 if case .lock = request.action { TextField("Lock reason (optional)", text: $reason).textFieldStyle(.roundedBorder) }
             } else {
-                if let plan { relatedField("Checkout", plan.mode == .detached ? "Detached HEAD" : plan.branch); relatedField("Commit", plan.hash) }
+                if let plan { relatedField("Checkout", plan.mode == .detached ? String(localized: "Detached HEAD") : plan.branch); relatedField("Commit", plan.hash) }
                 if needsPath { relatedField("Destination", path) }
-                if case .lock = request.action { relatedField("Reason", reason.isEmpty ? "No reason" : reason) }
+                if case .lock = request.action { relatedField("Reason", reason.isEmpty ? String(localized: "No reason") : reason) }
             }
             if case .remove = request.action {
                 Text("Remove this linked working directory. All local, untracked and ignored files must be clean. The branch and a backup of Git metadata are retained; the current and main worktrees cannot be removed.").font(.callout).foregroundStyle(.secondary)
@@ -71,34 +71,34 @@ struct WorktreeManagementSheet: View {
             let panel = NSOpenPanel(); panel.canChooseFiles = false; panel.canChooseDirectories = true
             panel.begin { if $0 == .OK, let url = panel.url { path = url.path } }
         } else {
-            let panel = NSSavePanel(); panel.title = title; panel.prompt = "Choose Folder"; panel.nameFieldStringValue = "worktree"
+            let panel = NSSavePanel(); panel.title = String(localized: title); panel.prompt = String(localized: "Choose Folder"); panel.nameFieldStringValue = "worktree"
             panel.begin { if $0 == .OK, let url = panel.url { path = url.path } }
         }
     }
     func prepare() async {
-        guard let repository = store.repository, request.repositoryToken == store.repositoryToken else { failure = "The repository changed. Close this sheet and retry."; return }
+        guard let repository = store.repository, request.repositoryToken == store.repositoryToken else { failure = String(localized: "The repository changed. Close this sheet and retry."); return }
         loading = true; failure = nil; defer { loading = false }
         do {
-            if needsPath, !path.hasPrefix("/") { throw GitFailure("Choose an absolute local folder path.") }
+            if needsPath, !path.hasPrefix("/") { throw appFailure("Choose an absolute local folder path.") }
             if isCreate { plan = try await repository.previewWorktreeCreation(destination: URL(fileURLWithPath: path), mode: mode, branch: branch, revision: revision, reuseEmptyDirectory: reuseEmpty) }
-            if let entry, !(try await repository.managedWorktrees().contains(entry)) { throw GitFailure("The worktree changed. Refresh its list.") }
-            guard request.repositoryToken == store.repositoryToken else { throw GitFailure("The repository changed. Reopen this sheet.") }
+            if let entry, !(try await repository.managedWorktrees().contains(entry)) { throw appFailure("The worktree changed. Refresh its list.") }
+            guard request.repositoryToken == store.repositoryToken else { throw appFailure("The repository changed. Reopen this sheet.") }
             reviewed = true
         } catch { failure = error.localizedDescription }
     }
     func apply() {
-        guard request.repositoryToken == store.repositoryToken else { failure = "The repository changed. Reopen this sheet."; return }
+        guard request.repositoryToken == store.repositoryToken else { failure = String(localized: "The repository changed. Reopen this sheet."); return }
         if let plan { store.applyWorktreePlan(plan, request: request, openAfter: openAfter) }
         else {
             let action = request.action, destination = URL(fileURLWithPath: path), reason = reason
-            store.perform(title + "…") { repository in
+            store.perform("\(title)…") { repository in
                 switch action {
                 case .move(let entry): try await repository.moveWorktree(entry, to: destination)
                 case .repair(let entry): try await repository.repairWorktree(entry, at: destination)
                 case .remove(let entry): try await repository.removeWorktree(entry)
                 case .lock(let entry): try await repository.setWorktreeLocked(entry, locked: true, reason: reason)
                 case .unlock(let entry): try await repository.setWorktreeLocked(entry, locked: false)
-                case .create: throw GitFailure("Prepare a worktree preview first.")
+                case .create: throw appFailure("Prepare a worktree preview first.")
                 }
             }
         }
@@ -123,7 +123,7 @@ struct SubmoduleManagementSheet: View {
     @State private var loading = false
     @State private var failure: String?
     var operation: SubmoduleOperation? { if case .manage(_, let operation) = request.action { operation } else { nil } }
-    var title: String { operation?.rawValue ?? "Add Submodule" }
+    var title: LocalizedStringResource { operation.map { "\($0.title)" } ?? "Add Submodule" }
     var reviewed: Bool { plan != nil || addition != nil }
     var supportsRecursion: Bool { operation.map { [.initialize, .update, .fetch, .sync].contains($0) } ?? false }
     var supportsTransport: Bool { operation.map { [.initialize, .update, .fetch, .setURL].contains($0) } ?? true }
@@ -132,12 +132,12 @@ struct SubmoduleManagementSheet: View {
             SheetTitle(title, icon: "shippingbox")
             if case .manage(let entry, _) = request.action {
                 relatedField("Submodule", entry.path + " · " + entry.status)
-                relatedField("Parent records", entry.recordedHash ?? "No recorded gitlink")
-                relatedField("Checked out", entry.head ?? "Not initialized")
+                relatedField("Parent records", entry.recordedHash ?? String(localized: "No recorded gitlink"))
+                relatedField("Checked out", entry.head ?? String(localized: "Not initialized"))
             }
             if !reviewed {
                 if case .add = request.action {
-                    Picker("Directory", selection: $directoryMode) { ForEach(SubmoduleDirectoryMode.allCases, id: \.self) { Text($0.rawValue).tag($0) } }
+                    Picker("Directory", selection: $directoryMode) { ForEach(SubmoduleDirectoryMode.allCases, id: \.self) { Text($0.title).tag($0) } }
                     TextField("Repository URL", text: $source).textFieldStyle(.roundedBorder)
                     TextField("Relative path in this repository", text: $path).textFieldStyle(.roundedBorder)
                     TextField("Submodule name (optional)", text: $name).textFieldStyle(.roundedBorder)
@@ -149,7 +149,7 @@ struct SubmoduleManagementSheet: View {
                 if supportsRecursion { Toggle("Include nested submodules recursively", isOn: $recursive).toggleStyle(.checkbox) }
                 if supportsTransport { Toggle("Allow local file transport for this operation", isOn: $localTransport).toggleStyle(.checkbox) }
             } else {
-                if let addition { relatedField("Source", addition.source); relatedField("Destination", addition.path); relatedField("Name / branch", addition.name + " · " + (addition.branch.isEmpty ? "Remote default" : addition.branch)) }
+                if let addition { relatedField("Source", addition.source); relatedField("Destination", addition.path); relatedField("Name / branch", addition.name + " · " + (addition.branch.isEmpty ? String(localized: "Remote default") : addition.branch)) }
                 if let plan, !plan.value.isEmpty { relatedField(plan.operation == .checkout ? "Resolved commit" : "New value", plan.value) }
                 if supportsRecursion { Text(recursive ? "Includes nested submodules" : "Selected submodule only").font(.caption) }
                 if supportsTransport { Text(localTransport ? "Local file transport allowed for this operation" : "Local file transport disabled").font(.caption).foregroundStyle(.secondary) }
@@ -168,28 +168,28 @@ struct SubmoduleManagementSheet: View {
     }
     var explanation: String {
         switch operation {
-        case .remove: "Removes the submodule working directory and stages its removal. Every local, untracked and ignored file must be clean, and its revision must already be recorded in the parent. Git history stays in .git/modules; metadata is backed up. No parent commit is created."
-        case .deinitialize: "Clears the clean submodule working directory and its local registration. The parent gitlink and retained Git history remain available for later initialization."
-        case .checkout: "Checks out the resolved commit with detached HEAD. Stage the submodule in the parent's Working Copy to record that version."
-        case .initialize, .update: "Checks out the exact gitlink recorded by the parent, with detached HEAD. Local changes block the operation. A recursive failure can leave some modules initialized; refresh and retry after resolving the reported error."
-        case .setURL, .move: "Updates and stages .gitmodules and any changed gitlink. Existing metadata is backed up. Review these changes in Working Copy and commit them when ready."
-        case .sync: "Copies versioned .gitmodules URLs to local Git configuration and initialized module remotes."
-        case .fetch: "Downloads Git objects and remote references without changing working files or committing the parent."
-        case .repair: "Absorbs an embedded Git directory, or restores a missing .git pointer after verifying retained metadata belongs to this path. Working files are preserved."
-        case .forceDeinitialize, .forceRemove: "Backs up the full working directory, index and retained Git storage before clearing local changes. Ignored/untracked files and conflict state are retained in Management Backups. No parent commit is created."
-        case .archiveStorage: "Copies retained Git storage into Management Backups, then removes the active module storage directory so the name can be reused. A working directory still using it blocks the operation."
-        case .none: "New/empty directories clone from the reviewed URL. Existing/retained repository modes preserve branches and staging without fetching; retained mode populates files from its saved index. Origin URL differences block reuse. Older unstaged/untracked files remain in Management Backups. The parent records HEAD and stages .gitmodules without committing."
+        case .remove: String(localized: "Removes the submodule working directory and stages its removal. Every local, untracked and ignored file must be clean, and its revision must already be recorded in the parent. Git history stays in .git/modules; metadata is backed up. No parent commit is created.")
+        case .deinitialize: String(localized: "Clears the clean submodule working directory and its local registration. The parent gitlink and retained Git history remain available for later initialization.")
+        case .checkout: String(localized: "Checks out the resolved commit with detached HEAD. Stage the submodule in the parent's Working Copy to record that version.")
+        case .initialize, .update: String(localized: "Checks out the exact gitlink recorded by the parent, with detached HEAD. Local changes block the operation. A recursive failure can leave some modules initialized; refresh and retry after resolving the reported error.")
+        case .setURL, .move: String(localized: "Updates and stages .gitmodules and any changed gitlink. Existing metadata is backed up. Review these changes in Working Copy and commit them when ready.")
+        case .sync: String(localized: "Copies versioned .gitmodules URLs to local Git configuration and initialized module remotes.")
+        case .fetch: String(localized: "Downloads Git objects and remote references without changing working files or committing the parent.")
+        case .repair: String(localized: "Absorbs an embedded Git directory, or restores a missing .git pointer after verifying retained metadata belongs to this path. Working files are preserved.")
+        case .forceDeinitialize, .forceRemove: String(localized: "Backs up the full working directory, index and retained Git storage before clearing local changes. Ignored/untracked files and conflict state are retained in Management Backups. No parent commit is created.")
+        case .archiveStorage: String(localized: "Copies retained Git storage into Management Backups, then removes the active module storage directory so the name can be reused. A working directory still using it blocks the operation.")
+        case .none: String(localized: "New/empty directories clone from the reviewed URL. Existing/retained repository modes preserve branches and staging without fetching; retained mode populates files from its saved index. Origin URL differences block reuse. Older unstaged/untracked files remain in Management Backups. The parent records HEAD and stages .gitmodules without committing.")
         }
     }
     func prepare() async {
-        guard let repository = store.repository, request.repositoryToken == store.repositoryToken else { failure = "The repository changed. Close this sheet and retry."; return }
+        guard let repository = store.repository, request.repositoryToken == store.repositoryToken else { failure = String(localized: "The repository changed. Close this sheet and retry."); return }
         loading = true; failure = nil; defer { loading = false }
         do {
             switch request.action {
             case .add: addition = try await repository.previewSubmoduleAddition(source: source, path: path, name: name, branch: branch, allowLocalTransport: localTransport, directoryMode: directoryMode)
             case .manage(let entry, let operation): plan = try await repository.previewSubmodule(entry, operation: operation, value: value, recursive: recursive, allowLocalTransport: localTransport)
             }
-            guard request.repositoryToken == store.repositoryToken else { plan = nil; addition = nil; throw GitFailure("The repository changed. Reopen this sheet.") }
+            guard request.repositoryToken == store.repositoryToken else { plan = nil; addition = nil; throw appFailure("The repository changed. Reopen this sheet.") }
         } catch { failure = error.localizedDescription }
     }
 }

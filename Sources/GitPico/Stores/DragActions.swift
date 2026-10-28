@@ -114,12 +114,12 @@ extension RepositoryStore {
             integrationRequest = IntegrationRequest(action: option ? .revert : .cherryPick, revision: commit.hash, expectedHead: HeadPosition(branch: target.fullName, hash: target.hash))
         case (.commit(let target, let position), .commit(let source)):
             guard let repository, let expectedHead = currentDropHead(), source.hash != target.hash else { return false }
-            isBusy = true; activity = "Preparing rebase plan…"
+            isBusy = true; activity = String(localized: "Preparing rebase plan…")
             operationTask = Task {
                 defer { isBusy = false; activity = "" }
                 do {
                     let plan = try await repository.rebaseDropPlan(source: source.hash, target: target.hash, position: option && position == .squash ? .fixup : position)
-                    guard plan.position == expectedHead else { throw GitFailure("HEAD changed outside this drag. Refresh and drag again.") }
+                    guard plan.position == expectedHead else { throw appFailure("HEAD changed outside this drag. Refresh and drag again.") }
                     rebaseRequest = RebaseRequest(base: plan.base, preparedPlan: plan)
                 }
                 catch { self.error = error.localizedDescription }

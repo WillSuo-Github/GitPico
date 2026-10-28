@@ -18,12 +18,12 @@ struct CommitDetailView: View {
             if let commit = store.selectedCommit {
                 HStack(spacing: 8) {
                     HashChip(hash: commit.hash)
-                    if commit.parents.count > 1 { Chip(text: "Merge", icon: "arrow.triangle.merge", tint: .purple) }
+                    if commit.parents.count > 1 { Chip(text: String(localized: "Merge"), icon: "arrow.triangle.merge", tint: .purple) }
                     Spacer()
                     if commit.parents.count > 1 {
                         Menu("Compare Parent") {
                             ForEach(Array(commit.parents.enumerated()), id: \.offset) { index, parent in
-                                Button("Parent \(index + 1) · " + String(parent.prefix(8))) { parentComparison = MergeParentComparison(parent: parent, commit: commit.hash) }
+                                Button("Parent \(index + 1) · \(String(parent.prefix(8)))") { parentComparison = MergeParentComparison(parent: parent, commit: commit.hash) }
                             }
                         }.fixedSize().controlSize(.small).help("Compare the merge result with a specific parent")
                     }
@@ -73,7 +73,7 @@ struct CommitDetailView: View {
                         }
                     }
                 } else { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
-            } else { EmptyPane(title: "Select a commit", subtitle: "Pick a commit to read its message and review every changed file.", icon: "clock.arrow.circlepath") }
+            } else { EmptyPane(title: String(localized: "Select a commit"), subtitle: String(localized: "Pick a commit to read its message and review every changed file."), icon: "clock.arrow.circlepath") }
         }.onChange(of: store.selectedCommit?.id) { expandedFiles = [] }
         .sheet(item: $parentComparison) { request in
             if let repository = store.repository {
@@ -142,7 +142,7 @@ struct ChangedFilesHeader<Trailing: View>: View {
     @ViewBuilder var trailing: Trailing
     var body: some View {
         HStack(spacing: 10) {
-            Text("\(count) \(count == 1 ? "file" : "files") changed").font(.system(size: 12, weight: .semibold))
+            Text("\(count) files changed").font(.system(size: 12, weight: .semibold))
             DiffStat(additions: additions, deletions: deletions)
             Spacer()
             trailing
@@ -180,7 +180,7 @@ struct CommitFileDisclosure: View {
                     let patch = PatchDocument(diff)
                     if patch.hunks.isEmpty { Text(diff).font(.system(size: 11, design: .monospaced)).textSelection(.enabled).padding(12).frame(maxWidth: .infinity, alignment: .leading) }
                     if preferences.splitDiff {
-                        HStack(spacing: 0) { Text("Parent").frame(maxWidth: .infinity, alignment: .leading); Text(commit.shortHash).frame(maxWidth: .infinity, alignment: .leading) }.font(.system(size: 10)).foregroundStyle(.secondary).padding(8)
+                        HStack(spacing: 0) { Text("Parent").frame(maxWidth: .infinity, alignment: .leading); Text(commit.shortHash).frame(maxWidth: .infinity, alignment: .leading) }.font(.system(size: 10)).foregroundStyle(.secondary).padding(8).environment(\.layoutDirection, .leftToRight)
                     }
                     ForEach(patch.preview()) { preview in
                         let hunk = preview.hunk
@@ -200,12 +200,12 @@ struct CommitFileDisclosure: View {
                     StatusBadge(status: file.status).help(statusName)
                     FilePathLabel(path: file.path)
                     Spacer()
-                    if let stats { if stats.isBinary { Chip(text: "Binary", tint: .secondary) } else { DiffStat(additions: stats.additions, deletions: stats.deletions) } }
+                    if let stats { if stats.isBinary { Chip(text: String(localized: "Binary"), tint: .secondary) } else { DiffStat(additions: stats.additions, deletions: stats.deletions) } }
                 }.padding(.vertical, 8).contentShape(Rectangle()).contextMenu {
                     Button("Compare in External Tool…") { store.externalTool(.comparison(commit.parents.first, commit.hash, file.path, nil)) }
                     if let showHistory { Button("Show File History…", action: showHistory) }
                     if let revision = file.status == "D" ? commit.parents.first : commit.hash {
-                        if file.status == "D" { Text("Version before deletion · " + String(revision.prefix(8))) }
+                        if file.status == "D" { Text("Version before deletion · \(String(revision.prefix(8)))") }
                         HistoricalFileMenu(store: store, revision: revision, paths: [file.path])
                     }
                 }
@@ -216,7 +216,7 @@ struct CommitFileDisclosure: View {
             }
         }.frame(maxWidth: .infinity).onGeometryChange(for: CGFloat.self) { $0.size.width } action: { contentWidth = $0 }.id(commit.hash + file.path)
     }
-    var statusName: String { switch file.status.first { case "A": "added"; case "D": "deleted"; case "R": "renamed"; default: "modified" } }
+    var statusName: String { localizedFileStatus(file.status.first.map(String.init) ?? "M") }
     var statusColor: Color { switch file.status.first { case "A": .green; case "D": .red; case "R": .purple; default: .blue } }
 }
 

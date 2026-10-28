@@ -3,7 +3,7 @@ import Foundation
 public enum PatchDestination: String, CaseIterable, Sendable {
     case workingCopy, index, both
     public var title: String {
-        switch self { case .workingCopy: "Working Copy"; case .index: "Index Only"; case .both: "Working Copy and Index" }
+        switch self { case .workingCopy: localized("Working Copy"); case .index: localized("Index Only"); case .both: localized("Working Copy and Index") }
     }
 }
 
@@ -79,7 +79,7 @@ extension GitRepository {
             guard Set(actual).isSubset(of: Set(paths)) else { throw GitFailure("The patch writes undeclared paths.") }
         }
         let afterIndex = destination == .workingCopy ? beforeIndex : try readLocalIndex(temporaryIndex)
-        return LocalChangePlan(id: UUID(), title: reverse ? "Apply Reversed Patch" : "Apply Patch", paths: paths,
+        return LocalChangePlan(id: UUID(), title: reverse ? localized("Apply Reversed Patch") : localized("Apply Patch"), paths: paths,
                                preview: String(decoding: data.prefix(256 * 1024), as: UTF8.self), repository: root.path, head: head,
                                beforeIndex: beforeIndex, afterIndex: afterIndex, before: before, after: after)
     }
@@ -89,7 +89,7 @@ extension GitRepository {
         guard fresh == renderedDiff, !change.isConflicted else { throw GitFailure("The file changed. Refresh the diff before discarding lines.") }
         let patch = try PatchDocument(fresh).selectedPatch(selection, reverse: true)
         let plan = try await previewPatch(Data(patch.utf8), destination: .workingCopy)
-        return LocalChangePlan(id: plan.id, title: "Discard Selected Lines", paths: plan.paths, preview: patch, repository: plan.repository, head: plan.head,
+        return LocalChangePlan(id: plan.id, title: localized("Discard Selected Lines"), paths: plan.paths, preview: patch, repository: plan.repository, head: plan.head,
                                beforeIndex: plan.beforeIndex, afterIndex: plan.afterIndex, before: plan.before, after: plan.after)
     }
 
@@ -99,7 +99,7 @@ extension GitRepository {
             throw GitFailure("The chunk changed or cannot be discarded separately. Refresh the diff.")
         }
         let plan = try await previewPatch(Data(hunk.patch.utf8), destination: .workingCopy, reverse: true)
-        return LocalChangePlan(id: plan.id, title: "Discard Chunk", paths: plan.paths, preview: hunk.patch, repository: plan.repository, head: plan.head,
+        return LocalChangePlan(id: plan.id, title: localized("Discard Chunk"), paths: plan.paths, preview: hunk.patch, repository: plan.repository, head: plan.head,
                                beforeIndex: plan.beforeIndex, afterIndex: plan.afterIndex, before: plan.before, after: plan.after)
     }
 

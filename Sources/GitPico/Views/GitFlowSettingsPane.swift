@@ -9,9 +9,9 @@ struct GitFlowToolbarMenu: View {
             Button(store.flowConfiguration == nil ? "Enable Git Flow…" : "Configure Git Flow…") { store.manageFlow(.configure) }.disabled(store.activeFlow != nil)
             if store.flowConfiguration != nil {
                 Divider()
-                ForEach(GitFlowKind.allCases, id: \.self) { kind in Button("Start " + kind.rawValue + "…") { store.manageFlow(.start(kind)) } }.disabled(store.activeFlow != nil)
+                ForEach(GitFlowKind.allCases, id: \.self) { kind in Button("\(kind.startTitle)…") { store.manageFlow(.start(kind)) } }.disabled(store.activeFlow != nil)
                 if let current = store.snapshot?.references.first(where: \.isCurrent), let kind = store.flowConfiguration?.kind(of: current.name), kind != .support {
-                    Button("Finish " + kind.rawValue + "…") { store.manageFlow(.finish(current.name)) }.disabled(store.activeFlow != nil)
+                    Button("\(kind.finishTitle)…") { store.manageFlow(.finish(current.name)) }.disabled(store.activeFlow != nil)
                 }
             }
             if let active = store.activeFlow {
@@ -33,8 +33,8 @@ struct GitFlowSettingsPane: View {
                     Grid(alignment: .leading, horizontalSpacing: 28, verticalSpacing: 9) {
                         GridRow { Text("Production").foregroundStyle(.secondary); Text(config.production) }
                         GridRow { Text("Development").foregroundStyle(.secondary); Text(config.development) }
-                        ForEach(GitFlowKind.allCases, id: \.self) { kind in GridRow { Text(kind.rawValue).foregroundStyle(.secondary); Text(config.prefix(kind)).monospaced() } }
-                        GridRow { Text("Version tags").foregroundStyle(.secondary); Text(config.versionTag.isEmpty ? "No prefix" : config.versionTag) }
+                        ForEach(GitFlowKind.allCases, id: \.self) { kind in GridRow { Text(kind.title).foregroundStyle(.secondary); Text(config.prefix(kind)).monospaced() } }
+                        GridRow { Text("Version tags").foregroundStyle(.secondary); Text(config.versionTag.isEmpty ? String(localized: "No prefix") : config.versionTag) }
                     }
                     Divider()
                     Text("TOPIC BRANCHES").font(.caption.bold()).foregroundStyle(.secondary)
@@ -58,8 +58,8 @@ struct GitFlowSettingsPane: View {
     }
     func flowRecord(_ record: GitFlowRecord) -> some View {
         VStack(alignment: .leading, spacing: 5) {
-            HStack { Text(record.title).fontWeight(.medium); Spacer(); Text(record.state).foregroundStyle(.secondary) }
-            Text(record.date.formatted() + " · \(record.next)/\(record.stepCount) steps").font(.caption).foregroundStyle(.secondary)
+            HStack { Text(record.title).fontWeight(.medium); Spacer(); Text(operationStateTitle(record.state)).foregroundStyle(.secondary) }
+            Text("\(record.date.formatted()) · \(record.next)/\(record.stepCount) steps").font(.caption).foregroundStyle(.secondary)
             if let diagnostic = record.diagnostic { Text(diagnostic).font(.caption).foregroundStyle(.orange).textSelection(.enabled) }
         }.padding(.vertical, 8)
     }
@@ -68,7 +68,7 @@ struct GitFlowOperationBanner: View {
     let store: RepositoryStore
     var body: some View {
         if let active = store.activeFlow {
-            NoticeBanner(icon: "arrow.triangle.branch", title: active.title, message: "Step \(active.next) of \(active.stepCount)", tint: .purple) {
+            NoticeBanner(icon: "arrow.triangle.branch", title: "\(active.title)", message: String(localized: "Step \(active.next) of \(active.stepCount)"), tint: .purple) {
                 Button("Git Flow…", action: store.showGitFlow)
                 Button("Continue…") { store.manageFlow(.resume(active)) }.buttonStyle(.borderedProminent).disabled(store.isBusy)
             }

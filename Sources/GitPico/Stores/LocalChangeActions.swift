@@ -29,20 +29,20 @@ extension RepositoryStore {
         if !paths.isEmpty { localChange(.discard(paths)) }
     }
     func applyLocalPlan(_ plan: LocalChangePlan, request: LocalChangeRequest) {
-        guard request.repositoryToken == repositoryToken else { error = "The repository changed. Reopen the preview."; return }
+        guard request.repositoryToken == repositoryToken else { error = String(localized: "The repository changed. Reopen the preview."); return }
         let refresh: MutationRefresh
         if case .forceAdd = request.action { refresh = .index } else { refresh = .full }
-        perform(plan.title + "…", refresh: refresh) { _ = try await $0.applyLocalChange(plan) }
+        perform("\(plan.title)…", refresh: refresh) { _ = try await $0.applyLocalChange(plan) }
     }
     func restoreLocalBackup(_ id: UUID, request: LocalChangeRequest) {
-        guard request.repositoryToken == repositoryToken else { error = "The repository changed. Reopen recovery."; return }
+        guard request.repositoryToken == repositoryToken else { error = String(localized: "The repository changed. Reopen recovery."); return }
         perform("Restoring local changes…") { try await $0.restoreLocalChanges(id) }
     }
     func choosePatch() {
         guard !isBusy, repository != nil else { return }
         let token = repositoryToken
         let panel = NSOpenPanel()
-        panel.title = "Apply Patch"; panel.prompt = "Review Patch"
+        panel.title = String(localized: "Apply Patch"); panel.prompt = String(localized: "Review Patch")
         panel.canChooseDirectories = false; panel.allowsMultipleSelection = false
         panel.allowedContentTypes = [UTType(filenameExtension: "patch") ?? .data, UTType(filenameExtension: "diff") ?? .data, .plainText]
         panel.allowsOtherFileTypes = true
@@ -52,7 +52,7 @@ extension RepositoryStore {
                 guard let self, self.repositoryToken == token, !self.isBusy else { return }
                 do {
                     let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? Int.max
-                    guard size <= 16 * 1024 * 1024 else { throw GitFailure("Choose a patch up to 16 MB.") }
+                    guard size <= 16 * 1024 * 1024 else { throw appFailure("Choose a patch up to 16 MB.") }
                     self.localChange(.importPatch(try Data(contentsOf: url), url.lastPathComponent))
                 } catch { self.error = error.localizedDescription }
             }
@@ -60,8 +60,8 @@ extension RepositoryStore {
     }
     func savePatch(_ data: Data) {
         let panel = NSSavePanel()
-        panel.title = "Save Patch as File"; panel.nameFieldStringValue = "changes.patch"
-        panel.message = "Choose a new filename. Existing files are kept intact."
+        panel.title = String(localized: "Save Patch as File"); panel.nameFieldStringValue = "changes.patch"
+        panel.message = String(localized: "Choose a new filename. Existing files are kept intact.")
         panel.allowedContentTypes = [UTType(filenameExtension: "patch") ?? .data]
         panel.begin { [weak self] response in
             guard response == .OK, let url = panel.url else { return }

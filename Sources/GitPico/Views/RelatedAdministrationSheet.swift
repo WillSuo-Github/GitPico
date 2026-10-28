@@ -36,8 +36,8 @@ struct RelatedBatchSheet: View {
         VStack(alignment: .leading, spacing: 16) {
             SheetTitle(isResume ? (completedHistory ? "Batch History" : "Resume Batch") : isWorktree ? "Manage Worktrees" : "Manage Submodules", icon: "checklist")
             if plan == nil && !isResume {
-                if isWorktree { Picker("Operation", selection: $worktreeOperation) { ForEach(WorktreeBatchOperation.allCases, id: \.self) { Text($0.rawValue).tag($0) } } }
-                else { Picker("Operation", selection: $submoduleOperation) { ForEach(SubmoduleOperation.allCases, id: \.self) { Text($0.rawValue).tag($0) } } }
+                if isWorktree { Picker("Operation", selection: $worktreeOperation) { ForEach(WorktreeBatchOperation.allCases, id: \.self) { Text($0.title).tag($0) } } }
+                else { Picker("Operation", selection: $submoduleOperation) { ForEach(SubmoduleOperation.allCases, id: \.self) { Text($0.title).tag($0) } } }
                 if needsValue { TextField(isWorktree ? (worktreeOperation == .move ? "Absolute destination parent folder" : "Lock reason (optional)") : submoduleOperation == .move ? "Relative destination parent folder" : submoduleOperation == .setURL ? "Repository URL for all selected modules" : "Revision resolved in each submodule", text: $value).textFieldStyle(.roundedBorder) }
                 if !isWorktree {
                     Toggle("Include nested submodules when supported", isOn: $recursive).toggleStyle(.checkbox)
@@ -46,12 +46,12 @@ struct RelatedBatchSheet: View {
             }
             Text("Each target is validated before execution. The batch stops at the first failure and retains completed results and management backups. Resume reviews remaining targets again; completed items are not replayed.").font(.callout).foregroundStyle(.secondary)
             if let report {
-                HStack { Text(report.title).font(.headline); Spacer(); Text(report.state.capitalized).foregroundStyle(.secondary) }
+                HStack { Text(report.title).font(.headline); Spacer(); Text(operationStateTitle(report.state)).foregroundStyle(.secondary) }
                 List(report.items) { item in
                     HStack(alignment: .top, spacing: 10) {
                         Image(systemName: item.state == "completed" ? "checkmark.circle.fill" : item.state == "failed" ? "exclamationmark.triangle" : item.state == "running" ? "arrow.triangle.2.circlepath" : "circle").foregroundStyle(item.state == "failed" ? Color.orange : Color.secondary)
                         VStack(alignment: .leading, spacing: 4) { Text(item.path).lineLimit(1).truncationMode(.middle); if !item.value.isEmpty { Text(item.value).font(.caption).foregroundStyle(.secondary).lineLimit(2) }; if let diagnostic = item.diagnostic { Text(diagnostic).font(.caption).foregroundStyle(.red).textSelection(.enabled) } }
-                        Spacer(); Text(item.state.capitalized).font(.caption).foregroundStyle(.secondary)
+                        Spacer(); Text(operationStateTitle(item.state)).font(.caption).foregroundStyle(.secondary)
                     }.padding(.vertical, 3)
                 }.frame(height: 270)
                 if let diagnostic = report.diagnostic { Text(diagnostic).font(.caption).foregroundStyle(.red).lineLimit(4).textSelection(.enabled) }
@@ -75,7 +75,7 @@ struct RelatedBatchSheet: View {
         }.padding(24).frame(width: 780).interactiveDismissDisabled(store.isBusy).task { if let operation = request.initialWorktreeOperation { worktreeOperation = operation } }
     }
     func prepare(resuming: RelatedBatchReport? = nil) async {
-        guard let repository = store.repository, request.repositoryToken == store.repositoryToken else { failure = "The repository changed. Reopen this sheet."; return }
+        guard let repository = store.repository, request.repositoryToken == store.repositoryToken else { failure = String(localized: "The repository changed. Reopen this sheet."); return }
         loading = true; failure = nil; defer { loading = false }
         do {
             if let resuming { plan = try await repository.previewResumeRelatedBatch(resuming); store.relatedBatchProgress = nil }
@@ -87,7 +87,7 @@ struct RelatedBatchSheet: View {
                 case .backups: break
                 }
             }
-            guard request.repositoryToken == store.repositoryToken else { plan = nil; throw GitFailure("The repository changed. Reopen this sheet.") }
+            guard request.repositoryToken == store.repositoryToken else { plan = nil; throw appFailure("The repository changed. Reopen this sheet.") }
         } catch { failure = error.localizedDescription }
     }
 }
@@ -137,8 +137,8 @@ struct RelatedManagementBackupsView: View {
             } else {
                 List(backups, selection: $selected) { backup in
                     VStack(alignment: .leading, spacing: 4) {
-                        HStack { Text(backup.title).fontWeight(.medium); Spacer(); Text(backup.state.capitalized).font(.caption).foregroundStyle(.secondary) }
-                        Text(backup.date.formatted() + " · " + backup.originalPath).font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+                        HStack { Text(backup.title).fontWeight(.medium); Spacer(); Text(operationStateTitle(backup.state)).font(.caption).foregroundStyle(.secondary) }
+                        Text("\(backup.date.formatted()) · \(backup.originalPath)").font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
                         if let diagnostic = backup.diagnostic { Text(diagnostic).font(.caption).foregroundStyle(.orange).lineLimit(2) }
                     }.padding(.vertical, 4).tag(backup.id)
                 }.frame(height: 250).overlay { if backups.isEmpty && !loading { ContentUnavailableView("No management backups", systemImage: "archivebox") } }
@@ -164,7 +164,7 @@ struct RelatedManagementBackupsView: View {
                 if !batches.isEmpty {
                     Menu("Batch History / Resume") {
                         ForEach(batches) { report in
-                            Button(report.date.formatted(date: .abbreviated, time: .shortened) + " · " + report.title + " · " + report.state) {
+                            Button("\(report.date.formatted(date: .abbreviated, time: .shortened)) · \(report.title) · \(String(localized: operationStateTitle(report.state)))") {
                                 dismiss(); Task { try? await Task.sleep(for: .milliseconds(180)); store.relatedAdministration(.resume(report)) }
                             }
                         }
@@ -183,7 +183,7 @@ struct RelatedManagementBackupsView: View {
         }.padding(24).frame(width: 800).task { await load() }.onChange(of: selected) { plan = nil }
     }
     func load() async {
-        guard let repository = store.repository, request.repositoryToken == store.repositoryToken else { failure = "The repository changed. Reopen Management Backups."; return }
+        guard let repository = store.repository, request.repositoryToken == store.repositoryToken else { failure = String(localized: "The repository changed. Reopen Management Backups."); return }
         loading = true; failure = nil; defer { loading = false }
         do { backups = try await repository.relatedManagementBackups(); legacy = try await repository.legacyManagementBackups(); legacyChoice = legacy.first?.id ?? ""; batches = try await repository.relatedBatchReports(); if !backups.contains(where: { $0.id == selected }) { selected = backups.first?.id } }
         catch { failure = error.localizedDescription }
@@ -192,7 +192,7 @@ struct RelatedManagementBackupsView: View {
         guard let repository = store.repository, let chosen, request.repositoryToken == store.repositoryToken else { return }
         loading = true; failure = nil; defer { loading = false }
         do {
-            guard extractionPath.hasPrefix("/") else { throw GitFailure("Choose an absolute new recovery directory.") }
+            guard extractionPath.hasPrefix("/") else { throw appFailure("Choose an absolute new recovery directory.") }
             savedModule = try await repository.previewSavedModuleRepositoryRecovery(chosen, to: URL(fileURLWithPath: extractionPath))
         } catch { failure = error.localizedDescription }
     }
@@ -200,7 +200,7 @@ struct RelatedManagementBackupsView: View {
         guard let repository = store.repository, let chosen, request.repositoryToken == store.repositoryToken else { return }
         loading = true; failure = nil; defer { loading = false }
         do {
-            guard extractionPath.hasPrefix("/") else { throw GitFailure("Choose an absolute new destination folder.") }
+            guard extractionPath.hasPrefix("/") else { throw appFailure("Choose an absolute new destination folder.") }
             extraction = try await repository.previewManagementBackupExtraction(chosen, to: URL(fileURLWithPath: extractionPath))
         } catch { failure = error.localizedDescription }
     }
@@ -208,7 +208,7 @@ struct RelatedManagementBackupsView: View {
         guard let repository = store.repository, let backup = legacy.first(where: { $0.id == legacyChoice }), request.repositoryToken == store.repositoryToken else { return }
         loading = true; failure = nil; defer { loading = false }
         do {
-            guard legacyPath.hasPrefix("/") else { throw GitFailure("Choose an absolute new recovery folder.") }
+            guard legacyPath.hasPrefix("/") else { throw appFailure("Choose an absolute new recovery folder.") }
             legacyPlan = try await repository.previewLegacyManagementRestore(backup, to: URL(fileURLWithPath: legacyPath))
         } catch { failure = error.localizedDescription }
     }

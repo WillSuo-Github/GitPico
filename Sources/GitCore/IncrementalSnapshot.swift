@@ -35,7 +35,7 @@ extension GitRepository {
                 files = ignored || rescanIgnored ? try await workingFiles(includeIgnored: ignored) : try await indexedWorkingFiles(changes: changes)
             } else { files = nil }
             guard try await headPosition() == before else { continue }
-            let branch = before.branch == "HEAD" ? "Detached HEAD" : (before.branch.hasPrefix("refs/heads/") ? String(before.branch.dropFirst("refs/heads/".count)) : before.branch)
+            let branch = before.branch == "HEAD" ? localized("Detached HEAD") : (before.branch.hasPrefix("refs/heads/") ? String(before.branch.dropFirst("refs/heads/".count)) : before.branch)
             let snapshot = RepositorySnapshot(root: root, branch: branch, changes: changes, commits: commits, references: refs, stashes: previous.stashes, remotes: previous.remotes, ahead: ahead, behind: behind, hasHEAD: before.hash != nil, identity: identity, operation: state, historyCount: count, head: before, historyCountIsExact: exact)
             return IncrementalSnapshot(snapshot: snapshot, headChanged: headChanged, browserFiles: files)
         }

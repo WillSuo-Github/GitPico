@@ -28,9 +28,9 @@ struct RepositoryInfrastructureSheet: View {
     var reviewed: Bool { migration != nil || repair != nil || restore != nil || selectedRepair != nil || savedRecovery != nil }
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
-            SheetTitle(mode.rawValue, icon: "externaldrive.badge.wifi")
+            SheetTitle(mode.title, icon: "externaldrive.badge.wifi")
             if !reviewed {
-                Picker("Manage", selection: $mode) { ForEach(RepositoryInfrastructureMode.allCases, id: \.self) { Text($0.rawValue).tag($0) } }.pickerStyle(.segmented)
+                Picker("Manage", selection: $mode) { ForEach(RepositoryInfrastructureMode.allCases, id: \.self) { Text($0.title).tag($0) } }.pickerStyle(.segmented)
                 HStack { TextField("Main repository folder containing .git", text: $rootPath).textFieldStyle(.roundedBorder); Button("Choose…") { chooseFolder() } }
                 switch mode {
                 case .move:
@@ -51,8 +51,8 @@ struct RepositoryInfrastructureSheet: View {
                         Section("Main Repository Migrations") {
                             ForEach(migrations) { record in
                                 VStack(alignment: .leading, spacing: 5) {
-                                    HStack { Text(record.date.formatted()).fontWeight(.medium); Spacer(); Text(record.state).foregroundStyle(.secondary) }
-                                    Text(record.source + " → " + record.destination).font(.caption).lineLimit(2).textSelection(.enabled)
+                                    HStack { Text(record.date.formatted()).fontWeight(.medium); Spacer(); Text(operationStateTitle(record.state)).foregroundStyle(.secondary) }
+                                    Text("\(record.source) → \(record.destination)").font(.caption).lineLimit(2).textSelection(.enabled)
                                     if let diagnostic = record.diagnostic { Text(diagnostic).font(.caption).foregroundStyle(.orange) }
                                     HStack {
                                         Button(record.state == "restoring" ? "Review Resume Restore…" : "Review Restore…") { Task { await reviewRestore(record) } }.disabled(!["applied", "restoring"].contains(record.state))
@@ -64,7 +64,7 @@ struct RepositoryInfrastructureSheet: View {
                         Section("Pointer Repairs") {
                             ForEach(repairs) { record in
                                 VStack(alignment: .leading, spacing: 5) {
-                                    HStack { Text(record.date.formatted()); Spacer(); Text(record.state).foregroundStyle(.secondary) }
+                                    HStack { Text(record.date.formatted()); Spacer(); Text(operationStateTitle(record.state)).foregroundStyle(.secondary) }
                                     Text("\(record.targets.count) repository locations").font(.caption).foregroundStyle(.secondary)
                                     HStack {
                                         Button("Review Metadata Restore…") { selectedRepair = record; undoRepair = true }.disabled(record.state == "restored")
@@ -129,7 +129,7 @@ struct RepositoryInfrastructureSheet: View {
         }.frame(height: 290)
     }
     func rawRepository() throws -> GitRepository {
-        guard request.repositoryToken == store.repositoryToken, rootPath.hasPrefix("/") else { throw GitFailure("Choose an absolute main repository path in the current session.") }
+        guard request.repositoryToken == store.repositoryToken, rootPath.hasPrefix("/") else { throw appFailure("Choose an absolute main repository path in the current session.") }
         return GitRepository(root: URL(fileURLWithPath: rootPath).resolvingSymlinksInPath())
     }
     func preview(scanOnly: Bool = false) async {
@@ -137,7 +137,7 @@ struct RepositoryInfrastructureSheet: View {
         do {
             let repository = try rawRepository()
             if mode == .move {
-                guard destination.hasPrefix("/") else { throw GitFailure("Choose an absolute new destination.") }
+                guard destination.hasPrefix("/") else { throw appFailure("Choose an absolute new destination.") }
                 migration = try await repository.previewMainRepositoryMigration(to: URL(fileURLWithPath: destination))
             } else {
                 let plan = try await repository.previewPointerRepair(previousMainPath: previousPath.isEmpty ? nil : previousPath, locations: locations, replaceBrokenMarkers: replaceBroken)
@@ -157,12 +157,12 @@ struct RepositoryInfrastructureSheet: View {
     func reviewSavedRecovery(_ record: MainRepositoryMigrationBackup) async {
         loading = true; failure = nil; defer { loading = false }
         do {
-            guard destination.hasPrefix("/") else { throw GitFailure("Choose an absolute new recovery destination.") }
+            guard destination.hasPrefix("/") else { throw appFailure("Choose an absolute new recovery destination.") }
             savedRecovery = try await GitRepository(root: URL(fileURLWithPath: record.destination)).previewSavedMainRepositoryRecovery(record, to: URL(fileURLWithPath: destination))
         } catch { failure = error.localizedDescription }
     }
     func apply() {
-        guard request.repositoryToken == store.repositoryToken else { failure = "The repository changed. Reopen this preview."; return }
+        guard request.repositoryToken == store.repositoryToken else { failure = String(localized: "The repository changed. Reopen this preview."); return }
         if let savedRecovery { store.recoverSavedMain(savedRecovery, request: request) }
         else if let migration { store.migrateMain(migration, request: request) }
         else if let repair { store.repairPointers(repair, request: request) }

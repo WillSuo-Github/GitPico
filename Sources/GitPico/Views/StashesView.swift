@@ -7,7 +7,7 @@ struct StashesView: View {
     var body: some View {
         PersistentSplitView(name: "stashes", width: 320) {
             VStack(spacing: 0) {
-                PaneBar(title: "Stashes", subtitle: stashes.isEmpty ? "Nothing saved" : "\(store.snapshot?.stashes.count ?? 0) saved", icon: "tray.full") {
+                PaneBar(title: "Stashes", subtitle: stashes.isEmpty ? String(localized: "Nothing saved") : String(localized: "\(store.snapshot?.stashes.count ?? 0) saved"), icon: "tray.full") {
                     Button { store.stashAction(.save([], false)) } label: { Label("Save Stash", systemImage: "plus") }.labelStyle(.iconOnly).buttonStyle(.borderless).disabled(store.changes.isEmpty).help("Save local changes to a new stash")
                     Menu {
                         Button("Save Stash…") { store.stashAction(.save([], false)) }.disabled(store.changes.isEmpty)
@@ -25,7 +25,7 @@ struct StashesView: View {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(displaySubject(stash)).font(.system(size: 12.5, weight: .medium)).lineLimit(2)
                                 HStack(spacing: 5) {
-                                    if let branch = stashBranch(stash) { Text("on " + branch).lineLimit(1) ; Text("·") }
+                                    if let branch = stashBranch(stash) { Text("on \(branch)").lineLimit(1) ; Text("·") }
                                     Text(stash.date.picoRelative)
                                     Spacer(minLength: 0)
                                     Text(stash.name).font(.system(size: 10, design: .monospaced))
@@ -41,11 +41,11 @@ struct StashesView: View {
                         }
                     }
                 }.listStyle(.plain)
-                .overlay { if stashes.isEmpty { EmptyPane(title: store.search.isEmpty ? "No stashes" : "No matching stashes", subtitle: store.search.isEmpty ? "Stash shelves local changes so you can switch tasks and bring them back later." : "No stash message matches this search.", icon: "tray") } }
+                .overlay { if stashes.isEmpty { EmptyPane(title: store.search.isEmpty ? String(localized: "No stashes") : String(localized: "No matching stashes"), subtitle: store.search.isEmpty ? String(localized: "Stash shelves local changes so you can switch tasks and bring them back later.") : String(localized: "No stash message matches this search."), icon: "tray") } }
             }
         } trailing: {
             if let stash = store.selectedStash, let repository = store.repository { StashDetailView(store: store, repository: repository, stash: stash).id(stash.id) }
-            else { EmptyPane(title: "Select a stash", subtitle: "Review its files, then apply all of it, single files, chunks or lines.", icon: "tray.full") }
+            else { EmptyPane(title: String(localized: "Select a stash"), subtitle: String(localized: "Review its files, then apply all of it, single files, chunks or lines."), icon: "tray.full") }
         }
         .onAppear { selectFirst() }
         .onChange(of: store.snapshot?.stashes) { selectFirst() }

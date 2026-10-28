@@ -59,7 +59,7 @@ struct HistoryCommitTable: NSViewRepresentable {
                 guard let self, let input = self.input, self.rows.indices.contains(row), case .commit(let commit) = self.rows[row] else { return nil }
                 return NSHostingMenu(rootView: HistoryCommitActions(store: input.store, commit: commit, canModifyHistory: input.canModifyHistory))
             }
-            table.setAccessibilityLabel("Commit history")
+            table.setAccessibilityLabel(String(localized: "Commit history"))
             scroll.documentView = table
             return scroll
         }

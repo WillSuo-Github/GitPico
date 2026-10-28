@@ -11,7 +11,7 @@ struct IntegrationSheet: View {
     @State private var expectedHead: HeadPosition?
     @Environment(\.dismiss) private var dismiss
     var targets: [Reference] { (store.snapshot?.references ?? []).filter { !$0.isCurrent && !$0.name.hasSuffix("/HEAD") } }
-    var title: String { request.action == .cherryPick ? "Cherry-Pick" : request.action.rawValue.capitalized }
+    var title: LocalizedStringResource { "\(request.action.title)" }
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             SheetTitle(title)
@@ -57,7 +57,7 @@ struct OperationBanner: View {
     @State private var confirmAbort = false
     var body: some View {
         if let operation = store.snapshot?.operation, operation != .none {
-            NoticeBanner(icon: "arrow.triangle.merge", title: "\(operation.rawValue.capitalized) in progress", message: store.changes.contains(where: \.isConflicted) ? "Resolve and stage conflicts in Working Copy, then continue." : "All conflicts are resolved. Continue to finish.") {
+            NoticeBanner(icon: "arrow.triangle.merge", title: "\(operation.inProgressTitle)", message: store.changes.contains(where: \.isConflicted) ? String(localized: "Resolve and stage conflicts in Working Copy, then continue.") : String(localized: "All conflicts are resolved. Continue to finish.")) {
                 Button("Show Conflicts") { store.navigate(.workingCopy) }.disabled(store.destination == .workingCopy)
                 Button("Abort…") { confirmAbort = true }
                 Button("Continue", action: store.continueOperation).buttonStyle(.borderedProminent).disabled(store.changes.contains(where: \.isConflicted))

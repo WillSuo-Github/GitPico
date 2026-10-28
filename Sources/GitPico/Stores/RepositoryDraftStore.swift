@@ -20,9 +20,9 @@ struct RepositoryCommitDraft: Codable, Equatable {
             try checkStorage()
             if FileManager.default.fileExists(atPath: file.path) {
                 let data = try Data(contentsOf: file)
-                guard data.count <= 4 * 1024 * 1024 else { throw GitFailure("Commit draft storage is too large.") }
+                guard data.count <= 4 * 1024 * 1024 else { throw appFailure("Commit draft storage is too large.") }
                 values = try JSONDecoder().decode([String: RepositoryCommitDraft].self, from: data)
-                guard values.count <= 500, values.keys.allSatisfy({ $0.hasPrefix("/") && !$0.utf8.contains(0) }) else { throw GitFailure("Invalid commit draft storage.") }
+                guard values.count <= 500, values.keys.allSatisfy({ $0.hasPrefix("/") && !$0.utf8.contains(0) }) else { throw appFailure("Invalid commit draft storage.") }
                 diskData = data
             }
             loaded = true
@@ -39,17 +39,17 @@ struct RepositoryCommitDraft: Codable, Equatable {
             var saved: [String: RepositoryCommitDraft] = [:]
             if FileManager.default.fileExists(atPath: file.path) {
                 let data = try Data(contentsOf: file)
-                guard data.count <= 4 * 1024 * 1024 else { throw GitFailure("Commit draft storage is too large.") }
+                guard data.count <= 4 * 1024 * 1024 else { throw appFailure("Commit draft storage is too large.") }
                 saved = try JSONDecoder().decode([String: RepositoryCommitDraft].self, from: data)
-                guard saved.count <= 500, saved.keys.allSatisfy({ $0.hasPrefix("/") && !$0.utf8.contains(0) }) else { throw GitFailure("Invalid commit draft storage.") }
+                guard saved.count <= 500, saved.keys.allSatisfy({ $0.hasPrefix("/") && !$0.utf8.contains(0) }) else { throw appFailure("Invalid commit draft storage.") }
             }
             values = saved.merging(values) { _, current in current }; loaded = true
         }
         try checkStorage()
-        guard values.count <= 500 else { throw GitFailure("Too many commit drafts to save. Keep this tab open and review draft storage.") }
+        guard values.count <= 500 else { throw appFailure("Too many commit drafts to save. Keep this tab open and review draft storage.") }
         let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
         let data = try encoder.encode(values)
-        guard data.count <= 4 * 1024 * 1024 else { throw GitFailure("Commit drafts exceed the storage limit. Shorten the draft before closing this tab.") }
+        guard data.count <= 4 * 1024 * 1024 else { throw appFailure("Commit drafts exceed the storage limit. Shorten the draft before closing this tab.") }
         guard data != diskData else { return }
         try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
         try data.write(to: file, options: .atomic); diskData = data; error = nil
@@ -57,8 +57,8 @@ struct RepositoryCommitDraft: Codable, Equatable {
     private func checkStorage() throws {
         for url in [file, file.deletingLastPathComponent()] {
             if let type = try? FileManager.default.attributesOfItem(atPath: url.path)[.type] as? FileAttributeType {
-                guard type != .typeSymbolicLink else { throw GitFailure("Commit draft storage contains a symbolic link.") }
-                if url == file { guard type == .typeRegular else { throw GitFailure("Commit draft storage is not a regular file.") } }
+                guard type != .typeSymbolicLink else { throw appFailure("Commit draft storage contains a symbolic link.") }
+                if url == file { guard type == .typeRegular else { throw appFailure("Commit draft storage is not a regular file.") } }
             }
         }
     }

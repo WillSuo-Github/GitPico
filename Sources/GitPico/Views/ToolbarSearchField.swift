@@ -25,7 +25,7 @@ struct ToolbarSearchField: NSViewRepresentable {
         let composing = (field.currentEditor() as? NSTextView)?.hasMarkedText() == true
         if !composing, field.stringValue != text { field.stringValue = text }
         field.placeholderString = placeholder; field.isEnabled = context.environment.isEnabled
-        field.setAccessibilityLabel("Search files, branches, commits and actions")
+        field.setAccessibilityLabel(String(localized: "Search files, branches, commits and actions"))
         coordinator.update(field, session: session, presentation: presentation)
         coordinator.focus(field, request: focusRequest)
     }
@@ -93,7 +93,7 @@ struct ToolbarSearchField: NSViewRepresentable {
                 let panel = SearchSuggestionsPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
                 panel.isReleasedWhenClosed = false; panel.isOpaque = false; panel.backgroundColor = .clear
                 panel.hasShadow = true; panel.hidesOnDeactivate = true; panel.level = .popUpMenu
-                panel.contentViewController = NSHostingController(rootView: ToolbarSearchSuggestions(session: session))
+                panel.contentViewController = NSHostingController(rootView: ToolbarSearchSuggestions(session: session).environment(\.layoutDirection, AppLocalization.layoutDirection))
                 self.panel = panel
             }
             guard let panel else { return }

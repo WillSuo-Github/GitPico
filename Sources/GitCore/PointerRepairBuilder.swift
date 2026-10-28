@@ -43,7 +43,7 @@ actor PointerRepairBuilder {
         if try await repository.configuredWorktree(common) != nil { try await config(common.appendingPathComponent("config"), values: ["core.worktree": main.path]) }
         let mainWorktreeConfig = common.appendingPathComponent("config.worktree")
         if try repository.localAttributes(mainWorktreeConfig) != nil { try await config(mainWorktreeConfig, values: ["core.worktree": main.path]) }
-        targets.append(PointerRepairTarget(id: "main", title: "Main Repository", workingPath: main.path, gitDirectory: common.path, missing: false, mappingChanged: false))
+        targets.append(PointerRepairTarget(id: "main", title: localized("Main Repository"), workingPath: main.path, gitDirectory: common.path, missing: false, mappingChanged: false))
         usedAdmins.insert(common.path); usedRoots.insert(main.path)
         try await modules(working: main, admin: common, key: "module:main", depth: 0)
         for admin in admins {
@@ -57,7 +57,7 @@ actor PointerRepairBuilder {
             let commondir = admin.appendingPathComponent("commondir")
             if let data = try repository.readLocalIndex(commondir), String(data: data, encoding: .utf8)?.hasPrefix("/") == true { try change(commondir, Data((common.path + "\n").utf8)) }
             let missing = try repository.localAttributes(working) == nil
-            targets.append(PointerRepairTarget(id: id, title: "Worktree · " + working.lastPathComponent, workingPath: working.path, gitDirectory: admin.path, missing: missing, mappingChanged: false))
+            targets.append(PointerRepairTarget(id: id, title: localized("Worktree · \(working.lastPathComponent)"), workingPath: working.path, gitDirectory: admin.path, missing: missing, mappingChanged: false))
             if missing { continue }
             guard usedRoots.insert(working.path).inserted else { throw GitFailure("Two worktree entries point at the same folder.") }
             try repository.checkManagementAncestors(working)
@@ -121,7 +121,7 @@ actor PointerRepairBuilder {
             let available = try repository.localAttributes(child) != nil
             let retained = try repository.localAttributes(childAdmin) != nil
             if !available || !retained {
-                targets.append(PointerRepairTarget(id: childKey, title: "Submodule · " + name, workingPath: child.path, gitDirectory: childAdmin.path, missing: true, mappingChanged: relative != originalPath))
+                targets.append(PointerRepairTarget(id: childKey, title: localized("Submodule · \(name)"), workingPath: child.path, gitDirectory: childAdmin.path, missing: true, mappingChanged: relative != originalPath))
                 if relative != originalPath { throw GitFailure("A relocated module needs its retained Git data and working directory before updating the mapping.") }
                 continue
             }
@@ -132,7 +132,7 @@ actor PointerRepairBuilder {
             _ = try await GitProcess.run(["--git-dir=" + childAdmin.path, "--work-tree=" + child.path, "rev-parse", "--verify", "HEAD^{commit}"], at: main)
             if !embedded { try change(child.appendingPathComponent(".git"), Data(("gitdir: " + childAdmin.path + "\n").utf8)) }
             try await config(childAdmin.appendingPathComponent("config"), values: ["core.worktree": child.path])
-            targets.append(PointerRepairTarget(id: childKey, title: "Submodule · " + name, workingPath: child.path, gitDirectory: childAdmin.path, missing: false, mappingChanged: relative != originalPath))
+            targets.append(PointerRepairTarget(id: childKey, title: localized("Submodule · \(name)"), workingPath: child.path, gitDirectory: childAdmin.path, missing: false, mappingChanged: relative != originalPath))
             if relative != originalPath { mapping[originalPath] = relative }
             try await modules(working: child, admin: childAdmin, key: childKey, depth: depth + 1)
         }

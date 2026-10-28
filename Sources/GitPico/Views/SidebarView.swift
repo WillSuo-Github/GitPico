@@ -86,7 +86,7 @@ struct SidebarView: View {
                 Section(isExpanded: $relatedExpanded) {
                     Label("Worktrees", systemImage: "folder.badge.gearshape").badge(store.worktrees.filter { !$0.isMain && !$0.isBare }.count).tag(Destination.worktrees).contextMenu { Button("Add Worktree…") { store.manageWorktree(.create(nil)) } }
                     ForEach(store.worktrees.filter { !$0.isBare && $0.path != store.snapshot?.root.path }) { entry in
-                        Button { store.openWorktree(entry) } label: { Label(entry.name, systemImage: entry.locked != nil ? "lock" : "folder") }.buttonStyle(.plain).padding(.leading, 12).disabled(entry.prunable != nil).help("Open " + entry.path).contextMenu { WorktreeContextActions(store: store, entry: entry) }
+                        Button { store.openWorktree(entry) } label: { Label(entry.name, systemImage: entry.locked != nil ? "lock" : "folder") }.buttonStyle(.plain).padding(.leading, 12).disabled(entry.prunable != nil).help("Open \(entry.path)").contextMenu { WorktreeContextActions(store: store, entry: entry) }
                     }
                     Label("Submodules", systemImage: "shippingbox").badge(store.submodules.count).tag(Destination.submodules).contextMenu { Button("Add Submodule…") { store.manageSubmodule(.add) } }
                     ForEach(store.submodules) { entry in
@@ -153,7 +153,7 @@ struct SidebarView: View {
             Button("Archive Files as ZIP…") { store.historical(.archive, revision: ref.hash) }.disabled(store.isBusy)
             Divider()
             if ref.isLocal {
-                if let kind = store.flowConfiguration?.kind(of: ref.name), kind != .support { Button("Git Flow Finish " + kind.rawValue + "…") { store.manageFlow(.finish(ref.name)) }.disabled(store.isBusy || store.activeFlow != nil) }
+                if let kind = store.flowConfiguration?.kind(of: ref.name), kind != .support { Button("Git Flow: \(kind.finishTitle)…") { store.manageFlow(.finish(ref.name)) }.disabled(store.isBusy || store.activeFlow != nil) }
                 Button("Checkout Branch in New Worktree…") { store.manageWorktree(.create(ref.name)) }.disabled(store.worktrees.contains { $0.branch == ref.fullName })
                 Button(store.organization.pinned.contains(ref.fullName) ? "Unpin Branch" : "Pin Branch") { store.organize(ref, pinned: !store.organization.pinned.contains(ref.fullName)) }
                 Button("Track Upstream Branch…") { store.manage(.upstream(ref)) }
@@ -182,7 +182,7 @@ struct SidebarView: View {
             }
             Button("Compare with Revision…") { store.navigate(.comparison(ref.fullName)) }
             Button("Copy Name") { NSPasteboard.general.clearContents(); NSPasteboard.general.setString(ref.name, forType: .string) }
-        }.help(ref.name + (ref.isCurrent ? " · Current branch" : " · Click to preview history"))
+        }.help(ref.name + (ref.isCurrent ? String(localized: " · Current branch") : String(localized: " · Click to preview history")))
     }
 }
 
@@ -208,7 +208,7 @@ struct SidebarRepositoryHeader: View {
             }
             .buttonStyle(.plain)
             .disabled(store.isBusy || store.isOpeningRepository)
-            .help("Switch repository\n" + snapshot.root.path)
+            .help("Switch repository\n\(snapshot.root.path)")
             .accessibilityLabel(Text("Repository \(name), branch \(snapshot.branch). Switch repository"))
             .contextMenu {
                 Button("Switch Repository…", action: store.showRepositories)

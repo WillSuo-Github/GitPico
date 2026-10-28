@@ -48,20 +48,20 @@ struct WorkspaceSession: Codable {
         do {
             try validateStorage()
             let data = FileManager.default.fileExists(atPath: file.path) ? try Data(contentsOf: file) : nil
-            guard (data?.count ?? 0) <= 8 * 1024 * 1024 else { throw GitFailure("Saved workspace exceeds its size limit.") }
+            guard (data?.count ?? 0) <= 8 * 1024 * 1024 else { throw appFailure("Saved workspace exceeds its size limit.") }
             let session = try data.map { try JSONDecoder().decode(WorkspaceSession.self, from: $0) }
             if let session { try validate(session) }
             saved = session; diskData = data; canWrite = true; error = nil
         } catch { self.error = error.localizedDescription; canWrite = false }
     }
     func save(_ session: WorkspaceSession) throws {
-        guard canWrite else { throw GitFailure("Saved workspace could not be read. Keep it for recovery before replacing it.") }
+        guard canWrite else { throw appFailure("Saved workspace could not be read. Keep it for recovery before replacing it.") }
         try validateStorage(); try validate(session)
         let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
         let data = try encoder.encode(session)
-        guard data.count <= 8 * 1024 * 1024 else { throw GitFailure("Saved workspace exceeds its size limit.") }
+        guard data.count <= 8 * 1024 * 1024 else { throw appFailure("Saved workspace exceeds its size limit.") }
         let current = FileManager.default.fileExists(atPath: file.path) ? try Data(contentsOf: file) : nil
-        guard current == diskData else { throw GitFailure("Saved workspace changed outside GitPico. Reload it before saving.") }
+        guard current == diskData else { throw appFailure("Saved workspace changed outside GitPico. Reload it before saving.") }
         if data != diskData {
             try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
             try data.write(to: file, options: .atomic)
@@ -72,7 +72,7 @@ struct WorkspaceSession: Codable {
     private func validateStorage() throws {
         for url in [file, file.deletingLastPathComponent()] {
             if let type = try? FileManager.default.attributesOfItem(atPath: url.path)[.type] as? FileAttributeType {
-                guard type != .typeSymbolicLink, url != file || type == .typeRegular else { throw GitFailure("Saved workspace storage is not a regular file or contains a symbolic link.") }
+                guard type != .typeSymbolicLink, url != file || type == .typeRegular else { throw appFailure("Saved workspace storage is not a regular file or contains a symbolic link.") }
             }
         }
     }
@@ -81,16 +81,16 @@ struct WorkspaceSession: Codable {
         guard session.version == 1, !session.tabs.isEmpty, session.tabs.count <= 128,
               ids.count == session.tabs.count, ids.contains(session.selected),
               session.tabs.allSatisfy({ tab in tab.path.map { $0.hasPrefix("/") && !$0.utf8.contains(0) } ?? true }),
-              session.windows.count <= 128 else { throw GitFailure("Saved workspace is invalid or from an unsupported version.") }
+              session.windows.count <= 128 else { throw appFailure("Saved workspace is invalid or from an unsupported version.") }
         if let visits = session.repositoryVisits {
             let paths = visits.back + visits.forward + [visits.current].compactMap { $0 }
             guard visits.back.count + visits.forward.count <= 100,
-                  paths.allSatisfy({ $0.hasPrefix("/") && !$0.utf8.contains(0) }) else { throw GitFailure("Saved repository visits are invalid.") }
+                  paths.allSatisfy({ $0.hasPrefix("/") && !$0.utf8.contains(0) }) else { throw appFailure("Saved repository visits are invalid.") }
         }
         let grouped = session.windows.flatMap(\.tabs)
         guard Set(grouped).count == grouped.count, Set(grouped).isSubset(of: ids), session.windows.allSatisfy({ group in
             !group.tabs.isEmpty && group.tabs.contains(group.selected) && [group.x, group.y, group.width, group.height].allSatisfy(\.isFinite) && group.width >= 500 && group.height >= 300 && group.width <= 20000 && group.height <= 20000
-        }) else { throw GitFailure("Saved window groups are invalid.") }
+        }) else { throw appFailure("Saved window groups are invalid.") }
     }
 }
 

@@ -40,7 +40,7 @@ struct RevisionField: View {
 }
 
 struct ManagementFooter: View {
-    let title: String
+    let title: LocalizedStringResource
     var disabled = false
     var destructive = false
     let submit: () -> Void

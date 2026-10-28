@@ -42,15 +42,15 @@ import UniformTypeIdentifiers
             let bytes = try data(store: store)
             let panel = NSSavePanel(); panel.allowedContentTypes = [.json]
             panel.nameFieldStringValue = "GitPico-diagnostics-" + Date().formatted(.iso8601.year().month().day().dateSeparator(.dash)) + ".json"
-            panel.title = "Export Diagnostics"
-            panel.message = "Exports app/build and repository state counts. File contents, raw logs, names, paths, URLs and credentials are excluded."
+            panel.title = String(localized: "Export Diagnostics")
+            panel.message = String(localized: "Exports app/build and repository state counts. File contents, raw logs, names, paths, URLs and credentials are excluded.")
             panel.begin { result in
                 guard result == .OK, let url = panel.url else { return }
                 do {
-                    if FileManager.default.fileExists(atPath: url.path), try FileManager.default.attributesOfItem(atPath: url.path)[.type] as? FileAttributeType != .typeRegular { throw GitFailure("Choose a regular diagnostic file destination.") }
+                    if FileManager.default.fileExists(atPath: url.path), try FileManager.default.attributesOfItem(atPath: url.path)[.type] as? FileAttributeType != .typeRegular { throw appFailure("Choose a regular diagnostic file destination.") }
                     try bytes.write(to: url, options: .atomic)
                     try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: url.path)
-                    completion("Diagnostics exported.")
+                    completion(String(localized: "Diagnostics exported."))
                 } catch { completion(error.localizedDescription) }
             }
         } catch { completion(error.localizedDescription) }

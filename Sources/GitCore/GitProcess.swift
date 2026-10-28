@@ -1,9 +1,15 @@
 import Foundation
 
 public struct GitFailure: LocalizedError, Sendable {
+    enum Reason: Sendable { case outputLimitExceeded }
     public let message: String
+    let reason: Reason?
     public var errorDescription: String? { message }
-    public init(_ message: String) { self.message = message }
+    /// User-facing messages are localized from GitCore's string catalog.
+    public init(_ message: String.LocalizationValue) { self.message = localized(message); reason = nil }
+    init(_ message: String.LocalizationValue, reason: Reason) { self.message = localized(message); self.reason = reason }
+    /// Text that must not be translated, such as Git's own output.
+    public init(verbatim message: String) { self.message = message; reason = nil }
 }
 
 public struct GitOutput: Sendable {
@@ -39,7 +45,7 @@ public enum GitProcess {
     private static func execute(_ arguments: [String], root: URL, allowed: Set<Int32>, timeout: TimeInterval, acceptGeneratedMessage: Bool, sequenceEditor: URL?, input: Data?, identityEnvironment: [String: String], indexFile: URL?, maxOutputBytes: Int, lfsEnvironment: [String: String], cancellable: Bool, networkContext: GitNetworkContext?) throws -> GitOutput {
             if cancellable { try Task.checkCancellation() }
             let network = GitNetworkObservation(arguments: arguments, context: networkContext, root: root)
-            defer { network?.finish(succeeded: false, message: "Git did not finish successfully. Review the output before retrying.") }
+            defer { network?.finish(succeeded: false, message: localized("Git did not finish successfully. Review the output before retrying.")) }
             try network?.prepareCredential()
             let fm = FileManager.default
             let directory = fm.temporaryDirectory.appendingPathComponent("GitPico-process-\(UUID().uuidString)")
@@ -147,7 +153,7 @@ public enum GitProcess {
             let reader = try FileHandle(forReadingFrom: outURL)
             defer { try? reader.close() }
             let data = try reader.read(upToCount: maxOutputBytes + 1) ?? Data()
-            guard data.count <= maxOutputBytes else { throw GitFailure("Git output exceeds \(maxOutputBytes / 1024 / 1024) MB. Narrow the selection before trying again.") }
+            guard data.count <= maxOutputBytes else { throw GitFailure("Git output exceeds \(maxOutputBytes / 1024 / 1024) MB. Narrow the selection before trying again.", reason: .outputLimitExceeded) }
             let errorReader = try FileHandle(forReadingFrom: errURL)
             defer { try? errorReader.close() }
             let error = String(decoding: try errorReader.read(upToCount: 64 * 1024) ?? Data(), as: UTF8.self)
@@ -155,7 +161,9 @@ public enum GitProcess {
             network?.progress(stdout: outURL, stderr: errURL)
             network?.finish(succeeded: allowed.contains(result.status))
             guard allowed.contains(result.status) else {
-                throw GitFailure(error.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Git exited with status \(result.status)." : error.trimmingCharacters(in: .whitespacesAndNewlines))
+                let message = error.trimmingCharacters(in: .whitespacesAndNewlines)
+                // Git's own diagnostics are shown untranslated.
+                throw message.isEmpty ? GitFailure("Git exited with status \(result.status).") : GitFailure(verbatim: message)
             }
             return result
     }

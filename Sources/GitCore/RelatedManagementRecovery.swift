@@ -251,7 +251,7 @@ extension GitRepository {
             record.summary.state = "restored"; record.summary.diagnostic = nil; try await saveRelatedBackup(record)
         } catch {
             record.summary.diagnostic = error.localizedDescription; try? await saveRelatedBackup(record)
-            throw GitFailure(error.localizedDescription + "\nThe backup and quarantined data were kept. Reopen Management Backups to resume restoration.")
+            throw GitFailure("\(error.localizedDescription)\nThe backup and quarantined data were kept. Reopen Management Backups to resume restoration.")
         }
     }
 }

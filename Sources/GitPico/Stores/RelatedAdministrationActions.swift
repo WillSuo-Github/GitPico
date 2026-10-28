@@ -17,7 +17,7 @@ extension RepositoryStore {
         relatedAdministrationRequest = RelatedAdministrationRequest(repositoryToken: repositoryToken, action: action, initialWorktreeOperation: initialWorktreeOperation)
     }
     func runRelatedBatch(_ plan: RelatedBatchPlan, request: RelatedAdministrationRequest) {
-        guard !isBusy, let repository, request.repositoryToken == repositoryToken else { error = "The repository changed. Reopen this batch preview."; return }
+        guard !isBusy, let repository, request.repositoryToken == repositoryToken else { error = String(localized: "The repository changed. Reopen this batch preview."); return }
         isBusy = true; activity = plan.report.title + "…"; relatedBatchProgress = plan.report
         relatedBatchTask = Task {
             do {
@@ -30,8 +30,8 @@ extension RepositoryStore {
         }
     }
     func recoverSavedModule(_ plan: SavedModuleRepositoryRecoveryPlan, request: RelatedAdministrationRequest) {
-        guard !isBusy, request.repositoryToken == repositoryToken, let repository else { error = "The repository changed. Reopen the saved repository preview."; return }
-        isBusy = true; activity = "Recovering saved submodule repository…"
+        guard !isBusy, request.repositoryToken == repositoryToken, let repository else { error = String(localized: "The repository changed. Reopen the saved repository preview."); return }
+        isBusy = true; activity = String(localized: "Recovering saved submodule repository…")
         Task {
             do { let recovered = try await repository.recoverSavedModuleRepository(plan); let url = await recovered.root; isBusy = false; await open(url) }
             catch { self.error = error.localizedDescription; isBusy = false }
@@ -39,15 +39,15 @@ extension RepositoryStore {
         }
     }
     func extractManagementFiles(_ plan: ManagementBackupExtractionPlan, request: RelatedAdministrationRequest) {
-        guard request.repositoryToken == repositoryToken else { error = "The repository changed. Reopen this preview."; return }
+        guard request.repositoryToken == repositoryToken else { error = String(localized: "The repository changed. Reopen this preview."); return }
         perform("Extracting saved management files…") { try await $0.extractManagementBackupFiles(plan) }
     }
     func restoreEarlierManagement(_ plan: LegacyManagementRestorePlan, request: RelatedAdministrationRequest) {
-        guard request.repositoryToken == repositoryToken else { error = "The repository changed. Reopen this preview."; return }
+        guard request.repositoryToken == repositoryToken else { error = String(localized: "The repository changed. Reopen this preview."); return }
         perform("Recovering earlier management snapshot…") { _ = try await $0.restoreLegacyManagement(plan) }
     }
     func restoreManagementBackup(_ plan: RelatedManagementRestorePlan, request: RelatedAdministrationRequest) {
-        guard request.repositoryToken == repositoryToken else { error = "The repository changed. Reopen the restore preview."; return }
+        guard request.repositoryToken == repositoryToken else { error = String(localized: "The repository changed. Reopen the restore preview."); return }
         perform("Restoring management backup…") { try await $0.restoreRelatedManagement(plan) }
     }
 }

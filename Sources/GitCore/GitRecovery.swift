@@ -113,7 +113,7 @@ extension GitRepository {
         if restoreFiles { try await protectUntrackedDestinations(target) }
         try await checkpoint(expected.hash, id: UUID(), side: "before")
         _ = try await GitProcess.run(["reset", restoreFiles ? "--keep" : "--soft", target, "--"], at: root)
-        try await recordHistory(expected, title: "Restore HEAD", restoresFiles: restoreFiles)
+        try await recordHistory(expected, title: localized("Restore HEAD"), restoresFiles: restoreFiles)
     }
 
     func verifiedCommit(_ revision: String) async throws -> String {

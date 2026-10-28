@@ -46,7 +46,7 @@ extension RepositoryStore {
     }
     func transferLFS(_ plan: LFSTransferPlan, request: LFSRequest) {
         let token = request.token
-        runExtension(token: token, activity: plan.operation.rawValue + "…") { [weak self] repository in
+        runExtension(token: token, activity: "\(plan.operation.title)…") { [weak self] repository in
             _ = try await repository.runLFSTransfer(plan) { [weak self] message in
                 await self?.setLFSProgress(message, token: token)
             }
@@ -61,9 +61,9 @@ extension RepositoryStore {
             if stop { try await repository.stopGitFlow(record) } else { _ = try await repository.resumeGitFlow(record) }
         }
     }
-    private func runExtension(token: UUID, activity: String, operation: @escaping @Sendable (GitRepository) async throws -> Void) {
-        guard !isBusy, let repository, token == repositoryToken else { error = "The repository changed. Reopen this extension preview."; return }
-        isBusy = true; self.activity = activity
+    private func runExtension(token: UUID, activity: String.LocalizationValue, operation: @escaping @Sendable (GitRepository) async throws -> Void) {
+        guard !isBusy, let repository, token == repositoryToken else { error = String(localized: "The repository changed. Reopen this extension preview."); return }
+        isBusy = true; self.activity = String(localized: activity)
         Task {
             do { try await operation(repository) }
             catch { self.error = error.localizedDescription }

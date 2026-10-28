@@ -22,21 +22,21 @@ struct ExternalToolSheet: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack { SheetTitle(session?.isMerge == true ? "External Merge" : browsingSessions ? "External Tool Sessions" : "External Comparison"); Spacer(); Button("Tool Settings…") { showingSettings = true } }
             if !sessions.isEmpty {
-                Picker("Saved Session", selection: $selected) { Text("Select a session").tag(nil as UUID?); ForEach(sessions) { item in Text(item.path + " · " + item.date.formatted(date: .numeric, time: .shortened)).tag(Optional(item.id)) } }.disabled(loading || launching)
+                Picker("Saved Session", selection: $selected) { Text("Select a session").tag(nil as UUID?); ForEach(sessions) { item in Text("\(item.path) · \(item.date.formatted(date: .numeric, time: .shortened))").tag(Optional(item.id)) } }.disabled(loading || launching)
             }
             if loading { ProgressView("Preparing tool files…").frame(maxWidth: .infinity, minHeight: 200) }
             if browsingSessions && !loading && sessions.isEmpty { ContentUnavailableView("No saved tool sessions", systemImage: "arrow.left.arrow.right", description: Text("Open an external comparison or merge from a file to create one.")) }
             if let session {
                 Text(session.path).font(.headline).textSelection(.enabled)
-                Text(session.title + " · " + session.head.branch).font(.callout).foregroundStyle(.secondary)
+                Text("\(session.title) · \(session.head.branch)").font(.callout).foregroundStyle(.secondary)
                 Text(session.isMerge ? "The tool edits a separate result file. Save and close the tool, review the result, then apply it here. Applying also stages this file." : "The tool compares snapshot copies. Changes to these copies never update your working copy or index.").font(.callout).foregroundStyle(.secondary)
                 if session.isMerge {
-                    ScrollView { Text(result.isEmpty ? "Empty merge result" : result).font(.system(size: 11, design: .monospaced)).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading).padding(10) }.frame(height: 230).background(Color(nsColor: .textBackgroundColor))
+                    ScrollView { Text(result.isEmpty ? String(localized: "Empty merge result") : result).font(.system(size: 11, design: .monospaced)).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading).padding(10) }.frame(height: 230).background(Color(nsColor: .textBackgroundColor))
                     Button("Reload Saved Result") { loadResult() }.disabled(status?.running == true)
                     if session.applied { Label("Result applied", systemImage: "checkmark.circle").foregroundStyle(.green) }
                 } else {
                     ForEach(["local", "remote"], id: \.self) { side in
-                        if let url = files[side] { LabeledContent(side.capitalized, value: url.path).font(.caption).textSelection(.enabled) }
+                        if let url = files[side] { LabeledContent(side == "local" ? String(localized: "Local") : String(localized: "Remote"), value: url.path).font(.caption).textSelection(.enabled) }
                     }
                 }
                 if let status {
@@ -72,7 +72,7 @@ struct ExternalToolSheet: View {
         .sheet(isPresented: $showingSettings) { VStack { ExternalToolSettingsView(preferences: store.toolPreferences); Button("Close") { showingSettings = false }.padding(.bottom) } }
     }
     func prepare() async {
-        guard let repository = store.repository, request.repositoryToken == store.repositoryToken else { failure = "The repository changed."; loading = false; return }
+        guard let repository = store.repository, request.repositoryToken == store.repositoryToken else { failure = String(localized: "The repository changed."); loading = false; return }
         do {
             let item: ExternalToolSession?
             switch request.action {
@@ -102,9 +102,9 @@ struct ExternalToolSheet: View {
         guard let file = files["merged"] else { return }
         do {
             let attrs = try file.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey, .fileSizeKey])
-            guard attrs.isRegularFile == true, attrs.isSymbolicLink != true, attrs.fileSize ?? Int.max <= 1_048_576 else { throw GitFailure("Result is not a regular UTF-8 file under 1 MB.") }
+            guard attrs.isRegularFile == true, attrs.isSymbolicLink != true, attrs.fileSize ?? Int.max <= 1_048_576 else { throw appFailure("Result is not a regular UTF-8 file under 1 MB.") }
             let data = try Data(contentsOf: file)
-            guard !data.contains(0), let text = String(data: data, encoding: .utf8) else { throw GitFailure("Result is not UTF-8 text.") }
+            guard !data.contains(0), let text = String(data: data, encoding: .utf8) else { throw appFailure("Result is not UTF-8 text.") }
             result = text
         } catch { failure = error.localizedDescription }
     }
@@ -112,9 +112,9 @@ struct ExternalToolSheet: View {
         guard request.repositoryToken == store.repositoryToken, !store.isBusy else { return }
         launching = true; failure = nil; defer { launching = false }
         do {
-            guard store.toolPreferences.error == nil else { throw GitFailure("Reload valid external tool settings before launching.") }
+            guard store.toolPreferences.error == nil else { throw appFailure("Reload valid external tool settings before launching.") }
             let command = item.isMerge ? store.toolPreferences.value.merge : store.toolPreferences.value.diff
-            guard let repository = store.repository else { throw GitFailure("No repository is open.") }
+            guard let repository = store.repository else { throw appFailure("No repository is open.") }
             let validated = try await repository.externalFiles(item)
             try await store.externalToolRunner.launch(command, session: item, files: validated)
             status = await store.externalToolRunner.status(item.id)
@@ -123,7 +123,7 @@ struct ExternalToolSheet: View {
     func remove(_ item: ExternalToolSession) async {
         guard request.repositoryToken == store.repositoryToken, let repository = store.repository else { return }
         do {
-            guard await store.externalToolRunner.status(item.id).running == false else { throw GitFailure("Close the tool before deleting its files.") }
+            guard await store.externalToolRunner.status(item.id).running == false else { throw appFailure("Close the tool before deleting its files.") }
             try await repository.deleteExternalSession(item.id); session = nil; files = [:]
             sessions = try await repository.externalSessions(); selected = nil
         } catch { failure = error.localizedDescription }

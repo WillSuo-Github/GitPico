@@ -9,7 +9,7 @@ public struct LFSFileLock: Codable, Sendable, Identifiable, Equatable {
 }
 public enum LFSLockAction: Sendable {
     case lock(String), unlock(LFSFileLock, force: Bool)
-    public var title: String { switch self { case .lock: "Lock File"; case .unlock(_, let force): force ? "Force Unlock File" : "Unlock File" } }
+    public var title: String { switch self { case .lock: localized("Lock File"); case .unlock(_, let force): force ? localized("Force Unlock File") : localized("Unlock File") } }
     public var path: String { switch self { case .lock(let path): path; case .unlock(let lock, _): lock.path } }
 }
 public struct LFSLockPlan: Sendable {

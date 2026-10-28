@@ -13,7 +13,7 @@ struct GitMutationRefreshReader: MutationRefreshReading {
 }
 extension RepositoryStore {
     func reloadIncrementally(history: Bool, includingRecovery: Bool = false) async throws {
-        guard let repository, let previous = snapshot else { throw GitFailure("Refresh the repository before updating its working copy.") }
+        guard let repository, let previous = snapshot else { throw appFailure("Refresh the repository before updating its working copy.") }
         let token = repositoryToken
         metadataEpoch = UUID(); metadataTask?.cancel(); fileBrowserGeneration = UUID()
         let policyChanged = previous.changes.contains { $0.path == ".gitignore" || $0.path.hasSuffix("/.gitignore") }
@@ -28,7 +28,7 @@ extension RepositoryStore {
             clearHistoryCache()
             metadataDirty.formUnion(DeferredMetadata.allCases)
             do { undoAvailability = try await repository.undoAvailability() }
-            catch { undoAvailability = nil; commitWarning = [commitWarning, "The changes were saved, but Undo status could not be refreshed. " + error.localizedDescription].compactMap { $0 }.joined(separator: "\n") }
+            catch { undoAvailability = nil; commitWarning = [commitWarning, String(localized: "The changes were saved, but Undo status could not be refreshed. \(error.localizedDescription)")].compactMap { $0 }.joined(separator: "\n") }
         }
         if includingRecovery || previous.operation != delta.snapshot.operation {
             do { rebaseProgress = delta.snapshot.operation == .rebase ? try await repository.rebaseProgress() : nil }
@@ -60,7 +60,7 @@ extension RepositoryStore {
         lastUpdated = Date()
         if isHistoryDestination { requestHistory() }
         requestDeferredMetadata(destination)
-        if !refreshErrors.isEmpty { throw GitFailure(refreshErrors.joined(separator: "\n")) }
+        if !refreshErrors.isEmpty { throw GitFailure(verbatim: refreshErrors.joined(separator: "\n")) }
     }
     private func publishStashes(_ values: [Stash]) {
         snapshot = snapshot?.replacingMetadata(stashes: values)
@@ -80,7 +80,7 @@ extension RepositoryStore {
                     let message = scopes.compactMap { scope -> String? in
                         switch scope { case .worktrees: worktreeError; case .submodules: submoduleError; case .workflow: workflowError; default: nil }
                     }.first
-                    error = message ?? "The requested repository data could not be refreshed. Try Refresh before continuing."
+                    error = message ?? String(localized: "The requested repository data could not be refreshed. Try Refresh before continuing.")
                 }
                 return
             }

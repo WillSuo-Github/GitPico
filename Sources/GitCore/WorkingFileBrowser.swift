@@ -51,6 +51,6 @@ extension GitRepository {
         let directory = try makeLocalScratch(); defer { try? FileManager.default.removeItem(at: directory) }
         let temporaryIndex = try await scratchIndex(index, in: directory)
         _ = try await GitProcess.run(["add", "--force", "--"] + chosen, at: root, indexFile: temporaryIndex)
-        return LocalChangePlan(id: UUID(), title: "Force Add Ignored Files", paths: chosen, preview: "Ignored files will become tracked in the index:\n\n" + chosen.joined(separator: "\n"), repository: root.path, head: head, beforeIndex: index, afterIndex: try readLocalIndex(temporaryIndex), before: before, after: before)
+        return LocalChangePlan(id: UUID(), title: localized("Force Add Ignored Files"), paths: chosen, preview: localized("Ignored files will become tracked in the index:\n\n\(chosen.joined(separator: "\n"))"), repository: root.path, head: head, beforeIndex: index, afterIndex: try readLocalIndex(temporaryIndex), before: before, after: before)
     }
 }

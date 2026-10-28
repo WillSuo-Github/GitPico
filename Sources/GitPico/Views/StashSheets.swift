@@ -64,7 +64,7 @@ struct StashActionSheet: View {
         default: nil
         }
     }
-    var title: String {
+    var title: LocalizedStringResource {
         switch action {
         case .apply: "Apply Stash"
         case .rename: "Rename Stash"

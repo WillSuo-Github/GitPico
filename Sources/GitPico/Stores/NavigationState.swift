@@ -43,16 +43,16 @@ extension RepositoryStore {
     var canSynchronize: Bool { canIntegrate && snapshot?.remotes.isEmpty == false && snapshot?.references.contains { $0.isCurrent && !$0.upstream.isEmpty } == true }
     var previewedReference: Reference? { snapshot?.references.first { $0.fullName == destination.ref } }
     func checkoutUnavailableReason(_ ref: Reference) -> String? {
-        if !canUseRepository { return "Wait for the current repository operation." }
-        if !ref.isLocal { return "Check out a local branch." }
-        if ref.isCurrent { return "This branch is already checked out." }
-        if snapshot?.operation != RepositoryOperation.none { return "Finish or abort the current operation first." }
-        if !metadataDirty.contains(.worktrees), let entry = worktrees.first(where: { $0.branch == ref.fullName && $0.path != snapshot?.root.path }) { return "Checked out in " + entry.path }
+        if !canUseRepository { return String(localized: "Wait for the current repository operation.") }
+        if !ref.isLocal { return String(localized: "Check out a local branch.") }
+        if ref.isCurrent { return String(localized: "This branch is already checked out.") }
+        if snapshot?.operation != RepositoryOperation.none { return String(localized: "Finish or abort the current operation first.") }
+        if !metadataDirty.contains(.worktrees), let entry = worktrees.first(where: { $0.branch == ref.fullName && $0.path != snapshot?.root.path }) { return String(localized: "Checked out in \(entry.path)") }
         return nil
     }
     var navigationSubtitle: String {
-        guard snapshot != nil else { return "A little clarity for every commit" }
-        if let reference = destination.ref { return "History · " + Destination.reference(reference).title }
+        guard snapshot != nil else { return String(localized: "A little clarity for every commit") }
+        if let reference = destination.ref { return String(localized: "History · \(Destination.reference(reference).title)") }
         return destination.title
     }
 }

@@ -4,7 +4,7 @@ import Darwin
 public enum BinaryFileSource: Sendable, Equatable {
     case workingCopy, index, revision(String), empty
     public var title: String {
-        switch self { case .workingCopy: "Working Copy"; case .index: "Index"; case .revision(let value): String(value.prefix(12)); case .empty: "Absent" }
+        switch self { case .workingCopy: localized("Working Copy"); case .index: localized("Index"); case .revision(let value): String(value.prefix(12)); case .empty: localized("Absent") }
     }
 }
 public struct BinaryComparison: Sendable {
