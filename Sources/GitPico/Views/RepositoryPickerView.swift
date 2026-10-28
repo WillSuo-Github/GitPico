@@ -4,7 +4,7 @@ struct RepositoryPickerView: View {
     @Bindable var workspace: RepositoryWorkspace
     @Bindable var tab: RepositoryTab
     var showsSidebar = true
-    @FocusState private var searchFocused: Bool
+    @State private var searchFocused = false
     var store: RepositoryStore { tab.store }
     var entries: [SavedRepository] { workspace.library.matches(query: tab.pickerQuery, filter: tab.pickerFilter) }
     var selection: SavedRepository? { entries.first { $0.id == tab.pickerSelection } }
@@ -58,7 +58,7 @@ struct RepositoryPickerView: View {
                     Spacer()
                     HStack(spacing: 6) {
                         Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                        TextField("Search name, path or group", text: $tab.pickerQuery).textFieldStyle(.plain).focused($searchFocused).onSubmit(openSelected)
+                        RepositoryPickerSearchField(text: $tab.pickerQuery, isFocused: $searchFocused, submit: openSelected)
                     }
                     .padding(.horizontal, 10).frame(width: 300, height: 28)
                     .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 8, style: .continuous))

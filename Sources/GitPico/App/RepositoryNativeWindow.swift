@@ -5,6 +5,7 @@ final class RepositoryNativeWindow: NSWindow {
     let tabID: UUID
     let permitsPresentation: Bool
     weak var repositoryWindows: NativeRepositoryWindows?
+    weak var pickerSearchField: RepositoryPickerSearchControl?
     init(tabID: UUID, permitsPresentation: Bool) {
         self.tabID = tabID
         self.permitsPresentation = permitsPresentation
@@ -29,6 +30,10 @@ final class RepositoryNativeWindow: NSWindow {
     override func orderFrontRegardless() { if permitsPresentation { super.orderFrontRegardless() } }
     override func makeKeyAndOrderFront(_ sender: Any?) { if permitsPresentation { super.makeKeyAndOrderFront(sender) } }
     override func newWindowForTab(_ sender: Any?) { repositoryWindows?.newTab(from: tabID) }
+    override func sendEvent(_ event: NSEvent) {
+        if event.type == .keyDown, pickerSearchField?.beginSearching(with: event) == true { return }
+        super.sendEvent(event)
+    }
 }
 
 final class RepositoryWindowController: NSWindowController, NSWindowDelegate {
