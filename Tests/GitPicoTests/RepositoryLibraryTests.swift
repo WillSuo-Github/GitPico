@@ -154,6 +154,71 @@ import Testing
     #expect(!f.library.acceptDrop([token], to: nil))
 }
 
+@Test @MainActor func libraryReorderPreservesGroupsFavoritesRecentsAndPersistsAcrossReload() throws {
+    let f = try LibraryFixture(); defer { f.clean() }
+    let a = try f.library.recordOpened(f.directory("Alpha"))
+    let b = try f.library.recordOpened(f.directory("Beta"))
+    let c = try f.library.recordOpened(f.directory("Gamma"))
+    let group = try f.library.createGroup("Work")
+    try f.library.move([b], to: group, before: nil)
+    try f.library.setFavorite([b], true)
+    let before = f.library.document
+    let ids = before.repositories.map(\.id)
+    try f.library.reorder(ids, from: IndexSet(integer: 2), to: 0)
+    #expect(f.library.matches(filter: .all).map(\.id) == [b, a, c])
+    #expect(f.library.matches(filter: .recent).map(\.id) == [c, b, a])
+    #expect(f.library.document.recent == before.recent && f.library.document.groups == before.groups)
+    for entry in before.repositories { #expect(f.library.document.repositories.first { $0.id == entry.id } == entry) }
+    let reopened = RepositoryLibrary(file: f.file, legacy: [])
+    #expect(reopened.error == nil && reopened.document == f.library.document)
+    try reopened.reorder([b, a, c], from: IndexSet(integer: 0), to: 3)
+    #expect(reopened.matches().map(\.id) == [a, c, b])
+    // Opening an existing registration only updates Recent, not the manual library order.
+    _ = try reopened.recordOpened(URL(fileURLWithPath: try #require(before.repositories.first { $0.id == a }).path))
+    #expect(reopened.matches().map(\.id) == [a, c, b] && reopened.matches(filter: .recent).first?.id == a)
+}
+
+@Test @MainActor func libraryReorderHandlesFilteredMultiRowMovesAndBothEdges() throws {
+    let f = try LibraryFixture(); defer { f.clean() }
+    var ids: [UUID] = []
+    for name in ["Match A", "Hidden A", "Match B", "Hidden B", "Match C", "Match D"] {
+        ids.append(try f.library.register(f.directory(name)))
+    }
+    let visible = f.library.matches(query: "Match").map(\.id)
+    #expect(visible == [ids[0], ids[2], ids[4], ids[5]])
+    try f.library.reorder(visible, from: IndexSet([0, 2]), to: 4)
+    #expect(f.library.matches(query: "Match").map(\.id) == [ids[2], ids[5], ids[0], ids[4]])
+    #expect(f.library.matches().map(\.id) == [ids[2], ids[1], ids[5], ids[3], ids[0], ids[4]])
+    try f.library.reorder(f.library.matches().map(\.id), from: IndexSet([4, 5]), to: 0)
+    #expect(f.library.matches().map(\.id) == [ids[0], ids[4], ids[2], ids[1], ids[5], ids[3]])
+    let beforeNoop = f.library.document
+    try f.library.reorder(f.library.matches().map(\.id), from: IndexSet(integer: 0), to: 1)
+    #expect(f.library.document == beforeNoop)
+    #expect(try JSONDecoder().decode(RepositoryLibraryDocument.self, from: Data(contentsOf: f.file)) == beforeNoop)
+}
+
+@Test @MainActor func libraryReorderRejectsInvalidStaleAndExternallyChangedMoves() throws {
+    let f = try LibraryFixture(); defer { f.clean() }
+    let a = try f.library.register(f.directory("Alpha")), b = try f.library.register(f.directory("Beta"))
+    let before = f.library.document, data = try Data(contentsOf: f.file)
+    for (ids, offsets, destination) in [
+        ([a, b], IndexSet(), 0), ([a, b], IndexSet(integer: 2), 0),
+        ([a, b], IndexSet(integer: 0), -1), ([a, b], IndexSet(integer: 0), 3),
+        ([a, a], IndexSet(integer: 0), 1), ([b, a], IndexSet(integer: 0), 1),
+        ([a, UUID()], IndexSet(integer: 0), 1)
+    ] {
+        #expect(throws: GitFailure.self) { try f.library.reorder(ids, from: offsets, to: destination) }
+        #expect(f.library.document == before)
+        #expect(try Data(contentsOf: f.file) == data)
+    }
+    let other = RepositoryLibrary(file: f.file, legacy: [])
+    try other.rename([a], to: "Updated externally")
+    let latest = try Data(contentsOf: f.file)
+    #expect(throws: GitFailure.self) { try f.library.reorder([a, b], from: IndexSet(integer: 0), to: 2) }
+    #expect(f.library.document == before)
+    #expect(try Data(contentsOf: f.file) == latest)
+}
+
 @Test @MainActor func libraryRelocateKeepsIdentityAndRejectsExistingRegistration() throws {
     let f = try LibraryFixture(); defer { f.clean() }
     let source = try f.directory("Source"), destination = f.root.appendingPathComponent("Moved")

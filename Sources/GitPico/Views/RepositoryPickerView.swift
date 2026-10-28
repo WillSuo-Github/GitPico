@@ -91,7 +91,7 @@ struct RepositoryPickerView: View {
                                 Button(entry.favorite ? "Remove from Favorites" : "Add to Favorites") { do { try workspace.library.setFavorite([entry.id], !entry.favorite) } catch { store.error = error.localizedDescription } }
                                 Button("Locate Repository…") { store.chooseLibraryRepository(relocating: entry.id) }
                             }
-                    }
+                    }.onMove(perform: reorderAction)
                 }.listStyle(.inset).scrollContentBackground(.hidden)
                     .background(Color(nsColor: .controlBackgroundColor).opacity(0.6), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color(nsColor: .separatorColor).opacity(0.6), lineWidth: 0.5))
@@ -124,6 +124,15 @@ struct RepositoryPickerView: View {
 
     func openSelected() { if let entry = selection ?? entries.first { open(entry) } }
     func open(_ entry: SavedRepository) { Task { await store.openSavedRepository(entry) } }
+    var reorderAction: ((IndexSet, Int) -> Void)? {
+        guard tab.pickerFilter == .all else { return nil }
+        let visibleIDs = entries.map(\.id)
+        return { offsets, destination in
+            guard !tab.isBusy, tab.pickerFilter == .all, entries.map(\.id) == visibleIDs else { return }
+            do { try workspace.library.reorder(visibleIDs, from: offsets, to: destination) }
+            catch { store.error = error.localizedDescription }
+        }
+    }
 }
 
 /// Large, friendly entry point for the three ways to get a repository.

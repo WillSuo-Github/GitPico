@@ -197,6 +197,25 @@ final class RepositoryLibrary {
         guard !tokens.isEmpty, tokens.allSatisfy({ $0.session == session && !$0.repositories.isEmpty && $0.repositories.count <= 5000 }) else { return false }
         do { try move(Set(tokens.flatMap(\.repositories)), to: group, before: before); return true } catch { return false }
     }
+    /// Reorder visible slots only, preserving hidden entries and every repository's metadata.
+    func reorder(_ visibleIDs: [UUID], from offsets: IndexSet, to destination: Int) throws {
+        try update { value in
+            let visible = Set(visibleIDs)
+            let indices = value.repositories.indices.filter { visible.contains(value.repositories[$0].id) }
+            guard !offsets.isEmpty, visible.count == visibleIDs.count,
+                  indices.map({ value.repositories[$0].id }) == visibleIDs,
+                  offsets.allSatisfy({ visibleIDs.indices.contains($0) }),
+                  (0...visibleIDs.count).contains(destination) else {
+                throw appFailure("The repository selection changed.")
+            }
+            let entries = indices.map { value.repositories[$0] }
+            let moving = offsets.map { entries[$0] }
+            var reordered = entries.enumerated().filter { !offsets.contains($0.offset) }.map(\.element)
+            let insertion = destination - offsets.filter { $0 < destination }.count
+            reordered.insert(contentsOf: moving, at: insertion)
+            for (index, entry) in zip(indices, reordered) { value.repositories[index] = entry }
+        }
+    }
     func sortContents(of group: UUID?) throws {
         try update { value in
             let repositoryIndices = value.repositories.indices.filter { value.repositories[$0].group == group }
