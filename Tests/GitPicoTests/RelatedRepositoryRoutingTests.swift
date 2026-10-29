@@ -1,5 +1,7 @@
+import AppKit
 import Foundation
 import GitCore
+import SwiftUI
 import Testing
 @testable import GitPico
 
@@ -60,6 +62,61 @@ import Testing
     #expect(f.store.repositoryToken != oldToken && f.store.worktrees.count == 2)
     #expect(f.store.destination == .workingCopy && f.store.error == nil)
     #expect(f.store.library.document.repositories.count == 2)
+}
+
+@Test @MainActor func worktreeListSelectionOnlyPreviewsAndNativeActionOpensAvailableTrees() async throws {
+    let f = try await RelatedAppFixture.make(); defer { f.clean() }
+    let linked = try await f.repository.createWorktree(try await f.repository.previewWorktreeCreation(destination: f.root.appendingPathComponent("Linked"), mode: .detached))
+    let missing = try await f.repository.createWorktree(try await f.repository.previewWorktreeCreation(destination: f.root.appendingPathComponent("Missing"), mode: .detached))
+    try FileManager.default.removeItem(atPath: missing.path)
+    await f.store.loadRelatedRepositories()
+    f.store.navigate(.worktrees)
+    let token = f.store.repositoryToken
+    let window = RepositoryNativeWindow(tabID: UUID(), permitsPresentation: false)
+    window.contentView = NSHostingView(rootView: WorktreesView(store: f.store))
+    defer { window.contentView = nil; window.close() }
+    func findTable(_ view: NSView) -> NSTableView? {
+        if let table = view as? NSTableView { return table }
+        return view.subviews.lazy.compactMap { findTable($0) }.first
+    }
+    let deadline = ContinuousClock.now + .seconds(5)
+    var nativeTable: NSTableView?
+    while ContinuousClock.now < deadline {
+        window.contentView?.layoutSubtreeIfNeeded()
+        nativeTable = window.contentView.flatMap { findTable($0) }
+        if nativeTable?.numberOfRows == f.store.worktrees.count { break }
+        try await Task.sleep(for: .milliseconds(10))
+    }
+    let table = try #require(nativeTable)
+    let missingRow = try #require(f.store.worktrees.firstIndex { $0.id == missing.id })
+    let linkedRow = try #require(f.store.worktrees.firstIndex { $0.id == linked.id })
+    #expect(table.doubleAction != nil)
+    #expect(window.makeFirstResponder(table))
+    let enter = try #require(NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0,
+                                            windowNumber: window.windowNumber, context: nil, characters: "\r",
+                                            charactersIgnoringModifiers: "\r", isARepeat: false, keyCode: 36))
+    let trace = GitCommandTrace()
+    await GitCommandTrace.$current.withValue(trace) {
+        for row in [linkedRow, missingRow, 0, linkedRow, missingRow] {
+            table.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+            window.contentView?.layoutSubtreeIfNeeded()
+            try? await Task.sleep(for: .milliseconds(10))
+            #expect(table.selectedRow == row)
+            #expect(f.store.repositoryToken == token && !f.store.isBusy && f.store.operationTask == nil)
+        }
+    }
+    #expect(await trace.samples.isEmpty, "Previewing a worktree must not read or open its repository.")
+    table.keyDown(with: enter)
+    try await Task.sleep(for: .milliseconds(20))
+    #expect(f.store.repositoryToken == token && f.store.operationTask == nil && f.store.error == nil)
+    table.selectRowIndexes(IndexSet(integer: linkedRow), byExtendingSelection: false)
+    try await Task.sleep(for: .milliseconds(20))
+    table.keyDown(with: enter)
+    try await Task.sleep(for: .milliseconds(20))
+    await f.store.operationTask?.value
+    #expect(f.store.snapshot?.root.path == linked.path && f.store.repositoryToken != token)
+    #expect(f.store.error == nil && !f.store.isBusy)
+    #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
 }
 
 @Test @MainActor func malformedSubmoduleConfigurationKeepsRepositoryUsable() async throws {

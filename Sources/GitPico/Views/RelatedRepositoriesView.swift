@@ -38,8 +38,13 @@ struct WorktreesView: View {
                             Label(entry.branch?.replacingOccurrences(of: "refs/heads/", with: "") ?? (entry.isBare ? String(localized: "Bare repository") : String(localized: "Detached HEAD")), systemImage: "arrow.triangle.branch").font(.system(size: 11)).foregroundStyle(.secondary)
                             Text(Pico.abbreviated(entry.path)).font(.system(size: 11)).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle)
                         }
-                    }.padding(.vertical, 4).tag(entry.id).contentShape(Rectangle()).onTapGesture(count: 2) { store.openWorktree(entry) }.contextMenu { if selection.count > 1 { Button("Manage Selected Worktrees…") { store.relatedAdministration(.worktrees(store.worktrees.filter { selection.contains($0.id) })) }; Divider() }; WorktreeContextActions(store: store, entry: entry) }
+                    }.padding(.vertical, 4).tag(entry.id).contentShape(Rectangle()).contextMenu { if selection.count > 1 { Button("Manage Selected Worktrees…") { store.relatedAdministration(.worktrees(store.worktrees.filter { selection.contains($0.id) })) }; Divider() }; WorktreeContextActions(store: store, entry: entry) }
                 }.listStyle(.plain)
+                .contextMenu(forSelectionType: String.self) { _ in } primaryAction: { ids in
+                    if let entry = entries.first(where: { ids.contains($0.id) }), entry.prunable == nil, !entry.isBare {
+                        store.openWorktree(entry)
+                    }
+                }
             } trailing: {
                 ScrollView {
                     if let entry = selected {

@@ -201,7 +201,7 @@ struct CommitFileDisclosure: View {
                     FilePathLabel(path: file.path)
                     Spacer()
                     if let stats { if stats.isBinary { Chip(text: String(localized: "Binary"), tint: .secondary) } else { DiffStat(additions: stats.additions, deletions: stats.deletions) } }
-                }.padding(.vertical, 8).contentShape(Rectangle()).contextMenu {
+                }.contextMenu {
                     Button("Compare in External Tool…") { store.externalTool(.comparison(commit.parents.first, commit.hash, file.path, nil)) }
                     if let showHistory { Button("Show File History…", action: showHistory) }
                     if let revision = file.status == "D" ? commit.parents.first : commit.hash {
@@ -209,7 +209,7 @@ struct CommitFileDisclosure: View {
                         HistoricalFileMenu(store: store, revision: revision, paths: [file.path])
                     }
                 }
-            }.padding(.horizontal, 14)
+            }.disclosureGroupStyle(CommitFileDisclosureStyle())
             .task(id: expanded) {
                 guard expanded, diff == nil else { return }
                 do { diff = try await repository.commitDiff(commit, path: file.path) } catch { self.error = error.localizedDescription }
@@ -218,6 +218,35 @@ struct CommitFileDisclosure: View {
     }
     var statusName: String { localizedFileStatus(file.status.first.map(String.init) ?? "M") }
     var statusColor: Color { switch file.status.first { case "A": .green; case "D": .red; case "R": .purple; default: .blue } }
+}
+
+private struct CommitFileDisclosureStyle: DisclosureGroupStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Button {
+                configuration.isExpanded.toggle()
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.tertiary)
+                        .rotationEffect(.degrees(configuration.isExpanded ? 90 : 0))
+                        .accessibilityHidden(true)
+                    configuration.label
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityValue(configuration.isExpanded ? Text("Expanded") : Text("Collapsed"))
+
+            if configuration.isExpanded {
+                configuration.content.padding(.horizontal, 14)
+            }
+        }
+    }
 }
 
 struct HistoricTreeView: View {
