@@ -4,7 +4,7 @@ import GitCore
 import SwiftUI
 import UniformTypeIdentifiers
 
-extension UTType { static let picoDrag = UTType(exportedAs: "com.willsuo.GitPico.drag", conformingTo: .data) }
+extension UTType { static let picoDrag = UTType(exportedAs: "com.willsuo.gitpico.drag", conformingTo: .data) }
 
 struct PicoDragToken: Codable, Equatable, Sendable {
     let id: UUID
@@ -76,8 +76,8 @@ extension RepositoryStore {
         case (.workingCopy, .stash), (.workingCopy, .stashFiles), (.workingCopy, .stashChunk), (.workingCopy, .stashLines): return true
         case (.branches, .reference), (.branches, .commit), (.tags, .reference), (.tags, .commit): return true
         case (.remote, .reference(let ref)): return ref.isLocal || ref.isTag
-        case (.reference(let target), .reference(let source)): return target.isCurrent && isCurrentDropTarget(target) && target.fullName != source.fullName
-        case (.reference(let target), .commit): return target.isCurrent && isCurrentDropTarget(target)
+        case (.reference(let target), .reference(let source)): return canIntegrate && target.isCurrent && isCurrentDropTarget(target) && target.fullName != source.fullName
+        case (.reference(let target), .commit): return canIntegrate && target.isCurrent && isCurrentDropTarget(target)
         case (.commit(let target, _), .commit(let source)): return currentDropHead() != nil && source.hash != target.hash
         default: return false
         }
@@ -109,7 +109,7 @@ extension RepositoryStore {
         case (.remote(let remote), .reference(let ref)) where ref.isLocal || ref.isTag: manage(.publish(ref, remote, nil, false))
         case (.reference(let target), .reference(let source)) where target.isCurrent && target.fullName != source.fullName:
             if source.isRemote && option { manage(.createBranch(source.hash, source.fullName)) }
-            else { integrationRequest = IntegrationRequest(action: option ? .rebase : .merge, revision: source.hash, expectedHead: HeadPosition(branch: target.fullName, hash: target.hash)) }
+            else { integrationRequest = IntegrationRequest(action: option ? .rebase : .merge, revision: source.hash, expectedHead: HeadPosition(branch: target.fullName, hash: target.hash), sourceReference: source) }
         case (.reference(let target), .commit(let commit)) where target.isCurrent:
             integrationRequest = IntegrationRequest(action: option ? .revert : .cherryPick, revision: commit.hash, expectedHead: HeadPosition(branch: target.fullName, hash: target.hash))
         case (.commit(let target, let position), .commit(let source)):

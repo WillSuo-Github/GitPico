@@ -276,20 +276,27 @@ final class RepositoryStore {
         do {
             let repo: GitRepository
             if let openedRepository { repo = openedRepository } else { repo = try await timing.measure("validate") { try await GitRepository.open(url) } }
-            let data = try await timing.measure("snapshot") { try await repo.snapshot(countHistory: false) }
+            // These reads are independent; keep them off the serial path to the repository view.
+            async let initialSnapshot = timing.measure("snapshot") { try await repo.snapshot(countHistory: false) }
+            async let stashRecord = timing.measure("automatic-stash") { try await repo.automaticStashRecord() }
+            async let remoteConfigurations = timing.measure("remotes") { try await repo.remoteConfigurations() }
+            async let referenceOrganization = timing.measure("organization") { try await repo.referenceOrganization() }
+            async let undoState = timing.measure("undo") { try await repo.undoAvailability() }
+            async let rebaseState = timing.measure("rebase") { try await repo.rebaseProgress() }
+            let (data, stash, remotes, references, undo, rebase) = try await (initialSnapshot, stashRecord, remoteConfigurations, referenceOrganization, undoState, rebaseState)
             cancelPreviewWork(); clearHistoryCache(); commitDetailCache = [:]; historyPresentation = .empty; historyError = nil
             searchFocusRequest = nil; searchActionsRequest = nil; metadataEpoch = UUID(); metadataTask?.cancel(); metadataTask = nil; metadataDirty = []; repositoryToken = UUID(); detailToken = UUID(); workingFileEntries = []; workingList = .empty; workingOnlyConflicts = false; commitFeedback = nil; commitWarning = nil; diffError = nil; workingDiffRequest = nil; showAllFiles = false; showIgnoredFiles = false; dragActions = [:]; selectedWorkingFiles = []
             lfsRequest = nil; flowRequest = nil; lfsState = nil; lfsChanges = []; lfsTransfers = []; lfsProgress = ""; lfsError = nil; flowConfiguration = nil; activeFlow = nil; flowHistory = []; workflowError = nil
             managementRequest = nil; stashRequest = nil; localChangeRequest = nil; historicalRequest = nil; worktreeRequest = nil; submoduleRequest = nil; relatedAdministrationRequest = nil; infrastructureRequest = nil; relatedBatchProgress = nil; worktrees = []; submodules = []; externalToolRequest = nil; showingBranchSheet = false; showingStashSheet = false
             automaticStashRequest = nil; pendingAutomaticStashRequest = nil
-            automaticStash = try await timing.measure("automatic-stash") { try await repo.automaticStashRecord() }
+            automaticStash = stash
             disconnectNetworkContext()
             repository = repo; snapshot = data
             configureNetworkContext()
-            managedRemotes = try await timing.measure("remotes") { try await repo.remoteConfigurations() }
-            organization = try await timing.measure("organization") { try await repo.referenceOrganization() }
-            undoAvailability = try await timing.measure("undo") { try await repo.undoAvailability() }
-            rebaseProgress = try await timing.measure("rebase") { try await repo.rebaseProgress() }
+            managedRemotes = remotes
+            organization = references
+            undoAvailability = undo
+            rebaseProgress = rebase
             navigationBookmarks = [:]; navigationBookmarkOrder = []; pendingHistorySelection = nil; historyNeedsReveal = false; historyReveal = nil; draftBeforeAmend = nil
             destination = .workingCopy; search = ""; historyOptions = HistoryOptions(); amend = false; signOff = false; configuration = nil
             selectedChange = nil; selectedCommit = nil; selectedStash = nil
@@ -299,9 +306,10 @@ final class RepositoryStore {
             await loadConflictDrafts(at: data.root)
             do { try library.recordOpened(data.root) }
             catch { self.error = String(localized: "Repository opened, but the library could not be saved: \(error.localizedDescription)") }
-            await timing.measure("related") { await loadRelatedRepositories() }
-            await timing.measure("workflow") { await loadWorkflowState() }
+            async let related: Void = timing.measure("related") { await loadRelatedRepositories() }
+            async let workflow: Void = timing.measure("workflow") { await loadWorkflowState() }
             await timing.measure("working-list") { await rebuildWorkingList() }
+            _ = await (related, workflow)
             lastUpdated = Date(); succeeded = true
             if workspace?.monitoringEnabled == true { startAutomaticRefresh() }
         } catch { self.error = error.localizedDescription }

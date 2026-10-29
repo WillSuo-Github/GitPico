@@ -6,6 +6,7 @@ struct IntegrationRequest: Identifiable {
     let action: GitRepository.Integration
     var revision: String?
     var expectedHead: HeadPosition? = nil
+    var sourceReference: Reference? = nil
 }
 
 extension RepositoryStore {

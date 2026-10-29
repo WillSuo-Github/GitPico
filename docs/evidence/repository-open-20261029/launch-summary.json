@@ -1,0 +1,20 @@
+{
+  "background-verification.json": {
+    "version": "0.0.1",
+    "build": "20261029152734",
+    "backgroundTesting": true,
+    "isActive": false,
+    "visibleWindows": 0
+  },
+  "native-startup-verification.json": {
+    "version": "0.0.1",
+    "build": "20261029152734",
+    "nativeStartupVerification": true,
+    "isActive": false,
+    "visibleWindows": 0,
+    "repositoryReady": true,
+    "repositoryOpenSeconds": 0.295898167,
+    "newTabMenuWorks": true,
+    "closeTabMenuWorks": true
+  }
+}

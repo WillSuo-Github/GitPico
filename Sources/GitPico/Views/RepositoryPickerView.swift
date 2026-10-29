@@ -1,5 +1,24 @@
 import SwiftUI
 
+private struct RepositoryOpeningProgressView: View {
+    @State private var visible = false
+
+    var body: some View {
+        Group {
+            if visible {
+                ProgressView("Opening repository…")
+                    .padding(24)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
+            }
+        }
+        .task {
+            do { try await Task.sleep(for: .milliseconds(200)) }
+            catch { return }
+            visible = true
+        }
+    }
+}
+
 struct RepositoryPickerView: View {
     @Bindable var workspace: RepositoryWorkspace
     @Bindable var tab: RepositoryTab
@@ -19,7 +38,13 @@ struct RepositoryPickerView: View {
             } else { content }
         }
         .disabled(tab.isBusy)
-        .overlay { if tab.isOpening || store.isBusy { ProgressView(tab.isOpening ? String(localized: "Opening repository…") : store.activity).padding(24).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10)) } }
+        .overlay {
+            if tab.isOpening {
+                RepositoryOpeningProgressView()
+            } else if store.isBusy {
+                ProgressView(store.activity).padding(24).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
+            }
+        }
         .task { if tab.pickerSelection == nil { tab.pickerSelection = entries.first?.id }; searchFocused = true }
         .onChange(of: entries.map(\.id)) { if !entries.contains(where: { $0.id == tab.pickerSelection }) { tab.pickerSelection = entries.first?.id } }
         .onKeyPress(.return) { guard !searchFocused, selection != nil else { return .ignored }; openSelected(); return .handled }

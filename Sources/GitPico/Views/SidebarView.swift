@@ -139,8 +139,10 @@ struct SidebarView: View {
                 }
             }
         } icon: { Image(systemName: icon) }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
         .tag(Destination.reference(ref.fullName))
-        .picoDrag(store, .reference(ref))
+        .itemProvider { store.isBusy ? nil : store.dragProvider(.reference(ref)) }
         .picoDrop(store, .reference(ref))
         .contextMenu {
             Button("Preview History") { store.navigate(.reference(ref.fullName)) }

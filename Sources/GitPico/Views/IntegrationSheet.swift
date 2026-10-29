@@ -16,6 +16,9 @@ struct IntegrationSheet: View {
         VStack(alignment: .leading, spacing: 18) {
             SheetTitle(title)
             LabeledContent("Current branch", value: store.snapshot?.branch ?? "")
+            if let source = request.sourceReference {
+                LabeledContent(request.action == .merge ? "Merge branch" : "Rebase onto", value: source.name)
+            }
             if request.revision != nil || request.action == .cherryPick || request.action == .revert {
                 LabeledContent("Commit", value: request.revision ?? "") .font(.system(size: 11, design: .monospaced)).textSelection(.enabled)
                 if let commit { Text(commit.subject).font(.callout) }

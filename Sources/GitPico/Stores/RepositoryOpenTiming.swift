@@ -12,7 +12,7 @@ struct RepositoryOpenReport: Codable, Sendable {
     private static let logger = Logger(subsystem: "com.willsuo.GitPico", category: "RepositoryOpen")
     private let start = ContinuousClock.now
     private var phases: [RepositoryOpenPhase] = []
-    func measure<T>(_ name: String, _ operation: () async throws -> T) async rethrows -> T {
+    func measure<T: Sendable>(_ name: String, _ operation: () async throws -> T) async rethrows -> T {
         let start = ContinuousClock.now
         defer { phases.append(RepositoryOpenPhase(name: name, seconds: start.duration(to: .now).secondsValue)) }
         return try await GitCommandTrace.$phase.withValue(name) { try await operation() }

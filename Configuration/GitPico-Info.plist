@@ -16,7 +16,7 @@
     <key>GitPicoUpdateRepository</key><string>WillSuo-Github/GitPico</string>
     <key>UTExportedTypeDeclarations</key>
     <array><dict>
-        <key>UTTypeIdentifier</key><string>com.willsuo.GitPico.drag</string>
+        <key>UTTypeIdentifier</key><string>com.willsuo.gitpico.drag</string>
         <key>UTTypeDescription</key><string>GitPico Drag Selection</string>
         <key>UTTypeConformsTo</key><array><string>public.data</string></array>
     </dict></array>

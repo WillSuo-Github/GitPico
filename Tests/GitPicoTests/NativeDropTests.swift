@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import SwiftUI
 import Testing
 import UniformTypeIdentifiers
 @testable import GitCore
@@ -40,6 +41,116 @@ import UniformTypeIdentifiers
     view.validate = { store.canAcceptDrop($0, on: target) }
     view.accept = { store.acceptDrop($0, on: target, point: $1, height: $2, option: option) }
     return view
+}
+
+@Test @MainActor func sidebarBranchDragReachesMergeReviewAndAppliesOnlyAfterConfirmation() async throws {
+    let store = try await dropStore(), repository = try #require(store.repository)
+    let root = await repository.root
+    defer { try? FileManager.default.removeItem(at: root) }
+    try await repository.createBranch("feature", at: "HEAD", checkout: true)
+    try Data("feature content\n".utf8).write(to: root.appendingPathComponent("feature.txt"))
+    _ = try await GitProcess.run(["add", "."], at: root)
+    _ = try await GitProcess.run(["commit", "-m", "Feature change"], at: root)
+    try await repository.switchBranch("main")
+    store.snapshot = try await repository.snapshot()
+    let originalHead = try await repository.headPosition()
+    let target = try #require(store.snapshot?.references.first { $0.isCurrent })
+    let source = try #require(store.snapshot?.references.first { $0.name == "feature" })
+    let window = RepositoryNativeWindow(tabID: UUID(), permitsPresentation: false)
+    window.setContentSize(NSSize(width: 320, height: 1000))
+    let suite = "GitPico-sidebar-drag-\(UUID())"
+    let defaults = try #require(UserDefaults(suiteName: suite))
+    defer { defaults.removePersistentDomain(forName: suite) }
+    window.contentView = NSHostingView(rootView: SidebarView(store: store).defaultAppStorage(defaults))
+    defer { window.contentView = nil; window.close() }
+    func findTable(_ view: NSView) -> NSOutlineView? {
+        if let table = view as? NSOutlineView { return table }
+        return view.subviews.lazy.compactMap { findTable($0) }.first
+    }
+    let deadline = ContinuousClock.now + .seconds(5)
+    var table: NSOutlineView?
+    while ContinuousClock.now < deadline {
+        window.contentView?.layoutSubtreeIfNeeded()
+        table = window.contentView.flatMap { findTable($0) }
+        if (table?.numberOfRows ?? 0) > 10 { break }
+        try await Task.sleep(for: .milliseconds(10))
+    }
+    try await Task.sleep(for: .milliseconds(300))
+    window.contentView?.layoutSubtreeIfNeeded()
+    let outline = try #require(table)
+    var branches: Set<String> = []
+    var sourceData: Data?
+    let pasteboard = NSPasteboard.withUniqueName()
+    defer { pasteboard.releaseGlobally() }
+    for row in 0..<outline.numberOfRows {
+        _ = outline.view(atColumn: 0, row: row, makeIfNecessary: true)
+        guard let item = outline.item(atRow: row), let writer = outline.dataSource?.outlineView?(outline, pasteboardWriterForItem: item) else { continue }
+        pasteboard.clearContents()
+        _ = pasteboard.writeObjects([writer])
+        guard let data = pasteboard.data(forType: .init(UTType.picoDrag.identifier)), let token = try? JSONDecoder().decode(PicoDragToken.self, from: data), case .reference(let reference) = store.dragAction(token) else { continue }
+        branches.insert(reference.fullName)
+        if reference.fullName == source.fullName { sourceData = data }
+    }
+    #expect(branches.contains("refs/heads/main") && branches.contains("refs/heads/feature"))
+    let sender = WindowlessDragInfo(); defer { sender.releasePasteboard() }
+    sender.draggingPasteboard.setData(try #require(sourceData), forType: .init(UTType.picoDrag.identifier))
+    let destination = dropView(store, target: .reference(target))
+    #expect(destination.draggingEntered(sender) == .copy)
+    #expect(destination.isDropTargeted && destination.performDragOperation(sender))
+    let request = try #require(store.integrationRequest)
+    #expect(request.action == .merge && request.revision == source.hash && request.sourceReference == source)
+    #expect(request.expectedHead == originalHead)
+    #expect(try await repository.headPosition() == originalHead)
+    #expect(!FileManager.default.fileExists(atPath: root.appendingPathComponent("feature.txt").path))
+    store.integrate(request, revision: try #require(request.revision))
+    await store.operationTask?.value
+    #expect(store.error == nil && !store.isBusy)
+    #expect(try await repository.headPosition() == HeadPosition(branch: target.fullName, hash: source.hash))
+    #expect(try await repository.references().first { $0.fullName == source.fullName }?.hash == source.hash)
+    #expect(try String(contentsOf: root.appendingPathComponent("feature.txt"), encoding: .utf8) == "feature content\n")
+    #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
+}
+
+@Test @MainActor func nativeBranchDropRejectsOtherTargetsAndConflictAbortKeepsCurrentBranch() async throws {
+    let store = try await dropStore(), repository = try #require(store.repository)
+    let root = await repository.root
+    defer { try? FileManager.default.removeItem(at: root) }
+    try await repository.createBranch("feature", at: "HEAD", checkout: true)
+    try Data("feature version\n".utf8).write(to: root.appendingPathComponent("readme.txt"))
+    _ = try await GitProcess.run(["commit", "-am", "Feature change"], at: root)
+    try await repository.switchBranch("main")
+    try Data("main version\n".utf8).write(to: root.appendingPathComponent("readme.txt"))
+    _ = try await GitProcess.run(["commit", "-am", "Main change"], at: root)
+    try await repository.createBranch("other", at: "HEAD", checkout: false)
+    store.snapshot = try await repository.snapshot()
+    let originalHead = try await repository.headPosition()
+    let refs = try await repository.references()
+    let source = try #require(refs.first { $0.name == "feature" })
+    let target = try #require(refs.first { $0.isCurrent })
+    let other = try #require(refs.first { $0.name == "other" })
+    let token = try await dropToken(store, .reference(source))
+    let sender = WindowlessDragInfo(); defer { sender.releasePasteboard() }
+    try sender.write([token])
+    let rejected = dropView(store, target: .reference(other))
+    #expect(rejected.draggingEntered(sender).isEmpty && !rejected.performDragOperation(sender))
+    #expect(store.integrationRequest == nil && !rejected.isDropTargeted)
+    let accepted = dropView(store, target: .reference(target))
+    #expect(accepted.draggingEntered(sender) == .copy && accepted.performDragOperation(sender))
+    let request = try #require(store.integrationRequest)
+    #expect(try await repository.headPosition() == originalHead)
+    store.integrate(request, revision: source.hash)
+    await store.operationTask?.value
+    #expect(store.error != nil && store.changes.contains(where: \.isConflicted))
+    #expect(try await repository.currentOperation() == .merge)
+    #expect(try await repository.headPosition() == originalHead)
+    #expect(!store.canAcceptDrop(token, on: .reference(target)))
+    store.error = nil
+    store.abortOperation(); await store.operationTask?.value
+    #expect(store.error == nil && !store.isBusy)
+    #expect(try await repository.currentOperation() == .none)
+    #expect(try await repository.headPosition() == originalHead)
+    #expect(try String(contentsOf: root.appendingPathComponent("readme.txt"), encoding: .utf8) == "main version\n")
+    #expect(try await repository.references().first { $0.fullName == source.fullName }?.hash == source.hash)
 }
 
 @Test @MainActor func nativeWholeStashDropNegotiatesMoveAndDeliversExactlyOneReview() async throws {
