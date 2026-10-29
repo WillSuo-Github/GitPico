@@ -35,6 +35,11 @@ import Testing
         let topImage = try #require(view.bitmapImageRepForCachingDisplay(in: top))
         view.cacheDisplay(in: top, to: topImage)
         try #require(topImage.representation(using: .png, properties: [:])).write(to: folder.appendingPathComponent(name + "-top.png"))
+        let bottom = NSRect(x: view.bounds.minX, y: view.isFlipped ? view.bounds.maxY - 100 : view.bounds.minY, width: view.bounds.width, height: 100)
+        let bottomImage = try #require(view.bitmapImageRepForCachingDisplay(in: bottom))
+        view.cacheDisplay(in: bottom, to: bottomImage)
+        try #require(bottomImage.representation(using: .png, properties: [:])).write(to: folder.appendingPathComponent(name + "-bottom.png"))
+
     }
     try await Task.sleep(for: .milliseconds(350))
     try capture("01-idle")

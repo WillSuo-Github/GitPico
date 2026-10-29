@@ -58,24 +58,18 @@ struct RepositoryOperationFeedbackView: View {
     let store: RepositoryStore
 
     var body: some View {
-        if let feedback = store.operationFeedback, feedback.isVisible {
-            TimelineView(.periodic(from: .now, by: 1)) { context in
-                let running = feedback.phase == .running
-                let message = running ? String(localized: "Running for \(max(0, Int(context.date.timeIntervalSince(feedback.started)))) seconds") : (feedback.warning ?? feedback.failure)?.components(separatedBy: .newlines).first
-                NoticeBanner(icon: symbol(feedback), title: "\(feedback.title)", message: message, tint: tint(feedback)) {
-                    if running { ProgressView().controlSize(.small) }
-                    if store.feedbackNetworkRecord != nil || feedback.command != .local {
-                        Button("Details") { store.showingNetworkActivity = true }.buttonStyle(.borderless)
-                    } else if let detail = feedback.warning ?? feedback.failure {
-                        Button("Details") { store.error = detail }.buttonStyle(.borderless)
-                    }
-                    if !running {
-                        Button { store.dismissOperationFeedback(feedback.id) } label: { Image(systemName: "xmark") }
-                            .buttonStyle(.borderless).help("Dismiss").accessibilityLabel("Dismiss")
-                    }
+        if let feedback = store.operationFeedback, feedback.isVisible, feedback.phase != .running {
+            HStack(spacing: 7) {
+                Image(systemName: symbol(feedback)).foregroundStyle(tint(feedback))
+                Text(feedback.title).lineLimit(1).truncationMode(.tail)
+                    .help(feedback.warning ?? feedback.failure ?? feedback.title)
+                if let detail = feedback.warning ?? feedback.failure, feedback.command == .local {
+                    Button("Details") { store.error = detail }.buttonStyle(.borderless)
                 }
-                .accessibilityElement(children: .contain)
+                Button { store.dismissOperationFeedback(feedback.id) } label: { Image(systemName: "xmark") }
+                    .buttonStyle(.borderless).help("Dismiss").accessibilityLabel("Dismiss")
             }
+            .accessibilityElement(children: .contain)
         }
     }
 

@@ -1,0 +1,37 @@
+[
+  {
+    "file" : "\/tmp\/gitpico-bottom-status-baseline-20261029\/01-idle.png",
+    "headerLeftPixels" : 589.78112748632714,
+    "headerTopPixels" : 131.5875179510418,
+    "imageHeight" : 1800,
+    "imageWidth" : 2880
+  },
+  {
+    "file" : "\/tmp\/gitpico-bottom-status-baseline-20261029\/02-fetching.png",
+    "headerLeftPixels" : 589.61798293813683,
+    "headerTopPixels" : 223.59704683119153,
+    "imageHeight" : 1800,
+    "imageWidth" : 2880
+  },
+  {
+    "file" : "\/tmp\/gitpico-bottom-status-preview-20261029\/01-idle.png",
+    "headerLeftPixels" : 589.78112748632714,
+    "headerTopPixels" : 131.5875179510418,
+    "imageHeight" : 1800,
+    "imageWidth" : 2880
+  },
+  {
+    "file" : "\/tmp\/gitpico-bottom-status-preview-20261029\/02-fetching.png",
+    "headerLeftPixels" : 589.56719391568004,
+    "headerTopPixels" : 131.48234766843331,
+    "imageHeight" : 1800,
+    "imageWidth" : 2880
+  },
+  {
+    "file" : "\/tmp\/gitpico-bottom-status-preview-20261029\/03-completed.png",
+    "headerLeftPixels" : 589.78112748632714,
+    "headerTopPixels" : 131.5875179510418,
+    "imageHeight" : 1800,
+    "imageWidth" : 2880
+  }
+]
