@@ -98,7 +98,7 @@ struct SidebarView: View {
                     Label("Branches Review", systemImage: "arrow.left.arrow.right").tag(Destination.branchesReview)
                     Label("Reflog", systemImage: "list.bullet.rectangle").tag(Destination.reflog)
                 } header: { Text("Tools") }
-            }.listStyle(.sidebar).disabled(store.isBusy && !store.isBackgroundFetching)
+            }.listStyle(.sidebar).disabled(store.isBusy && !store.isFetching)
             Divider()
             HStack(spacing: 8) {
                 HStack(spacing: 5) {

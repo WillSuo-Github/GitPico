@@ -27,7 +27,7 @@ extension RepositoryStore {
                 isBusy = false; activity = ""
                 await open(url)
                 if let assignmentWarning { self.error = assignmentWarning }
-            } catch { isBusy = false; activity = ""; self.error = error.localizedDescription }
+            } catch { self.error = error.localizedDescription; isBusy = false; activity = "" }
         }
     }
 

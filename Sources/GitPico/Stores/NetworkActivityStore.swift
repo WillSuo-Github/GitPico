@@ -139,7 +139,7 @@ extension RepositoryStore {
             do {
                 _ = try await GitProcess.run(["ls-remote", "--heads", "--", name], at: repository.root, timeout: 30)
                 connectionTestMessage = String(localized: "Read access to “\(name)” verified. Push permissions are checked by the server during Push.")
-            } catch { connectionTestMessage = String(localized: "Remote test failed. \(networkFailureAdvice(error.localizedDescription))") }
+            } catch { connectionTestMessage = String(localized: "Remote test failed. \(networkFailureAdvice(error.localizedDescription))"); operationFeedback?.failure = connectionTestMessage }
         }
     }
 }

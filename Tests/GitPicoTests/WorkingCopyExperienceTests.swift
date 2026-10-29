@@ -260,6 +260,8 @@ actor RecordingWorkingReader: WorkingDiffReading {
     f.store.commit(); await f.finish()
     #expect(f.store.error == nil && f.store.commitFeedback == "Commit created.")
     #expect(f.store.commitWarning?.contains("Undo record") == true)
+    #expect(f.store.operationFeedback?.phase == .succeeded && f.store.operationFeedback?.warning != nil)
+    #expect(f.store.operationFeedback?.isVisible == true && f.store.operationFeedback?.title.contains("Action required") == true)
     #expect(f.store.commitSubject.isEmpty && f.store.commitBody.isEmpty && !f.store.canCommit)
     #expect(f.store.undoAvailability == nil && f.store.staged.isEmpty)
     #expect(try await GitProcess.run(["log", "-1", "--format=%s"], at: f.repository.root).text == "Created once\n")

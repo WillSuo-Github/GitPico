@@ -157,7 +157,7 @@ struct PullReviewSheet: View {
 extension RepositoryStore {
     func runPull(_ request: PullReviewRequest, policy: PullPolicy) {
         guard canIntegrate else { return }
-        protectedPerform("Pull (\(policy.title))…", refresh: .workingTree) {
+        protectedPerform(request.pushAfter ? "Synchronizing…" : "Pull (\(policy.title))…", refresh: .workingTree, feedback: request.pushAfter ? .synchronize : .pull) {
             try await $0.pull(policy: policy, expectedHead: request.head, expectedUpstream: request.upstream)
             if request.pushAfter { try await $0.sync(.push) }
         }

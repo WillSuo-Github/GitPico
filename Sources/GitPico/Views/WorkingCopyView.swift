@@ -29,9 +29,9 @@ struct WorkingCopyView: View {
                             else { BrowserFileRow(store: store, file: file) }
                         }.tag(file.path).listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
                     }
-                }.listStyle(.plain).disabled(store.isBusy && !store.isBackgroundFetching)
+                }.listStyle(.plain).disabled(store.isBusy && !store.isFetching)
                 .overlay {
-                    if files.isEmpty && (store.isLoadingWorkingFiles || store.isBusy) { ProgressView("Loading files…") }
+                    if files.isEmpty && store.isLoadingWorkingFiles { ProgressView("Loading files…") }
                     else if files.isEmpty { EmptyPane(title: isFiltered ? String(localized: "No matching files") : String(localized: "Nothing to commit"), subtitle: isFiltered ? String(localized: "Change the file filter or refresh.") : String(localized: "Your working copy matches HEAD. Show All Files to browse the tree."), icon: isFiltered ? "line.3.horizontal.decrease.circle" : "checkmark.seal") }
                 }
                 if store.snapshot?.operation == RepositoryOperation.none {
@@ -223,7 +223,7 @@ struct CommitComposer: View {
         }
         .padding(12)
         .background(.bar).overlay(alignment: .top) { Divider() }
-        .disabled(store.isBusy && !store.isBackgroundFetching).onChange(of: store.amend) { store.updateAmend() }
+        .disabled(store.isBusy && !store.isFetching).onChange(of: store.amend) { store.updateAmend() }
         .sheet(item: $insertion) { CommitTemplateInsertionView(store: store, insertion: $0) }
         .onDisappear { ai.cancel() }
         .onChange(of: store.snapshot?.root) { ai.cancel(); ai.error = nil }

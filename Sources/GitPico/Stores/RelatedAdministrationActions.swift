@@ -24,6 +24,9 @@ extension RepositoryStore {
                 relatedBatchProgress = try await repository.applyRelatedBatch(plan) { [self] report in
                     await MainActor.run { self.relatedBatchProgress = report }
                 }
+                if let report = relatedBatchProgress, report.state != "completed" {
+                    operationFeedback?.warning = report.diagnostic ?? String(localized: "The batch stopped before all items completed. Review the batch report before continuing.")
+                }
                 try await reload()
             } catch { self.error = error.localizedDescription; try? await reload() }
             isBusy = false; activity = ""; relatedBatchTask = nil

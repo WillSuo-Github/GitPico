@@ -63,7 +63,7 @@ struct RemoteFetchSheet: View {
             Text("Updates remote-tracking references without changing your working files. Pruning removes references to branches no longer on the server.").font(.callout).foregroundStyle(.secondary)
             ManagementFooter(title: "Fetch", disabled: store.isBusy || store.managedRemotes.isEmpty) {
                 let remote = store.managedRemotes.first { $0.name == name }, prune = prune, tags = tags
-                store.perform("Fetching…") { try await $0.fetchRemote(remote, prune: prune, tags: tags) }; dismiss()
+                store.runRemoteFetch(remote, prune: prune, tags: tags); dismiss()
             }
         }.padding(24).frame(width: 520).onAppear { name = initialRemote?.name ?? "" }
     }
@@ -108,7 +108,7 @@ struct RemotePushSheet: View {
                 HStack {
                     Button("Back") { self.preview = nil }
                     ManagementFooter(title: deleting ? "Delete on Remote" : "Push", disabled: store.isBusy, destructive: deleting || lease) {
-                        store.perform(deleting ? "Deleting remote reference…" : "Pushing…") { try await $0.executePush(preview) }; dismiss()
+                        store.runRemotePush(preview); dismiss()
                     }
                 }
             } else {
@@ -152,5 +152,16 @@ struct RemotePushSheet: View {
         defer { loading = false }
         do { preview = try await repo.pushPreview(remote: remote, source: deleting ? nil : selectedSource, destination: revision, forceWithLease: lease, setUpstream: tracking, pushURL: pushURL) }
         catch { failure = error.localizedDescription }
+    }
+}
+
+
+extension RepositoryStore {
+    func runRemoteFetch(_ remote: RemoteConfiguration?, prune: Bool, tags: Bool) {
+        perform("Fetching…", feedback: .fetch) { try await $0.fetchRemote(remote, prune: prune, tags: tags) }
+    }
+
+    func runRemotePush(_ preview: RemotePushPreview) {
+        perform(preview.deletes ? "Deleting remote reference…" : "Pushing…", feedback: .push) { try await $0.executePush(preview) }
     }
 }

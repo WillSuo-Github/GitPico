@@ -1,0 +1,92 @@
+{
+  "background": {
+    "backgroundTesting": true,
+    "build": "20261029163421",
+    "frontmostBundle": "com.openai.codex",
+    "frontmostProcessIdentifier": 47957,
+    "isActive": false,
+    "processIdentifier": 168,
+    "version": "0.0.1",
+    "visibleWindows": 0
+  },
+  "nativeStartup": {
+    "build": "20261029163421",
+    "chooserMenuDisabled": true,
+    "closeTabMenuWorks": true,
+    "closeTabShortcut": "w",
+    "findUsesToolbarSearch": true,
+    "fixtureError": "",
+    "frontmostBundle": "com.openai.codex",
+    "frontmostProcessIdentifier": 47957,
+    "isActive": false,
+    "menuTitles": [
+      "GitPico",
+      "File",
+      "Edit",
+      "View",
+      "Repository",
+      "Branch",
+      "Commit",
+      "Working Copy",
+      "Navigate",
+      "Window",
+      "Help"
+    ],
+    "multipleTabBarVisible": true,
+    "nativeSelectionMatchesModel": true,
+    "nativeStartupVerification": true,
+    "nativeTabBarVisible": false,
+    "newTabMenuWorks": true,
+    "newTabShortcut": "t",
+    "processIdentifier": 180,
+    "quickActionsUseToolbarSearch": true,
+    "repositoriesMenuReusesCurrentTab": true,
+    "repositoryMenuContextWorks": true,
+    "repositoryMenuEnabled": true,
+    "repositoryOpenPhases": [
+      {
+        "name": "rebase",
+        "seconds": 0.018917833
+      },
+      {
+        "name": "automatic-stash",
+        "seconds": 0.021491875
+      },
+      {
+        "name": "remotes",
+        "seconds": 0.023857417
+      },
+      {
+        "name": "organization",
+        "seconds": 0.036171875
+      },
+      {
+        "name": "snapshot",
+        "seconds": 0.036233125
+      },
+      {
+        "name": "undo",
+        "seconds": 0.061405959
+      },
+      {
+        "name": "working-list",
+        "seconds": 0.008747791
+      },
+      {
+        "name": "workflow",
+        "seconds": 0.037096042
+      },
+      {
+        "name": "related",
+        "seconds": 0.037127584
+      }
+    ],
+    "repositoryOpenSeconds": 0.317414541,
+    "repositoryReady": true,
+    "returnedMenuEnabled": true,
+    "singleTabBarHidden": true,
+    "singleTabBarHiddenAfterClose": true,
+    "version": "0.0.1",
+    "visibleWindows": 0
+  }
+}

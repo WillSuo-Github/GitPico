@@ -38,8 +38,8 @@ extension RepositoryStore {
     var isChoosingRepository: Bool { workspace?.tab(for: self)?.showsRepositoryPicker == true }
     var isOpeningRepository: Bool { workspace?.tab(for: self)?.isOpening == true }
     var canUseRepository: Bool { snapshot != nil && !isBusy && !isChoosingRepository && !isOpeningRepository }
-    var canBrowseHistory: Bool { canUseRepository && snapshot?.hasHEAD == true }
-    var canIntegrate: Bool { canBrowseHistory && snapshot?.operation == RepositoryOperation.none }
+    var canBrowseHistory: Bool { (canUseRepository || (isFetching && !isChoosingRepository && !isOpeningRepository)) && snapshot?.hasHEAD == true }
+    var canIntegrate: Bool { canUseRepository && snapshot?.hasHEAD == true && snapshot?.operation == RepositoryOperation.none }
     var canSynchronize: Bool { canIntegrate && snapshot?.remotes.isEmpty == false && snapshot?.references.contains { $0.isCurrent && !$0.upstream.isEmpty } == true }
     var previewedReference: Reference? { snapshot?.references.first { $0.fullName == destination.ref } }
     func checkoutUnavailableReason(_ ref: Reference) -> String? {

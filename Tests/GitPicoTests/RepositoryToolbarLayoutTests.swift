@@ -1,7 +1,102 @@
 import AppKit
 import Foundation
+import GitCore
 import Testing
 @testable import GitPico
+
+@Test(.enabled(if: ProcessInfo.processInfo.environment["GITPICO_FETCH_FEEDBACK_CAPTURE"] != nil, "Explicit hidden-window remote operation capture only."))
+@MainActor func captureManualFetchFeedbackWithoutActivation() async throws {
+    let f = try await WorkingAppFixture.make(); defer { f.clean() }
+    let root = await f.repository.root
+    let remote = f.root.appendingPathComponent("Remote.git")
+    _ = try await GitProcess.run(["clone", "--bare", root.path, remote.path], at: f.root)
+    _ = try await GitProcess.run(["remote", "add", "origin", remote.path], at: root)
+    let upload = f.root.appendingPathComponent("delayed-upload-pack")
+    try Data("#!/bin/sh\nsleep 2\nexec /usr/bin/git-upload-pack \"$@\"\n".utf8).write(to: upload)
+    try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: upload.path)
+    _ = try await GitProcess.run(["config", "remote.origin.uploadpack", upload.path], at: root)
+    let workspace = RepositoryWorkspace(library: f.store.library)
+    await workspace.open(root)
+    let windows = NativeRepositoryWindows(workspace: workspace, permitsPresentation: false)
+    windows.start()
+    defer { windows.stop(); workspace.shutdown() }
+    let window = try #require(windows.window(for: workspace.selectedID))
+    window.setFrame(NSRect(x: -10000, y: -10000, width: 1440, height: 900), display: false)
+    window.appearance = NSAppearance(named: .aqua)
+    let folder = URL(fileURLWithPath: try #require(ProcessInfo.processInfo.environment["GITPICO_FETCH_FEEDBACK_CAPTURE"]))
+    try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+    func capture(_ name: String) throws {
+        let view = try #require(window.contentView?.superview)
+        view.layoutSubtreeIfNeeded()
+        let image = try #require(view.bitmapImageRepForCachingDisplay(in: view.bounds))
+        view.cacheDisplay(in: view.bounds, to: image)
+        try #require(image.representation(using: .png, properties: [:])).write(to: folder.appendingPathComponent(name + ".png"))
+        let top = NSRect(x: view.bounds.minX, y: view.isFlipped ? view.bounds.minY : view.bounds.maxY - 110, width: view.bounds.width, height: 110)
+        let topImage = try #require(view.bitmapImageRepForCachingDisplay(in: top))
+        view.cacheDisplay(in: top, to: topImage)
+        try #require(topImage.representation(using: .png, properties: [:])).write(to: folder.appendingPathComponent(name + "-top.png"))
+    }
+    try await Task.sleep(for: .milliseconds(350))
+    try capture("01-idle")
+    workspace.activeStore.sync(.fetch)
+    try await Task.sleep(for: .milliseconds(150))
+    #expect(workspace.activeStore.isBusy)
+    try capture("02-fetching")
+    window.setFrame(NSRect(x: -10000, y: -10000, width: 1080, height: 900), display: false)
+    try await Task.sleep(for: .milliseconds(150))
+    try capture("02-fetching-narrow")
+    window.appearance = NSAppearance(named: .darkAqua)
+    try await Task.sleep(for: .milliseconds(150))
+    try capture("02-fetching-dark")
+    window.appearance = NSAppearance(named: .aqua)
+    window.setFrame(NSRect(x: -10000, y: -10000, width: 1440, height: 900), display: false)
+    await workspace.activeStore.operationTask?.value
+    try await Task.sleep(for: .milliseconds(100))
+    #expect(workspace.activeStore.error == nil && !workspace.activeStore.isBusy)
+    try capture("03-completed")
+
+    _ = try await GitProcess.run(["branch", "--set-upstream-to", "origin/main", "main"], at: root)
+    workspace.activeStore.refresh(); await workspace.activeStore.operationTask?.value
+    workspace.activeStore.reviewPull()
+    let pull = try #require(workspace.activeStore.pullRequest)
+    workspace.activeStore.pullRequest = nil
+    workspace.activeStore.runPull(pull, policy: .merge)
+    try await Task.sleep(for: .milliseconds(150))
+    #expect(workspace.activeStore.operationFeedback?.command == .pull && workspace.activeStore.isBusy)
+    try capture("04-pulling")
+    window.setFrame(NSRect(x: -10000, y: -10000, width: 1080, height: 900), display: false)
+    window.appearance = NSAppearance(named: .darkAqua)
+    try await Task.sleep(for: .milliseconds(150))
+    try capture("04-pulling-dark-narrow")
+    await workspace.activeStore.operationTask?.value
+    try await Task.sleep(for: .milliseconds(100))
+    try capture("05-pull-completed")
+
+    _ = try await GitProcess.run(["commit", "--allow-empty", "-m", "Push feedback capture"], at: root)
+    let hooks = f.root.appendingPathComponent("Hooks")
+    try FileManager.default.createDirectory(at: hooks, withIntermediateDirectories: true)
+    let hook = hooks.appendingPathComponent("pre-push")
+    try Data("#!/bin/sh\nsleep 2\n".utf8).write(to: hook)
+    try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: hook.path)
+    _ = try await GitProcess.run(["config", "core.hooksPath", hooks.path], at: root)
+    workspace.activeStore.refresh(); await workspace.activeStore.operationTask?.value
+    window.appearance = NSAppearance(named: .aqua)
+    window.setFrame(NSRect(x: -10000, y: -10000, width: 1440, height: 900), display: false)
+    workspace.activeStore.sync(.push)
+    try await Task.sleep(for: .milliseconds(150))
+    #expect(workspace.activeStore.operationFeedback?.command == .push && workspace.activeStore.isBusy)
+    try capture("06-pushing")
+    window.setFrame(NSRect(x: -10000, y: -10000, width: 1080, height: 900), display: false)
+    window.appearance = NSAppearance(named: .darkAqua)
+    try await Task.sleep(for: .milliseconds(150))
+    try capture("06-pushing-dark-narrow")
+    await workspace.activeStore.operationTask?.value
+    try await Task.sleep(for: .milliseconds(100))
+    try capture("07-push-completed")
+    #expect(workspace.activeStore.error == nil)
+
+    #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
+}
 
 @Test @MainActor func repositoryToolbarKeepsCenterEmptyAndTrailingToolsRightAlignedWithoutActivation() async throws {
     let f = try await WorkingAppFixture.make(); defer { f.clean() }
