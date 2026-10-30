@@ -297,3 +297,37 @@ extension RepositoryStore {
     let after = try await f.base.repository.headPosition()
     #expect(f.store.snapshot?.root == f.root && after == before)
 }
+
+@Test @MainActor func completedOperationRemainsInspectableAfterItsAcknowledgementEnds() async throws {
+    let f = try await FetchFeedbackFixture.make(delay: 0.1); defer { f.clean() }
+    let head = try await f.base.repository.headPosition()
+    f.store.sync(.fetch); await f.store.operationTask?.value
+    let completed = try #require(f.store.operationFeedback)
+    #expect(completed.phase == .succeeded && completed.isVisible)
+    try await Task.sleep(for: .milliseconds(2300))
+    #expect(f.store.operationFeedback?.id == completed.id && f.store.operationFeedback?.phase == .succeeded)
+    #expect(f.store.operationFeedback?.isVisible == false)
+    let originalRecord = try #require(f.store.feedbackNetworkRecord)
+    await f.store.fetchInBackground()
+    #expect(f.store.operationFeedback?.id == completed.id && f.store.feedbackNetworkRecord?.id == originalRecord.id)
+    f.store.inspectOperationNetworkActivity()
+    #expect(f.store.showingNetworkActivity && f.store.networkActivitySelection == originalRecord.id)
+    f.store.showingNetworkActivity = false
+    #expect(f.store.networkActivitySelection == nil)
+    #expect(try await f.base.repository.headPosition() == head)
+    #expect(f.store.snapshot?.branch == "main" && f.store.snapshot?.changes.isEmpty == true)
+    f.store.sync(.fetch)
+    #expect(f.store.operationFeedback?.id != completed.id && f.store.operationFeedback?.phase == .running)
+    await f.store.operationTask?.value
+    #expect(f.store.operationFeedback?.isVisible == true && f.store.operationFeedback?.phase == .succeeded)
+}
+
+@Test @MainActor func localStagingRetainsItsLatestResultForOnDemandDetails() async throws {
+    let f = try await FetchFeedbackFixture.make(delay: 0); defer { f.clean() }
+    try await f.base.write("a.txt", "Inspect this staged result\n"); try await f.base.sync()
+    f.store.stage(f.store.changes); await f.store.operationTask?.value
+    #expect(f.store.operationFeedback?.command == .local && f.store.operationFeedback?.phase == .succeeded)
+    #expect(f.store.feedbackFinishedAt != nil && !f.store.isBusy && f.store.error == nil)
+    #expect(f.store.snapshot?.branch == "main" && f.store.staged.map(\.path) == ["a.txt"])
+    #expect(try await f.git(["show", ":a.txt"]) == "Inspect this staged result")
+}

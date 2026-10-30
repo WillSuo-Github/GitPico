@@ -1,0 +1,92 @@
+{
+  "background-verification": {
+    "backgroundTesting": true,
+    "build": "20261030145821",
+    "frontmostBundle": "com.openai.codex",
+    "frontmostProcessIdentifier": 4232,
+    "isActive": false,
+    "processIdentifier": 76530,
+    "version": "0.0.1",
+    "visibleWindows": 0
+  },
+  "native-startup-verification": {
+    "build": "20261030145821",
+    "chooserMenuDisabled": true,
+    "closeTabMenuWorks": true,
+    "closeTabShortcut": "w",
+    "findUsesToolbarSearch": true,
+    "fixtureError": "",
+    "frontmostBundle": "com.openai.codex",
+    "frontmostProcessIdentifier": 4232,
+    "isActive": false,
+    "menuTitles": [
+      "GitPico",
+      "File",
+      "Edit",
+      "View",
+      "Repository",
+      "Branch",
+      "Commit",
+      "Working Copy",
+      "Navigate",
+      "Window",
+      "Help"
+    ],
+    "multipleTabBarVisible": true,
+    "nativeSelectionMatchesModel": true,
+    "nativeStartupVerification": true,
+    "nativeTabBarVisible": false,
+    "newTabMenuWorks": true,
+    "newTabShortcut": "t",
+    "processIdentifier": 76558,
+    "quickActionsUseToolbarSearch": true,
+    "repositoriesMenuReusesCurrentTab": true,
+    "repositoryMenuContextWorks": true,
+    "repositoryMenuEnabled": true,
+    "repositoryOpenPhases": [
+      {
+        "name": "rebase",
+        "seconds": 0.017519209
+      },
+      {
+        "name": "organization",
+        "seconds": 0.017536583
+      },
+      {
+        "name": "remotes",
+        "seconds": 0.018111
+      },
+      {
+        "name": "automatic-stash",
+        "seconds": 0.021110541
+      },
+      {
+        "name": "snapshot",
+        "seconds": 0.042385875
+      },
+      {
+        "name": "undo",
+        "seconds": 0.051219166
+      },
+      {
+        "name": "working-list",
+        "seconds": 0.005977417
+      },
+      {
+        "name": "workflow",
+        "seconds": 0.033324458
+      },
+      {
+        "name": "related",
+        "seconds": 0.033351458
+      }
+    ],
+    "repositoryOpenSeconds": 0.265939458,
+    "repositoryReady": true,
+    "returnedMenuEnabled": true,
+    "singleTabBarHidden": true,
+    "singleTabBarHiddenAfterClose": true,
+    "version": "0.0.1",
+    "visibleWindows": 0
+  }
+}

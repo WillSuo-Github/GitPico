@@ -1,0 +1,746 @@
+[
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0000.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 3.6375000000000003e-05
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0001.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 0.138078584
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0002.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 0.257323417
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0003.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 0.37435299999999999
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0004.png",
+    "isBusy" : true,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 0.48789870899999999
+  },
+  {
+    "backgroundRGB" : [
+      0.97541183233261108,
+      0.96330219507217407,
+      0.97823172807693481
+    ],
+    "file" : "frame-0005.png",
+    "isBusy" : true,
+    "linePeak" : 0.97231525182723999,
+    "linePeakX" : 6,
+    "seconds" : 0.63645025
+  },
+  {
+    "backgroundRGB" : [
+      0.68248319625854492,
+      0.50096619129180908,
+      0.70643359422683716
+    ],
+    "file" : "frame-0006.png",
+    "isBusy" : true,
+    "linePeak" : 0.62996099392573035,
+    "linePeakX" : 6,
+    "seconds" : 0.74012641700000004
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0007.png",
+    "isBusy" : true,
+    "linePeak" : 0.49756652116775513,
+    "linePeakX" : 6,
+    "seconds" : 0.84320541699999996
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0008.png",
+    "isBusy" : true,
+    "linePeak" : 0.49756652116775513,
+    "linePeakX" : 6,
+    "seconds" : 0.94418212499999998
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0009.png",
+    "isBusy" : true,
+    "linePeak" : 0.49756652116775513,
+    "linePeakX" : 6,
+    "seconds" : 1.048246625
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0010.png",
+    "isBusy" : true,
+    "linePeak" : 0.49756652116775513,
+    "linePeakX" : 6,
+    "seconds" : 1.1501097090000001
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0011.png",
+    "isBusy" : true,
+    "linePeak" : 0.49756652116775513,
+    "linePeakX" : 6,
+    "seconds" : 1.2569652920000001
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0012.png",
+    "isBusy" : true,
+    "linePeak" : 0.50399585564931237,
+    "linePeakX" : 6,
+    "seconds" : 1.359479334
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0013.png",
+    "isBusy" : true,
+    "linePeak" : 0.54077053070068359,
+    "linePeakX" : 6,
+    "seconds" : 1.4703029999999999
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0014.png",
+    "isBusy" : true,
+    "linePeak" : 0.71390579144159949,
+    "linePeakX" : 26,
+    "seconds" : 1.5739969999999999
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0015.png",
+    "isBusy" : true,
+    "linePeak" : 0.71390579144159949,
+    "linePeakX" : 143,
+    "seconds" : 1.6858707499999999
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0016.png",
+    "isBusy" : true,
+    "linePeak" : 0.71390579144159949,
+    "linePeakX" : 278,
+    "seconds" : 1.79911025
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0017.png",
+    "isBusy" : true,
+    "linePeak" : 0.71390579144159949,
+    "linePeakX" : 416,
+    "seconds" : 1.90869625
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0018.png",
+    "isBusy" : true,
+    "linePeak" : 0.71390579144159949,
+    "linePeakX" : 553,
+    "seconds" : 2.0232376670000001
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0019.png",
+    "isBusy" : true,
+    "linePeak" : 0.71390579144159949,
+    "linePeakX" : 670,
+    "seconds" : 2.1361637920000001
+  },
+  {
+    "backgroundRGB" : [
+      0.57934486865997314,
+      0.32523530721664429,
+      0.60740739107131958
+    ],
+    "file" : "frame-0020.png",
+    "isBusy" : true,
+    "linePeak" : 0.71390579144159949,
+    "linePeakX" : 808,
+    "seconds" : 2.2404652500000002
+  },
+  {
+    "backgroundRGB" : [
+      0.60112369060516357,
+      0.36574769020080566,
+      0.62902551889419556
+    ],
+    "file" : "frame-0021.png",
+    "isBusy" : true,
+    "linePeak" : 0.71390579144159949,
+    "linePeakX" : 925,
+    "seconds" : 2.3461444999999999
+  },
+  {
+    "backgroundRGB" : [
+      0.75736206769943237,
+      0.62342852354049683,
+      0.77456206083297729
+    ],
+    "file" : "frame-0022.png",
+    "isBusy" : true,
+    "linePeak" : 0.71390579144159949,
+    "linePeakX" : 1062,
+    "seconds" : 2.4567339170000002
+  },
+  {
+    "backgroundRGB" : [
+      0.60834187269210815,
+      0.37778830528259277,
+      0.63618141412734985
+    ],
+    "file" : "frame-0023.png",
+    "isBusy" : true,
+    "linePeak" : 0.71390579144159949,
+    "linePeakX" : 1179,
+    "seconds" : 2.5640569170000003
+  },
+  {
+    "backgroundRGB" : [
+      0.57934486865997314,
+      0.32523530721664429,
+      0.60740739107131958
+    ],
+    "file" : "frame-0024.png",
+    "isBusy" : true,
+    "linePeak" : 0.71390579144159949,
+    "linePeakX" : 1297,
+    "seconds" : 2.6668839589999997
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0025.png",
+    "isBusy" : true,
+    "linePeak" : 0.71390579144159949,
+    "linePeakX" : 1433,
+    "seconds" : 2.7730080839999998
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0026.png",
+    "isBusy" : true,
+    "linePeak" : 0.71390579144159949,
+    "linePeakX" : 1551,
+    "seconds" : 2.8876642920000002
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0027.png",
+    "isBusy" : true,
+    "linePeak" : 0.71390579144159949,
+    "linePeakX" : 1689,
+    "seconds" : 2.9989294170000003
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0028.png",
+    "isBusy" : true,
+    "linePeak" : 0.71390579144159949,
+    "linePeakX" : 1805,
+    "seconds" : 3.1040536670000001
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0029.png",
+    "isBusy" : true,
+    "linePeak" : 0.71390579144159949,
+    "linePeakX" : 1942,
+    "seconds" : 3.206408084
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0030.png",
+    "isBusy" : true,
+    "linePeak" : 0.71390579144159949,
+    "linePeakX" : 2059,
+    "seconds" : 3.311335084
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0031.png",
+    "isBusy" : true,
+    "linePeak" : 0.59384612242380774,
+    "linePeakX" : 2153,
+    "seconds" : 3.4240781670000002
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0032.png",
+    "isBusy" : true,
+    "linePeak" : 0.52058115601539612,
+    "linePeakX" : 2146,
+    "seconds" : 3.5362321249999997
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0033.png",
+    "isBusy" : true,
+    "linePeak" : 0.49756652116775513,
+    "linePeakX" : 6,
+    "seconds" : 3.641947042
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0034.png",
+    "isBusy" : true,
+    "linePeak" : 0.49756652116775513,
+    "linePeakX" : 6,
+    "seconds" : 3.7501048340000001
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0035.png",
+    "isBusy" : true,
+    "linePeak" : 0.49756652116775513,
+    "linePeakX" : 6,
+    "seconds" : 3.8544614589999999
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0036.png",
+    "isBusy" : true,
+    "linePeak" : 0.49756652116775513,
+    "linePeakX" : 6,
+    "seconds" : 3.9579829169999998
+  },
+  {
+    "backgroundRGB" : [
+      0.57195818424224854,
+      0.31695300340652466,
+      0.60378837585449219
+    ],
+    "file" : "frame-0037.png",
+    "isBusy" : true,
+    "linePeak" : 0.49756652116775513,
+    "linePeakX" : 6,
+    "seconds" : 4.0565855839999996
+  },
+  {
+    "backgroundRGB" : [
+      0.59393185377120972,
+      0.34980696439743042,
+      0.62184715270996094
+    ],
+    "file" : "frame-0038.png",
+    "isBusy" : false,
+    "linePeak" : 0.52186199029286706,
+    "linePeakX" : 6,
+    "seconds" : 4.1564694170000003
+  },
+  {
+    "backgroundRGB" : [
+      0.70317929983139038,
+      0.5340767502784729,
+      0.72364652156829834
+    ],
+    "file" : "frame-0039.png",
+    "isBusy" : false,
+    "linePeak" : 0.65363419055938721,
+    "linePeakX" : 6,
+    "seconds" : 4.2503057919999998
+  },
+  {
+    "backgroundRGB" : [
+      0.92259639501571655,
+      0.87914246320724487,
+      0.92787790298461914
+    ],
+    "file" : "frame-0040.png",
+    "isBusy" : false,
+    "linePeak" : 0.90987225373586023,
+    "linePeakX" : 6,
+    "seconds" : 4.3567619999999998
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0041.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 4.4568189169999997
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0042.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 4.5601074590000001
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0043.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 4.6651152089999997
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0044.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 4.777103834
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0045.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 4.8931680000000002
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0046.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 5.0092760839999997
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0047.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 5.1252549170000004
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0048.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 5.2327514170000002
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0049.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 5.3529836670000002
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0050.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 5.4702055840000003
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0051.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 5.5878242919999996
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0052.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 5.7036427920000001
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0053.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 5.8183236669999996
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0054.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 5.9376640839999997
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0055.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 6.0533608750000001
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0056.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 6.1644648340000003
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0057.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 6.2794485
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0058.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 6.3902188750000004
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0059.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 6.5009152500000003
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0060.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 6.6160547090000001
+  },
+  {
+    "backgroundRGB" : [
+      1,
+      0.99999994039535522,
+      1
+    ],
+    "file" : "frame-0061.png",
+    "isBusy" : false,
+    "linePeak" : 0.99999998013178504,
+    "linePeakX" : 6,
+    "seconds" : 6.7344176249999999
+  }
+]

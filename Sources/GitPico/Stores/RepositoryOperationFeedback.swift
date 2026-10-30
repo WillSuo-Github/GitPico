@@ -84,13 +84,20 @@ extension RepositoryStore {
         if phase == .succeeded, snapshot?.operation != RepositoryOperation.none || changes.contains(where: \.isConflicted) {
             operationFeedback?.warning = String(localized: "Review the working copy to resolve conflicts or finish the current operation.")
         }
-        if phase == .succeeded, !feedback.isVisible, operationFeedback?.warning == nil { clearOperationFeedback(); return }
+        // Keep the latest result available on demand, even when a quick action needs no visual acknowledgement.
+        if phase == .succeeded, !feedback.isVisible, operationFeedback?.warning == nil { return }
         operationFeedback?.isVisible = true
         guard phase != .failed, operationFeedback?.warning == nil else { return }
         operationFeedbackTask = Task { [weak self] in
-            do { try await Task.sleep(for: .seconds(6)) } catch { return }
-            self?.dismissOperationFeedback(feedback.id)
+            do { try await Task.sleep(for: .seconds(2)) } catch { return }
+            guard self?.operationFeedback?.id == feedback.id else { return }
+            self?.operationFeedback?.isVisible = false
         }
+    }
+
+    func inspectOperationNetworkActivity() {
+        networkActivitySelection = feedbackNetworkRecord?.id
+        showingNetworkActivity = true
     }
 
     func dismissOperationFeedback(_ id: UUID) {

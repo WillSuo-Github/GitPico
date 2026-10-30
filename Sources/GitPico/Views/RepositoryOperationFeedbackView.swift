@@ -53,32 +53,3 @@ struct RepositorySyncButton: View {
         .accessibilityLabel(running ? runningTitle : action.title)
     }
 }
-
-struct RepositoryOperationFeedbackView: View {
-    let store: RepositoryStore
-
-    var body: some View {
-        if let feedback = store.operationFeedback, feedback.isVisible, feedback.phase != .running {
-            HStack(spacing: 7) {
-                Image(systemName: symbol(feedback)).foregroundStyle(tint(feedback))
-                Text(feedback.title).lineLimit(1).truncationMode(.tail)
-                    .help(feedback.warning ?? feedback.failure ?? feedback.title)
-                if let detail = feedback.warning ?? feedback.failure, feedback.command == .local {
-                    Button("Details") { store.error = detail }.buttonStyle(.borderless)
-                }
-                Button { store.dismissOperationFeedback(feedback.id) } label: { Image(systemName: "xmark") }
-                    .buttonStyle(.borderless).help("Dismiss").accessibilityLabel("Dismiss")
-            }
-            .accessibilityElement(children: .contain)
-        }
-    }
-
-    private func symbol(_ feedback: RepositoryOperationFeedback) -> String {
-        if feedback.warning != nil { return "exclamationmark.triangle.fill" }
-        switch feedback.phase { case .running: return "arrow.triangle.2.circlepath"; case .succeeded: return "checkmark.circle.fill"; case .failed: return "exclamationmark.triangle.fill"; case .cancelled: return "stop.circle.fill" }
-    }
-    private func tint(_ feedback: RepositoryOperationFeedback) -> Color {
-        if feedback.warning != nil { return Pico.warning }
-        switch feedback.phase { case .running: return .accentColor; case .succeeded: return Pico.addition; case .failed: return Pico.deletion; case .cancelled: return Pico.warning }
-    }
-}

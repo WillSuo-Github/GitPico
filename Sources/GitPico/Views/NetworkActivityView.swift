@@ -51,7 +51,7 @@ struct NetworkActivityView: View {
             } else { EmptyPane(title: String(localized: "No network activity yet"), subtitle: String(localized: "Open a repository or clone one to get started."), icon: "network").frame(height: 300) }
             HStack { Spacer(); Button("Close") { dismiss() }.keyboardShortcut(.cancelAction) }
         }.padding(22).frame(width: 820)
-            .onAppear { selection = store.networkActivity?.records.first?.id }
+            .onAppear { selection = store.networkActivity?.records.first(where: { $0.id == store.networkActivitySelection })?.id ?? store.networkActivity?.records.first?.id }
             .onChange(of: store.networkActivity?.records.first?.id) { if selection == nil { selection = store.networkActivity?.records.first?.id } }
             .confirmationDialog("Cancel the network operation?", isPresented: Binding(get: { cancelling != nil }, set: { if !$0 { cancelling = nil } })) {
                 Button("Cancel Operation", role: .destructive) { if let cancelling { store.networkActivity?.cancel(cancelling) }; cancelling = nil }

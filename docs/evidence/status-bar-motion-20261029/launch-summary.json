@@ -1,0 +1,92 @@
+{
+  "background": {
+    "backgroundTesting": true,
+    "build": "20261029181801",
+    "frontmostBundle": "com.willsuo.Liltpaper",
+    "frontmostProcessIdentifier": 50511,
+    "isActive": false,
+    "processIdentifier": 59265,
+    "version": "0.0.1",
+    "visibleWindows": 0
+  },
+  "nativeStartup": {
+    "build": "20261029181801",
+    "chooserMenuDisabled": true,
+    "closeTabMenuWorks": true,
+    "closeTabShortcut": "w",
+    "findUsesToolbarSearch": true,
+    "fixtureError": "",
+    "frontmostBundle": "com.willsuo.Liltpaper",
+    "frontmostProcessIdentifier": 50511,
+    "isActive": false,
+    "menuTitles": [
+      "GitPico",
+      "File",
+      "Edit",
+      "View",
+      "Repository",
+      "Branch",
+      "Commit",
+      "Working Copy",
+      "Navigate",
+      "Window",
+      "Help"
+    ],
+    "multipleTabBarVisible": true,
+    "nativeSelectionMatchesModel": true,
+    "nativeStartupVerification": true,
+    "nativeTabBarVisible": false,
+    "newTabMenuWorks": true,
+    "newTabShortcut": "t",
+    "processIdentifier": 59275,
+    "quickActionsUseToolbarSearch": true,
+    "repositoriesMenuReusesCurrentTab": true,
+    "repositoryMenuContextWorks": true,
+    "repositoryMenuEnabled": true,
+    "repositoryOpenPhases": [
+      {
+        "name": "organization",
+        "seconds": 0.021857459
+      },
+      {
+        "name": "rebase",
+        "seconds": 0.026050125
+      },
+      {
+        "name": "remotes",
+        "seconds": 0.026061875
+      },
+      {
+        "name": "automatic-stash",
+        "seconds": 0.026065416
+      },
+      {
+        "name": "snapshot",
+        "seconds": 0.050308292
+      },
+      {
+        "name": "undo",
+        "seconds": 0.062208166
+      },
+      {
+        "name": "working-list",
+        "seconds": 0.006461709
+      },
+      {
+        "name": "workflow",
+        "seconds": 0.036181916
+      },
+      {
+        "name": "related",
+        "seconds": 0.036211542
+      }
+    ],
+    "repositoryOpenSeconds": 0.30659725,
+    "repositoryReady": true,
+    "returnedMenuEnabled": true,
+    "singleTabBarHidden": true,
+    "singleTabBarHiddenAfterClose": true,
+    "version": "0.0.1",
+    "visibleWindows": 0
+  }
+}

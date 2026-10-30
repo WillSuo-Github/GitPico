@@ -1,6 +1,7 @@
 import AppKit
 import Foundation
 import GitCore
+import SwiftUI
 import Testing
 @testable import GitPico
 
@@ -41,8 +42,23 @@ import Testing
         try #require(bottomImage.representation(using: .png, properties: [:])).write(to: folder.appendingPathComponent(name + "-bottom.png"))
 
     }
+    func captureDetails(_ name: String, store: RepositoryStore) throws {
+        let panel = NSWindow(contentRect: NSRect(x: -10000, y: -10000, width: 360, height: 220), styleMask: .borderless, backing: .buffered, defer: false)
+        panel.isReleasedWhenClosed = false
+        panel.appearance = NSAppearance(named: .aqua)
+        let hosting = NSHostingView(rootView: RepositoryActivityDetailsView(store: store).background(Color(nsColor: .windowBackgroundColor)))
+        panel.contentView = hosting
+        defer { panel.contentView = nil; panel.close() }
+        hosting.layoutSubtreeIfNeeded()
+        panel.setContentSize(NSSize(width: 360, height: max(1, min(380, hosting.fittingSize.height))))
+        hosting.layoutSubtreeIfNeeded()
+        let image = try #require(hosting.bitmapImageRepForCachingDisplay(in: hosting.bounds))
+        hosting.cacheDisplay(in: hosting.bounds, to: image)
+        try #require(image.representation(using: .png, properties: [:])).write(to: folder.appendingPathComponent(name + ".png"))
+    }
     try await Task.sleep(for: .milliseconds(350))
     try capture("01-idle")
+    try captureDetails("01-idle-details", store: workspace.activeStore)
     workspace.activeStore.sync(.fetch)
     try await Task.sleep(for: .milliseconds(150))
     #expect(workspace.activeStore.isBusy)
@@ -59,6 +75,12 @@ import Testing
     try await Task.sleep(for: .milliseconds(100))
     #expect(workspace.activeStore.error == nil && !workspace.activeStore.isBusy)
     try capture("03-completed")
+    try captureDetails("03-completed-details", store: workspace.activeStore)
+    let completedID = workspace.activeStore.operationFeedback?.id
+    try await Task.sleep(for: .milliseconds(2300))
+    #expect(workspace.activeStore.operationFeedback?.id == completedID && workspace.activeStore.operationFeedback?.isVisible == false)
+    try capture("03-settled")
+    try captureDetails("03-settled-details", store: workspace.activeStore)
 
     _ = try await GitProcess.run(["branch", "--set-upstream-to", "origin/main", "main"], at: root)
     workspace.activeStore.refresh(); await workspace.activeStore.operationTask?.value
@@ -99,6 +121,21 @@ import Testing
     try await Task.sleep(for: .milliseconds(100))
     try capture("07-push-completed")
     #expect(workspace.activeStore.error == nil)
+
+    // The consolidated entry must still expose network history after manual feedback is cleared.
+    workspace.activeStore.clearOperationFeedback()
+    await workspace.activeStore.fetchInBackground()
+    #expect(workspace.activeStore.operationFeedback == nil)
+    try captureDetails("07-network-history-details", store: workspace.activeStore)
+
+    // Render a real failure's details without a root ContentView, whose system alert can reveal a hidden window.
+    let failed = try await WorkingAppFixture.make(); defer { failed.clean(); failed.store.disconnectNetworkContext() }
+    let failedRoot = await failed.repository.root
+    _ = try await GitProcess.run(["remote", "add", "origin", failed.root.appendingPathComponent("Missing.git").path], at: failedRoot)
+    await failed.store.openInPlace(failedRoot)
+    failed.store.sync(.fetch); await failed.store.operationTask?.value
+    #expect(failed.store.operationFeedback?.phase == .failed && failed.store.operationFeedback?.isVisible == true)
+    try captureDetails("08-failed-details", store: failed.store)
 
     #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
 }

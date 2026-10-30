@@ -198,7 +198,10 @@ final class RepositoryStore {
     var conflictDrafts: [String: ConflictDraft] = [:] { didSet { scheduleConflictDraftSave() } }
     var conflictDraftSaveError: String?
     var showingConflictDrafts = false
-    var showingNetworkActivity = false
+    var networkActivitySelection: UUID?
+    var showingNetworkActivity = false {
+        didSet { if !showingNetworkActivity { networkActivitySelection = nil } }
+    }
     var showingAuthentication = false
     var authenticationAfterNetwork = false
     var networkAfterAuthentication = false
