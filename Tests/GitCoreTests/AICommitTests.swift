@@ -50,6 +50,59 @@ import Testing
     }
 }
 
+@Test func aiCommitAllChangesIncludesUnstagedAndUntrackedWithoutChangingIndex() async throws {
+    let f = try await Fixture.make(); defer { f.clean() }
+    try f.write("readme.txt", "staged content\n"); try await f.git(["add", "readme.txt"])
+    try f.write("readme.txt", "unstaged content\n")
+    try f.write("new file [literal].txt", "new untracked content\n")
+    try f.write(".gitignore", "private.txt\n"); try f.write("private.txt", "ignored secret\n")
+    try f.write(".gitattributes", "*.txt diff=evil\n")
+    try await f.git(["config", "diff.evil.command", "touch DIFF_DRIVER_RAN"])
+    try await f.git(["config", "diff.evil.textconv", "touch TEXTCONV_RAN"])
+    let index = try Data(contentsOf: f.url.appendingPathComponent(".git/index"))
+    let head = try await f.repo.headPosition()
+    let context = try await f.repo.aiCommitContext(scope: .allChanges)
+    #expect(context.diff.contains("+staged content") && context.diff.contains("+unstaged content"))
+    #expect(context.diff.contains("new file [literal].txt") && context.diff.contains("+new untracked content"))
+    #expect(!context.diff.contains("ignored secret"))
+    #expect(context.prompt(language: "English").contains("staged and unstaged diffs"))
+    #expect(!FileManager.default.fileExists(atPath: f.url.appendingPathComponent("DIFF_DRIVER_RAN").path))
+    #expect(!FileManager.default.fileExists(atPath: f.url.appendingPathComponent("TEXTCONV_RAN").path))
+    #expect(try Data(contentsOf: f.url.appendingPathComponent(".git/index")) == index)
+    #expect(try await f.repo.headPosition() == head)
+    try f.write("new file [literal].txt", "changed untracked content\n")
+    #expect(try await f.repo.aiCommitFingerprint(scope: .allChanges) != context.fingerprint)
+}
+
+@Test func aiCommitAllChangesSupportsUnbornDeletedAndBinaryFilesAndTracksBinaryEdits() async throws {
+    let f = try await Fixture.make(initialCommit: false); defer { f.clean() }
+    await #expect(throws: GitFailure.self) { try await f.repo.aiCommitContext(scope: .allChanges) }
+    try f.write("new.txt", "untracked on unborn branch\n")
+    #expect(try await f.repo.aiCommitContext(scope: .allChanges).diff.contains("+untracked on unborn branch"))
+    try Data([0, 1, 2]).write(to: f.url.appendingPathComponent("binary.dat"))
+    try await f.git(["add", "."]); try await f.git(["commit", "-m", "Initial files"])
+    try FileManager.default.removeItem(at: f.url.appendingPathComponent("new.txt"))
+    try Data([0, 2, 3]).write(to: f.url.appendingPathComponent("binary.dat"))
+    let context = try await f.repo.aiCommitContext(scope: .allChanges)
+    #expect(context.diff.contains("deleted file") && context.diff.contains("Binary files"))
+    try Data([0, 4, 5]).write(to: f.url.appendingPathComponent("binary.dat"))
+    #expect(try await f.repo.aiCommitFingerprint(scope: .allChanges) != context.fingerprint)
+}
+
+@Test func aiCommitAllChangesEnforcesCombinedDiffLimit() async throws {
+    let f = try await Fixture.make(); defer { f.clean() }
+    try f.write("staged.txt", String(repeating: "staged line\n", count: 4_500))
+    try await f.git(["add", "staged.txt"])
+    try f.write("untracked.txt", String(repeating: "untracked line\n", count: 3_500))
+    #expect(try await f.repo.aiCommitContext().diff.utf8.count < 96 * 1024)
+    do {
+        _ = try await f.repo.aiCommitContext(scope: .allChanges)
+        Issue.record("Expected the combined AI diff size failure")
+    } catch let error as GitFailure {
+        #expect(error.message.contains("96 KB maximum"))
+    }
+}
+
 private func aiStub(_ f: Fixture, _ body: String) throws -> URL {
     let executable = f.url.appendingPathComponent("AI CLI $(literal) stub.sh")
     try ("#!/bin/sh\n" + body).write(to: executable, atomically: true, encoding: .utf8)

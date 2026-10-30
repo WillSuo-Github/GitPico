@@ -139,6 +139,7 @@ struct CommitComposer: View {
     @State private var insertion: CommitTemplateInsertion?
     @State private var showBody = false
     @State private var ai = AICommitSession()
+    @AppStorage("aiCommit.scope") private var aiScope: AICommitScope = .staged
     @FocusState private var subjectFocused: Bool
     var commitTitle: String {
         if store.amend { return String(localized: "Amend Commit") }
@@ -156,9 +157,22 @@ struct CommitComposer: View {
                         else { Label("AI", systemImage: "sparkles") }
                     }
                         .buttonStyle(.plain).foregroundStyle(Color.accentColor)
-                        .disabled(!ai.isGenerating && store.aiCommitUnavailableReason != nil)
+                        .disabled(!ai.isGenerating && store.aiCommitUnavailableReason(scope: aiScope) != nil)
                         .help(aiHelp)
                         .accessibilityLabel(ai.isGenerating ? "Stop generating commit message" : "Generate commit message with AI")
+                    Menu {
+                        Picker("AI", selection: $aiScope) {
+                            Text("Staged").tag(AICommitScope.staged)
+                            Text("Staged and unstaged changes").tag(AICommitScope.allChanges)
+                        }.pickerStyle(.inline)
+                    } label: {
+                        Image(systemName: "chevron.down").font(.system(size: 9, weight: .semibold))
+                            .foregroundStyle(aiScope == .allChanges ? Color.accentColor : .secondary)
+                    }
+                        .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+                        .disabled(ai.isGenerating)
+                        .help(aiScope == .staged ? String(localized: "Staged") : String(localized: "Staged and unstaged changes"))
+                        .accessibilityLabel("AI")
                     Button { showBody.toggle() } label: { Image(systemName: "text.alignleft").foregroundStyle(showBody || !store.commitBody.isEmpty ? Color.accentColor : .secondary) }
                         .buttonStyle(.plain).help(showBody ? "Hide description" : "Add a description")
                 }.padding(.horizontal, 10).frame(height: 32)
@@ -227,6 +241,7 @@ struct CommitComposer: View {
         .sheet(item: $insertion) { CommitTemplateInsertionView(store: store, insertion: $0) }
         .onDisappear { ai.cancel() }
         .onChange(of: store.snapshot?.root) { ai.cancel(); ai.error = nil }
+        .onChange(of: aiScope) { ai.cancel(); ai.error = nil }
     }
     private func toggleAI() {
         if ai.isGenerating { ai.cancel(); return }
@@ -235,11 +250,11 @@ struct CommitComposer: View {
             ai.error = String(localized: "\(provider.title) was not found. Install a supported AI CLI or choose one in Settings → AI Commits.")
             return
         }
-        ai.generate(in: store, settings: settings, provider: provider, executable: executable)
+        ai.generate(in: store, settings: settings, provider: provider, executable: executable, scope: aiScope)
     }
     var aiHelp: String {
         if ai.isGenerating { return String(localized: "Stop generating") }
-        if let reason = store.aiCommitUnavailableReason { return reason }
+        if let reason = store.aiCommitUnavailableReason(scope: aiScope) { return reason }
         let tool = AICommitPreferences.shared.value.resolvedProvider.title
         return store.commitSubject.isEmpty && store.commitBody.isEmpty ? String(localized: "Write the commit message with \(tool)") : String(localized: "Replace the commit message with \(tool)")
     }

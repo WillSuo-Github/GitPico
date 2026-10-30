@@ -1,6 +1,472 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Make at least one change before generating a commit message." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أجرِ تغييرًا واحدًا على الأقل قبل إنشاء رسالة الالتزام."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fes almenys un canvi abans de generar un missatge de commit."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Před generováním zprávy commitu proveďte alespoň jednu změnu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foretag mindst én ændring, før du genererer en commitbesked."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nimm mindestens eine Änderung vor, bevor du eine Commit-Nachricht generierst."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κάντε τουλάχιστον μία αλλαγή πριν δημιουργήσετε μήνυμα commit."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make at least one change before generating a commit message."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Realiza al menos un cambio antes de generar un mensaje de commit."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Realiza al menos un cambio antes de generar un mensaje de commit."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tee vähintään yksi muutos ennen commit-viestin luomista."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effectuez au moins une modification avant de générer un message de commit."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effectuez au moins une modification avant de générer un message de commit."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יש לבצע לפחות שינוי אחד לפני יצירת הודעת commit."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "कमिट संदेश बनाने से पहले कम से कम एक बदलाव करें।"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Napravite barem jednu promjenu prije generiranja poruke commita."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Végezzen legalább egy módosítást a commitüzenet létrehozása előtt."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buat setidaknya satu perubahan sebelum membuat pesan commit."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apporta almeno una modifica prima di generare un messaggio di commit."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コミットメッセージを生成する前に、少なくとも1つ変更してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "커밋 메시지를 생성하기 전에 하나 이상 변경하세요."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buat sekurang-kurangnya satu perubahan sebelum menjana mesej commit."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Breng minstens één wijziging aan voordat je een commitbericht genereert."
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gjør minst én endring før du genererer en commitmelding."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wprowadź co najmniej jedną zmianę przed wygenerowaniem wiadomości commita."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faça pelo menos uma alteração antes de gerar uma mensagem de commit."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faça pelo menos uma alteração antes de gerar uma mensagem de commit."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faceți cel puțin o modificare înainte de a genera un mesaj de commit."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Внесите хотя бы одно изменение перед созданием сообщения коммита."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pred generovaním správy commitu vykonajte aspoň jednu zmenu."
+          }
+        },
+        "sl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pred ustvarjanjem sporočila commita naredite vsaj eno spremembo."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gör minst en ändring innan du genererar ett commitmeddelande."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "เปลี่ยนแปลงอย่างน้อยหนึ่งรายการก่อนสร้างข้อความคอมมิต"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commit mesajı oluşturmadan önce en az bir değişiklik yapın."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Внесіть хоча б одну зміну перед створенням повідомлення коміту."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thực hiện ít nhất một thay đổi trước khi tạo thông điệp commit."
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請先修改至少一個檔案，再產生提交說明。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请先修改至少一个文件，再生成提交说明。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請先修改至少一個檔案，再產生提交說明。"
+          }
+        }
+      }
+    },
+    "The selected changes or commit mode changed. Generate a new message." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تغيّرت التغييرات المحددة أو وضع الالتزام. أنشئ رسالة جديدة."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Els canvis seleccionats o el mode de commit han canviat. Genera un missatge nou."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vybrané změny nebo režim commitu se změnily. Vygenerujte novou zprávu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De valgte ændringer eller committypen blev ændret. Generér en ny besked."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die ausgewählten Änderungen oder der Commit-Modus haben sich geändert. Generiere eine neue Nachricht."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι επιλεγμένες αλλαγές ή η λειτουργία commit άλλαξαν. Δημιουργήστε νέο μήνυμα."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The selected changes or commit mode changed. Generate a new message."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los cambios seleccionados o el modo de commit cambiaron. Genera un mensaje nuevo."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los cambios seleccionados o el modo de commit cambiaron. Genera un mensaje nuevo."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valitut muutokset tai commit-tila muuttuivat. Luo uusi viesti."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les modifications sélectionnées ou le mode de commit ont changé. Générez un nouveau message."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les modifications sélectionnées ou le mode de commit ont changé. Générez un nouveau message."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השינויים שנבחרו או מצב ה-commit השתנו. יש ליצור הודעה חדשה."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "चुने गए बदलाव या कमिट मोड बदल गया। नया संदेश बनाएँ।"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odabrane promjene ili način commita izmijenjeni su. Generirajte novu poruku."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A kijelölt módosítások vagy a commit módja megváltozott. Hozzon létre új üzenetet."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perubahan yang dipilih atau mode commit berubah. Buat pesan baru."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le modifiche selezionate o la modalità di commit sono cambiate. Genera un nuovo messaggio."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択した変更内容またはコミットモードが変わりました。新しいメッセージを生成してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선택한 변경 사항 또는 커밋 모드가 바뀌었습니다. 새 메시지를 생성하세요."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perubahan yang dipilih atau mod commit telah berubah. Jana mesej baharu."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De geselecteerde wijzigingen of de commitmodus zijn veranderd. Genereer een nieuw bericht."
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De valgte endringene eller commitmodusen er endret. Generer en ny melding."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wybrane zmiany lub tryb commita zmieniły się. Wygeneruj nową wiadomość."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As alterações selecionadas ou o modo de commit mudaram. Gere uma nova mensagem."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As alterações selecionadas ou o modo de commit mudaram. Gere uma nova mensagem."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modificările selectate sau modul de commit s-au schimbat. Generați un mesaj nou."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбранные изменения или режим коммита изменились. Создайте новое сообщение."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vybrané zmeny alebo režim commitu sa zmenili. Vygenerujte novú správu."
+          }
+        },
+        "sl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Izbrane spremembe ali način commita so se spremenili. Ustvarite novo sporočilo."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De valda ändringarna eller commitläget ändrades. Generera ett nytt meddelande."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "การเปลี่ยนแปลงที่เลือกหรือโหมดคอมมิตเปลี่ยนไป โปรดสร้างข้อความใหม่"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seçilen değişiklikler veya commit modu değişti. Yeni bir mesaj oluşturun."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вибрані зміни або режим коміту змінилися. Створіть нове повідомлення."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Các thay đổi đã chọn hoặc chế độ commit đã thay đổi. Hãy tạo thông điệp mới."
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所選變更或提交模式發生了變化。請重新產生提交說明。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所选改动或提交模式发生了变化。请重新生成提交说明。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所選變更或提交模式發生了變化。請重新產生提交說明。"
+          }
+        }
+      }
+    },
     "Pulling…" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -1,6 +1,705 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Make at least one change before generating a commit message." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أجرِ تغييرًا واحدًا على الأقل قبل إنشاء رسالة الالتزام."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fes almenys un canvi abans de generar un missatge de commit."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Před generováním zprávy commitu proveďte alespoň jednu změnu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foretag mindst én ændring, før du genererer en commitbesked."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nimm mindestens eine Änderung vor, bevor du eine Commit-Nachricht generierst."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Κάντε τουλάχιστον μία αλλαγή πριν δημιουργήσετε μήνυμα commit."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make at least one change before generating a commit message."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Realiza al menos un cambio antes de generar un mensaje de commit."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Realiza al menos un cambio antes de generar un mensaje de commit."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tee vähintään yksi muutos ennen commit-viestin luomista."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effectuez au moins une modification avant de générer un message de commit."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effectuez au moins une modification avant de générer un message de commit."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יש לבצע לפחות שינוי אחד לפני יצירת הודעת commit."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "कमिट संदेश बनाने से पहले कम से कम एक बदलाव करें।"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Napravite barem jednu promjenu prije generiranja poruke commita."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Végezzen legalább egy módosítást a commitüzenet létrehozása előtt."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buat setidaknya satu perubahan sebelum membuat pesan commit."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apporta almeno una modifica prima di generare un messaggio di commit."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コミットメッセージを生成する前に、少なくとも1つ変更してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "커밋 메시지를 생성하기 전에 하나 이상 변경하세요."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buat sekurang-kurangnya satu perubahan sebelum menjana mesej commit."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Breng minstens één wijziging aan voordat je een commitbericht genereert."
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gjør minst én endring før du genererer en commitmelding."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wprowadź co najmniej jedną zmianę przed wygenerowaniem wiadomości commita."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faça pelo menos uma alteração antes de gerar uma mensagem de commit."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faça pelo menos uma alteração antes de gerar uma mensagem de commit."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faceți cel puțin o modificare înainte de a genera un mesaj de commit."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Внесите хотя бы одно изменение перед созданием сообщения коммита."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pred generovaním správy commitu vykonajte aspoň jednu zmenu."
+          }
+        },
+        "sl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pred ustvarjanjem sporočila commita naredite vsaj eno spremembo."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gör minst en ändring innan du genererar ett commitmeddelande."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "เปลี่ยนแปลงอย่างน้อยหนึ่งรายการก่อนสร้างข้อความคอมมิต"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commit mesajı oluşturmadan önce en az bir değişiklik yapın."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Внесіть хоча б одну зміну перед створенням повідомлення коміту."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thực hiện ít nhất một thay đổi trước khi tạo thông điệp commit."
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請先修改至少一個檔案，再產生提交說明。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请先修改至少一个文件，再生成提交说明。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請先修改至少一個檔案，再產生提交說明。"
+          }
+        }
+      }
+    },
+    "The selected changes moved while preparing the message. Generate again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تغيّرت التغييرات المحددة أثناء إعداد الرسالة. أنشئها مجددًا."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Els canvis seleccionats han canviat mentre es preparava el missatge. Torna a generar-lo."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vybrané změny se během přípravy zprávy změnily. Vygenerujte ji znovu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De valgte ændringer blev ændret under forberedelsen af beskeden. Generér igen."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die ausgewählten Änderungen haben sich beim Vorbereiten der Nachricht geändert. Generiere sie erneut."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Οι επιλεγμένες αλλαγές άλλαξαν κατά την προετοιμασία του μηνύματος. Δημιουργήστε το ξανά."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The selected changes moved while preparing the message. Generate again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los cambios seleccionados cambiaron mientras se preparaba el mensaje. Genéralo de nuevo."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los cambios seleccionados cambiaron mientras se preparaba el mensaje. Genéralo de nuevo."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valitut muutokset muuttuivat viestin valmistelun aikana. Luo viesti uudelleen."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les modifications sélectionnées ont changé pendant la préparation du message. Générez-le à nouveau."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les modifications sélectionnées ont changé pendant la préparation du message. Générez-le à nouveau."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השינויים שנבחרו השתנו במהלך הכנת ההודעה. יש ליצור אותה שוב."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "संदेश तैयार करते समय चुने गए बदलाव बदल गए। फिर से बनाएँ।"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odabrane promjene izmijenjene su tijekom pripreme poruke. Generirajte je ponovno."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A kijelölt módosítások megváltoztak az üzenet előkészítése közben. Hozza létre újra."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perubahan yang dipilih berubah saat menyiapkan pesan. Buat ulang."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le modifiche selezionate sono cambiate durante la preparazione del messaggio. Generalo di nuovo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メッセージの準備中に選択した変更内容が変わりました。再生成してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "메시지를 준비하는 동안 선택한 변경 사항이 바뀌었습니다. 다시 생성하세요."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perubahan yang dipilih berubah semasa menyediakan mesej. Jana semula."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De geselecteerde wijzigingen zijn veranderd tijdens het voorbereiden van het bericht. Genereer opnieuw."
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De valgte endringene ble endret under klargjøringen av meldingen. Generer på nytt."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wybrane zmiany zmieniły się podczas przygotowywania wiadomości. Wygeneruj ją ponownie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As alterações selecionadas mudaram durante a preparação da mensagem. Gere novamente."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As alterações selecionadas mudaram durante a preparação da mensagem. Gere novamente."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modificările selectate s-au schimbat în timpul pregătirii mesajului. Generați-l din nou."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбранные изменения изменились во время подготовки сообщения. Создайте его заново."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vybrané zmeny sa počas prípravy správy zmenili. Vygenerujte ju znova."
+          }
+        },
+        "sl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Izbrane spremembe so se med pripravo sporočila spremenile. Ustvarite ga znova."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De valda ändringarna ändrades medan meddelandet förbereddes. Generera igen."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "การเปลี่ยนแปลงที่เลือกเปลี่ยนไปขณะเตรียมข้อความ โปรดสร้างใหม่"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mesaj hazırlanırken seçilen değişiklikler değişti. Yeniden oluşturun."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вибрані зміни змінилися під час підготовки повідомлення. Створіть його знову."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Các thay đổi đã chọn bị thay đổi khi chuẩn bị thông điệp. Hãy tạo lại."
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "準備提交說明時，所選變更發生了變化。請重新產生。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "准备提交说明时，所选改动发生了变化。请重新生成。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "準備提交說明時，所選變更發生了變化。請重新產生。"
+          }
+        }
+      }
+    },
+    "The selected diff is too large for AI generation (96 KB maximum). Select a smaller set of changes." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الفرق المحدد كبير جدًا لإنشائه بالذكاء الاصطناعي (الحد الأقصى 96 KB). حدد مجموعة أصغر من التغييرات."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El diff seleccionat és massa gran per a la IA (màxim 96 KB). Selecciona menys canvis."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vybraný diff je pro generování pomocí AI příliš velký (maximum 96 KB). Vyberte méně změn."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Den valgte diff er for stor til AI-generering (maks. 96 KB). Vælg færre ændringer."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der ausgewählte Diff ist für die KI-Generierung zu groß (maximal 96 KB). Wähle weniger Änderungen aus."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το επιλεγμένο diff είναι πολύ μεγάλο για δημιουργία με AI (μέγιστο 96 KB). Επιλέξτε λιγότερες αλλαγές."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The selected diff is too large for AI generation (96 KB maximum). Select a smaller set of changes."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El diff seleccionado es demasiado grande para la IA (máximo 96 KB). Selecciona menos cambios."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El diff seleccionado es demasiado grande para la IA (máximo 96 KB). Selecciona menos cambios."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valittu diff on liian suuri tekoälylle (enintään 96 KB). Valitse vähemmän muutoksia."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le diff sélectionné est trop volumineux pour l’IA (96 KB maximum). Sélectionnez moins de modifications."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le diff sélectionné est trop volumineux pour l’IA (96 KB maximum). Sélectionnez moins de modifications."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההבדלים שנבחרו גדולים מדי ליצירה באמצעות AI (עד 96 KB). יש לבחור פחות שינויים."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "चुना गया डिफ़ AI के लिए बहुत बड़ा है (अधिकतम 96 KB)। कम बदलाव चुनें।"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odabrani diff prevelik je za AI (najviše 96 KB). Odaberite manje promjena."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A kijelölt diff túl nagy az AI számára (legfeljebb 96 KB). Jelöljön ki kevesebb módosítást."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diff yang dipilih terlalu besar untuk AI (maksimum 96 KB). Pilih lebih sedikit perubahan."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il diff selezionato è troppo grande per l’IA (massimo 96 KB). Seleziona meno modifiche."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択した差分はAI生成には大きすぎます（最大96 KB）。選択する変更を減らしてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선택한 diff가 AI 생성에 너무 큽니다(최대 96 KB). 더 적은 변경 사항을 선택하세요."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diff yang dipilih terlalu besar untuk AI (maksimum 96 KB). Pilih kurang perubahan."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De geselecteerde diff is te groot voor AI (maximaal 96 KB). Selecteer minder wijzigingen."
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Den valgte diffen er for stor for AI (maksimalt 96 KB). Velg færre endringer."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wybrany diff jest zbyt duży dla AI (maksymalnie 96 KB). Wybierz mniej zmian."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O diff selecionado é grande demais para a IA (máximo de 96 KB). Selecione menos alterações."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O diff selecionado é demasiado grande para a IA (máximo de 96 KB). Selecione menos alterações."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diff-ul selectat este prea mare pentru AI (maximum 96 KB). Selectați mai puține modificări."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбранный diff слишком велик для ИИ (не более 96 KB). Выберите меньше изменений."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vybraný diff je pre AI príliš veľký (najviac 96 KB). Vyberte menej zmien."
+          }
+        },
+        "sl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Izbrani diff je prevelik za AI (največ 96 KB). Izberite manj sprememb."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Den valda diffen är för stor för AI (högst 96 KB). Välj färre ändringar."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diff ที่เลือกใหญ่เกินไปสำหรับ AI (สูงสุด 96 KB) โปรดเลือกการเปลี่ยนแปลงให้น้อยลง"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seçilen diff AI için çok büyük (en fazla 96 KB). Daha az değişiklik seçin."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вибраний diff завеликий для ШІ (максимум 96 KB). Виберіть менше змін."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diff đã chọn quá lớn cho AI (tối đa 96 KB). Hãy chọn ít thay đổi hơn."
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所選差異過大，無法用於 AI 產生（最大 96 KB）。請選擇較少的變更。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所选差异过大，无法用于 AI 生成（最大 96 KB）。请选择更少的改动。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所選差異過大，無法用於 AI 產生（最大 96 KB）。請選擇較少的變更。"
+          }
+        }
+      }
+    },
     "%@\n\n%@" : {
       "localizations" : {
         "en" : {

@@ -134,6 +134,36 @@ private let stub = URL(fileURLWithPath: "/stub")
     #expect(session.error?.contains("Stage at least one change") == true)
 }
 
+@Test @MainActor func aiCommitAllChangesCanGenerateWithNothingStaged() async throws {
+    let f = try await WorkingAppFixture.make(); defer { f.clean() }
+    #expect(f.store.aiCommitUnavailableReason(scope: .allChanges) != nil)
+    try await f.write("a.txt", "unstaged for AI\n")
+    try await f.write("new.txt", "untracked for AI\n"); try await f.sync()
+    #expect(f.store.staged.isEmpty && f.store.aiCommitUnavailableReason(scope: .allChanges) == nil)
+    let generator = AICommitTestGenerator(), session = AICommitSession(generator: generator)
+    session.generate(in: f.store, settings: AICommitSettings(), provider: .codex, executable: stub, scope: .allChanges)
+    await session.task?.value
+    let prompt = await generator.prompt
+    #expect(session.error == nil && !f.store.commitSubject.isEmpty)
+    #expect(prompt.contains("unstaged for AI") && prompt.contains("untracked for AI"))
+    #expect(try await f.repository.aiCommitContext(scope: .allChanges).diff.contains("unstaged for AI"))
+    #expect(f.store.staged.isEmpty && !f.store.canCommit)
+}
+
+@Test @MainActor func aiCommitAllChangesRejectsResultsAfterUnstagedOrUntrackedEdits() async throws {
+    let f = try await aiCommitFixture(); defer { f.clean() }
+    for path in ["a.txt", "new.txt"] {
+        try await f.write(path, "before AI\n"); try await f.sync()
+        let generator = AICommitTestGenerator(blocked: true), session = AICommitSession(generator: generator)
+        session.generate(in: f.store, settings: AICommitSettings(), provider: .codex, executable: stub, scope: .allChanges)
+        let task = session.task
+        try await awaitAIStart(generator)
+        try await f.write(path, "after AI\n")
+        await generator.release(); await task?.value
+        #expect(f.store.commitSubject.isEmpty && session.error?.contains("selected changes") == true)
+    }
+}
+
 @Test @MainActor func aiCommitGenerationExplainsConflictsEvenWhenOtherChangesAreStaged() async throws {
     let f = try await WorkingAppFixture.make(); defer { f.clean() }
     let branch = try await f.repository.headPosition().branch
@@ -160,19 +190,23 @@ private let stub = URL(fileURLWithPath: "/stub")
     let output = URL(fileURLWithPath: try #require(ProcessInfo.processInfo.environment["GITPICO_AI_COMMIT_OUTPUT"]))
     try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
     let preferences = AICommitPreferences(file: f.root.appendingPathComponent("ai-settings.json"))
+    let defaultsName = "GitPico-ai-render-" + UUID().uuidString
+    let defaults = try #require(UserDefaults(suiteName: defaultsName))
+    defer { defaults.removePersistentDomain(forName: defaultsName) }
     let window = RepositoryNativeWindow(tabID: UUID(), permitsPresentation: false)
     window.tabbingMode = .disallowed; window.styleMask = [.borderless]; window.contentMinSize = .zero
     defer { window.contentView = nil; window.close() }
-    for (step, dark) in [("entry", false), ("settings", false), ("settings", true), ("unstaged-entry", false)] {
+    for (step, dark) in [("entry", false), ("settings", false), ("settings", true), ("unstaged-entry", false), ("all-changes-entry", false), ("all-changes-entry", true)] {
         if step == "unstaged-entry" {
             _ = try await GitProcess.run(["reset", "HEAD", "--", "a.txt"], at: f.repository.root)
             try await f.sync()
         }
+        defaults.set((step == "all-changes-entry" ? AICommitScope.allChanges : .staged).rawValue, forKey: "aiCommit.scope")
         let entry = step.hasSuffix("entry")
         let width: CGFloat = entry ? 340 : 740, height: CGFloat = entry ? 210 : 700
         let content = Group {
             if entry { CommitComposer(store: f.store) } else { AICommitSettingsView(preferences: preferences) }
-        }.frame(width: width, height: height).background(Color(nsColor: .windowBackgroundColor))
+        }.defaultAppStorage(defaults).frame(width: width, height: height).background(Color(nsColor: .windowBackgroundColor))
         window.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
         let host = NSHostingView(rootView: content); window.contentView = host
         window.setFrame(NSRect(x: -10000, y: -10000, width: width, height: height), display: false)
