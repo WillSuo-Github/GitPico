@@ -31,6 +31,10 @@ extension RepositoryWindowRouting {
         if store.library.recentPaths.isEmpty { pickerFilter = .all }
     }
     var showsRepositoryPicker: Bool { isChoosingRepository || root == nil }
+    var displayedRepositoryPath: String? {
+        guard !showsRepositoryPicker, !isOpening, let root, store.snapshot?.root.path == root.path else { return nil }
+        return root.path
+    }
     var title: String {
         if showsRepositoryPicker { return String(localized: "Repositories") }
         if root?.path == store.snapshot?.root.path { return store.repositoryWindowTitle }
@@ -82,6 +86,7 @@ extension RepositoryWindowRouting {
         sessionSaveWarning = session.error
     }
     func tab(for store: RepositoryStore) -> RepositoryTab? { tabs.first { $0.store === store } }
+    func isRepositoryOpen(at path: String) -> Bool { tabs.contains { $0.displayedRepositoryPath == path } }
     private func originTab(from store: RepositoryStore?) -> RepositoryTab? {
         if let store { return tab(for: store) }
         return activeTab

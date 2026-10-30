@@ -64,7 +64,7 @@ struct RepositoryLibraryView: View {
                                 Text(Pico.abbreviated(entry.path)).font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
                             }
                             Spacer()
-                            if entry.path == store.snapshot?.root.path { Chip(text: String(localized: "Open"), tint: .accentColor) }
+                            if store.workspace?.isRepositoryOpen(at: entry.path) ?? (entry.path == store.snapshot?.root.path && !store.isChoosingRepository) { Chip(text: String(localized: "Open"), tint: .accentColor) }
                             Text(library.breadcrumb(entry.group)).font(.caption).foregroundStyle(.tertiary).lineLimit(1)
                         }.padding(.vertical, 4).tag(entry.id).contentShape(Rectangle())
                             .onTapGesture(count: 2) { open(entry) }

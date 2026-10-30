@@ -24,6 +24,7 @@ struct RepositoryPickerView: View {
     @Bindable var tab: RepositoryTab
     var showsSidebar = true
     @State private var searchFocused = false
+    @FocusState private var listFocused: Bool
     var store: RepositoryStore { tab.store }
     var entries: [SavedRepository] { workspace.library.matches(query: tab.pickerQuery, filter: tab.pickerFilter) }
     var selection: SavedRepository? { entries.first { $0.id == tab.pickerSelection } }
@@ -95,22 +96,9 @@ struct RepositoryPickerView: View {
                 }
                 List(selection: $tab.pickerSelection) {
                     ForEach(entries) { entry in
-                        let isOpen = workspace.tabs.contains(where: { $0.root?.path == entry.path })
-                        HStack(spacing: 12) {
-                            RepositoryGlyph(name: entry.name, size: 34)
-                            VStack(alignment: .leading, spacing: 3) {
-                                HStack(spacing: 6) {
-                                    Text(entry.name).font(.system(size: 13, weight: .semibold))
-                                    if entry.favorite { Image(systemName: "star.fill").font(.system(size: 10)).foregroundStyle(.yellow) }
-                                    if isOpen { Chip(text: String(localized: "Open"), tint: .accentColor) }
-                                }
-                                Text(Pico.abbreviated(entry.path)).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
-                            }
-                            Spacer(minLength: 8)
-                            if let opened = entry.lastOpened { Text(opened.picoRelative).font(.system(size: 11)).foregroundStyle(.tertiary) }
-                            Button { open(entry) } label: { Image(systemName: "arrow.right.circle.fill").font(.system(size: 18)).foregroundStyle(.tint).frame(width: 26, height: 26).contentShape(Rectangle()) }
-                                .buttonStyle(.plain).help("Open \(entry.name)").accessibilityLabel("Open \(entry.name)")
-                        }.padding(.vertical, 7).padding(.horizontal, 4).tag(entry.id).contentShape(Rectangle())
+                        RepositoryPickerRow(entry: entry, isOpen: workspace.isRepositoryOpen(at: entry.path),
+                                            isSelected: tab.pickerSelection == entry.id, isEmphasized: listFocused) { open(entry) }
+                            .tag(entry.id).contentShape(Rectangle())
                             .contextMenu {
                                 Button("Open") { open(entry) }
                                 Button(entry.favorite ? "Remove from Favorites" : "Add to Favorites") { do { try workspace.library.setFavorite([entry.id], !entry.favorite) } catch { store.error = error.localizedDescription } }
@@ -118,6 +106,7 @@ struct RepositoryPickerView: View {
                             }
                     }.onMove(perform: reorderAction)
                 }.listStyle(.inset).scrollContentBackground(.hidden)
+                    .focused($listFocused)
                     .background(Color(nsColor: .controlBackgroundColor).opacity(0.6), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color(nsColor: .separatorColor).opacity(0.6), lineWidth: 0.5))
                     .contextMenu(forSelectionType: UUID.self) { _ in } primaryAction: { ids in if let entry = entries.first(where: { ids.contains($0.id) }) { open(entry) } }
