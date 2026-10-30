@@ -3,16 +3,15 @@ import SwiftUI
 
 struct WorktreesView: View {
     @Bindable var store: RepositoryStore
-    @State private var selection: Set<String> = []
     var entries: [ManagedWorktree] { store.worktrees.filter { store.search.isEmpty || ($0.path + " " + ($0.branch ?? "")).localizedCaseInsensitiveContains(store.search) } }
-    var selected: ManagedWorktree? { entries.first { selection.contains($0.id) } }
+    var selected: ManagedWorktree? { entries.first { store.selectedWorktreePaths.contains($0.id) } }
     var body: some View {
         VStack(spacing: 0) {
             PaneBar(title: "Worktrees", subtitle: String(localized: "\(store.worktrees.count) checked-out directories sharing this repository"), icon: "folder.badge.gearshape") {
                 Menu {
                     Section("Selection") {
-                        Button("Manage Selected Worktrees…") { store.relatedAdministration(.worktrees(store.worktrees.filter { selection.contains($0.id) })) }.disabled(selection.isEmpty)
-                        Button("Select All") { selection = Set(entries.map(\.id)) }
+                        Button("Manage Selected Worktrees…") { store.relatedAdministration(.worktrees(store.worktrees.filter { store.selectedWorktreePaths.contains($0.id) })) }.disabled(store.selectedWorktreePaths.isEmpty)
+                        Button("Select All") { store.selectedWorktreePaths = Set(entries.map(\.id)) }
                     }
                     Section("Maintenance") {
                         Button("Management Backups…") { store.relatedAdministration(.backups) }
@@ -24,21 +23,21 @@ struct WorktreesView: View {
                 Button { store.manageWorktree(.create(nil)) } label: { Label("Add Worktree", systemImage: "plus") }.buttonStyle(.borderedProminent).controlSize(.small).disabled(store.snapshot?.hasHEAD != true || store.isBusy)
             }
             PersistentSplitView(name: "worktrees", width: 340) {
-                List(entries, selection: $selection) { entry in
+                List(entries, selection: $store.selectedWorktreePaths) { entry in
                     HStack(alignment: .top, spacing: 10) {
                         Image(systemName: entry.locked != nil ? "lock.fill" : entry.prunable != nil ? "exclamationmark.triangle.fill" : "folder.fill")
                             .font(.system(size: 13)).foregroundStyle(entry.prunable != nil ? Pico.warning : Color.accentColor)
                             .frame(width: 28, height: 28).background((entry.prunable != nil ? Pico.warning : Color.accentColor).opacity(0.12), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
                         VStack(alignment: .leading, spacing: 3) {
                             HStack(spacing: 5) {
-                                Text(entry.name).font(.system(size: 12.5, weight: .medium)).lineLimit(1)
+                                Text(store.worktreeTitle(entry)).font(.system(size: 12.5, weight: .medium)).lineLimit(1).truncationMode(.middle)
                                 if entry.isMain { Chip(text: String(localized: "Main"), tint: .secondary) }
                                 if store.snapshot?.root.path == entry.path { Chip(text: String(localized: "Current"), tint: .accentColor) }
                             }
-                            Label(entry.branch?.replacingOccurrences(of: "refs/heads/", with: "") ?? (entry.isBare ? String(localized: "Bare repository") : String(localized: "Detached HEAD")), systemImage: "arrow.triangle.branch").font(.system(size: 11)).foregroundStyle(.secondary)
-                            Text(Pico.abbreviated(entry.path)).font(.system(size: 11)).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle)
+                            Label(store.worktreePresentation.branch(for: entry) ?? (entry.isBare ? String(localized: "Bare repository") : String(localized: "Detached HEAD")), systemImage: "arrow.triangle.branch").font(.system(size: 11)).foregroundStyle(.secondary)
+                            Text(store.worktreePresentation.location(for: entry)).font(.system(size: 11)).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle).help(entry.path)
                         }
-                    }.padding(.vertical, 4).tag(entry.id).contentShape(Rectangle()).contextMenu { if selection.count > 1 { Button("Manage Selected Worktrees…") { store.relatedAdministration(.worktrees(store.worktrees.filter { selection.contains($0.id) })) }; Divider() }; WorktreeContextActions(store: store, entry: entry) }
+                    }.padding(.vertical, 4).tag(entry.id).contentShape(Rectangle()).contextMenu { if store.selectedWorktreePaths.count > 1 { Button("Manage Selected Worktrees…") { store.relatedAdministration(.worktrees(store.worktrees.filter { store.selectedWorktreePaths.contains($0.id) })) }; Divider() }; WorktreeContextActions(store: store, entry: entry) }
                 }.listStyle(.plain)
                 .contextMenu(forSelectionType: String.self) { _ in } primaryAction: { ids in
                     if let entry = entries.first(where: { ids.contains($0.id) }), entry.prunable == nil, !entry.isBare {
@@ -52,7 +51,7 @@ struct WorktreesView: View {
                             HStack(spacing: 12) {
                                 Image(systemName: "folder.badge.gearshape").font(.system(size: 20)).foregroundStyle(.tint).frame(width: 44, height: 44).background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 11, style: .continuous))
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(entry.name).font(.system(size: 17, weight: .semibold))
+                                    Text(store.worktreeTitle(entry)).font(.system(size: 17, weight: .semibold))
                                     Text(store.snapshot?.root.path == entry.path ? "This is the current working tree" : entry.isMain ? "Main working tree" : "Linked worktree").font(.system(size: 12)).foregroundStyle(.secondary)
                                 }
                                 Spacer()
@@ -62,7 +61,7 @@ struct WorktreesView: View {
                             if let reason = entry.prunable { Label("Unavailable: \(reason)", systemImage: "exclamationmark.triangle.fill").foregroundStyle(Pico.warning) }
                             Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 8) {
                                 MetadataRow(label: "Location", value: entry.path)
-                                MetadataRow(label: "Branch", value: entry.branch?.replacingOccurrences(of: "refs/heads/", with: "") ?? String(localized: "Detached HEAD"))
+                                MetadataRow(label: "Branch", value: store.worktreePresentation.branch(for: entry) ?? String(localized: "Detached HEAD"))
                                 MetadataRow(label: "HEAD", value: entry.head ?? String(localized: "Unborn / bare"), monospaced: true)
                                 if let lock = entry.locked { MetadataRow(label: "Locked", value: lock.isEmpty ? String(localized: "Locked without a reason") : lock) }
                             }.card()
@@ -72,7 +71,12 @@ struct WorktreesView: View {
                 }
             }
             if let error = store.worktreeError { Label(error, systemImage: "exclamationmark.triangle.fill").foregroundStyle(Pico.deletion).font(.caption).frame(maxWidth: .infinity, alignment: .leading).padding(12) }
-        }.disabled(store.isBusy).onChange(of: entries.map(\.id), initial: true) { selection.formIntersection(entries.map(\.id)); if selection.isEmpty { selection = Set(entries.prefix(1).map(\.id)) } }
+        }.disabled(store.isBusy)
+        .onChange(of: entries.map(\.id), initial: true) { updateSelection() }
+    }
+    private func updateSelection() {
+        store.selectedWorktreePaths.formIntersection(entries.map(\.id))
+        if store.selectedWorktreePaths.isEmpty { store.selectedWorktreePaths = Set(entries.prefix(1).map(\.id)) }
     }
 }
 
@@ -81,6 +85,10 @@ struct WorktreeContextActions: View {
     let entry: ManagedWorktree
     var body: some View {
         Button("Open Worktree") { store.openWorktree(entry) }.disabled(entry.prunable != nil || entry.isBare)
+        if store.workspace != nil {
+            Button(String(localized: "Open Worktree") + " · " + String(localized: "New Tab")) { store.openWorktree(entry, inNewTab: true) }
+                .disabled(entry.prunable != nil || entry.isBare)
+        }
         if !entry.isMain {
             Button(entry.locked == nil ? "Lock Worktree…" : "Unlock Worktree…") { store.manageWorktree(entry.locked == nil ? .lock(entry) : .unlock(entry)) }
             Button("Move Worktree…") { store.manageWorktree(.move(entry)) }.disabled(entry.locked != nil || entry.prunable != nil || store.snapshot?.root.path == entry.path)

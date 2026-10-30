@@ -8,6 +8,10 @@ struct RepositoryStatusBar: View {
     var body: some View {
         HStack(spacing: 10) {
             if let data = store.snapshot, !store.isChoosingRepository {
+                if store.isLinkedWorktree, let current = store.currentWorktree {
+                    Label("Worktree", systemImage: "folder.badge.gearshape").foregroundStyle(.tint).help(current.path)
+                    separator
+                }
                 Label(data.branch, systemImage: "arrow.triangle.branch").labelStyle(.titleAndIcon)
                 if data.ahead > 0 || data.behind > 0 {
                     HStack(spacing: 6) {

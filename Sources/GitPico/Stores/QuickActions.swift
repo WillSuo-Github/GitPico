@@ -62,7 +62,7 @@ extension RepositoryStore {
         if repository != nil {
             for destination in [Destination.worktrees, .submodules, .workingCopy, .history, .stashes, .reflog, .branchesReview, .repositorySettings] { result.append(QuickActionItem(id: "destination:" + destination.title, title: String(localized: "Go to \(destination.title)"), subtitle: String(localized: "View"), icon: "arrow.right", target: .destination(destination))) }
         }
-        for entry in worktrees where !entry.isBare && entry.prunable == nil { result.append(QuickActionItem(id: "worktree:" + entry.id, title: String(localized: "Open Worktree · \(entry.name)"), subtitle: entry.path, icon: "folder.badge.gearshape", target: .worktree(entry))) }
+        for entry in worktrees where !entry.isBare && entry.prunable == nil { result.append(QuickActionItem(id: "worktree:" + entry.id, title: String(localized: "Open Worktree · \(worktreeTitle(entry))"), subtitle: entry.path, icon: "folder.badge.gearshape", target: .worktree(entry))) }
         for entry in submodules { result.append(QuickActionItem(id: "submodule:" + entry.id, title: entry.initialized ? String(localized: "Open Submodule · \(entry.path)") : String(localized: "Initialize Submodule · \(entry.path)"), subtitle: entry.status, icon: "shippingbox", target: .submodule(entry))) }
         result += QuickActionSearch.fileItems(files, hasHEAD: snapshot?.hasHEAD == true)
         for ref in snapshot?.references ?? [] {

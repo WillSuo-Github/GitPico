@@ -42,6 +42,18 @@ extension RepositoryStore {
     var canIntegrate: Bool { canUseRepository && snapshot?.hasHEAD == true && snapshot?.operation == RepositoryOperation.none }
     var canSynchronize: Bool { canIntegrate && snapshot?.remotes.isEmpty == false && snapshot?.references.contains { $0.isCurrent && !$0.upstream.isEmpty } == true }
     var previewedReference: Reference? { snapshot?.references.first { $0.fullName == destination.ref } }
+    func activateSidebarSelection(_ selection: Set<Destination>) {
+        guard selection.count == 1, let target = selection.first else { return }
+        switch target {
+        case .reference(let name):
+            guard let ref = snapshot?.references.first(where: { $0.fullName == name }), ref.isLocal else { return }
+            switchBranch(ref)
+        case .worktree(let path):
+            guard let entry = worktrees.first(where: { $0.path == path }), !entry.isBare, entry.prunable == nil else { return }
+            openWorktree(entry)
+        default: break
+        }
+    }
     func checkoutUnavailableReason(_ ref: Reference) -> String? {
         if !canUseRepository { return String(localized: "Wait for the current repository operation.") }
         if !ref.isLocal { return String(localized: "Check out a local branch.") }

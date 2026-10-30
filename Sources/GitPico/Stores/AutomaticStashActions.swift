@@ -10,11 +10,11 @@ struct AutomaticStashRequest: Identifiable {
 }
 
 extension RepositoryStore {
-    func protectedPerform(_ title: String.LocalizationValue, protect: Bool = true, refresh: MutationRefresh = .full, feedback: RepositoryOperationKind? = nil, action: @escaping @Sendable (GitRepository) async throws -> Void) {
+    func protectedPerform(_ title: String.LocalizationValue, protect: Bool = true, alwaysOfferStash: Bool = false, refresh: MutationRefresh = .full, feedback: RepositoryOperationKind? = nil, action: @escaping @Sendable (GitRepository) async throws -> Void) {
         guard !isBusy else { return }
         guard protect else { perform(title, refresh: refresh, feedback: feedback, action: action); return }
         guard automaticStash == nil else { error = String(localized: "Review the pending automatic stash before starting another operation."); return }
-        if !changes.isEmpty, AppPreferences.shared.offerAutomaticStash {
+        if !changes.isEmpty, alwaysOfferStash || AppPreferences.shared.offerAutomaticStash {
             let request = AutomaticStashRequest(title: title, refresh: refresh, feedback: feedback, action: action)
             if integrationRequest != nil || pullRequest != nil || managementRequest != nil || rebaseRequest != nil || showingBranchSheet {
                 pendingAutomaticStashRequest = request

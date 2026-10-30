@@ -9,10 +9,10 @@ struct ConflictDraft: Codable, Sendable {
 }
 
 enum Destination: Hashable, Sendable, Codable {
-    case worktrees, submodules, workingCopy, history, reflog, stashes, branchesReview, repositorySettings, reference(String), fileHistory(String, String), comparison(String)
+    case worktrees, worktree(String), submodules, workingCopy, history, reflog, stashes, branchesReview, repositorySettings, reference(String), fileHistory(String, String), comparison(String)
     var title: String {
         switch self {
-        case .worktrees: String(localized: "Worktrees")
+        case .worktrees, .worktree: String(localized: "Worktrees")
         case .submodules: String(localized: "Submodules")
         case .workingCopy: String(localized: "Working Copy")
         case .history: String(localized: "History")
@@ -33,7 +33,7 @@ enum Destination: Hashable, Sendable, Codable {
         case .reflog: String(localized: "Search Reflog")
         case .branchesReview: String(localized: "Search for Branch with Name")
         case .stashes: String(localized: "Search for Stash")
-        case .worktrees: String(localized: "Search Worktrees")
+        case .worktrees, .worktree: String(localized: "Search Worktrees")
         case .submodules: String(localized: "Search Submodules")
         case .repositorySettings: nil
         case .fileHistory: String(localized: "Search Loaded File History")
@@ -48,7 +48,7 @@ enum Destination: Hashable, Sendable, Codable {
         case .reflog: String(localized: "Search Reflog or actions")
         case .branchesReview: String(localized: "Search for Branch with Name or actions")
         case .stashes: String(localized: "Search for Stash or actions")
-        case .worktrees: String(localized: "Search Worktrees or actions")
+        case .worktrees, .worktree: String(localized: "Search Worktrees or actions")
         case .submodules: String(localized: "Search Submodules or actions")
         case .fileHistory: String(localized: "Search Loaded File History or actions")
         case .repositorySettings, .comparison: String(localized: "Search files, branches or actions")
@@ -115,6 +115,7 @@ final class RepositoryStore {
     var stashRequest: StashRequest?
     var localChangeRequest: LocalChangeRequest?
     var worktrees: [ManagedWorktree] = []
+    var selectedWorktreePaths: Set<String> = []
     var submodules: [ManagedSubmodule] = []
     var worktreeError: String?
     var submoduleError: String?
@@ -238,7 +239,7 @@ final class RepositoryStore {
         if let root = networkRegisteredRoot { GitNetworkContexts.remove(root: root, owner: networkContextOwner) }
     }
 
-    var title: String { snapshot?.root.lastPathComponent ?? "GitPico" }
+    var title: String { repositoryWindowTitle }
     var changes: [FileChange] { snapshot?.changes ?? [] }
     var staged: [FileChange] { changes.filter(\.isStaged) }
     var unstaged: [FileChange] { changes.filter { $0.isUnstaged || $0.isConflicted } }
@@ -305,7 +306,7 @@ final class RepositoryStore {
             cancelPreviewWork(); clearHistoryCache(); commitDetailCache = [:]; historyPresentation = .empty; historyError = nil
             searchFocusRequest = nil; searchActionsRequest = nil; metadataEpoch = UUID(); metadataTask?.cancel(); metadataTask = nil; metadataDirty = []; repositoryToken = UUID(); detailToken = UUID(); workingFileEntries = []; workingList = .empty; workingOnlyConflicts = false; commitFeedback = nil; commitWarning = nil; diffError = nil; workingDiffRequest = nil; showAllFiles = false; showIgnoredFiles = false; dragActions = [:]; selectedWorkingFiles = []
             lfsRequest = nil; flowRequest = nil; lfsState = nil; lfsChanges = []; lfsTransfers = []; lfsProgress = ""; lfsError = nil; flowConfiguration = nil; activeFlow = nil; flowHistory = []; workflowError = nil
-            managementRequest = nil; stashRequest = nil; localChangeRequest = nil; historicalRequest = nil; worktreeRequest = nil; submoduleRequest = nil; relatedAdministrationRequest = nil; infrastructureRequest = nil; relatedBatchProgress = nil; worktrees = []; submodules = []; externalToolRequest = nil; showingBranchSheet = false; showingStashSheet = false
+            managementRequest = nil; stashRequest = nil; localChangeRequest = nil; historicalRequest = nil; worktreeRequest = nil; submoduleRequest = nil; relatedAdministrationRequest = nil; infrastructureRequest = nil; relatedBatchProgress = nil; worktrees = []; selectedWorktreePaths = []; submodules = []; externalToolRequest = nil; showingBranchSheet = false; showingStashSheet = false
             automaticStashRequest = nil; pendingAutomaticStashRequest = nil
             automaticStash = stash
             disconnectNetworkContext()
@@ -374,12 +375,14 @@ final class RepositoryStore {
         switch destination {
         case .history, .reference:
             requestHistory()
-        case .worktrees, .submodules, .workingCopy, .reflog, .stashes, .branchesReview, .repositorySettings, .fileHistory, .comparison: break
+        case .worktrees, .worktree, .submodules, .workingCopy, .reflog, .stashes, .branchesReview, .repositorySettings, .fileHistory, .comparison: break
         }
     }
 
     func navigate(_ value: Destination) {
-        guard (!isBusy || isFetching), value != destination else { return }
+        guard !isBusy || isFetching else { return }
+        if case .worktree(let path) = value { selectedWorktreePaths = [path] }
+        guard value != destination else { return }
         rememberNavigation()
         cancelPreviewWork(); searchFocusRequest = nil; detailToken = UUID(); destination = value; restoreNavigation(value)
         selectedCommit = nil; commitDetail = nil; selectedChange = nil
@@ -552,7 +555,7 @@ final class RepositoryStore {
     }
     func switchBranch(_ ref: Reference) {
         guard checkoutUnavailableReason(ref) == nil else { return }
-        protectedPerform("Checking out \(ref.name)…", refresh: .workingTree) { try await $0.switchBranch(ref) }
+        protectedPerform("Checking out \(ref.name)…", alwaysOfferStash: true, refresh: .workingTree) { try await $0.switchBranch(ref) }
     }
     func createBranch(_ name: String) { perform("Creating branch…", refresh: .workingTree) { try await $0.createBranch(name) } }
     func saveStash(_ message: String) { perform("Saving stash…", refresh: .workingTree) { try await $0.saveStash(message: message) } }

@@ -38,11 +38,19 @@ extension RepositoryStore {
             self.submoduleRequest = SubmoduleRequest(repositoryToken: self.repositoryToken, action: current)
         }
     }
-    func openWorktree(_ record: ManagedWorktree) {
+    func openWorktree(_ record: ManagedWorktree, inNewTab: Bool = false) {
         guard !isBusy, let repository else { return }
+        guard inNewTab || record.path != snapshot?.root.path else { return }
         isBusy = true; activity = String(localized: "Opening worktree…")
         operationTask = Task {
-            do { let child = try await repository.checkedWorktree(record); let url = await child.root; isBusy = false; await open(url) }
+            do {
+                let child = try await repository.checkedWorktree(record); let url = await child.root
+                isBusy = false
+                if inNewTab, let workspace {
+                    let tab = workspace.newTab(from: workspace.tab(for: self)?.id)
+                    await workspace.open(url, from: tab.store)
+                } else { await open(url) }
+            }
             catch { self.error = error.localizedDescription; isBusy = false }
             activity = ""
         }

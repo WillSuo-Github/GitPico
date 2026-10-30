@@ -5,7 +5,7 @@ struct RepositoryDetailView: View {
     @Bindable var store: RepositoryStore
     var body: some View {
         switch store.destination {
-        case .worktrees: WorktreesView(store: store)
+        case .worktrees, .worktree: WorktreesView(store: store)
         case .submodules: SubmodulesView(store: store)
         case .workingCopy: WorkingCopyView(store: store)
         case .history, .reference: HistoryView(store: store)

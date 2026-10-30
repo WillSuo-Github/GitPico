@@ -90,7 +90,7 @@ extension RepositoryStore {
     func requestDeferredMetadata(_ destination: Destination) {
         let scopes: Set<DeferredMetadata>
         switch destination {
-        case .worktrees: scopes = [.worktrees]
+        case .worktrees, .worktree: scopes = [.worktrees]
         case .submodules: scopes = [.submodules]
         case .repositorySettings: scopes = [.remotes, .organization, .workflow]
         case .stashes: scopes = [.stashes]

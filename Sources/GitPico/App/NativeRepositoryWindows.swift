@@ -147,7 +147,7 @@ import SwiftUI
         window.tab.title = title
         window.tab.toolTip = tab.showsRepositoryPicker ? String(localized: "Choose a repository") : (tab.root?.path ?? String(localized: "Choose a repository"))
         let attachment = NSTextAttachment()
-        attachment.image = NSImage(systemSymbolName: tab.showsRepositoryPicker ? "square.grid.2x2" : "folder", accessibilityDescription: nil)
+        attachment.image = NSImage(systemSymbolName: tab.showsRepositoryPicker ? "square.grid.2x2" : tab.store.isLinkedWorktree ? "folder.badge.gearshape" : "folder", accessibilityDescription: nil)
         attachment.bounds = NSRect(x: 0, y: -2, width: 13, height: 13)
         let label = NSMutableAttributedString(attachment: attachment)
         label.append(NSAttributedString(string: "  " + title))

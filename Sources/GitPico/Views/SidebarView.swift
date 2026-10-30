@@ -9,9 +9,12 @@ struct SidebarView: View {
     var outlineInput: SidebarOutlineInput { SidebarOutlineInput(references: store.snapshot?.references ?? [], remotes: store.snapshot?.remotes ?? [], pinned: store.organization.pinned, archived: store.organization.archived, filter: filter) }
     var selection: Destination {
         switch store.destination {
-        case .fileHistory, .comparison: .history
-        case .reference(let name) where !name.hasPrefix("refs/"): .history
-        default: store.destination
+        case .worktrees, .worktree:
+            if store.selectedWorktreePaths.count == 1, let path = store.selectedWorktreePaths.first { return .worktree(path) }
+            return .worktrees
+        case .fileHistory, .comparison: return .history
+        case .reference(let name) where !name.hasPrefix("refs/"): return .history
+        default: return store.destination
         }
     }
     @AppStorage("sidebar.branchesExpanded") private var branchesExpanded = true
@@ -85,8 +88,11 @@ struct SidebarView: View {
                 } header: { Text("Tags").frame(maxWidth: .infinity, alignment: .leading).picoDrop(store, .tags) }
                 Section(isExpanded: $relatedExpanded) {
                     Label("Worktrees", systemImage: "folder.badge.gearshape").badge(store.worktrees.filter { !$0.isMain && !$0.isBare }.count).tag(Destination.worktrees).contextMenu { Button("Add Worktree…") { store.manageWorktree(.create(nil)) } }
-                    ForEach(store.worktrees.filter { !$0.isBare && $0.path != store.snapshot?.root.path }) { entry in
-                        Button { store.openWorktree(entry) } label: { Label(entry.name, systemImage: entry.locked != nil ? "lock" : "folder") }.buttonStyle(.plain).padding(.leading, 12).disabled(entry.prunable != nil).help("Open \(entry.path)").contextMenu { WorktreeContextActions(store: store, entry: entry) }
+                    if store.worktrees.count > 1 {
+                        ForEach(store.worktrees.filter { !$0.isBare }) { entry in
+                            SidebarWorktreeRow(store: store, entry: entry)
+                                .tag(Destination.worktree(entry.path))
+                        }
                     }
                     Label("Submodules", systemImage: "shippingbox").badge(store.submodules.count).tag(Destination.submodules).contextMenu { Button("Add Submodule…") { store.manageSubmodule(.add) } }
                     ForEach(store.submodules) { entry in
@@ -98,7 +104,11 @@ struct SidebarView: View {
                     Label("Branches Review", systemImage: "arrow.left.arrow.right").tag(Destination.branchesReview)
                     Label("Reflog", systemImage: "list.bullet.rectangle").tag(Destination.reflog)
                 } header: { Text("Tools") }
-            }.listStyle(.sidebar).disabled(store.isBusy && !store.isFetching)
+            }.listStyle(.sidebar)
+            .contextMenu(forSelectionType: Destination.self) { _ in } primaryAction: { selection in
+                store.activateSidebarSelection(selection)
+            }
+            .disabled(store.isBusy && !store.isFetching)
             Divider()
             HStack(spacing: 8) {
                 HStack(spacing: 5) {
@@ -191,15 +201,24 @@ struct SidebarView: View {
 /// Identifies the open repository and its HEAD at a glance; clicking switches repositories.
 struct SidebarRepositoryHeader: View {
     @Bindable var store: RepositoryStore
-    var name: String { store.workspace?.tab(for: store)?.title ?? store.title }
+    var name: String { store.repositoryDisplayName }
+    var accessibilityContext: String {
+        let path = store.snapshot?.root.path ?? ""
+        guard store.isLinkedWorktree, let entry = store.currentWorktree else { return path }
+        return [String(localized: "Worktree"), store.worktreeTitle(entry), path].joined(separator: " · ")
+    }
     var body: some View {
         if let snapshot = store.snapshot {
             Button(action: store.showRepositories) {
                 HStack(spacing: 10) {
                     RepositoryGlyph(name: name, size: 32)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(name).font(.system(size: 13, weight: .semibold)).lineLimit(1).truncationMode(.middle)
-                        SidebarHeadSummary(branch: snapshot.branch, ahead: snapshot.ahead, behind: snapshot.behind)
+                        HStack(spacing: 5) {
+                            Text(name).font(.system(size: 13, weight: .semibold)).lineLimit(1).truncationMode(.middle)
+                            if store.isLinkedWorktree { Chip(text: String(localized: "Worktree"), tint: .accentColor) }
+                        }
+                        SidebarHeadSummary(branch: snapshot.branch, ahead: snapshot.ahead, behind: snapshot.behind,
+                                           worktreeName: store.isLinkedWorktree ? store.currentWorktree.map { store.worktreeTitle($0) } : nil)
                     }
                     Spacer(minLength: 4)
                     Image(systemName: "chevron.up.chevron.down").font(.system(size: 10, weight: .semibold)).foregroundStyle(.tertiary)
@@ -212,6 +231,7 @@ struct SidebarRepositoryHeader: View {
             .disabled(store.isBusy || store.isOpeningRepository)
             .help("Switch repository\n\(snapshot.root.path)")
             .accessibilityLabel(Text("Repository \(name), branch \(snapshot.branch). Switch repository"))
+            .accessibilityValue(accessibilityContext)
             .contextMenu {
                 Button("Switch Repository…", action: store.showRepositories)
                 Button("Repository Settings") { store.navigate(.repositorySettings) }
@@ -228,8 +248,13 @@ private struct SidebarHeadSummary: View {
     let branch: String
     let ahead: Int
     let behind: Int
+    var worktreeName: String? = nil
     var body: some View {
         HStack(spacing: 4) {
+            if let worktreeName, worktreeName != branch {
+                Text(worktreeName).lineLimit(1).truncationMode(.middle)
+                Text("·")
+            }
             Image(systemName: "arrow.triangle.branch").imageScale(.small)
             Text(branch).lineLimit(1).truncationMode(.middle)
             if ahead > 0 { Text("↑\(ahead)").monospacedDigit() }

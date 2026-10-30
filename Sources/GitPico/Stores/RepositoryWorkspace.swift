@@ -31,7 +31,11 @@ extension RepositoryWindowRouting {
         if store.library.recentPaths.isEmpty { pickerFilter = .all }
     }
     var showsRepositoryPicker: Bool { isChoosingRepository || root == nil }
-    var title: String { showsRepositoryPicker ? String(localized: "Repositories") : (root.map { store.library.displayName(for: $0.path) } ?? String(localized: "Repositories")) }
+    var title: String {
+        if showsRepositoryPicker { return String(localized: "Repositories") }
+        if root?.path == store.snapshot?.root.path { return store.repositoryWindowTitle }
+        return root.map { store.library.displayName(for: $0.path) } ?? String(localized: "Repositories")
+    }
     var isBusy: Bool { isOpening || store.isBusy }
 }
 
