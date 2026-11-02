@@ -1,7 +1,7 @@
 import GitCore
 import SwiftUI
 
-/// A compact tool group with separate targets for generation, scope and description.
+/// AI and its options share a light surface; description remains an independent editor control.
 struct CommitComposerTools: View {
     let isGenerating: Bool
     let canGenerate: Bool
@@ -14,6 +14,21 @@ struct CommitComposerTools: View {
     private var descriptionActive: Bool { showBody || hasDescription }
 
     var body: some View {
+        HStack(spacing: 6) {
+            aiControls
+            Button { showBody.toggle() } label: {
+                Image(systemName: "text.alignleft")
+                    .font(.system(size: 12, weight: .regular)).frame(width: 24)
+            }
+            .buttonStyle(CommitToolButtonStyle(tint: descriptionActive ? .accentColor : .secondary))
+            .help(showBody ? "Hide description" : "Add a description")
+            .accessibilityLabel(showBody ? "Hide description" : "Add a description")
+        }
+        .font(.system(size: 11, weight: .medium))
+        .fixedSize()
+    }
+
+    private var aiControls: some View {
         HStack(spacing: 0) {
             Button(action: generate) {
                 HStack(spacing: 4) {
@@ -24,7 +39,7 @@ struct CommitComposerTools: View {
                         Image(systemName: "sparkles").font(.system(size: 11, weight: .medium))
                         Text("AI")
                     }
-                }.padding(.horizontal, 8)
+                }.padding(.leading, 7).padding(.trailing, 3)
             }
             .buttonStyle(CommitToolButtonStyle(tint: .accentColor))
             .disabled(!isGenerating && !canGenerate)
@@ -41,50 +56,33 @@ struct CommitComposerTools: View {
             } label: {
                 Image(systemName: "chevron.down")
                     .font(.system(size: 9, weight: .semibold))
-                    .frame(width: 22)
+                    .frame(width: 20)
             }
             .menuStyle(.button).menuIndicator(.hidden)
-            .buttonStyle(CommitToolButtonStyle(tint: scope == .allChanges ? .accentColor : .secondary, selected: scope == .allChanges))
+            .buttonStyle(CommitToolButtonStyle(tint: .secondary))
             .help(scope == .staged ? String(localized: "Staged") : String(localized: "Staged and unstaged changes"))
             .accessibilityLabel("AI")
             .accessibilityValue(scope == .staged ? String(localized: "Staged") : String(localized: "Staged and unstaged changes"))
-
-            separator
-            Button { showBody.toggle() } label: {
-                Image(systemName: "text.alignleft")
-                    .font(.system(size: 11, weight: .medium)).frame(width: 28)
-            }
-            .buttonStyle(CommitToolButtonStyle(tint: descriptionActive ? .accentColor : .secondary, selected: descriptionActive))
-            .help(showBody ? "Hide description" : "Add a description")
-            .accessibilityLabel(showBody ? "Hide description" : "Add a description")
         }
-        .font(.system(size: 11, weight: .semibold))
-        .fixedSize()
-        .background(Color.primary.opacity(0.045))
-        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.10), lineWidth: 0.5).allowsHitTesting(false)
-        }
-    }
-
-    private var separator: some View {
-        Color.primary.opacity(0.10).frame(width: 0.5, height: 12)
+        .background(Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
     }
 }
 
 private struct CommitToolButtonStyle: ButtonStyle {
     var tint: Color
-    var selected = false
     @Environment(\.isEnabled) private var isEnabled
     @State private var hovered = false
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .frame(height: 24)
-            .foregroundStyle(isEnabled ? tint : Color.secondary.opacity(0.45))
+            .foregroundStyle(isEnabled ? tint : Color.secondary.opacity(0.65))
             .contentShape(Rectangle())
-            .background(tint.opacity(isEnabled ? (configuration.isPressed ? 0.20 : hovered ? 0.12 : selected ? 0.09 : 0) : 0))
+            .background {
+                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    .fill(tint.opacity(isEnabled ? (configuration.isPressed ? 0.16 : hovered ? 0.08 : 0) : 0))
+            }
             .onHover { hovered = $0 }
     }
 }

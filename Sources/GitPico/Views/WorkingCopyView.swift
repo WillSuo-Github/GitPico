@@ -159,7 +159,7 @@ struct CommitComposer: View {
                                         canGenerate: store.aiCommitUnavailableReason(scope: aiScope) == nil,
                                         aiHelp: aiHelp, scope: $aiScope, showBody: $showBody,
                                         hasDescription: !store.commitBody.isEmpty, generate: toggleAI)
-                }.padding(.horizontal, 10).frame(height: 32)
+                }.padding(.leading, 10).padding(.trailing, 6).frame(height: 32)
                 if showBody || !store.commitBody.isEmpty {
                     Divider().padding(.horizontal, 8)
                     TextEditor(text: $store.commitBody).font(.system(size: 12)).frame(height: 76).scrollContentBackground(.hidden).padding(.horizontal, 5).padding(.vertical, 4).accessibilityLabel("Commit description")

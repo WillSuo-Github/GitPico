@@ -218,13 +218,13 @@ private let stub = URL(fileURLWithPath: "/stub")
     // Capture transient tool states without invoking an external AI service.
     for dark in [false, true] {
         let content = VStack(alignment: .leading, spacing: 12) {
-            ForEach(0..<4) { state in
+            ForEach(0..<5) { state in
                 HStack {
-                    Text(["Staged", "All changes", "No staged changes", "Generating"][state])
+                    Text(["Staged", "All changes", "No staged changes", "All changes unavailable", "Generating"][state])
                         .font(.system(size: 11)).foregroundStyle(.secondary)
                     Spacer()
-                    CommitComposerTools(isGenerating: state == 3, canGenerate: state != 2,
-                                        aiHelp: "AI", scope: .constant(state == 1 ? .allChanges : .staged),
+                    CommitComposerTools(isGenerating: state == 4, canGenerate: state != 2 && state != 3,
+                                        aiHelp: "AI", scope: .constant(state == 1 || state == 3 ? .allChanges : .staged),
                                         showBody: .constant(state == 1), hasDescription: false, generate: {})
                 }
             }
