@@ -566,6 +566,17 @@ final class RepositoryStore {
         guard checkoutUnavailableReason(ref) == nil else { return }
         protectedPerform("Checking out \(ref.name)…", alwaysOfferStash: true, refresh: .workingTree) { try await $0.switchBranch(ref) }
     }
+    func switchRemoteBranch(_ ref: Reference) {
+        guard canUseRepository, let snapshot, snapshot.operation == .none else { return }
+        do {
+            let target = try RemoteBranchCheckoutTarget.resolve(ref, references: snapshot.references, remotes: snapshot.remotes)
+            if case .chooseName = target { manage(.createBranch(ref.hash, ref.fullName)); return }
+            if case .existing(let local) = target, local.isCurrent { return }
+            protectedPerform("Checking out \(ref.name)…", alwaysOfferStash: true, refresh: .workingTree) {
+                try await $0.switchRemoteBranch(ref, target: target)
+            }
+        } catch { self.error = error.localizedDescription }
+    }
     func createBranch(_ name: String) { perform("Creating branch…", refresh: .workingTree) { try await $0.createBranch(name) } }
     func saveStash(_ message: String) { perform("Saving stash…", refresh: .workingTree) { try await $0.saveStash(message: message) } }
     func applyStash(_ stash: Stash) { stashAction(.apply(stash)) }

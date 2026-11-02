@@ -176,6 +176,7 @@ struct SidebarView: View {
                 Button("Delete Branch…", role: .destructive) { store.manage(.deleteBranch(ref)) }.disabled(ref.isCurrent)
             }
             if ref.isRemote, let remote = store.remoteFor(ref) {
+                Button("Check Out “\(ref.name)”") { store.switchRemoteBranch(ref) }.disabled(!store.canUseRepository || store.snapshot?.operation != RepositoryOperation.none)
                 Button("Check Out as Tracking Branch…") { store.manage(.createBranch(ref.hash, ref.fullName)) }
                 Button("Delete Remote Branch…", role: .destructive) { store.manage(.publish(nil, remote.name, "refs/heads/" + String(ref.name.dropFirst(remote.name.count + 1)), false)) }
             }

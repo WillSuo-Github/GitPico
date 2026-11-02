@@ -53,8 +53,9 @@ extension RepositoryStore {
         guard selection.count == 1, let target = selection.first else { return }
         switch target {
         case .reference(let name):
-            guard let ref = snapshot?.references.first(where: { $0.fullName == name }), ref.isLocal else { return }
-            switchBranch(ref)
+            guard let ref = snapshot?.references.first(where: { $0.fullName == name }) else { return }
+            if ref.isLocal { switchBranch(ref) }
+            else if ref.isRemote { switchRemoteBranch(ref) }
         case .worktree(let path):
             guard let entry = worktrees.first(where: { $0.path == path }), !entry.isBare, entry.prunable == nil else { return }
             openWorktree(entry)

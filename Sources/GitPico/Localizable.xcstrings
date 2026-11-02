@@ -1,6 +1,47 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "A local branch with this name already exists. Choose a different name." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已存在同名本地分支，请使用其他名称。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已存在同名本機分支，請使用其他名稱。"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同じ名前のローカルブランチが既にあります。別の名前を選択してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "같은 이름의 로컬 브랜치가 이미 있습니다. 다른 이름을 선택하세요."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein lokaler Branch mit diesem Namen existiert bereits. Wähle einen anderen Namen."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une branche locale porte déjà ce nom. Choisissez un autre nom."
+          }
+        }
+      }
+    },
     "Saved Identity" : {
       "extractionState" : "manual",
       "localizations" : {

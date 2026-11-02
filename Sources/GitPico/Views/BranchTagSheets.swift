@@ -11,6 +11,7 @@ struct BranchCreateSheet: View {
     @State private var commit: Commit?
     @State private var error: String?
     @Environment(\.dismiss) private var dismiss
+    private var nameIsTaken: Bool { store.snapshot?.references.contains { $0.isLocal && $0.name == name } == true }
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             SheetTitle("Create New Branch")
@@ -26,7 +27,8 @@ struct BranchCreateSheet: View {
                 Toggle("Check Out New Branch", isOn: $checkout)
             }
             if let error { Text(error).foregroundStyle(.red).font(.caption) }
-            ManagementFooter(title: "Create Branch", disabled: name.isEmpty || commit == nil || store.isBusy) {
+            if nameIsTaken { Text("A local branch with this name already exists. Choose a different name.").foregroundStyle(.secondary).font(.caption) }
+            ManagementFooter(title: "Create Branch", disabled: name.isEmpty || nameIsTaken || commit == nil || store.isBusy) {
                 guard let hash = commit?.hash else { return }
                 let value = name, checkout = checkout, upstream = tracking.isEmpty ? nil : tracking
                 store.protectedPerform("Creating branch…", protect: checkout, refresh: checkout ? .workingTree : .full) { try await $0.createBranch(value, at: hash, checkout: checkout, upstream: upstream) }; dismiss()

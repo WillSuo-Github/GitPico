@@ -97,7 +97,7 @@ extension RepositoryStore {
         case .history(let path): navigate(.fileHistory(path, "HEAD"))
         case .checkout(let ref):
             guard snapshot?.references.contains(where: { $0.fullName == ref.fullName && $0.hash == ref.hash }) == true else { error = String(localized: "The reference changed. Refresh Quick Actions."); return }
-            if ref.isLocal { switchBranch(ref) } else { manage(.createBranch(ref.hash, ref.fullName)) }
+            if ref.isLocal { switchBranch(ref) } else if ref.isRemote { switchRemoteBranch(ref) }
         case .reference(let ref): navigate(.reference(ref.fullName))
         case .stash(let stash): stashAction(.apply(stash))
         case .commit(let commit): navigate(.reference(commit.hash)); selectCommit(commit)
