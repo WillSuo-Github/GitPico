@@ -13,6 +13,13 @@ struct HistoryReveal: Equatable {
 }
 
 extension RepositoryStore {
+    func finishRepositorySettings() {
+        showingRepositorySettings = false
+        if let destination = settingsNavigationRequest {
+            settingsNavigationRequest = nil
+            navigate(destination)
+        }
+    }
     func rememberNavigation() {
         var options = historyOptions
         if isHistoryDestination, options.query != search { options.query = search; options.limit = 500 }

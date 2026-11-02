@@ -45,9 +45,10 @@ private struct CommitTemplateEditor: View {
         }.padding(24).frame(width: 560)
     }
 }
-private struct CommitIdentityEditor: View {
+struct CommitIdentityEditor: View {
     @State var profile: CommitIdentityProfile
     let library: CommitWorkflowLibrary
+    var onSave: (CommitIdentityProfile) -> Void = { _ in }
     @State private var error: String?
     @Environment(\.dismiss) private var dismiss
     var body: some View {
@@ -57,7 +58,15 @@ private struct CommitIdentityEditor: View {
             TextField("Name", text: $profile.name)
             TextField("Email", text: $profile.email)
             if let error { Text(error).foregroundStyle(Pico.deletion) }
-            HStack { Spacer(); Button("Cancel") { dismiss() }; Button("Save") { do { try library.save(identity: profile); dismiss() } catch { self.error = error.localizedDescription } }.keyboardShortcut(.defaultAction) }
+            HStack {
+                Spacer()
+                Button("Cancel") { dismiss() }.keyboardShortcut(.cancelAction)
+                Button("Save") {
+                    do { try library.save(identity: profile); onSave(profile); dismiss() }
+                    catch { self.error = error.localizedDescription }
+                }.keyboardShortcut(.defaultAction)
+                    .disabled([profile.label, profile.name, profile.email].contains { $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty })
+            }
         }.padding(24).frame(width: 480)
     }
 }

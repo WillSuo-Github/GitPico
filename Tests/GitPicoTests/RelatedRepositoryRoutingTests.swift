@@ -214,9 +214,9 @@ import Testing
     let flow = try #require(items.first { $0.id == "command:Git Flow" })
     #expect(items.contains { $0.id == "command:Start Git Flow Feature" } == false)
     f.store.runQuickAction(lfs, repositoryToken: f.store.repositoryToken)
-    #expect(f.store.settingsTab == "Git LFS" && f.store.destination == .repositorySettings)
+    #expect(f.store.settingsTab == "Git LFS" && f.store.showingRepositorySettings && f.store.destination == .workingCopy)
     f.store.runQuickAction(flow, repositoryToken: f.store.repositoryToken)
-    #expect(f.store.settingsTab == "Git Flow" && f.store.destination == .repositorySettings)
+    #expect(f.store.settingsTab == "Git Flow" && f.store.showingRepositorySettings && f.store.destination == .workingCopy)
     await Task.yield()
     let refreshDeadline = Date().addingTimeInterval(20)
     while f.store.isBusy && Date() < refreshDeadline { try await Task.sleep(for: .milliseconds(20)) }

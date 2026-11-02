@@ -12,6 +12,7 @@ struct CommitIdentityProfile: Codable, Identifiable, Equatable {
     var label: String
     var name: String
     var email: String
+    func matches(name: String, email: String) -> Bool { self.name == name && self.email == email }
 }
 @MainActor @Observable final class CommitWorkflowLibrary {
     static let shared = CommitWorkflowLibrary(file: FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("GitPico/commit-workflows.json"))

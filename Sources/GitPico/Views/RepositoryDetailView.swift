@@ -12,7 +12,8 @@ struct RepositoryDetailView: View {
         case .reflog: ReflogView(store: store)
         case .stashes: StashesView(store: store)
         case .branchesReview: BranchesReviewView(store: store)
-        case .repositorySettings: RepositorySettingsView(store: store)
+        case .repositorySettings:
+            Color.clear.task { store.destination = .workingCopy; store.navigate(.repositorySettings) }
         case .fileHistory(let path, let revision):
             if let repository = store.repository { FileHistoryView(store: store, repository: repository, path: path, revision: revision).id(store.repositoryToken.uuidString + path + revision) }
         case .comparison(let left):

@@ -135,12 +135,15 @@ struct WorkingFileRow: View {
 /// Bottom-anchored composer: subject, optional description, identity/options and the primary Commit button.
 struct CommitComposer: View {
     @Bindable var store: RepositoryStore
-    @State private var workflows = CommitWorkflowLibrary.shared
+    @State private var workflows: CommitWorkflowLibrary
     @State private var insertion: CommitTemplateInsertion?
     @State private var showBody = false
     @State private var ai = AICommitSession()
     @AppStorage("aiCommit.scope") private var aiScope: AICommitScope = .staged
     @FocusState private var subjectFocused: Bool
+    init(store: RepositoryStore, workflows: CommitWorkflowLibrary = .shared) {
+        self.store = store; _workflows = State(initialValue: workflows)
+    }
     var commitTitle: String {
         if store.amend { return String(localized: "Amend Commit") }
         let count = store.staged.count
@@ -166,12 +169,7 @@ struct CommitComposer: View {
             .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(subjectFocused ? Color.accentColor.opacity(0.7) : Color(nsColor: .separatorColor), lineWidth: subjectFocused ? 1.5 : 0.5))
             HStack(spacing: 8) {
-                Button { store.navigate(.repositorySettings) } label: {
-                    HStack(spacing: 5) {
-                        AuthorAvatar(name: store.snapshot?.identity.name.nilIfEmpty ?? "?", size: 18)
-                        Text(store.snapshot?.identity.name.nilIfEmpty ?? String(localized: "No identity")).lineLimit(1).foregroundStyle(.secondary)
-                    }.contentShape(Rectangle())
-                }.buttonStyle(.plain).font(.system(size: 11)).help("\(identityLine)\nEdit the commit identity in Repository Settings")
+                CommitIdentityMenu(store: store, library: workflows).frame(maxWidth: 140, alignment: .leading)
                 Spacer(minLength: 4)
                 Toggle("Amend", isOn: $store.amend).toggleStyle(.checkbox).font(.system(size: 11)).disabled(store.snapshot?.hasHEAD != true).help("Replace the last commit with the staged changes")
                 Menu {
@@ -189,9 +187,6 @@ struct CommitComposer: View {
                             }
                         }
                     }
-                    Menu("Use Identity") {
-                        ForEach(workflows.identities) { identity in Button("\(identity.label) · \(identity.email)") { store.saveIdentity(name: identity.name, email: identity.email) } }
-                    }.disabled(workflows.identities.isEmpty)
                     Button("Edit Identity…") { store.navigate(.repositorySettings) }
                 } label: { Image(systemName: store.signOff ? "signature" : "ellipsis.circle") }
                     .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help(store.signOff ? "Signed-off-by will be added" : "Commit options")
@@ -238,10 +233,6 @@ struct CommitComposer: View {
         if let reason = store.aiCommitUnavailableReason(scope: aiScope) { return reason }
         let tool = AICommitPreferences.shared.value.resolvedProvider.title
         return store.commitSubject.isEmpty && store.commitBody.isEmpty ? String(localized: "Write the commit message with \(tool)") : String(localized: "Replace the commit message with \(tool)")
-    }
-    var identityLine: String {
-        guard let identity = store.snapshot?.identity, !identity.name.isEmpty else { return String(localized: "No Git identity configured") }
-        return identity.name + " <" + identity.email + ">"
     }
     var statusMessage: (text: String, icon: String, color: Color)? {
         if let warning = store.commitWarning { return (warning, "exclamationmark.triangle.fill", Pico.warning) }

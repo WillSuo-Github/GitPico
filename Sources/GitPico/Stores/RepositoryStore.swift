@@ -97,6 +97,8 @@ final class RepositoryStore {
     var showingRebaseEdit = false
     var showingLFSLocks = false
     var settingsTab = "General"
+    var showingRepositorySettings = false
+    var settingsNavigationRequest: Destination?
     var lfsRequest: LFSRequest?
     var flowRequest: FlowRequest?
     var lfsState: LFSState?
@@ -318,6 +320,7 @@ final class RepositoryStore {
             rebaseProgress = rebase
             navigationBookmarks = [:]; navigationBookmarkOrder = []; pendingHistorySelection = nil; historyNeedsReveal = false; historyReveal = nil; draftBeforeAmend = nil
             destination = .workingCopy; search = ""; historyOptions = HistoryOptions(); amend = false; signOff = false; configuration = nil
+            showingRepositorySettings = false; settingsNavigationRequest = nil
             selectedChange = nil; selectedCommit = nil; selectedStash = nil
             commitDetail = nil; selectedCommitPath = nil; diff = ""
             commitSubject = ""; commitBody = ""
@@ -381,6 +384,12 @@ final class RepositoryStore {
 
     func navigate(_ value: Destination) {
         guard !isBusy || isFetching else { return }
+        if value == .repositorySettings {
+            showingRepositorySettings = true
+            requestDeferredMetadata(.repositorySettings)
+            return
+        }
+        if showingRepositorySettings { settingsNavigationRequest = value; return }
         if case .worktree(let path) = value { selectedWorktreePaths = [path] }
         guard value != destination else { return }
         rememberNavigation()
