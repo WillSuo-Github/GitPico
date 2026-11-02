@@ -79,10 +79,11 @@ struct SettingsView: View {
     let tools: ExternalToolPreferences
     let store: RepositoryStore
     @State private var preferences = AppPreferences.shared
+    @State private var navigation = AppSettingsNavigation.shared
     var version: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? String(localized: "Development") }
     var build: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? String(localized: "Development") }
     var body: some View {
-        TabView {
+        TabView(selection: $navigation.selection) {
         Form {
             Section {
                 HStack(spacing: 14) {
@@ -122,12 +123,13 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .tabItem { Label("General", systemImage: "gearshape") }
-        CommitWorkflowSettingsView().tabItem { Label("Commits", systemImage: "doc.text") }
-        AICommitSettingsView().tabItem { Label("AI Commits", systemImage: "sparkles") }
-        ExternalToolSettingsView(preferences: tools).tabItem { Label("External Tools", systemImage: "arrow.left.arrow.right") }
-        AuthenticationSettingsView(store: store).tabItem { Label("Authentication", systemImage: "person.badge.key") }
-        SSHKeysSettingsView().tabItem { Label("SSH Keys", systemImage: "key") }
-        UpdatesSettingsView(store: store).tabItem { Label("Updates & Support", systemImage: "arrow.down.circle") }
+        .tag(AppSettingsTab.general)
+        CommitWorkflowSettingsView().tabItem { Label("Commits", systemImage: "doc.text") }.tag(AppSettingsTab.commits)
+        AICommitSettingsView().tabItem { Label("AI Commits", systemImage: "sparkles") }.tag(AppSettingsTab.aiCommits)
+        ExternalToolSettingsView(preferences: tools).tabItem { Label("External Tools", systemImage: "arrow.left.arrow.right") }.tag(AppSettingsTab.externalTools)
+        AuthenticationSettingsView(store: store).tabItem { Label("Authentication", systemImage: "person.badge.key") }.tag(AppSettingsTab.authentication)
+        SSHKeysSettingsView().tabItem { Label("SSH Keys", systemImage: "key") }.tag(AppSettingsTab.sshKeys)
+        UpdatesSettingsView(store: store).tabItem { Label("Updates & Support", systemImage: "arrow.down.circle") }.tag(AppSettingsTab.updates)
         }.frame(width: 740, height: 570)
     }
 }

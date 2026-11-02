@@ -145,7 +145,7 @@ extension RepositoryStore {
     #expect(f.store.operationFeedback?.isVisible == true && !f.store.isBusy)
 }
 
-@Test @MainActor func reviewedFetchAndBranchPublicationUseTheSameFeedback() async throws {
+@Test @MainActor func fetchAndDirectBranchPublicationUseTheSameFeedback() async throws {
     let f = try await FetchFeedbackFixture.make(delay: 0.1); defer { f.clean() }
     let remote = try #require(f.store.managedRemotes.first)
     f.store.runRemoteFetch(remote, prune: true, tags: true)
@@ -156,9 +156,8 @@ extension RepositoryStore {
     f.store.sync(.push)
     #expect(f.store.managementRequest != nil && !f.store.isBusy && f.store.operationFeedback == nil)
     let source = try #require(f.store.snapshot?.references.first { $0.isCurrent })
-    let preview = try await f.base.repository.pushPreview(remote: remote, source: source, destination: "refs/heads/published", setUpstream: true)
     f.store.managementRequest = nil
-    f.store.runRemotePush(preview)
+    f.store.runRemotePush(remote: remote, source: source, destination: "refs/heads/published", setUpstream: true, pushURL: remote.fetchURL)
     #expect(f.store.operationFeedback?.command == .push && f.store.operationFeedback?.isVisible == true)
     await f.store.operationTask?.value
     #expect(f.store.operationFeedback?.phase == .succeeded && f.store.error == nil)

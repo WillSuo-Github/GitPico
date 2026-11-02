@@ -215,5 +215,41 @@ private let stub = URL(fileURLWithPath: "/stub")
         host.cacheDisplay(in: host.bounds, to: bitmap)
         try #require(bitmap.representation(using: .png, properties: [:])).write(to: output.appendingPathComponent("ai-commit-" + step + (dark ? "-dark" : "") + ".png"))
     }
+    // Capture transient tool states without invoking an external AI service.
+    for dark in [false, true] {
+        let content = VStack(alignment: .leading, spacing: 12) {
+            ForEach(0..<4) { state in
+                HStack {
+                    Text(["Staged", "All changes", "No staged changes", "Generating"][state])
+                        .font(.system(size: 11)).foregroundStyle(.secondary)
+                    Spacer()
+                    CommitComposerTools(isGenerating: state == 3, canGenerate: state != 2,
+                                        aiHelp: "AI", scope: .constant(state == 1 ? .allChanges : .staged),
+                                        showBody: .constant(state == 1), hasDescription: false, generate: {})
+                }
+            }
+        }.padding(16).frame(width: 340).background(Color(nsColor: .textBackgroundColor))
+        window.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
+        let host = NSHostingView(rootView: content); window.contentView = host
+        window.setContentSize(host.fittingSize)
+        try await Task.sleep(for: .milliseconds(300)); host.layoutSubtreeIfNeeded()
+        let bitmap = try #require(host.bitmapImageRepForCachingDisplay(in: host.bounds))
+        host.cacheDisplay(in: host.bounds, to: bitmap)
+        try #require(bitmap.representation(using: .png, properties: [:])).write(to: output.appendingPathComponent("ai-commit-tools" + (dark ? "-dark" : "") + ".png"))
+    }
+    // An already-created Settings view must follow contextual navigation into AI Commits.
+    let navigation = AppSettingsNavigation.shared, previousTab = AppSettingsNavigation.shared.selection
+    defer { navigation.selection = previousTab }
+    navigation.selection = .general
+    window.appearance = NSAppearance(named: .aqua)
+    let settingsHost = NSHostingView(rootView: SettingsView(tools: f.store.toolPreferences, store: f.store))
+    window.contentView = settingsHost
+    window.setContentSize(NSSize(width: 740, height: 570))
+    try await Task.sleep(for: .milliseconds(250))
+    navigation.selection = .aiCommits
+    try await Task.sleep(for: .milliseconds(300)); settingsHost.layoutSubtreeIfNeeded()
+    let settingsBitmap = try #require(settingsHost.bitmapImageRepForCachingDisplay(in: settingsHost.bounds))
+    settingsHost.cacheDisplay(in: settingsHost.bounds, to: settingsBitmap)
+    try #require(settingsBitmap.representation(using: .png, properties: [:])).write(to: output.appendingPathComponent("ai-settings-navigation.png"))
     #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
 }

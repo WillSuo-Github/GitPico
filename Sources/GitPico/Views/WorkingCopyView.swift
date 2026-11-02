@@ -152,29 +152,10 @@ struct CommitComposer: View {
                 HStack(spacing: 6) {
                     TextField("Summary", text: $store.commitSubject).textFieldStyle(.plain).font(.system(size: 13, weight: .medium)).focused($subjectFocused).accessibilityLabel("Commit summary")
                     if !store.commitSubject.isEmpty { Text("\(store.commitSubject.count)").font(.system(size: 10).monospacedDigit()).foregroundStyle(store.commitSubject.count > 72 ? Pico.warning : Color.secondary.opacity(0.6)).help("Summary length; 50–72 characters reads best in logs") }
-                    Button(action: toggleAI) {
-                        if ai.isGenerating { HStack(spacing: 4) { ProgressView().controlSize(.mini); Text("Stop") } }
-                        else { Label("AI", systemImage: "sparkles") }
-                    }
-                        .buttonStyle(.plain).foregroundStyle(Color.accentColor)
-                        .disabled(!ai.isGenerating && store.aiCommitUnavailableReason(scope: aiScope) != nil)
-                        .help(aiHelp)
-                        .accessibilityLabel(ai.isGenerating ? "Stop generating commit message" : "Generate commit message with AI")
-                    Menu {
-                        Picker("AI", selection: $aiScope) {
-                            Text("Staged").tag(AICommitScope.staged)
-                            Text("Staged and unstaged changes").tag(AICommitScope.allChanges)
-                        }.pickerStyle(.inline)
-                    } label: {
-                        Image(systemName: "chevron.down").font(.system(size: 9, weight: .semibold))
-                            .foregroundStyle(aiScope == .allChanges ? Color.accentColor : .secondary)
-                    }
-                        .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
-                        .disabled(ai.isGenerating)
-                        .help(aiScope == .staged ? String(localized: "Staged") : String(localized: "Staged and unstaged changes"))
-                        .accessibilityLabel("AI")
-                    Button { showBody.toggle() } label: { Image(systemName: "text.alignleft").foregroundStyle(showBody || !store.commitBody.isEmpty ? Color.accentColor : .secondary) }
-                        .buttonStyle(.plain).help(showBody ? "Hide description" : "Add a description")
+                    CommitComposerTools(isGenerating: ai.isGenerating,
+                                        canGenerate: store.aiCommitUnavailableReason(scope: aiScope) == nil,
+                                        aiHelp: aiHelp, scope: $aiScope, showBody: $showBody,
+                                        hasDescription: !store.commitBody.isEmpty, generate: toggleAI)
                 }.padding(.horizontal, 10).frame(height: 32)
                 if showBody || !store.commitBody.isEmpty {
                     Divider().padding(.horizontal, 8)
@@ -222,7 +203,7 @@ struct CommitComposer: View {
                     Image(systemName: "sparkles").imageScale(.small)
                     Text(error).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
                     Spacer(minLength: 0)
-                    SettingsLink { Text("AI Settings") }.buttonStyle(.link)
+                    AISettingsButton().buttonStyle(.link)
                     Button { ai.error = nil } label: { Image(systemName: "xmark") }.buttonStyle(.plain).help("Dismiss")
                 }.font(.system(size: 11)).foregroundStyle(Pico.warning)
             }
