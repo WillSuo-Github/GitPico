@@ -34,10 +34,28 @@ import Testing
     try await git(["push", "origin", "main"], at: peer)
     // Changes not yet fetched cannot be counted from the local tracking ref.
     #expect(try status().behind == 0)
+    let localBranch = Destination.reference("refs/heads/main")
+    f.store.navigate(localBranch); await f.store.historyTask?.value; await f.store.detailTask?.value
+    #expect(!f.store.visibleCommits.contains { $0.subject.hasPrefix("Remote ") })
     f.store.sync(.fetch); await f.finish()
+    await f.store.historyTask?.value; await f.store.detailTask?.value
     #expect(f.store.error == nil)
+    #expect(f.store.destination == localBranch)
     let diverged = try status()
     #expect(diverged.ahead == 2 && diverged.behind == 3 && diverged.text == "HEAD | ↑2 ↓3")
+    let commits = f.store.visibleCommits
+    #expect(commits.filter { $0.subject.hasPrefix("Remote ") }.count == 3)
+    #expect(commits.filter { $0.subject.hasPrefix("Local ") }.count == 2)
+    let incomingRow = try #require(commits.firstIndex { $0.decorations.contains("origin/main") })
+    let coordinator = HistoryCommitTable.Coordinator()
+    let tableView = coordinator.makeView()
+    tableView.frame = NSRect(x: 0, y: 0, width: 480, height: 320)
+    coordinator.update(HistoryCommitTable(store: f.store, presentation: f.store.historyPresentation, grouped: false, compact: false, showGraph: true, canModifyHistory: f.store.canIntegrate, selection: f.store.selectedCommit?.hash, reveal: nil))
+    #expect(coordinator.table.numberOfRows == commits.count)
+    coordinator.table.selectRowIndexes(IndexSet(integer: incomingRow), byExtendingSelection: false)
+    await f.store.detailTask?.value
+    #expect(f.store.selectedCommit?.subject == "Remote 3")
+    #expect(f.store.commitDetail?.message.hasPrefix("Remote 3") == true)
     let snapshot = try #require(f.store.snapshot), current = try #require(snapshot.references.first { $0.isCurrent })
     let other = try #require(snapshot.references.first { $0.isLocal && !$0.isCurrent })
     f.store.navigate(.reference(other.fullName)); await f.store.historyTask?.value; await f.store.detailTask?.value

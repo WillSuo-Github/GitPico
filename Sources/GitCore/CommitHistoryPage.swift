@@ -5,6 +5,9 @@ public struct HistoryRevision: Sendable {
     public let identity: String
     let hashes: [String]
     public static func reference(_ name: String, hash: String) -> Self { Self(identity: name + ":" + hash, hashes: [hash]) }
+    static func trackingBranch(_ name: String, hash: String, upstream: String, upstreamHash: String) -> Self {
+        Self(identity: "\(name):\(hash)\n\(upstream):\(upstreamHash)", hashes: hash == upstreamHash ? [hash] : [hash, upstreamHash])
+    }
     public static func all(references: [Reference], head: HeadPosition) -> Self {
         let signature = references.sorted { $0.fullName < $1.fullName }.map { $0.fullName + ":" + $0.hash + ($0.isCurrent ? ":HEAD" : "") }.joined(separator: "\n") + "\n" + head.branch + ":" + (head.hash ?? "")
         let identity = SHA256.hash(data: Data(signature.utf8)).map { String(format: "%02x", $0) }.joined()
@@ -20,6 +23,22 @@ public struct CommitHistoryPage: Sendable {
 extension GitRepository {
     public func resolveHistory(_ reference: String?) async throws -> HistoryRevision {
         if let reference {
+            // Sidebar selections use full ref names. Keep tags, remote refs, and
+            // arbitrary revision expressions scoped to the selected commit.
+            if reference.hasPrefix("refs/heads/") {
+                let branch = try await GitProcess.run(["for-each-ref", "--count=1", "--format=%(refname)%00%(objectname)%00%(upstream)", "--", reference], at: root, cancellable: true)
+                let fields = branch.text.trimmingCharacters(in: .newlines).components(separatedBy: "\0")
+                if fields.count == 3, fields[0] == reference {
+                    let hash = fields[1], upstream = fields[2]
+                    if !upstream.isEmpty {
+                        let tip = try await GitProcess.run(["rev-parse", "--verify", "--quiet", "--end-of-options", upstream + "^{commit}"], at: root, allowed: [0, 1, 128], cancellable: true)
+                        if tip.status == 0 {
+                            return .trackingBranch(reference, hash: hash, upstream: upstream, upstreamHash: tip.text.trimmingCharacters(in: .newlines))
+                        }
+                    }
+                    return .reference(reference, hash: hash)
+                }
+            }
             let result = try await GitProcess.run(["rev-parse", "--verify", "--quiet", "--end-of-options", reference + "^{commit}"], at: root, allowed: [0,1,128], cancellable: true)
             guard result.status == 0 else { throw GitFailure("This revision is no longer available. Refresh the repository references.") }
             return .reference(reference, hash: result.text.trimmingCharacters(in: .newlines))

@@ -128,6 +128,42 @@ private final class HistoryPublicationFlag: @unchecked Sendable {
     #expect(await reader.pages == pages + 1)
 }
 
+@Test @MainActor func localBranchPreviewRevalidatesAfterOnlyItsUpstreamMoves() async throws {
+    let reader = RecordingHistoryReader()
+    let f = try await PreviewFixture.make(reader: reader); defer { f.clean() }
+    let root = await f.repository.root
+    let branch = "refs/heads/preview/branch-1", upstream = "refs/remotes/origin/release"
+    let originalHead = try await f.repository.headPosition()
+    _ = try await GitProcess.run(["remote", "add", "origin", root.path], at: root)
+    _ = try await GitProcess.run(["update-ref", upstream, f.tips[1]], at: root)
+    _ = try await GitProcess.run(["branch", "--set-upstream-to=origin/release", "preview/branch-1"], at: root)
+    f.store.navigate(.reference(branch)); try await settle(f.store)
+    #expect(f.store.visibleCommits.first?.hash == f.tips[1])
+
+    f.store.navigate(.workingCopy)
+    _ = try await GitProcess.run(["checkout", "--detach", f.tips[2]], at: root)
+    try Data("incoming\n".utf8).write(to: root.appendingPathComponent("incoming.txt"))
+    _ = try await GitProcess.run(["add", "incoming.txt"], at: root)
+    _ = try await GitProcess.run(["commit", "-m", "Remote-only change"], at: root)
+    _ = try await GitProcess.run(["update-ref", upstream, "HEAD"], at: root)
+    _ = try await GitProcess.run(["checkout", "main"], at: root)
+    f.store.navigate(.reference(branch)); try await settle(f.store)
+    let commits = f.store.visibleCommits
+    let incoming = try #require(commits.first { $0.subject == "Remote-only change" })
+    #expect(incoming.decorations.contains("origin/release"))
+    #expect(commits.contains { $0.hash == f.tips[1] && $0.decorations.contains("preview/branch-1") })
+    #expect(commits.filter { $0.hash == f.tips[2] }.count == 1)
+    #expect(f.store.historyPresentation.graph[incoming.hash] != nil)
+    f.store.selectCommit(incoming); try await settle(f.store)
+    #expect(f.store.selectedCommit?.hash == incoming.hash)
+    #expect(f.store.commitDetail?.files.map(\.path) == ["incoming.txt"])
+    #expect(await reader.pages == 2)
+    #expect(try await f.repository.headPosition() == originalHead)
+
+    f.store.navigate(.reference(upstream)); try await settle(f.store)
+    #expect(!f.store.visibleCommits.contains { $0.hash == f.tips[1] })
+}
+
 @Test @MainActor func latePreviewFailureCannotOverwriteNewerBranchOrRepository() async throws {
     let reader = RecordingHistoryReader()
     let f = try await PreviewFixture.make(reader: reader); defer { f.clean() }

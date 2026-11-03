@@ -72,6 +72,8 @@ struct HistoryCommitTable: NSViewRepresentable {
             let replaced = old?.presentation.id != value.presentation.id || old?.grouped != value.grouped || old?.store !== value.store
             let restyled = old?.compact != value.compact || old?.showGraph != value.showGraph || old?.canModifyHistory != value.canModifyHistory
             let previousIDs = replaced ? rows.map(\.id) : []
+            let scroll = table.enclosingScrollView
+            let wasAtTop = (scroll?.contentView.bounds.minY ?? 0) <= 1
             if replaced {
                 rows = []
                 commitRows = [:]
@@ -112,6 +114,12 @@ struct HistoryCommitTable: NSViewRepresentable {
                 else { table.deselectAll(nil) }
                 let changed = IndexSet([previousRow, selectedRow].filter { rows.indices.contains($0) })
                 if !changed.isEmpty { table.reloadData(forRowIndexes: changed, columnIndexes: IndexSet(integer: 0)) }
+            }
+            // AppKit can anchor an inserted block to the old top row. At the
+            // top of the list, keep the new tips visible without changing selection.
+            if replaced, wasAtTop, let scroll, scroll.contentView.bounds.minY > 1 {
+                scroll.contentView.scroll(to: .zero)
+                scroll.reflectScrolledClipView(scroll.contentView)
             }
             if let reveal = value.reveal, reveal.id != lastReveal, let row = commitRows[reveal.hash], let scroll = table.enclosingScrollView {
                 lastReveal = reveal.id
@@ -238,7 +246,7 @@ private final class HistoryCommitCell: NSTableCellView {
         authorLabel.stringValue = content.commit.author
         hashLabel.stringValue = " · " + content.commit.shortHash
         dateLabel.stringValue = content.commit.date.picoRelative
-        let badge = referenceBadge(content.commit.decorations)
+        let badge = CommitDecorationBadge(content.commit.decorations)
         badgeLabel.stringValue = badge.label
         badgeCountLabel.stringValue = content.commit.decorations.count > 1 ? "+\(content.commit.decorations.count - 1)" : ""
         updateTextColors()
@@ -247,8 +255,9 @@ private final class HistoryCommitCell: NSTableCellView {
         let target = PicoDropTarget.commit(content.commit, .squash)
         drop.validate = { [weak store] in store?.canAcceptDrop($0, on: target) == true }
         drop.accept = { [weak store] in store?.acceptDrop($0, on: target, point: $1, height: $2) == true }
-        setAccessibilityLabel(content.commit.subject + ", " + content.commit.author + ", " + content.commit.shortHash)
-        toolTip = content.commit.subject + "\n" + content.commit.author + " · " + content.commit.date.formatted(date: .complete, time: .shortened)
+        let refs = content.commit.decorations.joined(separator: ", ")
+        setAccessibilityLabel([content.commit.subject, content.commit.author, content.commit.shortHash, refs].filter { !$0.isEmpty }.joined(separator: ", "))
+        toolTip = [content.commit.subject, content.commit.author + " · " + content.commit.date.formatted(date: .complete, time: .shortened), refs].filter { !$0.isEmpty }.joined(separator: "\n")
     }
     override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
@@ -263,8 +272,8 @@ private final class HistoryCommitCell: NSTableCellView {
         let secondary: NSColor = emphasized ? .alternateSelectedControlTextColor : .secondaryLabelColor
         for label in [authorLabel, hashLabel, dateLabel, badgeCountLabel] { label.textColor = secondary }
         if let content {
-            let badge = referenceBadge(content.commit.decorations)
-            badgeLabel.textColor = emphasized ? .alternateSelectedControlTextColor : badge.head ? .white : badge.tint
+            let badge = CommitDecorationBadge(content.commit.decorations)
+            badgeLabel.textColor = emphasized ? .alternateSelectedControlTextColor : badge.isHead ? .white : badgeTint(badge)
         }
     }
     private var textOrigin: CGFloat {
@@ -331,12 +340,8 @@ private final class HistoryCommitCell: NSTableCellView {
         (text as NSString).draw(in: rect, withAttributes: [.font: font, .foregroundColor: color, .paragraphStyle: style])
     }
 
-    private func referenceBadge(_ decorations: [String]) -> (label: String, head: Bool, tag: Bool, tint: NSColor) {
-        let head = decorations.contains { $0.hasPrefix("HEAD") }
-        let tag = !head && decorations.first?.hasPrefix("tag: ") == true
-        let label = decorations.first(where: { $0.hasPrefix("HEAD -> ") }).map { String($0.dropFirst(8)) }
-            ?? (head ? "HEAD" : (decorations.first ?? "").replacingOccurrences(of: "tag: ", with: ""))
-        return (label, head, tag, head ? .controlAccentColor : NSColor(tag ? Pico.warning : Pico.modified))
+    private func badgeTint(_ badge: CommitDecorationBadge) -> NSColor {
+        badge.isHead ? .controlAccentColor : NSColor(badge.isTag ? Pico.warning : Pico.modified)
     }
     private func badgeRect(_ decorations: [String], y: CGFloat) -> NSRect {
         let extra: CGFloat = decorations.count > 1 ? 22 : 0
@@ -346,14 +351,15 @@ private final class HistoryCommitCell: NSTableCellView {
     }
     private func drawBadge(_ decorations: [String], y: CGFloat) {
         guard !decorations.isEmpty else { return }
-        let badge = referenceBadge(decorations)
+        let badge = CommitDecorationBadge(decorations)
+        let tint = badgeTint(badge)
         let rect = badgeRect(decorations, y: y)
         guard rect.width >= 22 else { return }
         let selectedText = NSColor.alternateSelectedControlTextColor
-        (emphasized ? selectedText.withAlphaComponent(0.2) : badge.head ? badge.tint : badge.tint.withAlphaComponent(0.15)).setFill()
+        (emphasized ? selectedText.withAlphaComponent(0.2) : badge.isHead ? tint : tint.withAlphaComponent(0.15)).setFill()
         NSBezierPath(roundedRect: rect, xRadius: 7.5, yRadius: 7.5).fill()
-        let ink: NSColor = emphasized ? selectedText : badge.head ? .white : badge.tint
-        let image = NSImage(systemSymbolName: badge.tag ? "tag.fill" : badge.head ? "smallcircle.filled.circle" : "arrow.triangle.branch", accessibilityDescription: nil)
+        let ink: NSColor = emphasized ? selectedText : badge.isHead ? .white : tint
+        let image = NSImage(systemSymbolName: badge.isTag ? "tag.fill" : badge.isHead ? "smallcircle.filled.circle" : "arrow.triangle.branch", accessibilityDescription: nil)
         image?.withSymbolConfiguration(.init(pointSize: 9, weight: .semibold))?.withSymbolConfiguration(.init(paletteColors: [ink]))?.draw(in: NSRect(x: rect.minX + 4, y: rect.minY + 3, width: 9, height: 9), from: .zero, operation: .sourceOver, fraction: 1, respectFlipped: true, hints: nil)
     }
 

@@ -74,8 +74,9 @@ extension RepositoryStore {
     func showHistory(_ value: HistoryPresentation, preservingSelection: Bool) {
         let previousSelection = selectedCommit?.hash
         if historyPresentation.id != value.id { historyPresentation = value }
-        if preservingSelection, let selectedCommit, value.page.commits.contains(where: { $0.hash == selectedCommit.hash }) {
-            if commitDetail == nil && !isLoadingDiff { selectCommit(selectedCommit) }
+        if preservingSelection, let selectedCommit, let updated = value.page.commits.first(where: { $0.hash == selectedCommit.hash }) {
+            if updated != selectedCommit { self.selectedCommit = updated }
+            if commitDetail == nil && !isLoadingDiff { selectCommit(updated) }
             revealHistorySelection()
             return
         }

@@ -23,7 +23,11 @@ public actor GitRepository {
         let (statusOutput, refsOutput, branchOutput, headOutput, remotesOutput, stashOutput) = try await (status, refs, branch, head, remotes, stashes)
         let hasHEAD = headOutput.status == 0
         let references = GitParser.references(refsOutput.data)
-        let selectors = ref.map { [$0, "--"] }
+        let scopedHistory: HistoryRevision?
+        if let ref, ref.hasPrefix("refs/heads/") {
+            scopedHistory = try await resolveHistory(ref)
+        } else { scopedHistory = nil }
+        let selectors = scopedHistory.map { $0.hashes + ["--"] } ?? ref.map { [$0, "--"] }
             ?? ["--branches", "--remotes", "--tags"] + (hasHEAD ? ["HEAD"] : []) + ["--"]
         let filters = (options.firstParent ? ["--first-parent"] : [])
             + (options.query.isEmpty ? [] : ["--regexp-ignore-case", "--fixed-strings", "--grep=" + options.query])
@@ -34,7 +38,10 @@ public actor GitRepository {
         if let reusable {
             commits = reusable.commits; historyCount = reusable.historyCount
         } else if !options.query.isEmpty, hasHEAD || !references.isEmpty {
-            let page = try await historyPage(at: resolveHistory(ref), options: options)
+            let revision: HistoryRevision
+            if let scopedHistory { revision = scopedHistory }
+            else { revision = try await resolveHistory(ref) }
+            let page = try await historyPage(at: revision, options: options)
             commits = page.commits; historyCount = commits.count
         } else if hasHEAD || !references.isEmpty {
             let output = try await GitProcess.run(["log", "--no-show-signature", options.sortByDate ? "--date-order" : "--topo-order", "--max-count=\(options.limit)", "--format=%H%x00%P%x00%an%x00%ae%x00%at%x00%s%x00%D%x00"] + filters + selectors, at: root)

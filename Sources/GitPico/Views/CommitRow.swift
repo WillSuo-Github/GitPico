@@ -84,22 +84,17 @@ struct CommitReferenceBadge: View {
     private var selectionColor: Color { Color(nsColor: controlActiveState == .key ? .alternateSelectedControlTextColor : .unemphasizedSelectedTextColor) }
     let decorations: [String]
     let selected: Bool
-    var isHead: Bool { decorations.contains { $0.hasPrefix("HEAD") } }
-    var label: String {
-        if let head = decorations.first(where: { $0.hasPrefix("HEAD -> ") }) { return String(head.dropFirst(8)) }
-        return isHead ? "HEAD" : (decorations.first ?? "").replacingOccurrences(of: "tag: ", with: "")
-    }
-    var isTag: Bool { !isHead && decorations.first?.hasPrefix("tag: ") == true }
-    var tint: Color { isHead ? .accentColor : isTag ? Pico.warning : Pico.modified }
     var body: some View {
+        let badge = CommitDecorationBadge(decorations)
+        let tint: Color = badge.isHead ? .accentColor : badge.isTag ? Pico.warning : Pico.modified
         HStack(spacing: 3) {
             HStack(spacing: 3) {
-                Image(systemName: isTag ? "tag.fill" : isHead ? "smallcircle.filled.circle" : "arrow.triangle.branch").imageScale(.small)
-                Text(label).lineLimit(1).truncationMode(.middle)
+                Image(systemName: badge.isTag ? "tag.fill" : badge.isHead ? "smallcircle.filled.circle" : "arrow.triangle.branch").imageScale(.small)
+                Text(badge.label).lineLimit(1).truncationMode(.middle)
             }
             .padding(.horizontal, 5).padding(.vertical, 1.5)
-            .foregroundStyle(selected ? selectionColor : (isHead ? .white : tint))
-            .background(selected ? AnyShapeStyle(selectionColor.opacity(0.2)) : isHead ? AnyShapeStyle(tint) : AnyShapeStyle(tint.opacity(0.15)), in: Capsule())
+            .foregroundStyle(selected ? selectionColor : (badge.isHead ? .white : tint))
+            .background(selected ? AnyShapeStyle(selectionColor.opacity(0.2)) : badge.isHead ? AnyShapeStyle(tint) : AnyShapeStyle(tint.opacity(0.15)), in: Capsule())
             if decorations.count > 1 { Text("+\(decorations.count - 1)").foregroundStyle(selected ? selectionColor.opacity(0.8) : .secondary) }
         }
         .font(.system(size: 9.5, weight: .semibold))

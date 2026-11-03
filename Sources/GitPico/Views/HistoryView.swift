@@ -11,6 +11,12 @@ struct HistoryView: View {
                 PaneBar(title: store.destination.ref == nil ? "All Branches" : "\(store.destination.title)",
                         subtitle: store.destination.ref == nil ? String(localized: "Branches, remotes and tags · \(commits.count)\(store.historyPresentation.page.hasMore ? "+" : "") commits") : String(localized: "\(commits.count)\(store.historyPresentation.page.hasMore ? "+" : "") commits"),
                         icon: store.destination.ref == nil ? "clock.arrow.circlepath" : "arrow.triangle.branch") {
+                    if let ref = store.previewedReference,
+                       let sync = BranchSyncStatus.current(ref, snapshot: store.snapshot),
+                       !sync.unavailable, sync.behind > 0 {
+                        Chip(text: sync.behind.formatted(), icon: "arrow.down", tint: .accentColor)
+                            .help(sync.help).accessibilityLabel(sync.help)
+                    }
                     if let ref = store.previewedReference, !ref.isCurrent {
                         Chip(text: String(localized: "Preview"), icon: "eye", tint: .secondary)
                             .help("Viewing this revision does not change the checked-out branch.")
