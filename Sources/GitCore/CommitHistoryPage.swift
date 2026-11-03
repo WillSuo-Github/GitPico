@@ -4,21 +4,29 @@ import CryptoKit
 public struct HistoryRevision: Sendable {
     public let identity: String
     let hashes: [String]
-    public static func reference(_ name: String, hash: String) -> Self { Self(identity: name + ":" + hash, hashes: [hash]) }
+    let trackingLocalTip: String?
+    public static func reference(_ name: String, hash: String) -> Self {
+        Self(identity: name + ":" + hash, hashes: [hash], trackingLocalTip: nil)
+    }
     static func trackingBranch(_ name: String, hash: String, upstream: String, upstreamHash: String) -> Self {
-        Self(identity: "\(name):\(hash)\n\(upstream):\(upstreamHash)", hashes: hash == upstreamHash ? [hash] : [hash, upstreamHash])
+        Self(identity: "\(name):\(hash)\n\(upstream):\(upstreamHash)", hashes: hash == upstreamHash ? [hash] : [hash, upstreamHash],
+             trackingLocalTip: hash == upstreamHash ? nil : hash)
     }
     public static func all(references: [Reference], head: HeadPosition) -> Self {
         let signature = references.sorted { $0.fullName < $1.fullName }.map { $0.fullName + ":" + $0.hash + ($0.isCurrent ? ":HEAD" : "") }.joined(separator: "\n") + "\n" + head.branch + ":" + (head.hash ?? "")
         let identity = SHA256.hash(data: Data(signature.utf8)).map { String(format: "%02x", $0) }.joined()
-        return Self(identity: identity, hashes: Array(Set(references.map(\.hash) + [head.hash].compactMap { $0 })).sorted())
+        return Self(identity: identity, hashes: Array(Set(references.map(\.hash) + [head.hash].compactMap { $0 })).sorted(),
+                    trackingLocalTip: nil)
     }
 }
 public struct CommitHistoryPage: Sendable {
     public let commits: [Commit]
     public let hasMore: Bool
     public let totalCount: Int?
-    public init(commits: [Commit], hasMore: Bool, totalCount: Int? = nil) { self.commits = commits; self.hasMore = hasMore; self.totalCount = totalCount }
+    public let incomingHashes: Set<String>
+    public init(commits: [Commit], hasMore: Bool, totalCount: Int? = nil, incomingHashes: Set<String> = []) {
+        self.commits = commits; self.hasMore = hasMore; self.totalCount = totalCount; self.incomingHashes = incomingHashes
+    }
 }
 extension GitRepository {
     public func resolveHistory(_ reference: String?) async throws -> HistoryRevision {
@@ -67,6 +75,30 @@ extension GitRepository {
         let args = ["log", "--no-show-signature", options.sortByDate ? "--date-order" : "--topo-order", "--max-count=\(query.hash == nil ? options.limit + 1 : 1)", "--format=%H%x00%P%x00%an%x00%ae%x00%at%x00%s%x00%D%x00"] + filters + ["--stdin", "--"] + query.paths
         let output = try await GitProcess.run(args, at: root, input: Data((tips.joined(separator: "\n") + "\n").utf8), cancellable: true)
         let commits = GitParser.commits(output.data), hasMore = commits.count > options.limit
-        return CommitHistoryPage(commits: Array(commits.prefix(options.limit)), hasMore: hasMore, totalCount: hasMore ? nil : commits.count)
+        let visible = Array(commits.prefix(options.limit))
+        let incoming = try await incomingHistoryHashes(visible, excluding: revision.trackingLocalTip)
+        return CommitHistoryPage(commits: visible, hasMore: hasMore, totalCount: hasMore ? nil : commits.count, incomingHashes: incoming)
+    }
+
+    private func incomingHistoryHashes(_ commits: [Commit], excluding localTip: String?) async throws -> Set<String> {
+        guard let localTip, !commits.isEmpty else { return [] }
+        let visible = Set(commits.map(\.hash))
+        // The page contains commits reachable from either tip. Remove everything
+        // reachable from the local tip, regardless of sort order or search filters.
+        let input = commits.map(\.hash).joined(separator: "\n") + "\n^" + localTip + "\n"
+        do {
+            let output = try await GitProcess.run(["rev-list", "--stdin"], at: root, input: Data(input.utf8), cancellable: true)
+            return Set(output.text.split(separator: "\n").lazy.map(String.init).filter { visible.contains($0) })
+        } catch let failure as GitFailure where failure.reason == .outputLimitExceeded {
+            // A very old filtered page can be separated from the local tip by
+            // more history than fits in a bounded process result.
+            var incoming: Set<String> = []
+            for commit in commits {
+                let result = try await GitProcess.run(["merge-base", "--is-ancestor", commit.hash, localTip],
+                                                      at: root, allowed: [0, 1], cancellable: true)
+                if result.status == 1 { incoming.insert(commit.hash) }
+            }
+            return incoming
+        }
     }
 }

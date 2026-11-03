@@ -59,14 +59,18 @@ import Testing
     #expect(f.store.visibleCommits.first?.subject == "Incoming commit 35")
     #expect(f.store.visibleCommits.prefix(35).allSatisfy { $0.subject.hasPrefix("Incoming commit ") })
     #expect(f.store.visibleCommits.dropFirst(35).first?.hash == localHead)
+    #expect(f.store.historyPresentation.page.incomingHashes == Set(f.store.visibleCommits.prefix(35).map(\.hash)))
     #expect(scroll.contentView.bounds.minY <= 1)
     let column = try #require(coordinator.table.tableColumns.first)
     let tipCell = try #require(coordinator.tableView(coordinator.table, viewFor: column, row: 0))
     let headCell = try #require(coordinator.tableView(coordinator.table, viewFor: column, row: 35))
     let tipLabels = tipCell.subviews.compactMap { ($0 as? NSTextField)?.stringValue }
     let headLabels = headCell.subviews.compactMap { ($0 as? NSTextField)?.stringValue }
+    let pendingPull = String(localized: "Pending Pull")
     #expect(tipLabels.contains("origin/main"))
     #expect(headLabels.contains("HEAD"))
+    #expect(tipCell.toolTip?.components(separatedBy: "\n").contains(pendingPull) == true)
+    #expect(headCell.toolTip?.contains(pendingPull) == false)
 
     if let path = ProcessInfo.processInfo.environment["GITPICO_INCOMING_HISTORY_CAPTURE"] {
         let folder = URL(fileURLWithPath: path, isDirectory: true)
@@ -80,6 +84,10 @@ import Testing
         coordinator.table.scrollRowToVisible(35)
         scroll.layoutSubtreeIfNeeded()
         try capture("Local-HEAD.png")
+        window.setContentSize(NSSize(width: 320, height: size.height))
+        coordinator.table.scrollRowToVisible(0)
+        scroll.layoutSubtreeIfNeeded()
+        try capture("Narrow.png")
     }
     #expect(!window.isVisible && !NSApp.isActive)
 }

@@ -46,6 +46,7 @@ import Testing
     let commits = f.store.visibleCommits
     #expect(commits.filter { $0.subject.hasPrefix("Remote ") }.count == 3)
     #expect(commits.filter { $0.subject.hasPrefix("Local ") }.count == 2)
+    #expect(f.store.historyPresentation.page.incomingHashes == Set(commits.filter { $0.subject.hasPrefix("Remote ") }.map(\.hash)))
     let incomingRow = try #require(commits.firstIndex { $0.decorations.contains("origin/main") })
     let coordinator = HistoryCommitTable.Coordinator()
     let tableView = coordinator.makeView()
@@ -79,6 +80,9 @@ import Testing
     f.store.runPull(pull, policy: .merge); await f.finish()
     let pulled = try status()
     #expect(f.store.error == nil && pulled.text == "HEAD")
+    f.store.navigate(localBranch); await f.store.historyTask?.value; await f.store.detailTask?.value
+    #expect(f.store.visibleCommits.first?.subject == "One more remote commit")
+    #expect(f.store.historyPresentation.page.incomingHashes.isEmpty)
     // Merge pulls without local commits fast-forward instead of creating a merge commit.
     #expect(f.store.snapshot?.commits.first?.parents.count == 1)
     try await git(["switch", "--detach"]); try await f.sync()

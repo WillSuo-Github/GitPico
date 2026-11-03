@@ -56,6 +56,7 @@ import Testing
     let revision = try await f.repo.resolveHistory(local)
     let page = try await f.repo.historyPage(at: revision)
     #expect(page.commits.map(\.subject) == ["Incoming two", "Incoming one", "Initial | commit"])
+    #expect(page.incomingHashes == Set(page.commits.prefix(2).map(\.hash)))
     #expect(page.commits.first?.decorations.contains("team/releases/current") == true)
     #expect(page.commits.last?.decorations.contains("HEAD -> main") == true)
     let snapshot = try await f.repo.snapshot(ref: local)
@@ -63,9 +64,12 @@ import Testing
     #expect(snapshot.commits.map(\.hash) == page.commits.map(\.hash))
     var options = HistoryOptions()
     options.limit = 2
-    #expect(try await f.repo.historyPage(at: revision, options: options).hasMore)
+    let limited = try await f.repo.historyPage(at: revision, options: options)
+    #expect(limited.hasMore && limited.incomingHashes == page.incomingHashes)
     options.query = "hash:" + (try #require(page.commits.first)).shortHash
-    #expect(try await f.repo.historyPage(at: revision, options: options).commits.map(\.subject) == ["Incoming two"])
+    let matching = try await f.repo.historyPage(at: revision, options: options)
+    #expect(matching.commits.map(\.subject) == ["Incoming two"])
+    #expect(matching.incomingHashes == Set(matching.commits.map(\.hash)))
     try await f.git(["update-ref", "-d", upstream])
     let gone = try await f.repo.resolveHistory(local)
     #expect(gone.identity != revision.identity)
