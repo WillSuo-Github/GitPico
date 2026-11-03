@@ -17,7 +17,7 @@ public struct OAuthConfiguration: Codable, Equatable, Sendable {
     }
     public var callback: URL { URL(string: "gitpico://oauth/" + provider.rawValue + "/callback")! }
     public var tokenURL: URL { URL(string: "https://" + host + (provider == .github ? "/login/oauth/access_token" : "/oauth/token"))! }
-    public var scopes: [String] { provider == .github ? ["repo", "read:user", "offline_access"] : ["read_user", "write_repository"] }
+    public var scopes: [String] { provider == .github ? ["repo", "read:user", "offline_access"] : ["read_user", "write_repository", "read_api"] }
 }
 
 public struct OAuthAuthorization: Codable, Sendable {

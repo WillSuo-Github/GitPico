@@ -4,7 +4,12 @@ public struct OAuthHTTPResponse: Sendable {
     public let status: Int
     public let data: Data
     public let redirectURL: URL?
-    public init(status: Int, data: Data, redirectURL: URL? = nil) { self.status = status; self.data = data; self.redirectURL = redirectURL }
+    public let link: String?
+    public let nextPage: String?
+    public init(status: Int, data: Data, redirectURL: URL? = nil, link: String? = nil, nextPage: String? = nil) {
+        self.status = status; self.data = data; self.redirectURL = redirectURL
+        self.link = link; self.nextPage = nextPage
+    }
 }
 public protocol OAuthHTTPTransport: Sendable {
     func send(_ request: URLRequest) async throws -> OAuthHTTPResponse
@@ -34,7 +39,9 @@ public struct OAuthHTTPSClient: OAuthHTTPTransport {
                 data.append(byte)
             }
             let redirect = response.value(forHTTPHeaderField: "Location").flatMap { URL(string: $0, relativeTo: request.url)?.absoluteURL }
-            return OAuthHTTPResponse(status: response.statusCode, data: data, redirectURL: redirect)
+            return OAuthHTTPResponse(status: response.statusCode, data: data, redirectURL: redirect,
+                                     link: response.value(forHTTPHeaderField: "Link"),
+                                     nextPage: response.value(forHTTPHeaderField: "X-Next-Page"))
         } catch is CancellationError { throw CancellationError() }
         catch let failure as GitFailure { throw failure }
         catch {

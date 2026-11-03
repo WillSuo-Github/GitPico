@@ -16,7 +16,7 @@ import Testing
 @Test func legacyOAuthConfigurationDecodesWithoutRequestingMRAPIAccess() throws {
     let data = Data(#"{"provider":"gitlab","host":"gitlab.com","clientID":"fixture-client","apiAccess":true}"#.utf8)
     let configuration = try JSONDecoder().decode(OAuthConfiguration.self, from: data)
-    #expect(configuration.scopes == ["read_user", "write_repository"])
+    #expect(configuration.scopes == ["read_user", "write_repository", "read_api"])
     let url = try OAuthPKCE(state: "fixture", verifier: "fixture").authorizationURL(configuration)
-    #expect(URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first(where: { $0.name == "scope" })?.value == "read_user write_repository")
+    #expect(URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first(where: { $0.name == "scope" })?.value == "read_user write_repository read_api")
 }

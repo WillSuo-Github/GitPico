@@ -6,13 +6,14 @@ struct RepositoryPickerSearchField: NSViewRepresentable {
     @Binding var text: String
     @Binding var isFocused: Bool
     var submit: () -> Void
+    var placeholder = String(localized: "Search name, path or group")
 
     func makeCoordinator() -> Coordinator { Coordinator(text: $text, isFocused: $isFocused, submit: submit) }
     func makeNSView(context: Context) -> RepositoryPickerSearchControl {
         let field = RepositoryPickerSearchControl()
         field.isBezeled = false; field.drawsBackground = false; field.focusRingType = .none
         field.font = .systemFont(ofSize: 13)
-        field.placeholderString = String(localized: "Search name, path or group")
+        field.placeholderString = placeholder
         field.setAccessibilityLabel(field.placeholderString)
         field.setContentHuggingPriority(.defaultLow, for: .horizontal)
         field.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)

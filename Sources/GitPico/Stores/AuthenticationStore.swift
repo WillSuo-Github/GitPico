@@ -127,11 +127,13 @@ struct SystemCredentialVault: CredentialStoring {
 
 struct HostingAccountVerification: Sendable { let login: String; let description: String }
 enum HostingAccountClient {
-    static func request(_ profile: AuthenticationProfile, credential: GitStoredCredential) throws -> URLRequest {
+    static func request(_ profile: AuthenticationProfile, credential: GitStoredCredential, listingRepositories: Bool = false) throws -> URLRequest {
         guard profile.host == credential.host, profile.provider != .generic else { throw appFailure("Use Test Remote to verify this HTTPS server through Git.") }
         let base = "https://" + profile.host
         let publicGitHub = ["github.com", "github.com:443"].contains(profile.host)
-        let endpoint = profile.provider == .github ? (publicGitHub ? "https://api.github.com/user" : base + "/api/v3/user") : base + "/api/v4/user"
+        let api = profile.provider == .github ? (publicGitHub ? "https://api.github.com" : base + "/api/v3") : base + "/api/v4"
+        let resource = !listingRepositories ? "/user" : profile.provider == .github ? "/user/repos" : "/projects"
+        let endpoint = api + resource
         guard let url = URL(string: endpoint) else { throw appFailure("Invalid hosting API URL.") }
         var request = URLRequest(url: url); request.timeoutInterval = 20
         if profile.provider == .gitlab && credential.oauth == nil { request.setValue(credential.secret, forHTTPHeaderField: "PRIVATE-TOKEN") }

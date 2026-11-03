@@ -5,6 +5,9 @@ import SwiftUI
 struct RepositoryCreationRequest: Identifiable {
     let id = UUID()
     let clone: Bool
+    var source: String = ""
+    var name: String = ""
+    var profileID: UUID? = nil
 }
 
 struct RepositoryCreationSheet: View {
@@ -19,7 +22,18 @@ struct RepositoryCreationSheet: View {
     @State private var allowLocalTransport = false
     @State private var parent = FileManager.default.homeDirectoryForCurrentUser
     @Environment(\.dismiss) private var dismiss
-    var valid: Bool { !name.isEmpty && !name.contains("/") && name != "." && name != ".." && (!request.clone || !source.isEmpty) }
+    init(store: RepositoryStore, request: RepositoryCreationRequest) {
+        self.store = store
+        self.request = request
+        _source = State(initialValue: request.source)
+        _name = State(initialValue: request.name)
+        _profileID = State(initialValue: request.profileID)
+    }
+    var valid: Bool {
+        !name.isEmpty && !name.contains("/") && name != "." && name != ".." &&
+            (!request.clone || !source.isEmpty) &&
+            (profileID == nil || store.authentication.profiles.contains { $0.id == profileID })
+    }
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             SheetTitle(request.clone ? "Clone Git Repository" : "Create Git Repository")

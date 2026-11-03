@@ -35,8 +35,8 @@ struct RepositoryPickerView: View {
                     RepositoryPickerSidebarView(workspace: workspace, tab: tab)
                         .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 280)
                         .toolbar { ToolbarItem { RepositoryMenu(store: store) } }
-                } detail: { content }
-            } else { content }
+                } detail: { pickerContent }
+            } else { pickerContent }
         }
         .disabled(tab.isBusy)
         .overlay {
@@ -46,9 +46,29 @@ struct RepositoryPickerView: View {
                 ProgressView(store.activity).padding(24).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
             }
         }
-        .task { if tab.pickerSelection == nil { tab.pickerSelection = entries.first?.id }; searchFocused = true }
+        .task {
+            resetRemovedAccount()
+            if tab.pickerSelection == nil { tab.pickerSelection = entries.first?.id }
+            searchFocused = true
+        }
         .onChange(of: entries.map(\.id)) { if !entries.contains(where: { $0.id == tab.pickerSelection }) { tab.pickerSelection = entries.first?.id } }
         .onKeyPress(.return) { guard !searchFocused, selection != nil else { return .ignored }; openSelected(); return .handled }
+        .onChange(of: workspace.authentication.profiles) { resetRemovedAccount() }
+    }
+    private func resetRemovedAccount() {
+        if case .account = tab.pickerFilter, account == nil { tab.pickerFilter = .recent }
+    }
+    private var account: AuthenticationProfile? {
+        guard case .account(let id) = tab.pickerFilter else { return nil }
+        return workspace.authentication.profiles.first { $0.id == id && $0.repositoryProvider != nil }
+    }
+    @ViewBuilder private var pickerContent: some View {
+        if let account, let provider = account.repositoryProvider {
+            AccountRepositoriesView(workspace: workspace, store: store, account: account, provider: provider)
+                .id(account.id)
+        } else {
+            content
+        }
     }
     var filterTitle: String {
         switch tab.pickerFilter {
@@ -57,6 +77,7 @@ struct RepositoryPickerView: View {
         case .favorites: String(localized: "Favorites")
         case .ungrouped: String(localized: "Ungrouped")
         case .group(let id): workspace.library.breadcrumb(id)
+        case .account: String(localized: "Repositories")
         }
     }
     private var content: some View {

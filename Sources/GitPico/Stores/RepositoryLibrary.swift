@@ -22,7 +22,7 @@ struct RepositoryLibraryDocument: Codable, Equatable, Sendable {
     var recent: [UUID] = []
 }
 enum RepositoryLibraryFilter: Hashable {
-    case all, favorites, recent, ungrouped, group(UUID)
+    case all, favorites, recent, ungrouped, group(UUID), account(UUID)
 }
 struct RepositoryLibraryDrop: Codable, Sendable {
     let session: UUID
@@ -261,6 +261,7 @@ final class RepositoryLibrary {
             case .favorites: included = record.favorite
             case .recent: included = document.recent.contains(record.id)
             case .ungrouped: included = record.group == nil
+            case .account: included = false
             case .group(let id):
                 var group = record.group; var found = false
                 while let current = group { if current == id { found = true; break }; group = document.groups.first { $0.id == current }?.parent }
