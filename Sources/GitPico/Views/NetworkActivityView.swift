@@ -33,15 +33,23 @@ struct NetworkActivityView: View {
                                 Button("Copy Log") { Pico.copy(record.output) }
                             }
                             if record.phase == .running {
-                                if let progress = record.progress { ProgressView(value: progress).help("Git's current phase: \(Int(progress * 100))%") }
+                                if let progress = record.transferProgress { ProgressView(value: progress.fraction).help("Git's current phase: \(progress.percent)%") }
                                 else { ProgressView() }
                                 TimelineView(.periodic(from: .now, by: 1)) { context in
                                     Text("Running for \(Int(context.date.timeIntervalSince(record.started))) seconds").font(.caption).foregroundStyle(.secondary)
                                 }
                             }
                             if record.phase == .failed || record.phase == .cancelled {
-                                Text(networkFailureAdvice(record.output)).font(.callout).foregroundStyle(Pico.warning)
-                                if record.command == "fetch", record.repositoryPath == store.snapshot?.root.path { Button("Fetch All Remotes Again") { store.sync(.fetch) }.disabled(!store.canUseRepository) }
+                                if record.phase == .failed {
+                                    Text(networkFailureAdvice(record.output, timedOut: record.timedOut == true)).font(.callout).foregroundStyle(Pico.warning)
+                                }
+                                if record.command == "fetch", record.repositoryPath == store.snapshot?.root.path {
+                                    Button("Fetch Options…") {
+                                        let interrupted = record.timedOut == true || networkTransferWasInterrupted(record.output)
+                                        store.fetchAfterNetwork = interrupted ? .largeTransfer : .retry
+                                        dismiss()
+                                    }.disabled(!store.canUseRepository)
+                                }
                             }
                             ScrollView([.horizontal, .vertical]) { Text(record.output.isEmpty ? String(localized: "No output was returned.") : record.output).font(.system(size: 11, design: .monospaced)).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .topLeading) }.frame(maxWidth: .infinity, maxHeight: .infinity)
                         }.padding(12).frame(minWidth: 380)
@@ -62,9 +70,25 @@ struct NetworkActivityView: View {
     private func tint(_ phase: GitNetworkEvent.Phase) -> Color { switch phase { case .running: .accentColor; case .succeeded: Pico.addition; case .failed: Pico.deletion; case .cancelled: .secondary } }
 }
 
-func networkFailureAdvice(_ output: String) -> String {
+func networkTransferWasInterrupted(_ output: String) -> Bool {
     let value = output.lowercased()
-    if value.contains("authentication") || value.contains("401") || value.contains("403") || value.contains("permission denied") { return String(localized: "Check the selected account, token permissions or unlocked SSH keys in Authentication.") }
+    return ["unexpected disconnect", "early eof", "remote end hung up unexpectedly", "connection reset",
+            "operation timed out", "git timed out after", "transfer closed", "curl 18 ", "curl 28 ",
+            "curl 56 ", "curl 92 ", "http/2 stream"].contains { value.contains($0) }
+}
+
+func networkFailureAdvice(_ output: String, timedOut: Bool = false) -> String {
+    let value = output.lowercased()
+    if timedOut {
+        return String(localized: "GitPico stopped this operation at its time limit. For a large fetch, choose a longer time limit in Fetch Options.")
+    }
+    if networkTransferWasInterrupted(output) {
+        return String(localized: "The transfer was interrupted. Check the connection or proxy. In Fetch Options, try one remote and one branch, or HTTP/1.1 for HTTPS.")
+    }
+    if ["authentication failed", "permission denied", "could not read username", "invalid username or token",
+        "returned error: 401", "returned error: 403", "http 401", "http 403"].contains(where: { value.contains($0) }) {
+        return String(localized: "Check the selected account, token permissions or unlocked SSH keys in Authentication.")
+    }
     if value.contains("host key verification") { return String(localized: "Verify the SSH host fingerprint with your hosting service, then trust it using your system SSH setup. GitPico does not bypass host verification.") }
     if value.contains("resolve host") || value.contains("timed out") || value.contains("unable to access") { return String(localized: "Check the network, proxy and server address. Retry Fetch when the connection is available.") }
     if value.contains("non-fast-forward") || value.contains("fetch first") || value.contains("divergent") || value.contains("diverging") || value.contains("not possible to fast-forward") { return String(localized: "Fetch and review incoming changes. Open Pull to choose Merge or Rebase deliberately; do not force-push to bypass this error.") }

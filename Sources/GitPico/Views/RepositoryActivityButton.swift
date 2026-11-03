@@ -14,7 +14,9 @@ struct RepositoryActivityButton: View {
     private var stateAnimation: Animation? { RepositoryStatusBarBackground.transition(isRunning: store.isBusy, reduceMotion: reduceMotion) }
 
     private var feedback: RepositoryOperationFeedback? { store.operationFeedback }
-    private var needsReview: Bool { feedback?.isVisible == true && (feedback?.phase == .failed || feedback?.warning != nil) }
+    private var latestRecord: NetworkActivityRecord? { feedback == nil ? store.latestStatusNetworkRecord : nil }
+    private var resultTitle: String? { feedback?.title ?? latestRecord?.activityTitle }
+    private var needsReview: Bool { !store.isBusy && feedback?.isVisible == true && (feedback?.phase == .failed || feedback?.warning != nil) }
     private var foreground: Color { .primary }
     private var emphasis: Color { needsReview ? Pico.warning : .accentColor }
     private var highlight: Color {
@@ -34,47 +36,91 @@ struct RepositoryActivityButton: View {
             case .local: return feedback.title
             }
         }
-        return needsReview ? String(localized: "Review") : String(localized: "Activity")
+        return resultTitle ?? String(localized: "Activity")
     }
     private var symbol: String {
-        guard let feedback, feedback.isVisible else { return "clock.arrow.circlepath" }
-        return feedback.activitySymbol
+        feedback?.activitySymbol ?? latestRecord?.phase.activitySymbol ?? "clock.arrow.circlepath"
     }
     private var color: Color {
-        guard !store.isBusy, let feedback, feedback.isVisible else { return foreground }
-        return feedback.activityTint
+        guard !store.isBusy else { return foreground }
+        if let feedback { return feedback.isVisible ? feedback.activityTint : .secondary }
+        return latestRecord == nil ? foreground : .secondary
     }
 
     var body: some View {
-        Button { showingDetails.toggle() } label: {
-            HStack(spacing: 6) {
-                if store.isBusy { ProgressView().controlSize(.mini).tint(.accentColor) }
-                else { Image(systemName: symbol).animation(stateAnimation) { $0.foregroundStyle(color) }.frame(width: 12) }
-                Text(title).fontWeight(store.isBusy || needsReview ? .medium : .regular).lineLimit(1).truncationMode(.tail).animation(stateAnimation) { $0.foregroundStyle(foreground) }
-                Spacer(minLength: 0)
-                Image(systemName: "chevron.up").font(.system(size: 8, weight: .medium)).animation(stateAnimation) { $0.foregroundStyle(foreground.opacity(0.65)) }
+        let progress = store.activeStatusNetworkRecord?.transferProgress
+        let description = progress.map { $0.stage + " · " + $0.formattedPercent }
+        let help = description ?? (store.isBusy ? title : resultTitle ?? String(localized: "Show operation details"))
+        let accessibility = description.map { title + " · " + $0 } ??
+            (store.isBusy ? title : resultTitle ?? String(localized: "No recent operation"))
+        Button { showingDetails.toggle() } label: { label(progress) }
+            .buttonStyle(.plain)
+            .onHover { hovering = $0 }
+            .help(help)
+            .accessibilityLabel("Activity")
+            .accessibilityValue(Text(accessibility))
+            .onChange(of: store.snapshot?.root) { showingDetails = false }
+            .popover(isPresented: $showingDetails, arrowEdge: .bottom) {
+                RepositoryActivityDetailsView(store: store, close: { showingDetails = false })
             }
-            .padding(.horizontal, 7).frame(width: 148, height: 22)
-            .background {
-                RoundedRectangle(cornerRadius: 5).fill(highlight)
-                    .animation(stateAnimation, value: store.isBusy)
+    }
+
+    private func label(_ progress: GitTransferProgress?) -> some View {
+        HStack(spacing: 6) {
+            if store.isBusy && progress == nil {
+                ProgressView().controlSize(.mini).tint(.accentColor).accessibilityHidden(true)
+            } else if !store.isBusy {
+                Image(systemName: symbol).animation(stateAnimation) { $0.foregroundStyle(color) }.frame(width: 12)
             }
-            .overlay {
-                RoundedRectangle(cornerRadius: 5).strokeBorder(emphasis.opacity(store.isBusy || needsReview ? 0.18 : 0), lineWidth: 0.5)
-                    .animation(stateAnimation, value: store.isBusy)
+            activityText
+                .fontWeight(store.isBusy || needsReview ? .medium : .regular)
+                .lineLimit(1).foregroundStyle(foreground)
+            Spacer(minLength: 0)
+            if let progress {
+                Text(progress.formattedPercent)
+                    .font(.system(size: 10, weight: .medium)).monospacedDigit().foregroundStyle(.secondary)
+                    .fixedSize()
             }
-            .contentShape(Rectangle())
+            Image(systemName: "chevron.up").font(.system(size: 8, weight: .medium)).foregroundStyle(foreground.opacity(0.65))
         }
-        .buttonStyle(.plain)
-        .onHover { hovering = $0 }
-        .help(store.isBusy ? (feedback?.phase == .running ? feedback?.title ?? title : title) : feedback?.title ?? String(localized: "Show operation details"))
-        .accessibilityLabel("Activity")
-        .accessibilityValue(store.isBusy ? title : feedback?.title ?? String(localized: "No recent operation"))
-        .onChange(of: store.snapshot?.root) { showingDetails = false }
-        .popover(isPresented: $showingDetails, arrowEdge: .bottom) {
-            RepositoryActivityDetailsView(store: store, close: { showingDetails = false })
+        .padding(.horizontal, 7).padding(.bottom, progress == nil ? 0 : 3).frame(width: 164, height: 22)
+        .background {
+            RoundedRectangle(cornerRadius: 5).fill(highlight).animation(stateAnimation, value: store.isBusy)
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 5).strokeBorder(emphasis.opacity(store.isBusy || needsReview ? 0.18 : 0), lineWidth: 0.5)
+                .animation(stateAnimation, value: store.isBusy)
+        }
+        .overlay(alignment: .bottom) {
+            if let progress { progressTrack(progress.fraction) }
+        }
+        .contentShape(Rectangle())
+    }
+
+    @ViewBuilder private var activityText: some View {
+        if !store.isBusy, let outcome = feedback?.outcomeTitle ?? latestRecord?.phase.title {
+            ViewThatFits(in: .horizontal) {
+                Text(title).fixedSize(horizontal: true, vertical: false)
+                Text(outcome)
+            }
+        } else {
+            Text(title)
         }
     }
+
+    private func progressTrack(_ fraction: Double) -> some View {
+        GeometryReader { geometry in
+            Capsule().fill(emphasis.opacity(0.18))
+                .overlay(alignment: .leading) {
+                    Capsule().fill(emphasis)
+                        .frame(width: geometry.size.width * CGFloat(fraction))
+                        .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: fraction)
+                }
+        }
+        .frame(height: 2).padding(.horizontal, 7).padding(.bottom, 2)
+        .allowsHitTesting(false).accessibilityHidden(true)
+    }
+
 }
 
 struct RepositoryActivityDetailsView: View {
@@ -85,11 +131,6 @@ struct RepositoryActivityDetailsView: View {
         if store.isBusy, store.operationFeedback?.phase != .running { return nil }
         return store.operationFeedback
     }
-    private var latestNetworkRecord: NetworkActivityRecord? {
-        guard let path = store.snapshot?.root.path else { return nil }
-        return store.networkActivity?.records.first { $0.repositoryPath == path }
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
@@ -113,13 +154,28 @@ struct RepositoryActivityDetailsView: View {
                 }
             } else if store.isBusy {
                 Label(store.activity, systemImage: "arrow.triangle.2.circlepath").font(.callout)
-            } else if let record = latestNetworkRecord {
-                Label(String(localized: networkCommandTitle(record.command)) + " · " + record.phase.title, systemImage: record.phase == .running ? "arrow.triangle.2.circlepath" : "network")
-                    .font(.callout).fixedSize(horizontal: false, vertical: true)
-                Text(record.started.formatted(date: .abbreviated, time: .standard)).font(.caption).foregroundStyle(.secondary)
+            } else if let record = store.latestStatusNetworkRecord {
+                Label(record.activityTitle, systemImage: record.phase.activitySymbol)
+                    .font(.callout).foregroundStyle(record.phase.activityTint).fixedSize(horizontal: false, vertical: true)
+                Text((record.finished ?? record.started).formatted(date: .abbreviated, time: .standard)).font(.caption).foregroundStyle(.secondary)
+                if record.phase == .failed || record.phase == .cancelled {
+                    Text(networkFailureAdvice(record.output, timedOut: record.timedOut == true)).font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                }
             } else {
                 Text("No recent operation").font(.callout)
                 Text("Run an operation to see its progress and latest result here.").font(.caption).foregroundStyle(.secondary)
+            }
+            if store.isBusy {
+                if let progress = store.activeStatusNetworkRecord?.transferProgress {
+                    ProgressView(value: progress.fraction) {
+                        Text(progress.stage)
+                    } currentValueLabel: {
+                        Text("Git's current phase: \(progress.percent)%")
+                    }
+                    .font(.caption)
+                } else {
+                    ProgressView().controlSize(.small).accessibilityLabel(Text(store.activity))
+                }
             }
             HStack {
                 Button("Network Activity") { close(); store.inspectOperationNetworkActivity() }
@@ -135,7 +191,18 @@ struct RepositoryActivityDetailsView: View {
 private extension RepositoryOperationFeedback {
     var activitySymbol: String {
         if warning != nil { return "exclamationmark.triangle.fill" }
-        switch phase {
+        return phase.activitySymbol
+    }
+    var activityTint: Color { warning == nil ? phase.activityTint : Pico.warning }
+}
+
+private extension NetworkActivityRecord {
+    var activityTitle: String { String(localized: networkCommandTitle(command)) + " · " + phase.title }
+}
+
+private extension GitNetworkEvent.Phase {
+    var activitySymbol: String {
+        switch self {
         case .running: return "arrow.triangle.2.circlepath"
         case .succeeded: return "checkmark.circle.fill"
         case .failed: return "exclamationmark.circle.fill"
@@ -143,12 +210,15 @@ private extension RepositoryOperationFeedback {
         }
     }
     var activityTint: Color {
-        if warning != nil { return Pico.warning }
-        switch phase {
+        switch self {
         case .running: return .accentColor
         case .succeeded: return Pico.addition
         case .failed: return Pico.deletion
         case .cancelled: return .secondary
         }
     }
+}
+
+private extension GitTransferProgress {
+    var formattedPercent: String { fraction.formatted(.percent.precision(.fractionLength(0))) }
 }

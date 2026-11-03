@@ -40,7 +40,7 @@ struct RepositoryCommands: Commands {
                 Button("Refresh", action: store.refresh).keyboardShortcut("r").disabled(!store.canUseRepository)
                 Divider()
                 Group {
-                    Button("Fetch") { store.sync(.fetch) }
+                    Button("Fetch…") { store.reviewFetch() }
                     Button("Pull…") { store.reviewPull() }.disabled(!store.canIntegrate)
                     Button("Push") { store.sync(.push) }.disabled(!store.canIntegrate)
                     Button("Synchronize (Fetch, Pull, Push)", action: store.syncAll).disabled(!store.canSynchronize)
@@ -49,7 +49,7 @@ struct RepositoryCommands: Commands {
                     Button("Add Remote…") { store.manage(.addRemote) }
                     Divider()
                     Group {
-                        Button("Fetch Options…") { store.manage(.fetch(nil)) }
+                        Button("Fetch Options…") { store.reviewFetch() }
                         Button("Publish / Push To…") { store.manage(.publish(nil, nil, nil, false)) }
                         Button("Delete Remote Reference…") { store.manage(.publish(nil, nil, "refs/heads/main", false)) }
                     }.disabled(store.managedRemotes.isEmpty)

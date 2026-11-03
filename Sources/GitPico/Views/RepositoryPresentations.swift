@@ -38,6 +38,10 @@ struct RepositoryPresentations: ViewModifier {
         .sheet(isPresented: flag($store.showingConflictDrafts)) { ConflictDraftsSheet(store: store) }
         .sheet(isPresented: flag($store.showingNetworkActivity), onDismiss: {
             if store.authenticationAfterNetwork { store.authenticationAfterNetwork = false; store.showingAuthentication = true }
+            else if let mode = store.fetchAfterNetwork {
+                store.fetchAfterNetwork = nil
+                store.reviewFetch(mode: mode)
+            }
         }) { NetworkActivityView(store: store) }
         .sheet(isPresented: flag($store.showingAuthentication), onDismiss: {
             if store.networkAfterAuthentication { store.networkAfterAuthentication = false; store.showingNetworkActivity = true }

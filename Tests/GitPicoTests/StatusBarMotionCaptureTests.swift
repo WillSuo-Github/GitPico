@@ -13,7 +13,17 @@ import Testing
     _ = try await GitProcess.run(["clone", "--bare", root.path, remote.path], at: f.root)
     _ = try await GitProcess.run(["remote", "add", "origin", remote.path], at: root)
     let upload = f.root.appendingPathComponent("motion-upload-pack")
-    try Data("#!/bin/sh\nsleep 3\nexec /usr/bin/git-upload-pack \"$@\"\n".utf8).write(to: upload)
+    // Delay a disposable fetch and send representative Git progress through
+    // its real stderr observer so the captured view passes through each state.
+    try Data("""
+        #!/bin/sh
+        sleep 1
+        printf 'remote: Counting objects:  42%% (42/100)\r' >&2
+        sleep 1
+        printf 'Receiving objects:  73%% (73/100)\r' >&2
+        sleep 1
+        exec /usr/bin/git-upload-pack "$@"
+        """.utf8).write(to: upload)
     try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: upload.path)
     _ = try await GitProcess.run(["config", "remote.origin.uploadpack", upload.path], at: root)
     let workspace = RepositoryWorkspace(library: f.store.library)
@@ -44,12 +54,14 @@ import Testing
         view.cacheDisplay(in: rect, to: bitmap)
         let name = String(format: "frame-%04d.png", frames.count)
         try #require(bitmap.representation(using: .png, properties: [:])).write(to: folder.appendingPathComponent(name))
-        frames.append(["file": name, "seconds": Double(elapsed.components.seconds) + Double(elapsed.components.attoseconds) / 1e18, "isBusy": workspace.activeStore.isBusy, "reduceMotion": reduced])
+        frames.append(["file": name, "seconds": Double(elapsed.components.seconds) + Double(elapsed.components.attoseconds) / 1e18, "isBusy": workspace.activeStore.isBusy, "percent": workspace.activeStore.activeStatusNetworkRecord?.transferProgress?.percent ?? -1, "reduceMotion": reduced])
         if let completed, completed.duration(to: .now) > .milliseconds(2600) { break }
         try await Task.sleep(for: .milliseconds(70))
     }
     await workspace.activeStore.operationTask?.value
     #expect(workspace.activeStore.error == nil && !workspace.activeStore.isBusy)
+    #expect(frames.contains { $0["percent"] as? Int == 42 })
+    #expect(frames.contains { $0["percent"] as? Int == 73 })
     #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
     try JSONSerialization.data(withJSONObject: frames, options: [.prettyPrinted, .sortedKeys]).write(to: folder.appendingPathComponent("frames.json"))
 }

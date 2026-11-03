@@ -1,11 +1,13 @@
 import Foundation
 import GitCore
 
+enum FetchReviewMode: Sendable { case standard, retry, largeTransfer }
+
 enum ManagementAction: Sendable {
     case createBranch(String, String?), renameBranch(Reference), deleteBranch(Reference), upstream(Reference)
     case createTag(String), renameTag(Reference), deleteTag(Reference), inspectTag(Reference)
     case addRemote, editRemote(RemoteConfiguration), renameRemote(RemoteConfiguration), removeRemote(RemoteConfiguration)
-    case publish(Reference?, String?, String?, Bool), fetch(RemoteConfiguration?), recovery
+    case publish(Reference?, String?, String?, Bool), fetch(RemoteConfiguration?, mode: FetchReviewMode = .standard), recovery
 }
 struct ManagementRequest: Identifiable { let id = UUID(); let action: ManagementAction }
 
@@ -16,6 +18,11 @@ enum StashAction: Sendable {
 struct StashRequest: Identifiable { let id = UUID(); let action: StashAction }
 
 extension RepositoryStore {
+    func reviewFetch(mode: FetchReviewMode = .standard) {
+        guard canUseRepository, snapshot?.remotes.isEmpty == false else { return }
+        manage(.fetch(nil, mode: mode))
+    }
+
     func manage(_ action: ManagementAction) { guard !isBusy else { return }; withFreshMetadata([.remotes, .organization]) { self.managementRequest = ManagementRequest(action: action) } }
     func stashAction(_ action: StashAction) { guard !isBusy else { return }; withFreshMetadata([.stashes]) { self.stashRequest = StashRequest(action: action) } }
     func saveStash(_ options: StashSaveOptions) {

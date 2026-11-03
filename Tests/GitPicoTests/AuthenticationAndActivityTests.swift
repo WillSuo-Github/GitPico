@@ -130,3 +130,10 @@ private final class MemoryCredentialVault: CredentialStoring, Sendable {
     }
     #expect(output.text.contains("username=oauth2\n") && output.text.contains("password=" + access + "\n") && !output.text.contains(refresh))
 }
+
+@Test func gitTransferProgressUsesTheCurrentStageRatherThanUnrelatedPercentages() {
+    let output = "remote: Compressing objects: 100% (20/20), done.\rReceiving objects:  37% (37/100)\nFrom repo-99%\n"
+    #expect(GitTransferProgress.latest(in: output) == GitTransferProgress(stage: "Receiving objects", percent: 37))
+    #expect(GitTransferProgress.latest(in: "Checking server quota: 75%\nWriting objects: 101% (101/100)") == nil)
+    #expect(GitTransferProgress.latest(in: "Resolving deltas:   0% (0/20)")?.fraction == 0)
+}

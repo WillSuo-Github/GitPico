@@ -177,7 +177,7 @@ struct UpstreamRecoveryBanner: View {
     var body: some View {
         if let missing = store.snapshot?.unresolvedUpstream {
             NoticeBanner(icon: "exclamationmark.triangle.fill", title: "Upstream unavailable", message: String(localized: "\(missing) is missing locally. Fetch it or select another tracking branch.")) {
-                Button("Fetch") { store.sync(.fetch) }.disabled(!store.canUseRepository)
+                Button("Fetch…") { store.reviewFetch() }.disabled(!store.canUseRepository)
                 Button("Tracking Branch…") { store.reviewTrackingBranch() }.disabled(!store.canUseRepository)
             }
         }

@@ -13,9 +13,26 @@ struct NetworkActivityRecord: Codable, Identifiable, Sendable {
     var finished: Date?
     var phase: GitNetworkEvent.Phase
     var output: String
-    var progress: Double? {
-        guard phase == .running, let regex = try? NSRegularExpression(pattern: "([0-9]{1,3})%"), let match = regex.matches(in: output, range: NSRange(output.startIndex..., in: output)).last, let range = Range(match.range(at: 1), in: output), let value = Double(output[range]), value <= 100 else { return nil }
-        return value / 100
+    var timedOut: Bool? = nil
+    var transferProgress: GitTransferProgress? {
+        phase == .running ? GitTransferProgress.latest(in: output) : nil
+    }
+}
+
+struct GitTransferProgress: Equatable {
+    let stage: String
+    let percent: Int
+    var fraction: Double { Double(percent) / 100 }
+
+    static func latest(in output: String) -> Self? {
+        // Ref names, paths and warnings can contain percentages without describing a transfer.
+        let progressLine = /^(?:remote: )?(Counting objects|Compressing objects|Receiving objects|Writing objects|Resolving deltas|Unpacking objects|Updating files|Checking out files|Uploading LFS objects|Downloading LFS objects):\s*([0-9]{1,3})%\s+\(/
+        for line in output.split(whereSeparator: \.isNewline).reversed() {
+            if let match = line.firstMatch(of: progressLine), let percent = Int(match.2), percent <= 100 {
+                return Self(stage: String(match.1), percent: percent)
+            }
+        }
+        return nil
     }
 }
 private final class NetworkHistoryWriter: @unchecked Sendable {
@@ -77,9 +94,12 @@ private final class NetworkHistoryWriter: @unchecked Sendable {
         if let index = records.firstIndex(where: { $0.id == event.id }) {
             guard records[index].phase == .running else { return }
             records[index].phase = event.phase; records[index].output = output
-            if event.phase != .running { records[index].finished = Date() }
+            if event.phase != .running {
+                records[index].finished = Date()
+                records[index].timedOut = event.timedOut ? true : nil
+            }
         } else {
-            records.insert(NetworkActivityRecord(id: event.id, command: event.command, repository: event.repository, repositoryPath: event.repositoryPath, started: event.started, finished: event.phase == .running ? nil : Date(), phase: event.phase, output: output), at: 0)
+            records.insert(NetworkActivityRecord(id: event.id, command: event.command, repository: event.repository, repositoryPath: event.repositoryPath, started: event.started, finished: event.phase == .running ? nil : Date(), phase: event.phase, output: output, timedOut: event.timedOut ? true : nil), at: 0)
         }
         if event.phase == .running { cancellations[event.id] = event.cancellation }
         else { cancellations.removeValue(forKey: event.id) }

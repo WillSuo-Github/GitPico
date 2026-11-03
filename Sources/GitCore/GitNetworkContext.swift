@@ -16,10 +16,11 @@ public struct GitNetworkEvent: Sendable {
     public let started: Date
     public let phase: Phase
     public let output: String
+    public let timedOut: Bool
     public let cancellation: GitNetworkCancellation
-    public init(id: UUID, command: String, repository: String, repositoryPath: String? = nil, started: Date, phase: Phase, output: String, cancellation: GitNetworkCancellation) {
+    public init(id: UUID, command: String, repository: String, repositoryPath: String? = nil, started: Date, phase: Phase, output: String, cancellation: GitNetworkCancellation, timedOut: Bool = false) {
         self.id = id; self.command = command; self.repository = repository; self.started = started; self.phase = phase; self.output = output; self.cancellation = cancellation
-        self.repositoryPath = repositoryPath
+        self.repositoryPath = repositoryPath; self.timedOut = timedOut
     }
 }
 public struct GitNetworkContext: Sendable {
@@ -96,11 +97,11 @@ final class GitNetworkObservation {
         let value = GitLogRedaction.clean(tail(stdout) + "\n" + tail(stderr), secrets: secrets)
         if value != lastOutput { lastOutput = value; send(.running, output: value) }
     }
-    func finish(succeeded: Bool, message: String = "") {
+    func finish(succeeded: Bool, message: String = "", timedOut: Bool = false) {
         guard !finished else { return }; finished = true
-        send(cancellation.isCancelled ? .cancelled : succeeded ? .succeeded : .failed, output: lastOutput + (message.isEmpty ? "" : "\n" + GitLogRedaction.clean(message, secrets: secrets)))
+        send(cancellation.isCancelled ? .cancelled : succeeded ? .succeeded : .failed, output: lastOutput + (message.isEmpty ? "" : "\n" + GitLogRedaction.clean(message, secrets: secrets)), timedOut: timedOut)
     }
-    private func send(_ phase: GitNetworkEvent.Phase, output: String) {
-        context.observer(GitNetworkEvent(id: id, command: command, repository: repository, repositoryPath: repositoryPath, started: started, phase: phase, output: output, cancellation: cancellation))
+    private func send(_ phase: GitNetworkEvent.Phase, output: String, timedOut: Bool = false) {
+        context.observer(GitNetworkEvent(id: id, command: command, repository: repository, repositoryPath: repositoryPath, started: started, phase: phase, output: output, cancellation: cancellation, timedOut: timedOut && phase == .failed))
     }
 }

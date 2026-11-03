@@ -28,11 +28,14 @@ struct RepositoryOperationFeedback: Identifiable {
     var failure: String?
     var warning: String?
 
+    var outcomeTitle: String {
+        phase == .succeeded ? (warning == nil ? String(localized: "Completed") : String(localized: "Action required")) : phase.title
+    }
+
     var title: String {
         let name = command.title ?? activity.trimmingCharacters(in: CharacterSet(charactersIn: ".…"))
         if phase == .running { return isRefreshing ? name + " · " + String(localized: "Refreshing…") : activity }
-        let result = phase == .succeeded ? (warning == nil ? String(localized: "Completed") : String(localized: "Action required")) : phase.title
-        return name + " · " + result
+        return name + " · " + outcomeTitle
     }
 }
 
@@ -47,6 +50,24 @@ extension RepositoryStore {
         return networkActivity?.records.first {
             $0.repositoryPath == feedback.repository && $0.started >= feedback.started && $0.started <= (feedbackFinishedAt ?? .distantFuture)
         }
+    }
+
+    var activeStatusNetworkRecord: NetworkActivityRecord? {
+        guard isBusy else { return nil }
+        if isBackgroundFetching, let path = snapshot?.root.path {
+            return networkActivity?.records.first {
+                $0.repositoryPath == path && $0.command == "fetch" && $0.started >= lastBackgroundFetch && $0.phase == .running
+            }
+        }
+        guard operationFeedback?.phase == .running, operationFeedback?.isRefreshing == false,
+              let record = feedbackNetworkRecord, record.phase == .running else { return nil }
+        return record
+    }
+
+    var latestStatusNetworkRecord: NetworkActivityRecord? {
+        guard !isChoosingRepository, let path = snapshot?.root.path else { return nil }
+        let record = networkActivity?.records.first { $0.repositoryPath == path && $0.phase != .running }
+        return record?.id == dismissedStatusNetworkRecord ? nil : record
     }
 
     /// Called by the shared busy/activity lifecycle, so custom workflows receive the same feedback.
@@ -96,12 +117,13 @@ extension RepositoryStore {
     }
 
     func inspectOperationNetworkActivity() {
-        networkActivitySelection = feedbackNetworkRecord?.id
+        networkActivitySelection = (activeStatusNetworkRecord ?? feedbackNetworkRecord ?? latestStatusNetworkRecord)?.id
         showingNetworkActivity = true
     }
 
     func dismissOperationFeedback(_ id: UUID) {
         guard operationFeedback?.id == id, operationFeedback?.phase != .running else { return }
+        dismissedStatusNetworkRecord = feedbackNetworkRecord?.id
         clearOperationFeedback()
     }
 

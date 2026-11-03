@@ -1,6 +1,259 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Advanced Options" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "高级选项"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "進階選項"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "進階選項"
+          }
+        }
+      }
+    },
+    "Enter a branch name to fetch only that branch." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "输入分支名，只获取该分支。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "輸入分支名稱，只擷取該分支。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "輸入分支名稱，只擷取該分支。"
+          }
+        }
+      }
+    },
+    "Fetch updates remote-tracking references without merging or changing your working files." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fetch 会更新远程跟踪引用，不会合并或修改工作区文件。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fetch 會更新遠端追蹤參照，不會合併或修改工作區檔案。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fetch 會更新遠端追蹤參照，不會合併或修改工作區檔案。"
+          }
+        }
+      }
+    },
+    "Skip Automatic Tags" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不自动获取标签"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不自動擷取標籤"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不自動擷取標籤"
+          }
+        }
+      }
+    },
+    "Time Limit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "时间上限"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時間上限"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時間上限"
+          }
+        }
+      }
+    },
+    "Fetch Submodule Updates" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "获取子模块更新"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "擷取子模組更新"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "擷取子模組更新"
+          }
+        }
+      }
+    },
+    "Pruning is available when fetching all configured branches." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "获取所有已配置的分支时，才可清理失效的远程跟踪分支。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "擷取所有已設定的分支時，才可清理失效的遠端追蹤分支。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "擷取所有已設定的分支時，才可清理失效的遠端追蹤分支。"
+          }
+        }
+      }
+    },
+    "Use HTTP/1.1" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用 HTTP/1.1"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用 HTTP/1.1"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用 HTTP/1.1"
+          }
+        }
+      }
+    },
+    "Try this for HTTPS transfers that repeatedly disconnect. This only applies to this fetch." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HTTPS 传输反复断开时可尝试开启。仅对本次 Fetch 生效。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HTTPS 傳輸反覆中斷時可嘗試開啟。僅適用於本次 Fetch。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HTTPS 傳輸反覆中斷時可嘗試開啟。僅適用於本次 Fetch。"
+          }
+        }
+      }
+    },
+    "GitPico stopped this operation at its time limit. For a large fetch, choose a longer time limit in Fetch Options." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已达到时间上限，GitPico 停止了本次操作。获取大量数据时，可在 Fetch 选项中延长时间上限。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已達時間上限，GitPico 已停止本次操作。擷取大量資料時，可在 Fetch 選項中延長時間上限。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已達時間上限，GitPico 已停止本次操作。擷取大量資料時，可在 Fetch 選項中延長時間上限。"
+          }
+        }
+      }
+    },
+    "The transfer was interrupted. Check the connection or proxy. In Fetch Options, try one remote and one branch, or HTTP/1.1 for HTTPS." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "传输中断。请检查网络或代理。在 Fetch 选项中试试只获取一个远端的一条分支；如果使用 HTTPS，也可尝试 HTTP/1.1。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "傳輸中斷。請檢查網絡或代理。在 Fetch 選項中嘗試只擷取一個遠端的一條分支；若使用 HTTPS，也可嘗試 HTTP/1.1。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "傳輸中斷。請檢查網絡或代理。在 Fetch 選項中嘗試只擷取一個遠端的一條分支；若使用 HTTPS，也可嘗試 HTTP/1.1。"
+          }
+        }
+      }
+    },
     "A local branch with this name already exists. Choose a different name." : {
       "extractionState" : "manual",
       "localizations" : {

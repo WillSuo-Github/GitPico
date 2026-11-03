@@ -176,6 +176,7 @@ final class RepositoryStore {
     var isAutomaticallyRefreshing = false
     var isBackgroundFetching = false
     var operationFeedback: RepositoryOperationFeedback?
+    var dismissedStatusNetworkRecord: UUID?
     @ObservationIgnored var feedbackFinishedAt: Date?
     @ObservationIgnored var operationFeedbackTask: Task<Void, Never>?
     var automaticRefreshError: String?
@@ -207,6 +208,7 @@ final class RepositoryStore {
     }
     var showingAuthentication = false
     var authenticationAfterNetwork = false
+    var fetchAfterNetwork: FetchReviewMode?
     var networkAfterAuthentication = false
     var connectionTestMessage: String?
     var authentication: AuthenticationStore
@@ -553,9 +555,10 @@ final class RepositoryStore {
 
     func sync(_ action: GitRepository.SyncAction) {
         guard canUseRepository, snapshot?.remotes.isEmpty == false, action == .fetch || canIntegrate else { return }
+        if action == .fetch { runRemoteFetch(nil, options: FetchOptions()); return }
         if action == .push, let current = snapshot?.references.first(where: \.isCurrent), current.isLocal, current.upstream.isEmpty {
             manage(.publish(current, nil, nil, false))
-        } else { perform(action == .fetch ? "Fetching remote updates…" : "Pushing…", feedback: action == .fetch ? .fetch : .push) { try await $0.sync(action) } }
+        } else { perform("Pushing…", feedback: .push) { try await $0.sync(.push) } }
     }
     /// Pull always goes through the strategy review sheet.
     func reviewPull() {

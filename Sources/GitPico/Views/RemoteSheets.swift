@@ -49,30 +49,91 @@ struct RemoteEditSheet: View {
 
 struct RemoteFetchSheet: View {
     let store: RepositoryStore
-    let initialRemote: RemoteConfiguration?
-    @State private var name = ""
-    @State private var prune = false
-    @State private var tags = false
+    @State private var name: String
+    @State private var branch = ""
+    @State private var options: FetchOptions
+    @State private var showAdvanced: Bool
     @Environment(\.dismiss) private var dismiss
+
+    init(store: RepositoryStore, initialRemote: RemoteConfiguration?, mode: FetchReviewMode) {
+        self.store = store
+        let singleRemote = store.managedRemotes.count == 1 ? store.managedRemotes.first : nil
+        _name = State(initialValue: initialRemote?.name ?? singleRemote?.name ?? "")
+        _showAdvanced = State(initialValue: mode != .standard)
+        var options = FetchOptions()
+        if mode == .largeTransfer { options.tags = .skip; options.timeLimit = .extended }
+        _options = State(initialValue: options)
+    }
+
+    private var selectedRemote: RemoteConfiguration? { store.managedRemotes.first { $0.name == name } }
+    private var branchName: String? {
+        let value = branch.trimmingCharacters(in: .whitespacesAndNewlines)
+        return name.isEmpty || value.isEmpty ? nil : value
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            SheetTitle("Fetch Remote Repository")
-            Picker("Remote", selection: $name) { Text("All Remotes").tag(""); ForEach(store.managedRemotes) { Text($0.name).tag($0.name) } }
-            Toggle("Prune Deleted Remote Branches", isOn: $prune)
-            Toggle("Fetch All Tags", isOn: $tags)
-            Text("Updates remote-tracking references without changing your working files. Pruning removes references to branches no longer on the server.").font(.callout).foregroundStyle(.secondary)
-            ManagementFooter(title: "Fetch", disabled: store.isBusy || store.managedRemotes.isEmpty) {
-                let remote = store.managedRemotes.first { $0.name == name }, prune = prune, tags = tags
-                store.runRemoteFetch(remote, prune: prune, tags: tags); dismiss()
+        VStack(alignment: .leading, spacing: 16) {
+            SheetTitle("Fetch Remote Repository", icon: "arrow.down.circle")
+            Picker("Remote", selection: $name) {
+                Text("All Remotes").tag("")
+                ForEach(store.managedRemotes) { Text($0.name).tag($0.name) }
             }
-        }.padding(24).frame(width: 520).onAppear { name = initialRemote?.name ?? "" }
+            if !name.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Branch").font(.callout)
+                    TextField("Branch", text: $branch, prompt: Text("All Branches"))
+                        .help("Enter a branch name to fetch only that branch.")
+                }
+            }
+            Text("Fetch updates remote-tracking references without merging or changing your working files.")
+                .font(.callout).foregroundStyle(.secondary)
+
+            DisclosureGroup("Advanced Options", isExpanded: $showAdvanced) {
+                VStack(alignment: .leading, spacing: 11) {
+                    Picker("Tags", selection: $options.tags) {
+                        Text("Default").tag(FetchOptions.Tags.configured)
+                        Text("Skip Automatic Tags").tag(FetchOptions.Tags.skip)
+                        Text("Fetch All Tags").tag(FetchOptions.Tags.all)
+                    }
+                    Picker("Time Limit", selection: $options.timeLimit) {
+                        ForEach(FetchOptions.TimeLimit.allCases, id: \.self) { limit in
+                            Text(Duration.seconds(limit.rawValue * 60).formatted(.units(allowed: [.hours, .minutes], width: .wide)))
+                                .tag(limit)
+                        }
+                    }
+                    Toggle("Fetch Submodule Updates", isOn: $options.recurseSubmodules)
+                    Toggle("Prune Deleted Remote Branches", isOn: $options.prune)
+                        .disabled(branchName != nil)
+                        .help("Pruning is available when fetching all configured branches.")
+                    Toggle("Use HTTP/1.1", isOn: $options.useHTTP11)
+                        .help("Try this for HTTPS transfers that repeatedly disconnect. This only applies to this fetch.")
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.leading, 12).padding(.top, 10)
+            }
+
+            ManagementFooter(title: "Fetch", disabled: !store.canUseRepository || store.managedRemotes.isEmpty || (!name.isEmpty && selectedRemote == nil)) {
+                var request = options
+                request.branch = branchName
+                if branchName != nil { request.prune = false }
+                store.runRemoteFetch(selectedRemote, options: request)
+                dismiss()
+            }
+        }.padding(24).frame(width: 520)
     }
 }
 
-
 extension RepositoryStore {
+    func runRemoteFetch(_ remote: RemoteConfiguration?, options: FetchOptions) {
+        guard canUseRepository else { return }
+        perform("Fetching…", feedback: .fetch) { try await $0.fetch(remote, options: options) }
+    }
+
     func runRemoteFetch(_ remote: RemoteConfiguration?, prune: Bool, tags: Bool) {
-        perform("Fetching…", feedback: .fetch) { try await $0.fetchRemote(remote, prune: prune, tags: tags) }
+        var options = FetchOptions()
+        options.prune = prune
+        if tags { options.tags = .all }
+        runRemoteFetch(remote, options: options)
     }
 
     func runRemotePush(_ preview: RemotePushPreview) {

@@ -79,9 +79,10 @@ extension GitRepository {
     }
 
     public func fetchRemote(_ remote: RemoteConfiguration?, prune: Bool = false, tags: Bool = false) async throws {
-        if let remote { try await requireRemote(remote) }
-        let options = (prune ? ["--prune"] : []) + (tags ? ["--tags"] : [])
-        _ = try await GitProcess.run(["fetch"] + options + (remote.map { ["--", $0.name] } ?? ["--all"]), at: root, timeout: 120)
+        var options = FetchOptions()
+        options.prune = prune
+        if tags { options.tags = .all }
+        try await fetch(remote, options: options)
     }
 
     public func pushPreview(remote: RemoteConfiguration, source: Reference?, destination: String, forceWithLease: Bool = false, setUpstream: Bool = false, pushURL: String? = nil) async throws -> RemotePushPreview {

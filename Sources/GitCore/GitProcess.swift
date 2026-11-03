@@ -145,7 +145,9 @@ public enum GitProcess {
                 network?.progress(stdout: outURL, stderr: errURL)
                 if network?.cancellation.isCancelled == true { throw GitFailure("Network operation cancelled. The server or working copy may already have changed; review the refreshed state before retrying.") }
                 if cancellable && Task.isCancelled { network?.cancellation.cancel(); throw CancellationError() }
-                throw GitFailure("Git timed out after \(Int(timeout)) seconds. Check SSH, signing, hooks, or network access.")
+                let failure = GitFailure("Git timed out after \(Int(timeout)) seconds. Check SSH, signing, hooks, or network access.")
+                network?.finish(succeeded: false, message: failure.localizedDescription, timedOut: true)
+                throw failure
             }
             // The termination callback already observed exit; waitUntilExit would pump
             // Foundation's run loop and add latency to every short command.

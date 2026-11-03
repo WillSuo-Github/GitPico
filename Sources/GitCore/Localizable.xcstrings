@@ -1,6 +1,29 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Choose one remote to fetch a single branch." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请选择一个远端，再获取指定分支。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請選擇一個遠端，再擷取指定分支。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請選擇一個遠端，再擷取指定分支。"
+          }
+        }
+      }
+    },
     "A local branch with this name already exists. Choose a different name." : {
       "extractionState" : "manual",
       "localizations" : {

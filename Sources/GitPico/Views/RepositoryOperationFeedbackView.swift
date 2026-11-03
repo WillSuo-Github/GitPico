@@ -22,7 +22,7 @@ struct RepositorySyncButton: View {
     private var help: String {
         if running { return String(localized: "Network progress, recent operations and authentication") }
         switch action {
-        case .fetch: return String(localized: "Fetch all remotes")
+        case .fetch: return String(localized: "Fetch Options…")
         case .pull: return String(localized: "Review Pull strategy (\(AppPreferences.shared.pullPolicy.title))")
         case .push: return String(localized: "Push current branch")
         }
@@ -33,7 +33,7 @@ struct RepositorySyncButton: View {
             if running { store.showingNetworkActivity = true }
             else {
                 switch action {
-                case .fetch: store.sync(.fetch)
+                case .fetch: store.reviewFetch()
                 case .pull: store.reviewPull()
                 case .push: store.sync(.push)
                 }

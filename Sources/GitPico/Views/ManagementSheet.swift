@@ -19,7 +19,8 @@ struct ManagementSheet: View {
         case .renameRemote(let remote): RemoteEditSheet(store: store, remote: remote, action: .rename)
         case .removeRemote(let remote): RemoteEditSheet(store: store, remote: remote, action: .remove)
         case .publish(let ref, let remote, let destination, let force): RemotePushSheet(store: store, source: ref, remoteName: remote, destination: destination, force: force)
-        case .fetch(let remote): RemoteFetchSheet(store: store, initialRemote: remote)
+        case .fetch(let remote, let mode):
+            RemoteFetchSheet(store: store, initialRemote: remote, mode: mode)
         case .recovery: ManagementRecoverySheet(store: store)
         }
     }
