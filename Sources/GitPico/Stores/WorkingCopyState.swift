@@ -86,6 +86,20 @@ extension RepositoryStore {
     }
     func stageSelectedFiles(_ context: String? = nil) { stage(workingTargets(context).filter { !$0.isConflicted && $0.isUnstaged }) }
     func unstageSelectedFiles(_ context: String? = nil) { unstage(workingTargets(context).filter { !$0.isConflicted && $0.isStaged }) }
+    // Resolve from the current filter instead of the asynchronously published list.
+    // Clicking immediately after typing must never include a now-hidden file.
+    var visibleWorkingChanges: [FileChange] {
+        let input = workingFilesInput
+        return WorkingFilesPresentation.visible(input).compactMap { entry in
+            guard !input.conflictsOnly || entry.change?.isConflicted == true,
+                  input.query.isEmpty || entry.path.localizedCaseInsensitiveContains(input.query) else { return nil }
+            return entry.change
+        }
+    }
+    var visibleStageTargets: [FileChange] { visibleWorkingChanges.filter { $0.isUnstaged && !$0.isConflicted } }
+    var visibleUnstageTargets: [FileChange] { visibleWorkingChanges.filter { $0.isStaged && !$0.isConflicted } }
+    func stageVisibleFiles() { stage(visibleStageTargets) }
+    func unstageVisibleFiles() { unstage(visibleUnstageTargets) }
     var commitUnavailableReason: String? {
         guard snapshot != nil, !isChoosingRepository else { return String(localized: "Open a repository to commit.") }
         if isBusy || isOpeningRepository { return String(localized: "Wait for the current operation.") }

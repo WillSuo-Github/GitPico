@@ -4,6 +4,7 @@ import SwiftUI
 struct HistoryView: View {
     @Bindable var store: RepositoryStore
     @State private var preferences = AppPreferences.shared
+    @State private var showingSearchFilters = false
     var commits: [Commit] { store.visibleCommits }
     var body: some View {
         PersistentSplitView(name: "history", width: 320) {
@@ -27,8 +28,12 @@ struct HistoryView: View {
                         }
                     }
                     if store.isLoadingHistory { ProgressView().controlSize(.mini).help("Loading history…") }
+                    Button { showingSearchFilters = true } label: { Image(systemName: "magnifyingglass") }
+                        .buttonStyle(.borderless).help("Search by author, date, file path or changed code")
+                        .accessibilityLabel("Search history filters")
+                        .popover(isPresented: $showingSearchFilters) { HistorySearchFilters(store: store) }
                     Menu {
-                        Text("Search: author:\"Name\" after:2026-01-01 before:2026-12-31 path:\"Sources/File.swift\" hash:abcd message:\"fix\"")
+                        Text("Search: author:\"Name\" after:2026-01-01 path:\"Sources/File.swift\" content:\"changed code\" hash:abcd message:\"fix\"")
                         Divider()
                         Toggle("Show Graph", isOn: $preferences.historyShowGraph)
                         Toggle("Show First Parent Only", isOn: $store.historyOptions.firstParent)
@@ -37,6 +42,18 @@ struct HistoryView: View {
                         Toggle("Group by Month", isOn: $preferences.historyGroups)
                         Picker("Commit View Size", selection: $preferences.historyCompact) { Text("Medium").tag(false); Text("Small").tag(true) }
                     } label: { Image(systemName: "line.3.horizontal.decrease.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Change viewing options").disabled(store.isBusy)
+                }
+                if !store.search.isEmpty {
+                    SearchScopeBar(title: String(localized: "Commit history · all reachable matches"), query: store.search) { store.search = "" }
+                        .padding(10).background(.bar)
+                }
+                if store.selectedHistoryHashes.count > 1 {
+                    HStack(spacing: 8) {
+                        Text("\(store.selectedHistoryHashes.count) selected").font(.caption).foregroundStyle(.secondary)
+                        Spacer(minLength: 0)
+                        Button("Cherry-Pick…") { store.reviewSelectedCommits(.cherryPick) }
+                        Button("Revert…") { store.reviewSelectedCommits(.revert) }
+                    }.controlSize(.small).padding(10).background(.bar).disabled(!store.canIntegrate)
                 }
                 if let failure = store.historyError, !commits.isEmpty {
                     HStack { Image(systemName: "exclamationmark.triangle"); Text(failure).lineLimit(2); Spacer(); Button("Retry") { store.requestHistory() } }
@@ -66,6 +83,12 @@ struct HistoryCommitActions: View {
     let commit: Commit
     let canModifyHistory: Bool
     var body: some View {
+        if store.selectedHistoryHashes.contains(commit.hash), store.selectedHistoryHashes.count > 1 {
+            Section {
+                Button("Cherry-Pick Selected Commits…") { store.reviewSelectedCommits(.cherryPick) }
+                Button("Revert Selected Commits…") { store.reviewSelectedCommits(.revert) }
+            }.disabled(!canModifyHistory)
+        }
         Section {
             Button("Cherry-Pick Commit…") { store.integrationRequest = IntegrationRequest(action: .cherryPick, revision: commit.hash) }
             Button("Revert Commit…") { store.integrationRequest = IntegrationRequest(action: .revert, revision: commit.hash) }
@@ -84,5 +107,14 @@ struct HistoryCommitActions: View {
             Button("Copy Commit Hash") { Pico.copy(commit.hash) }
             Button("Copy Commit Subject") { Pico.copy(commit.subject) }
         }
+    }
+}
+
+extension RepositoryStore {
+    func reviewSelectedCommits(_ action: GitRepository.Integration) {
+        guard canIntegrate else { return }
+        let commits = visibleCommits.filter { selectedHistoryHashes.contains($0.hash) }
+        guard (1...200).contains(commits.count) else { error = String(localized: "Choose up to 200 commits for one batch."); return }
+        batchIntegrationRequest = BatchIntegrationRequest(action: action, commits: action == .cherryPick ? commits.reversed() : commits)
     }
 }

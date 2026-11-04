@@ -19,6 +19,10 @@ struct SplitDiffView: View {
     var selected: Set<Int> = []
     var select: ((DiffLine) -> Void)?
     var minimumWidth: CGFloat = 700
+    var code: [Int: DiffCodeLine] = [:]
+    var query = ""
+    var focusedLine: String? = nil
+    var idPrefix = "line:"
     var body: some View {
         let rows = preparedRows ?? SplitDiffRow.align(lines)
         HStack(alignment: .top, spacing: 0) {
@@ -38,12 +42,16 @@ struct SplitDiffView: View {
                         } else if select != nil { Color.clear.frame(width: 25, height: 19) }
                         Text((right ? line?.newNumber : line?.oldNumber).map(String.init) ?? "")
                             .foregroundStyle(gutterStyle(line)).frame(width: 42, alignment: .trailing).padding(.trailing, 10)
-                        Text(line.map { $0.text.isEmpty ? " " : ($0.kind == .context || $0.kind == .addition || $0.kind == .deletion ? String($0.text.dropFirst()) : $0.text) } ?? " ")
-                            .textSelection(.enabled).fixedSize().padding(.trailing, 16)
+                        if let line {
+                            DiffCodeText(line: code[line.id] ?? DiffCodeLine(source: [.context, .addition, .deletion].contains(line.kind) ? String(line.text.dropFirst()) : line.text, path: ""), query: query)
+                                .padding(.trailing, 16)
+                        } else { Text(" ").padding(.trailing, 16) }
                         Spacer(minLength: 0)
                     }.font(.system(size: fontSize, design: .monospaced)).frame(height: 21)
                         .frame(minWidth: max(0, (minimumWidth - 1) / 2), alignment: .leading)
                         .background(background(line))
+                        .overlay { if let line, focusedLine == idPrefix + String(line.id) { Rectangle().strokeBorder(Color.accentColor, lineWidth: 1) } }
+                        .id(line.map { (right || $0.kind == .deletion ? idPrefix : "left:" + idPrefix) + String($0.id) } ?? "\(idPrefix)empty:\(right):\(row.id)")
                         .overlay(alignment: .leading) { if let line, line.kind == .addition || line.kind == .deletion { Rectangle().fill(line.kind == .addition ? Pico.addition : Pico.deletion).frame(width: 2) } }
                 }
             }.frame(maxWidth: .infinity, alignment: .leading)

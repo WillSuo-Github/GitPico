@@ -72,6 +72,7 @@ extension RepositoryStore {
         }
     }
     func showHistory(_ value: HistoryPresentation, preservingSelection: Bool) {
+        selectedHistoryHashes.formIntersection(Set(value.page.commits.map(\.hash)))
         let previousSelection = selectedCommit?.hash
         if historyPresentation.id != value.id { historyPresentation = value }
         if preservingSelection, let selectedCommit, let updated = value.page.commits.first(where: { $0.hash == selectedCommit.hash }) {

@@ -98,6 +98,10 @@ extension RepositoryStore {
 
     func abortOperation() { perform("Aborting operation…", refresh: .workingTree) { try await $0.abortOperation() } }
     func continueOperation() { perform("Continuing operation…", refresh: .workingTree) { try await $0.continueOperation() } }
+    func skipCurrentCommit() {
+        if snapshot?.operation == .rebase { skipRebaseCommit() }
+        else { perform("Skipping commit…", refresh: .workingTree) { try await $0.skipIntegrationStep() } }
+    }
 
     func loadConfiguration() async {
         guard let repository else { return }

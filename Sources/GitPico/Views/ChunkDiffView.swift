@@ -18,6 +18,9 @@ struct ChunkDiffView: View {
     var exportLines: ((Set<PatchLineID>) -> Void)? = nil
     @State private var preferences = AppPreferences.shared
     @State private var selectedLines = PatchLineSelection()
+    @State private var findQuery = ""
+    @State private var focusedLine: String?
+    @State private var findReveal = UUID()
     private var text: String { prepared?.source ?? "" }
 
     var body: some View {
@@ -27,7 +30,11 @@ struct ChunkDiffView: View {
         else if let prepared {
             let patch = prepared.patch
             let previews = prepared.previews
+            let matches = findQuery.isEmpty ? [] : previews.flatMap { preview in
+                preview.lines.filter { CodeHighlighting.contains(prepared.code[preview.id]?[$0.id]?.source ?? CodeHighlighting.source($0), query: findQuery) }.map { "\(preview.id):\($0.id)" }
+            }
             VStack(spacing: 0) {
+                DiffFindBar(query: $findQuery, matches: matches, selection: $focusedLine) { findReveal = UUID() }
                 HStack(spacing: 10) {
                     DiffStat(additions: patch.additions, deletions: patch.deletions)
                     Text("\(patch.hunks.count) chunks").foregroundStyle(.secondary)
@@ -50,6 +57,7 @@ struct ChunkDiffView: View {
                 }.font(.system(size: 11)).controlSize(.small).padding(.horizontal, 14).frame(height: 34).disabled(disabled)
                 Divider()
                 GeometryReader { geometry in
+                    ScrollViewReader { proxy in
                     ScrollView(.vertical) {
                         LazyVStack(alignment: .leading, spacing: 0) {
                             if preferences.splitDiff {
@@ -70,7 +78,7 @@ struct ChunkDiffView: View {
                                     }
                                 }.padding(.horizontal, 12).frame(height: 30).background(Color.accentColor.opacity(0.06)).overlay(alignment: .top) { Divider().opacity(0.6) }
                                 if preferences.splitDiff {
-                                    SplitDiffView(lines: preview.lines, fontSize: preferences.diffFontSize, preparedRows: prepared.splitRows[hunk.id], selected: Set(selectedLines.ids.filter { $0.hunk == hunk.id }.map(\.line)), select: canSelect ? { toggle($0, in: hunk, prepared: prepared) } : nil, minimumWidth: geometry.size.width)
+                                    SplitDiffView(lines: preview.lines, fontSize: preferences.diffFontSize, preparedRows: prepared.splitRows[hunk.id], selected: Set(selectedLines.ids.filter { $0.hunk == hunk.id }.map(\.line)), select: canSelect ? { toggle($0, in: hunk, prepared: prepared) } : nil, minimumWidth: geometry.size.width, code: prepared.code[hunk.id] ?? [:], query: findQuery, focusedLine: focusedLine, idPrefix: "\(hunk.id):")
                                 } else {
                                     ScrollView(.horizontal) {
                                         LazyVStack(alignment: .leading, spacing: 0) {
@@ -79,8 +87,10 @@ struct ChunkDiffView: View {
                                                     if canSelect, line.kind == .addition || line.kind == .deletion {
                                                         LineSelectionButton(line: line, selected: selectedLines.ids.contains(PatchLineID(hunk: hunk.id, line: line.id)), action: { toggle(line, in: hunk, prepared: prepared) })
                                                     } else if canSelect { Color.clear.frame(width: 25) }
-                                                    DiffLineView(line: line, fontSize: preferences.diffFontSize)
+                                                    DiffLineView(line: line, fontSize: preferences.diffFontSize, code: prepared.code[hunk.id]?[line.id], query: findQuery)
                                                 }.frame(minWidth: geometry.size.width, alignment: .leading)
+                                                    .id("\(hunk.id):\(line.id)")
+                                                    .overlay { if focusedLine == "\(hunk.id):\(line.id)" { Rectangle().strokeBorder(Color.accentColor, lineWidth: 1) } }
                                                     .background(selectedLines.ids.contains(PatchLineID(hunk: hunk.id, line: line.id)) ? Color.accentColor.opacity(0.23) : .clear)
                                                     .environment(\.layoutDirection, .leftToRight)
                                             }
@@ -91,6 +101,8 @@ struct ChunkDiffView: View {
                             if previews.count < patch.hunks.count || previews.last?.isTruncated == true { Text("Preview limited to 8,000 lines. Review the complete diff in an external tool.").font(.caption).foregroundStyle(.secondary).padding(12) }
                         }.frame(minWidth: geometry.size.width, minHeight: geometry.size.height, alignment: .topLeading)
                     }.defaultScrollAnchor(.topLeading)
+                        .onChange(of: findReveal) { if let focusedLine { proxy.scrollTo(focusedLine, anchor: .center) } }
+                    }
                 }.background(Color(nsColor: .textBackgroundColor))
             }
         }

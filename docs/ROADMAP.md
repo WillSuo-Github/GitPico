@@ -1,5 +1,14 @@
 # GitPico milestones
 
+## Workflow polish — 2026-11-04
+
+- Stable counted Stage Visible / Unstage Visible actions respect the latest filter; hidden files are excluded.
+- Search scopes are explicit; history has an author/date/path/changed-code form and literal pickaxe queries. File History separates file identity from controls and offers expansion of the loaded search range.
+- Working, commit, stash and comparison diffs share lexical code coloring, bounded inline changes and literal diff search/navigation.
+- Conflict source titles identify branch/commit context. Per-block navigation updates source snippets and reveals the corresponding result location; full-source viewing, editable drafts and existing stale-save guards remain available.
+- Native history multi-selection prepares reorderable Cherry-Pick/Revert batches with Git sequencer continuation/abort and one history undo record.
+- Branch cleanup recommends reversible archiving using ancestry, inactivity, local tracking state and patch equivalence, protecting pinned/current/occupied branches. This supersedes earlier missing batch-Revert and syntax-coloring entries; it does not add automatic destructive deletion or hosted PR/MR management.
+
 Current scope (2026-10-26): PR/MR creation, comments, discussions and merge management deliberately remain on the hosting website. The app exposes only a browser link. Earlier hosted-review milestones below are historical and were superseded by this user decision.
 
 ## Implemented in 0.1

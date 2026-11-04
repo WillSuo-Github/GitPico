@@ -167,6 +167,7 @@ struct CommitFileDisclosure: View {
     let stats: FileStatistics?
     @Binding var expanded: Bool
     @State private var diff: String?
+    @State private var prepared: PreparedPatch?
     @State private var error: String?
     @State private var contentWidth: CGFloat = 0
     @State private var preferences = AppPreferences.shared
@@ -176,23 +177,9 @@ struct CommitFileDisclosure: View {
             DisclosureGroup(isExpanded: $expanded) {
                 if stats?.isBinary == true || BinaryComparisonView.isImageCandidate(file.path) {
                     BinaryComparisonView(repository: repository, path: file.path, left: commit.parents.first.map { .revision($0) } ?? .empty, right: .revision(commit.hash)).frame(minHeight: 320)
-                } else if let diff {
-                    let patch = PatchDocument(diff)
-                    if patch.hunks.isEmpty { Text(diff).font(.system(size: 11, design: .monospaced)).textSelection(.enabled).padding(12).frame(maxWidth: .infinity, alignment: .leading) }
-                    if preferences.splitDiff {
-                        HStack(spacing: 0) { Text("Parent").frame(maxWidth: .infinity, alignment: .leading); Text(commit.shortHash).frame(maxWidth: .infinity, alignment: .leading) }.font(.system(size: 10)).foregroundStyle(.secondary).padding(8).environment(\.layoutDirection, .leftToRight)
-                    }
-                    ForEach(patch.preview()) { preview in
-                        let hunk = preview.hunk
-                        Text(hunk.header).font(.system(size: 10, weight: .medium, design: .monospaced)).foregroundStyle(Color.accentColor.opacity(0.85)).frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 10).padding(.vertical, 6).background(Color.accentColor.opacity(0.06))
-                        if preferences.splitDiff {
-                            SplitDiffView(lines: preview.lines, fontSize: preferences.diffFontSize, minimumWidth: max(0, contentWidth - 28))
-                        } else { ScrollView(.horizontal) {
-                            VStack(alignment: .leading, spacing: 0) {
-                                ForEach(preview.lines) { line in DiffLineView(line: line, fontSize: 11).frame(minWidth: max(0, contentWidth - 28), alignment: .leading) }
-                            }
-                        } }
-                    }
+                } else if let prepared {
+                    ChunkDiffView(prepared: prepared, leftTitle: String(localized: "Parent"), rightTitle: commit.shortHash)
+                        .frame(height: min(520, max(160, CGFloat(prepared.previews.reduce(0) { $0 + $1.lines.count }) * 21 + CGFloat(prepared.previews.count) * 30 + 90)))
                 } else if let error { Text(error).font(.caption).foregroundStyle(.red).padding(12) }
                 else { ProgressView().controlSize(.small).padding(12) }
             } label: {
@@ -212,7 +199,11 @@ struct CommitFileDisclosure: View {
             }.disclosureGroupStyle(CommitFileDisclosureStyle())
             .task(id: expanded) {
                 guard expanded, diff == nil else { return }
-                do { diff = try await repository.commitDiff(commit, path: file.path) } catch { self.error = error.localizedDescription }
+                do {
+                    let source = try await repository.commitDiff(commit, path: file.path), path = file.path
+                    let value = await Task.detached(priority: .userInitiated) { PreparedPatch.make(source, path: path) }.value
+                    guard !Task.isCancelled else { return }; prepared = value; diff = source
+                } catch { self.error = error.localizedDescription }
             }
         }.frame(maxWidth: .infinity).onGeometryChange(for: CGFloat.self) { $0.size.width } action: { contentWidth = $0 }.id(commit.hash + file.path)
     }

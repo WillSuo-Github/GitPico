@@ -72,7 +72,7 @@ extension GitRepository {
             tips = [hash]
         }
         let filters = (query.hash == nil ? [] : ["--no-walk=unsorted"]) + (options.firstParent ? ["--first-parent"] : []) + query.arguments
-        let args = ["log", "--no-show-signature", options.sortByDate ? "--date-order" : "--topo-order", "--max-count=\(query.hash == nil ? options.limit + 1 : 1)", "--format=%H%x00%P%x00%an%x00%ae%x00%at%x00%s%x00%D%x00"] + filters + ["--stdin", "--"] + query.paths
+        let args = ["log", "--no-show-signature", "--no-ext-diff", "--no-textconv", options.sortByDate ? "--date-order" : "--topo-order", "--max-count=\(query.hash == nil ? options.limit + 1 : 1)", "--format=%H%x00%P%x00%an%x00%ae%x00%at%x00%s%x00%D%x00"] + filters + ["--stdin", "--"] + query.paths
         let output = try await GitProcess.run(args, at: root, input: Data((tips.joined(separator: "\n") + "\n").utf8), cancellable: true)
         let commits = GitParser.commits(output.data), hasMore = commits.count > options.limit
         let visible = Array(commits.prefix(options.limit))

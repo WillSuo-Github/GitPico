@@ -28,10 +28,28 @@ struct FileHistoryView: View {
     var body: some View {
         PersistentSplitView(name: "fileHistory", width: 320) {
             VStack(spacing: 0) {
-                PaneBar(title: path.isEmpty ? "File History" : "\((path as NSString).lastPathComponent)", subtitle: path.isEmpty ? String(localized: "No file chosen") : String(localized: "\(history?.revisions.count ?? 0)\(history?.hasMore == true ? "+" : "") commits · \((path as NSString).deletingLastPathComponent.nilIfEmpty ?? String(localized: "repository root"))"), icon: "doc.text.magnifyingglass") {
-                    Toggle("All Refs", isOn: $allReferences).toggleStyle(.checkbox).controlSize(.small).help("Include local branches, remote-tracking branches and tags, following earlier names where discovered.")
-                    Button("Choose…") { showingFiles = true }.controlSize(.small).help("Choose another tracked file")
-                }
+                VStack(alignment: .leading, spacing: 8) {
+                    Label(path.isEmpty ? String(localized: "File History") : (path as NSString).lastPathComponent, systemImage: "doc.text.magnifyingglass")
+                        .font(.system(size: 13, weight: .semibold)).lineLimit(2).textSelection(.enabled).help(path)
+                    if !path.isEmpty {
+                        Text((path as NSString).deletingLastPathComponent.nilIfEmpty ?? String(localized: "repository root"))
+                            .font(.caption).foregroundStyle(.secondary).lineLimit(2).truncationMode(.middle).textSelection(.enabled).help(path)
+                    }
+                    HStack {
+                        Toggle("All Refs", isOn: $allReferences).toggleStyle(.checkbox)
+                            .help("Include local branches, remote-tracking branches and tags, following earlier names where discovered.")
+                        Spacer(minLength: 4)
+                        Button("Choose File…") { showingFiles = true }
+                    }.controlSize(.small).font(.caption)
+                    Text("\(history?.revisions.count ?? 0) loaded revisions").font(.caption).foregroundStyle(.secondary)
+                    if !store.search.isEmpty {
+                        SearchScopeBar(title: String(localized: "Loaded file history · \(filtered.count) matches"), query: store.search) { store.search = "" }
+                        if history?.hasMore == true {
+                            Button(limit < 10_000 ? "Search 500 Older Revisions" : "10,000 revision limit reached") { limit = min(10_000, limit + 500) }
+                                .controlSize(.small).disabled(isLoading || limit >= 10_000)
+                        }
+                    }
+                }.padding(12).frame(maxWidth: .infinity, alignment: .leading).background(.bar).overlay(alignment: .bottom) { Divider() }
                 if let error { InspectionErrorView(message: error) }
                 else if isLoading && history == nil { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
                 else if path.isEmpty { EmptyPane(title: String(localized: "File History"), subtitle: String(localized: "Choose a tracked file to inspect its commits, including earlier names."), icon: "doc.text.magnifyingglass") }
@@ -45,14 +63,14 @@ struct FileHistoryView: View {
                                     .onTapGesture(count: 2) { showCommit(entry.commit) }
                             }
                             if history?.hasMore == true {
-                                Button("Load 500 More Commits") { limit += 500 }.controlSize(.small).padding(14).disabled(isLoading || limit >= 10_000)
+                                Button(limit < 10_000 ? "Load 500 More Commits" : "10,000 revision limit reached") { limit = min(10_000, limit + 500) }.controlSize(.small).padding(14).disabled(isLoading || limit >= 10_000)
                             }
                     }.listStyle(.plain).accessibilityLabel("File history commits")
                     .onKeyPress(.return) {
                         guard let entry = filtered.first(where: { $0.id == selected }) else { return .ignored }
                         showCommit(entry.commit); return .handled
                     }
-                    if filtered.isEmpty { Text("No matching commits").font(.caption).foregroundStyle(.secondary).padding() }
+                    if filtered.isEmpty { Text(history?.hasMore == true ? "No matches in loaded revisions. Search older revisions to continue." : "No matching file revisions.").font(.caption).foregroundStyle(.secondary).padding() }
                 }
                 Divider()
                 HStack {

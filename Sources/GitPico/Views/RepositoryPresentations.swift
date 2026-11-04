@@ -18,6 +18,7 @@ struct RepositoryPresentations: ViewModifier {
         } message: { Text(store.error ?? "") }
         .sheet(item: item($store.automaticStashRequest)) { AutomaticStashSheet(store: store, request: $0) }
         .sheet(item: item($store.integrationRequest), onDismiss: store.presentPendingAutomaticStash) { IntegrationSheet(store: store, request: $0) }
+        .sheet(item: item($store.batchIntegrationRequest)) { BatchIntegrationSheet(store: store, request: $0) }
         .sheet(item: item($store.pullRequest), onDismiss: store.finishPullReview) { PullReviewSheet(store: store, request: $0) }
         .sheet(item: item($store.lfsRequest)) { LFSManagementSheet(store: store, request: $0) }
         .sheet(item: item($store.flowRequest)) { GitFlowManagementSheet(store: store, request: $0) }

@@ -91,8 +91,14 @@ struct RepositoryCommands: Commands {
             }
             CommandMenu("Commit") {
                 Group {
-                    Button("Cherry-Pick…") { if let commit = store.selectedCommit { store.integrationRequest = IntegrationRequest(action: .cherryPick, revision: commit.hash) } }.disabled(!store.canIntegrate)
-                    Button("Revert…") { if let commit = store.selectedCommit { store.integrationRequest = IntegrationRequest(action: .revert, revision: commit.hash) } }.disabled(!store.canIntegrate)
+                    Button(store.selectedHistoryHashes.count > 1 ? "Cherry-Pick Selected Commits…" : "Cherry-Pick…") {
+                        if store.selectedHistoryHashes.count > 1 { store.reviewSelectedCommits(.cherryPick) }
+                        else if let commit = store.selectedCommit { store.integrationRequest = IntegrationRequest(action: .cherryPick, revision: commit.hash) }
+                    }.disabled(!store.canIntegrate)
+                    Button(store.selectedHistoryHashes.count > 1 ? "Revert Selected Commits…" : "Revert…") {
+                        if store.selectedHistoryHashes.count > 1 { store.reviewSelectedCommits(.revert) }
+                        else if let commit = store.selectedCommit { store.integrationRequest = IntegrationRequest(action: .revert, revision: commit.hash) }
+                    }.disabled(!store.canIntegrate)
                     Button("Create Branch Here…") { if let commit = store.selectedCommit { store.manage(.createBranch(commit.hash, nil)) } }
                     Button("Restore HEAD Here…") { if let commit = store.selectedCommit { store.recoveryRequest = RecoveryRequest(action: .restore(commit.hash)) } }.disabled(!store.canIntegrate)
                     Divider()
@@ -108,6 +114,8 @@ struct RepositoryCommands: Commands {
                 Button("Commit Staged Changes", action: store.commit).keyboardShortcut(.return, modifiers: .command).disabled(!store.canCommit || store.destination != .workingCopy)
                 Button("Stage Selected Files") { store.stageSelectedFiles() }.disabled(!store.workingTargets().contains { $0.isUnstaged && !$0.isConflicted })
                 Button("Unstage Selected Files") { store.unstageSelectedFiles() }.disabled(!store.workingTargets().contains { $0.isStaged && !$0.isConflicted })
+                Button("Stage Visible Files", action: store.stageVisibleFiles).disabled(store.visibleStageTargets.isEmpty)
+                Button("Unstage Visible Files", action: store.unstageVisibleFiles).disabled(store.visibleUnstageTargets.isEmpty)
                 Divider()
                 Toggle("Show All Files", isOn: $store.showAllFiles).keyboardShortcut("m", modifiers: [.command, .control])
                 Toggle("Show Ignored Files", isOn: $store.showIgnoredFiles).keyboardShortcut("i", modifiers: [.command, .control])

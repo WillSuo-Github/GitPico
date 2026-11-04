@@ -8,6 +8,7 @@ struct BranchesReviewView: View {
     @State private var comparisons: [BranchComparison] = []
     @State private var failure: String?
     @State private var changeset = false
+    @State private var showingCleanup = false
     var branches: [Reference] { (store.snapshot?.references ?? []).filter(\.isLocal) }
     var visible: [BranchComparison] { comparisons.filter { store.search.isEmpty || $0.branch.name.localizedCaseInsensitiveContains(store.search) } }
     var baseName: String { branches.first { $0.fullName == base }?.name ?? base }
@@ -16,6 +17,7 @@ struct BranchesReviewView: View {
             PaneBar(title: "Branches Review", subtitle: String(localized: "\(comparisons.count) local branches compared with \(baseName)") + " · " + String(localized: "\(comparisons.filter(\.isMerged).count) merged"), icon: "arrow.left.arrow.right") {
                 Text("Base").foregroundStyle(.secondary).font(.system(size: 11))
                 Picker("Base branch", selection: $base) { ForEach(branches) { Text($0.name).tag($0.fullName) } }.labelsHidden().fixedSize()
+                Button("Review Cleanup…") { showingCleanup = true }.controlSize(.small).disabled(base.isEmpty || store.isBusy)
             }
             PersistentSplitView(name: "branchesReview", width: 300, minimum: 240) {
                 List(selection: $selected) {
@@ -76,10 +78,12 @@ struct BranchesReviewView: View {
                     else { EmptyPane(title: String(localized: "Select a branch"), subtitle: String(localized: "See how far it has drifted from \(baseName) and what would be merged."), icon: "arrow.triangle.branch") }
                 }.frame(minWidth: 400, maxWidth: .infinity, maxHeight: .infinity)
             }
-        }.task(id: base + (store.snapshot?.branch ?? "") + String(store.snapshot?.commits.count ?? 0)) {
+        }.sheet(isPresented: $showingCleanup) { BranchCleanupSheet(store: store, base: base) }
+        .task(id: base + (store.snapshot?.references.map { $0.fullName + $0.hash + $0.upstream }.joined() ?? "")) {
             guard let repository = store.repository else { return }
             if base.isEmpty { base = branches.first(where: { $0.name == "main" || $0.name == "master" })?.fullName ?? branches.first?.fullName ?? ""; return }
             do {
+                failure = nil; comparisons = []
                 var result: [BranchComparison] = []
                 for branch in branches where branch.fullName != base {
                     let comparison = try await repository.compare(branch, to: base)

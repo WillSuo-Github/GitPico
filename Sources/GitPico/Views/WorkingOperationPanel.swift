@@ -31,6 +31,8 @@ struct WorkingOperationPanel: View {
                 if let progress = store.rebaseProgress {
                     if progress.isEditing { Button("Amend…") { store.showingRebaseEdit = true } }
                     Button("Skip…") { confirmSkip = true }
+                } else if store.snapshot?.operation == .cherryPick || store.snapshot?.operation == .revert {
+                    Button("Skip…") { confirmSkip = true }
                 }
                 Spacer()
                 Button("Continue", action: store.continueOperation).buttonStyle(.borderedProminent).disabled(count > 0)
@@ -41,8 +43,8 @@ struct WorkingOperationPanel: View {
             .confirmationDialog("Abort this operation?", isPresented: $confirmAbort, titleVisibility: .visible) {
                 Button("Abort Operation", role: .destructive, action: store.abortOperation)
             } message: { Text("Git will restore the pre-operation state. Edits made while resolving conflicts may be lost.") }
-            .confirmationDialog("Skip this rebase commit?", isPresented: $confirmSkip, titleVisibility: .visible) {
-                Button("Skip Commit", role: .destructive, action: store.skipRebaseCommit)
-            } message: { Text("Drops this replayed commit and its conflict-resolution edits. The original branch tip remains in recovery checkpoints.") }
+            .confirmationDialog("Skip this commit?", isPresented: $confirmSkip, titleVisibility: .visible) {
+                Button("Skip Commit", role: .destructive, action: store.skipCurrentCommit)
+            } message: { Text("Discards edits for the current step and continues with the next commit. The starting branch tip remains in recovery checkpoints.") }
     }
 }

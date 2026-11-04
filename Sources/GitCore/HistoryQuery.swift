@@ -21,9 +21,10 @@ public struct HistoryQuery: Sendable {
         for item in tokens {
             let pair = item.split(separator: ":", maxSplits: 1, omittingEmptySubsequences: false)
             let field = String(pair[0]).lowercased(), value = pair.count == 2 ? String(pair[1]) : ""
-            guard pair.count == 2 && ["author", "committer", "after", "before", "path", "hash", "message"].contains(field) else { message.append(item); continue }
+            guard pair.count == 2 && ["author", "committer", "after", "before", "path", "hash", "message", "content"].contains(field) else { message.append(item); continue }
             guard !value.isEmpty else { throw GitFailure("Enter a value after \(field):.") }
             switch field {
+            case "content": arguments.append("-S" + value)
             case "path":
                 guard !value.hasPrefix("/"), !value.split(separator: "/").contains("..") else { throw GitFailure("Search for a repository-relative path.") }
                 // GitProcess supplies --literal-pathspecs for log.

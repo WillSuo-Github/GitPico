@@ -9,6 +9,10 @@ struct DiffView: View {
     var isLoading = false
     var showsHeader = true
     @State private var preferences = AppPreferences.shared
+    @State private var code: [Int: DiffCodeLine] = [:]
+    @State private var findQuery = ""
+    @State private var focusedLine: String?
+    @State private var findReveal = UUID()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -27,10 +31,14 @@ struct DiffView: View {
             } else {
                 let document = DiffDocument(text)
                 let lines = document.lines.filter { !$0.isFileHeader }
+                let matches = findQuery.isEmpty ? [] : lines.filter { CodeHighlighting.contains(code[$0.id]?.source ?? CodeHighlighting.source($0), query: findQuery) }.map { "line:\($0.id)" }
+                DiffFindBar(query: $findQuery, matches: matches, selection: $focusedLine) { findReveal = UUID() }
+                ScrollViewReader { proxy in
+                Group {
                 if preferences.splitDiff {
                     GeometryReader { geometry in
                         ScrollView(.vertical) {
-                            SplitDiffView(lines: lines, fontSize: preferences.diffFontSize, minimumWidth: geometry.size.width)
+                            SplitDiffView(lines: lines, fontSize: preferences.diffFontSize, minimumWidth: geometry.size.width, code: code, query: findQuery, focusedLine: focusedLine)
                             if document.isTruncated { Text("Preview limited to 8,000 lines.").font(.caption).foregroundStyle(.secondary).padding(12) }
                         }
                     }
@@ -38,7 +46,9 @@ struct DiffView: View {
                     ScrollView([.horizontal, .vertical]) {
                         LazyVStack(alignment: .leading, spacing: 0) {
                             ForEach(lines) { line in
-                                DiffLineView(line: line, fontSize: preferences.diffFontSize).frame(minWidth: geometry.size.width, alignment: .leading)
+                                DiffLineView(line: line, fontSize: preferences.diffFontSize, code: code[line.id], query: findQuery).frame(minWidth: geometry.size.width, alignment: .leading)
+                                    .id("line:\(line.id)")
+                                    .overlay { if focusedLine == "line:\(line.id)" { Rectangle().strokeBorder(Color.accentColor, lineWidth: 1) } }
                             }
                             if document.isTruncated {
                                 Text("Preview limited to 8,000 lines. Copy the diff to inspect the complete output.")
@@ -50,14 +60,23 @@ struct DiffView: View {
                     }
                     .defaultScrollAnchor(.topLeading)
                 } }
+                }.onChange(of: findReveal) { if let focusedLine { proxy.scrollTo(focusedLine, anchor: .center) } }
+                }
             }
         }.background(.background)
+            .task(id: text + (title ?? "")) {
+                let text = text, path = title ?? CodeHighlighting.path(in: text)
+                let value = await Task.detached(priority: .userInitiated) { CodeHighlighting.prepare(DiffDocument(text).lines, path: path) }.value
+                guard !Task.isCancelled else { return }; code = value
+            }
     }
 }
 
 struct DiffLineView: View {
     let line: DiffLine
     let fontSize: Double
+    var code: DiffCodeLine? = nil
+    var query = ""
     var tint: Color {
         switch line.kind {
         case .addition: Pico.addition
@@ -75,9 +94,11 @@ struct DiffLineView: View {
             }
             .foregroundStyle(isChange ? AnyShapeStyle(tint.opacity(0.9)) : AnyShapeStyle(.tertiary))
             .background(tint.opacity(isChange ? 0.10 : 0))
-            Text(line.text.isEmpty ? " " : line.text)
-                .foregroundStyle(line.kind == .metadata ? Color.secondary : line.kind == .hunk ? Color.accentColor.opacity(0.9) : Color.primary)
-                .textSelection(.enabled).fixedSize(horizontal: true, vertical: true).padding(.leading, 10).padding(.trailing, 20)
+            HStack(spacing: 0) {
+                if [.context, .addition, .deletion].contains(line.kind) { Text(String(line.text.prefix(1))).foregroundStyle(.secondary) }
+                DiffCodeText(line: code ?? DiffCodeLine(source: [.context, .addition, .deletion].contains(line.kind) ? String(line.text.dropFirst()) : line.text, path: ""), query: query)
+            }.foregroundStyle(line.kind == .metadata ? Color.secondary : line.kind == .hunk ? Color.accentColor.opacity(0.9) : Color.primary)
+                .padding(.leading, 10).padding(.trailing, 20)
             Spacer(minLength: 0)
         }
         .font(.system(size: fontSize, design: .monospaced)).padding(.vertical, 1.5)

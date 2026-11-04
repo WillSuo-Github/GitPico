@@ -12,6 +12,16 @@ extension GitRepository {
         for (path, operation) in [("rebase-merge", RepositoryOperation.rebase), ("rebase-apply", .rebase), ("MERGE_HEAD", .merge), ("CHERRY_PICK_HEAD", .cherryPick), ("REVERT_HEAD", .revert)] {
             if FileManager.default.fileExists(atPath: directory.appendingPathComponent(path).path) { return operation }
         }
+        // A user can commit a resolved step in another tool. The per-commit HEAD
+        // marker then disappears, while a batch still has pending sequencer steps.
+        let todo = directory.appendingPathComponent("sequencer/todo")
+        if let attributes = try? FileManager.default.attributesOfItem(atPath: todo.path) {
+            guard attributes[.type] as? FileAttributeType == .typeRegular,
+                  (attributes[.size] as? NSNumber)?.intValue ?? 0 <= 1_048_576 else { throw GitFailure("The Git sequencer state cannot be inspected safely.") }
+            let commands = try String(contentsOf: todo, encoding: .utf8).split(whereSeparator: \.isNewline)
+            if commands.contains(where: { $0.hasPrefix("pick ") }) { return .cherryPick }
+            if commands.contains(where: { $0.hasPrefix("revert ") }) { return .revert }
+        }
         return .none
     }
 

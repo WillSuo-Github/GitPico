@@ -88,6 +88,8 @@ final class RepositoryStore {
     var amend = false
     var signOff = false
     var integrationRequest: IntegrationRequest?
+    var batchIntegrationRequest: BatchIntegrationRequest?
+    var selectedHistoryHashes: Set<String> = []
     var pullRequest: PullReviewRequest?
     var trackingAfterPull = false
     var rebaseRequest: RebaseRequest?
@@ -323,7 +325,7 @@ final class RepositoryStore {
             navigationBookmarks = [:]; navigationBookmarkOrder = []; pendingHistorySelection = nil; historyNeedsReveal = false; historyReveal = nil; draftBeforeAmend = nil
             destination = .workingCopy; search = ""; historyOptions = HistoryOptions(); amend = false; signOff = false; configuration = nil
             showingRepositorySettings = false; settingsNavigationRequest = nil
-            selectedChange = nil; selectedCommit = nil; selectedStash = nil
+            selectedChange = nil; selectedCommit = nil; selectedHistoryHashes = []; batchIntegrationRequest = nil; selectedStash = nil
             commitDetail = nil; selectedCommitPath = nil; diff = ""
             commitSubject = ""; commitBody = ""
             conflictDraftArchive = nil; conflictDrafts = [:]
@@ -441,6 +443,7 @@ final class RepositoryStore {
 
     func selectCommit(_ commit: Commit) {
         guard let repository else { return }
+        if !selectedHistoryHashes.contains(commit.hash) { selectedHistoryHashes = [commit.hash] }
         if selectedCommit?.hash == commit.hash, commitDetail != nil || isLoadingDiff { return }
         detailTask?.cancel()
         selectedCommit = commit; commitDetail = nil; selectedCommitPath = nil; diff = ""

@@ -52,7 +52,7 @@ struct WorkingListHeader: View {
     var upstream: String? { store.snapshot?.references.first(where: \.isCurrent)?.upstream.nilIfEmpty }
     var body: some View {
         let unstagedCount = store.unstaged.count, stagedCount = store.staged.count
-        let unstageAll = unstagedCount == 0 && stagedCount > 0
+        let visibleStageCount = store.visibleStageTargets.count, visibleUnstageCount = store.visibleUnstageTargets.count
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
                 Text("Changes").font(.system(size: 13, weight: .semibold))
@@ -65,15 +65,8 @@ struct WorkingListHeader: View {
                     Toggle("Show Ignored Files", isOn: $store.showIgnoredFiles)
                     Toggle("Show Assume-Unchanged Files", isOn: $store.showAssumeUnchanged)
                     Divider()
-                    Button("Unstage All") { store.unstage(store.staged) }.disabled(store.isBusy || store.staged.isEmpty)
                 } label: { Image(systemName: "line.3.horizontal.decrease.circle") }
                     .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Sort and file visibility")
-                Button(unstageAll ? "Unstage All" : "Stage All") {
-                    if unstageAll { store.unstage(store.staged) }
-                    else { store.stage(store.unstaged.filter { !$0.isConflicted }) }
-                }
-                    .controlSize(.small).disabled(store.isBusy || (!unstageAll && store.unstaged.allSatisfy(\.isConflicted)))
-                    .help(unstageAll ? "Unstage every staged file, including files hidden by the filter" : "Stage every changed file, including files hidden by the filter")
             }
             HStack(spacing: 6) {
                 Image(systemName: "arrow.triangle.branch").imageScale(.small)
@@ -84,6 +77,18 @@ struct WorkingListHeader: View {
                 if stagedCount > 0 { Text("\(stagedCount) staged").foregroundStyle(.tint) }
                 if unstagedCount > 0 { Text("\(unstagedCount) unstaged") }
             }.font(.system(size: 11)).foregroundStyle(.secondary).truncationMode(.middle)
+            HStack(spacing: 8) {
+                Button("Stage Visible · \(visibleStageCount)", action: store.stageVisibleFiles)
+                    .disabled(store.isBusy || visibleStageCount == 0)
+                    .help("Stage only changed files matching the current file filter.")
+                Button("Unstage Visible · \(visibleUnstageCount)", action: store.unstageVisibleFiles)
+                    .disabled(store.isBusy || visibleUnstageCount == 0)
+                    .help("Unstage only files matching the current file filter.")
+                Spacer(minLength: 0)
+            }.controlSize(.small)
+            if !store.search.isEmpty {
+                SearchScopeBar(title: String(localized: "Working copy · file names"), query: store.search) { store.search = "" }
+            }
         }
         .padding(.horizontal, 14).padding(.vertical, 9)
         .background(.bar).overlay(alignment: .bottom) { Divider() }

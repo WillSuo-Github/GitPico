@@ -49,6 +49,7 @@ struct HistoryCommitTable: NSViewRepresentable {
             table.usesAutomaticRowHeights = false
             table.floatsGroupRows = false
             table.allowsEmptySelection = true
+            table.allowsMultipleSelection = true
             table.columnAutoresizingStyle = .uniformColumnAutoresizingStyle
             table.autoresizingMask = [.width]
             table.dataSource = self
@@ -57,6 +58,9 @@ struct HistoryCommitTable: NSViewRepresentable {
             table.setDraggingSourceOperationMask([], forLocal: false)
             table.rowMenu = { [weak self] row in
                 guard let self, let input = self.input, self.rows.indices.contains(row), case .commit(let commit) = self.rows[row] else { return nil }
+                if !self.table.selectedRowIndexes.contains(row) {
+                    self.table.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+                }
                 return NSHostingMenu(rootView: HistoryCommitActions(store: input.store, commit: commit, canModifyHistory: input.canModifyHistory))
             }
             table.setAccessibilityLabel(String(localized: "Commit history"))
@@ -109,8 +113,10 @@ struct HistoryCommitTable: NSViewRepresentable {
             }
             let selectedRow = value.selection.flatMap { commitRows[$0] } ?? -1
             let previousRow = table.selectedRow
-            if selectedRow != previousRow {
-                if selectedRow >= 0 { table.selectRowIndexes(IndexSet(integer: selectedRow), byExtendingSelection: false) }
+            let hashes = value.selection.map { value.store.selectedHistoryHashes.contains($0) ? value.store.selectedHistoryHashes : [$0] } ?? []
+            let selectedRows = IndexSet(hashes.compactMap { commitRows[$0] })
+            if selectedRows != table.selectedRowIndexes {
+                if !selectedRows.isEmpty { table.selectRowIndexes(selectedRows, byExtendingSelection: false) }
                 else { table.deselectAll(nil) }
                 let changed = IndexSet([previousRow, selectedRow].filter { rows.indices.contains($0) })
                 if !changed.isEmpty { table.reloadData(forRowIndexes: changed, columnIndexes: IndexSet(integer: 0)) }
@@ -152,7 +158,16 @@ struct HistoryCommitTable: NSViewRepresentable {
             return false
         }
         func tableViewSelectionDidChange(_ notification: Notification) {
-            guard !updating, let input, (!input.store.isBusy || input.store.isFetching), rows.indices.contains(table.selectedRow), case .commit(let commit) = rows[table.selectedRow] else { return }
+            guard !updating, let input, (!input.store.isBusy || input.store.isFetching) else { return }
+            input.store.selectedHistoryHashes = Set(table.selectedRowIndexes.compactMap { index in
+                if rows.indices.contains(index), case .commit(let item) = rows[index] { return item.hash }; return nil
+            })
+            guard rows.indices.contains(table.selectedRow), case .commit(let commit) = rows[table.selectedRow] else {
+                input.store.detailTask?.cancel(); input.store.detailToken = UUID()
+                input.store.selectedCommit = nil; input.store.commitDetail = nil; input.store.selectedCommitPath = nil
+                input.store.diff = ""; input.store.isLoadingDiff = false
+                return
+            }
             input.store.selectCommit(commit)
         }
         func tableView(_ tableView: NSTableView, pasteboardWriterForRow row: Int) -> (any NSPasteboardWriting)? {

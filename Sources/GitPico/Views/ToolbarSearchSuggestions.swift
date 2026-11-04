@@ -17,6 +17,9 @@ struct ToolbarSearchSuggestions: View {
                             suggestion(title: title, subtitle: String(localized: "Filter this view · Return"), icon: "magnifyingglass", selected: state.selection == nil, action: session.filterCurrentView)
                             Divider().padding(.horizontal, 8)
                         }
+                        if !session.actionsOnly && !state.results.isEmpty {
+                            HStack { SectionCaption("Jump to Files, Branches & Actions"); Spacer() }.padding(.horizontal, 10).padding(.vertical, 5)
+                        }
                         ForEach(state.results) { item in
                             suggestion(title: item.title, subtitle: item.subtitle, icon: item.icon, selected: state.selection == item.id) { _ = session.submit(item) }.id(item.id)
                         }

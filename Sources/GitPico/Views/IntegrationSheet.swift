@@ -58,16 +58,21 @@ struct IntegrationSheet: View {
 struct OperationBanner: View {
     var store: RepositoryStore
     @State private var confirmAbort = false
+    @State private var confirmSkip = false
     var body: some View {
         if let operation = store.snapshot?.operation, operation != .none {
             NoticeBanner(icon: "arrow.triangle.merge", title: "\(operation.inProgressTitle)", message: store.changes.contains(where: \.isConflicted) ? String(localized: "Resolve and stage conflicts in Working Copy, then continue.") : String(localized: "All conflicts are resolved. Continue to finish.")) {
                 Button("Show Conflicts") { store.navigate(.workingCopy) }.disabled(store.destination == .workingCopy)
                 Button("Abort…") { confirmAbort = true }
+                if operation == .cherryPick || operation == .revert { Button("Skip…") { confirmSkip = true } }
                 Button("Continue", action: store.continueOperation).buttonStyle(.borderedProminent).disabled(store.changes.contains(where: \.isConflicted))
             }.disabled(store.isBusy)
                 .confirmationDialog("Abort this operation?", isPresented: $confirmAbort, titleVisibility: .visible) {
                     Button("Abort Operation", role: .destructive, action: store.abortOperation)
                 } message: { Text("Git will restore the pre-operation state. Edits made while resolving conflicts may be lost.") }
+                .confirmationDialog("Skip this commit?", isPresented: $confirmSkip, titleVisibility: .visible) {
+                    Button("Skip Commit", role: .destructive, action: store.skipCurrentCommit)
+                } message: { Text("Discards edits for the current step and continues with the next commit. The starting branch tip remains in recovery checkpoints.") }
         }
     }
 }

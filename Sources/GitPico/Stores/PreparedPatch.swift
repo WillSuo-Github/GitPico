@@ -7,14 +7,17 @@ struct PreparedPatch: Sendable {
     let previews: [PatchHunkPreview]
     let splitRows: [Int:[SplitDiffRow]]
     let selectableOrder: [PatchLineID]
-    nonisolated static func make(_ source: String) -> Self {
+    let code: [Int: [Int: DiffCodeLine]]
+    nonisolated static func make(_ source: String, path explicitPath: String? = nil) -> Self {
         let patch = PatchDocument(source), previews = patch.preview()
         let order = patch.supportsChunkStaging ? previews.filter { !$0.isTruncated }.flatMap { preview in
             preview.lines.compactMap { line in
                 line.kind == .addition || line.kind == .deletion ? PatchLineID(hunk: preview.id, line: line.id) : nil
             }
         } : []
-        return Self(source: source, patch: patch, previews: previews, splitRows: Dictionary(uniqueKeysWithValues: previews.map { ($0.id, SplitDiffRow.align($0.lines)) }), selectableOrder: order)
+        let path = explicitPath ?? CodeHighlighting.path(in: source)
+        return Self(source: source, patch: patch, previews: previews, splitRows: Dictionary(uniqueKeysWithValues: previews.map { ($0.id, SplitDiffRow.align($0.lines)) }), selectableOrder: order,
+                    code: Dictionary(uniqueKeysWithValues: previews.map { ($0.id, CodeHighlighting.prepare($0.lines, path: path)) }))
     }
 }
 struct PatchLineSelection {
