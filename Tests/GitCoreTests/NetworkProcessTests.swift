@@ -73,3 +73,34 @@ import Testing
         try await GitProcess.run(["ls-remote", "--", f.url.path], at: f.url)
     }
 }
+
+@Test func verboseTransportFailureRetainsFinalDiagnosticsPastStderrLimit() async throws {
+    let f = try await Fixture.make(); defer { f.clean() }
+    let helper = f.url.appendingPathComponent("verbose-ssh.sh")
+    try Data("""
+    #!/bin/sh
+    case "$1" in -G) exit 0;; esac
+    printf 'obsolete-first-page-marker\\n' >&2
+    i=0
+    while [ "$i" -lt 4000 ]; do
+        printf 'Counting objects: 64%% (58/90)\\r' >&2
+        i=$((i + 1))
+    done
+    printf '\\nfatal: fixture transport disconnected at end of output\\n' >&2
+    exit 1
+    """.utf8).write(to: helper)
+    let events = Mutex<[GitNetworkEvent]>([])
+    let context = GitNetworkContext { event in events.withLock { $0.append(event) } }
+    do {
+        _ = try await GitNetworkContexts.$current.withValue(context) {
+            try await GitProcess.run(["-c", "core.sshCommand=/bin/sh " + shellQuote(helper.path), "ls-remote", "ssh://git@fixture.invalid/repo"], at: f.url)
+        }
+        Issue.record("The fixture transport must fail.")
+    } catch let failure as GitFailure {
+        #expect(failure.message.contains("fixture transport disconnected at end of output"))
+        #expect(!failure.message.contains("obsolete-first-page-marker"))
+        #expect(failure.message.utf8.count < 66_000)
+    }
+    let final = try #require(events.withLock { $0.last })
+    #expect(final.phase == .failed && final.output.contains("fixture transport disconnected at end of output"))
+}

@@ -158,7 +158,13 @@ public enum GitProcess {
             guard data.count <= maxOutputBytes else { throw GitFailure("Git output exceeds \(maxOutputBytes / 1024 / 1024) MB. Narrow the selection before trying again.", reason: .outputLimitExceeded) }
             let errorReader = try FileHandle(forReadingFrom: errURL)
             defer { try? errorReader.close() }
-            let error = String(decoding: try errorReader.read(upToCount: 64 * 1024) ?? Data(), as: UTF8.self)
+            // Transfer progress can fill stderr before Git writes the actual failure.
+            // Bound memory while retaining the final diagnostics, rather than its first pages.
+            let errorSize = try errorReader.seekToEnd()
+            let errorLimit: UInt64 = 64 * 1024
+            try errorReader.seek(toOffset: errorSize > errorLimit ? errorSize - errorLimit : 0)
+            let error = (errorSize > errorLimit ? localized("[Earlier Git output omitted.]\n") : "")
+                + String(decoding: try errorReader.read(upToCount: Int(errorLimit)) ?? Data(), as: UTF8.self)
             let result = GitOutput(data: data, error: error, status: process.terminationStatus)
             network?.progress(stdout: outURL, stderr: errURL)
             network?.finish(succeeded: allowed.contains(result.status))

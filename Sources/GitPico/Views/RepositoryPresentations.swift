@@ -3,6 +3,7 @@ import SwiftUI
 /// Present requests from the frontmost repository surface, including nested settings operations.
 struct RepositoryPresentations: ViewModifier {
     @Bindable var store: RepositoryStore
+    @State private var failureDetails: GitOperationFailure?
     var settingsContext = false
     private var active: Bool { settingsContext || !store.showingRepositorySettings }
     private func item<T>(_ value: Binding<T?>) -> Binding<T?> {
@@ -13,9 +14,12 @@ struct RepositoryPresentations: ViewModifier {
     }
     func body(content: Content) -> some View {
         content
-        .alert("Git operation failed", isPresented: Binding(get: { active && store.error != nil }, set: { if !$0 { store.error = nil } })) {
+        .alert("Git operation failed", isPresented: Binding(get: { active && store.error != nil }, set: { if !$0 { store.error = nil } }), presenting: store.error.map(GitOperationFailure.init)) { failure in
+            Button("Show Details…") { failureDetails = failure }
+            Button("Copy Log") { Pico.copy(failure.details) }
             Button("OK") { store.error = nil }
-        } message: { Text(store.error ?? "") }
+        } message: { failure in Text(failure.summary) }
+        .sheet(item: $failureDetails) { GitOperationFailureDetails(failure: $0) }
         .sheet(item: item($store.automaticStashRequest)) { AutomaticStashSheet(store: store, request: $0) }
         .sheet(item: item($store.integrationRequest), onDismiss: store.presentPendingAutomaticStash) { IntegrationSheet(store: store, request: $0) }
         .sheet(item: item($store.batchIntegrationRequest)) { BatchIntegrationSheet(store: store, request: $0) }
