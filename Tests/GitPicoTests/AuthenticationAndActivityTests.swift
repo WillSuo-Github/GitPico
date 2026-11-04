@@ -137,3 +137,12 @@ private final class MemoryCredentialVault: CredentialStoring, Sendable {
     #expect(GitTransferProgress.latest(in: "Checking server quota: 75%\nWriting objects: 101% (101/100)") == nil)
     #expect(GitTransferProgress.latest(in: "Resolving deltas:   0% (0/20)")?.fraction == 0)
 }
+
+@Test func workflowScopeRejectionExplainsOAuthReconnectAndPersonalTokenRecovery() {
+    let output = "Writing objects: 100% (51/51), done.\n ! [remote rejected] main -> main (refusing to allow an OAuth App to create or update workflow `.github/workflows/source-catalog.yml` without `workflow` scope)\nerror: failed to push some refs"
+    let advice = networkFailureAdvice(output)
+    #expect(advice.contains("GitHub Actions") && advice.contains("Authentication") && advice.contains("Sign In Again"))
+    #expect(advice.contains("personal access token") && !advice.contains("Fetch Options"))
+    #expect(networkFailureAdvice(output.replacingOccurrences(of: "OAuth App", with: "Personal Access Token")) == advice)
+    #expect(networkFailureAdvice("error: workflow.yml has local conflicts") != advice)
+}

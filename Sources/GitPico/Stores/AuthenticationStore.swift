@@ -80,7 +80,7 @@ struct SystemCredentialVault: CredentialStoring {
     }
     @discardableResult func completeOAuth(_ configuration: OAuthConfiguration, grant: OAuthTokenGrant, username: String, root: URL?, reconnecting: AuthenticationProfile? = nil) throws -> AuthenticationProfile {
         guard loaded else { throw appFailure("Reload authentication settings before signing in.") }
-        try grant.requireRepositoryScopes(configuration.provider)
+        try grant.requireRepositoryScopes(configuration.provider, includingWorkflows: true)
         let provider: HostingProvider = configuration.provider == .github ? .github : .gitlab
         guard !username.isEmpty, !username.contains(where: { $0.isNewline || $0 == "\0" }) else { throw appFailure("The provider returned an invalid account name.") }
         if let reconnecting {

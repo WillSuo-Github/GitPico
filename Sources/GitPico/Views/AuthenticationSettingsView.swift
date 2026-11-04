@@ -33,7 +33,7 @@ struct AuthenticationSettingsView: View {
                     Button { signIn(.github) } label: { Label("Sign In with GitHub", systemImage: "person.crop.circle.badge.checkmark") }
                     Button { signIn(.gitlab) } label: { Label("Sign In with GitLab", systemImage: "person.crop.circle.badge.checkmark") }
                 }.disabled(busy || oauth.isRunning || store.networkActivity?.runningCount ?? 0 > 0)
-                Text("GitHub requests repository access (including private repositories) and profile access. GitLab requests profile read access and Git repository read/write access. Review the provider's consent screen before approving.").font(.caption).foregroundStyle(.secondary)
+                Text("GitHub requests repository access (including private repositories), permission to update GitHub Actions workflows, and profile access. GitLab requests profile read access and Git repository read/write access. Review the provider's consent screen before approving.").font(.caption).foregroundStyle(.secondary)
                 if oauth.isRunning { HStack { ProgressView().controlSize(.small); Spacer(); Button("Cancel Sign-In") { oauth.cancel() } } }
                 if let challenge = oauth.deviceChallenge {
                     HStack {
@@ -74,6 +74,9 @@ struct AuthenticationSettingsView: View {
                         else { Button("Update Token…") { editing = profile; provider = profile.provider; host = profile.host; username = profile.username; token = "" }.disabled(busy || oauth.isRunning || store.networkActivity?.runningCount ?? 0 > 0) }
                         Button("Remove…", role: .destructive) { removing = profile }.disabled(busy || oauth.isRunning || store.networkActivity?.runningCount ?? 0 > 0)
                     }
+                }
+                if store.authentication.profiles.contains(where: { $0.provider == .github && $0.isOAuth }) {
+                    Text("To add GitHub Actions workflow access to an existing GitHub account, choose Sign In Again. Repository assignments are kept.").font(.caption).foregroundStyle(.secondary)
                 }
                 Text("Remove deletes this app's local credential. Revoke the provider grant from your authorized applications to withdraw server access.").font(.caption).foregroundStyle(.secondary)
                 HStack { Link("GitHub Authorized Apps", destination: URL(string: "https://github.com/settings/applications")!); Link("GitLab Authorized Apps", destination: URL(string: "https://gitlab.com/-/user_settings/applications")!) }

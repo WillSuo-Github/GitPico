@@ -17,7 +17,7 @@ public struct OAuthConfiguration: Codable, Equatable, Sendable {
     }
     public var callback: URL { URL(string: "gitpico://oauth/" + provider.rawValue + "/callback")! }
     public var tokenURL: URL { URL(string: "https://" + host + (provider == .github ? "/login/oauth/access_token" : "/oauth/token"))! }
-    public var scopes: [String] { provider == .github ? ["repo", "read:user", "offline_access"] : ["read_user", "write_repository", "read_api"] }
+    public var scopes: [String] { provider == .github ? ["repo", "workflow", "read:user", "offline_access"] : ["read_user", "write_repository", "read_api"] }
 }
 
 public struct OAuthAuthorization: Codable, Sendable {
@@ -41,9 +41,14 @@ public struct OAuthTokenGrant: Sendable {
     public func authorization(_ configuration: OAuthConfiguration) -> OAuthAuthorization {
         OAuthAuthorization(configuration: configuration, refreshToken: refreshToken, expiresAt: expiresAt, refreshExpiresAt: refreshExpiresAt, scopes: scopes)
     }
-    public func requireRepositoryScopes(_ provider: OAuthProvider) throws {
+    public func requireRepositoryScopes(_ provider: OAuthProvider, includingWorkflows: Bool = false) throws {
         let values = Set(scopes)
         guard provider == .github ? values.contains("repo") : values.contains("api") || values.contains("read_user") && values.contains("write_repository") else { throw GitFailure("The authorization did not grant the requested repository permissions. Sign in again and review the requested access.") }
+        // Interactive sign-in must grant the requested capability. Refreshing an
+        // older grant must still permit ordinary Git access until the user reconnects.
+        if includingWorkflows && provider == .github && !values.contains("workflow") {
+            throw GitFailure("The GitHub authorization did not grant access to update GitHub Actions workflows. Sign in again and approve workflow access.")
+        }
     }
 }
 

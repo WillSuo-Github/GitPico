@@ -82,6 +82,9 @@ func networkFailureAdvice(_ output: String, timedOut: Bool = false) -> String {
     if timedOut {
         return String(localized: "GitPico stopped this operation at its time limit. For a large fetch, choose a longer time limit in Fetch Options.")
     }
+    if value.contains("refusing to allow") && value.contains("workflow") && value.contains("scope") {
+        return String(localized: "GitHub requires permission to update GitHub Actions workflows. Open Authentication and choose Sign In Again for the GitHub account used by this repository, then retry Push. If you use a personal access token, update its workflow permission instead.")
+    }
     if networkTransferWasInterrupted(output) {
         return String(localized: "The transfer was interrupted. Check the connection or proxy. In Fetch Options, try one remote and one branch, or HTTP/1.1 for HTTPS.")
     }

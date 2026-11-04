@@ -75,8 +75,41 @@ private func grantObject(_ provider: OAuthProvider = .gitlab) -> [String: Any] {
     #expect(delays.withLock { $0 } == [5, 5, 12])
     let requests = await transport.requests
     #expect(requests.count == 4)
+    let scope = URLComponents(string: "https://fixture.invalid/?" + String(decoding: requests[0].httpBody ?? Data(), as: UTF8.self))?.queryItems?.first { $0.name == "scope" }?.value
+    #expect(Set((scope ?? "").split(separator: " ").map(String.init)) == ["repo", "workflow", "read:user", "offline_access"])
     #expect(requests.allSatisfy { $0.url?.scheme == "https" && $0.url?.query == nil && !String(decoding: $0.httpBody ?? Data(), as: UTF8.self).contains("client_secret") })
     #expect(requests.last?.url == config.tokenURL)
+}
+
+@Test func interactiveGitHubAuthorizationRequiresWorkflowAccessWithoutChangingGitLabPermissions() throws {
+    let limited = try OAuthRequests.grant(oauthResponse(grantObject(.github)))
+    try limited.requireRepositoryScopes(.github)
+    #expect(throws: GitFailure.self) { try limited.requireRepositoryScopes(.github, includingWorkflows: true) }
+    var object = grantObject(.github); object["scope"] = "repo workflow read:user"
+    let full = try OAuthRequests.grant(oauthResponse(object))
+    try full.requireRepositoryScopes(.github, includingWorkflows: true)
+    let gitlab = try OAuthRequests.grant(oauthResponse(grantObject(.gitlab)))
+    try gitlab.requireRepositoryScopes(.gitlab, includingWorkflows: true)
+    #expect(try OAuthConfiguration(provider: .github, host: "github.example.invalid", clientID: "fixture").scopes.contains("workflow"))
+    #expect(try !OAuthConfiguration(provider: .gitlab, host: "gitlab.com", clientID: "fixture").scopes.contains("workflow"))
+}
+
+@Test func legacyGitHubGrantStillRefreshesWithoutWorkflowAccessBeforeInteractiveReconnect() async throws {
+    let directory = FileManager.default.temporaryDirectory.appendingPathComponent("GitPico-OAuth-legacy-" + UUID().uuidString)
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let now = Date(), id = UUID(), vault = OAuthFixtureVault()
+    let config = try OAuthConfiguration(provider: .github, host: "github.com", clientID: "fixture")
+    let old = GitStoredCredential(host: config.host, username: "fixture", secret: "old-access", oauth: OAuthAuthorization(configuration: config, refreshToken: "old-refresh", expiresAt: now.addingTimeInterval(-1), refreshExpiresAt: nil, scopes: ["repo", "read:user"]))
+    try vault.save(old, id: id)
+    let transport = try OAuthFixtureTransport([grantObject(.github)])
+    let manager = OAuthCredentialRefresher(storage: vault, transport: transport, lockDirectory: directory)
+    let renewed = try await manager.credential(id, now: now)
+    #expect(renewed.username == old.username && renewed.secret == "new-fixture-access")
+    #expect(renewed.oauth?.scopes.contains("repo") == true && renewed.oauth?.scopes.contains("workflow") == false)
+    #expect(try vault.read(id).secret == renewed.secret)
+    let requests = await transport.requests
+    #expect(requests.count == 1)
+    #expect(!String(decoding: requests[0].httpBody ?? Data(), as: UTF8.self).contains("scope="))
 }
 
 @Test func deviceFlowRejectsOffHostVerificationAndStopsOnDenialExpiryOrCancellation() async throws {

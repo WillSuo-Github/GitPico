@@ -37,7 +37,7 @@ import Observation
                     grant = try await OAuthCodeAuthorization(transport: transport).exchange(callback: callback, pkce: pkce, configuration: configuration)
                 }
                 try Task.checkCancellation()
-                try grant.requireRepositoryScopes(configuration.provider)
+                try grant.requireRepositoryScopes(configuration.provider, includingWorkflows: true)
                 deviceChallenge = nil; message = String(localized: "Verifying your account…")
                 let credential = GitStoredCredential(host: configuration.host, username: "", secret: grant.accessToken, oauth: grant.authorization(configuration))
                 let profile = AuthenticationProfile(id: UUID(), provider: configuration.provider == .github ? .github : .gitlab, host: configuration.host, username: "", method: .oauth)
