@@ -76,3 +76,7 @@ The Xcode scheme's tests also run without opening app windows. Git integration t
 - [Localization](docs/LOCALIZATION.md)
 - [Development roadmap](docs/ROADMAP.md)
 - [Development agreements](AGENTS.md)
+
+## License
+
+GitPico is open source under the [MIT License](LICENSE).
