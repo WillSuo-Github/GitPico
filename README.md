@@ -4,7 +4,7 @@ A native Git client for macOS. Review changes, build focused commits, explore hi
 
 **macOS 26 or later** · [Download](https://github.com/WillSuo-Github/GitPico/releases/latest) · [Report an issue](https://github.com/WillSuo-Github/GitPico/issues)
 
-![GitPico working-copy detail with file staging, a side-by-side diff, and the commit editor](docs/images/working-copy.png)
+![GitPico full window with the toolbar, repository sidebar, file staging, a unified diff, and the commit editor](docs/images/working-copy.png)
 
 ## Features
 
