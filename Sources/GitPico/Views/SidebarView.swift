@@ -27,7 +27,12 @@ struct SidebarView: View {
             SidebarRepositoryHeader(store: store)
             List(selection: Binding<Destination?>(get: { selection }, set: { if let value = $0 { store.navigate(value) } })) {
                 Section {
-                    Label("Working Copy", systemImage: "square.and.pencil").badge(store.changes.count).tag(Destination.workingCopy).picoDrop(store, .workingCopy).contextMenu {
+                    Label {
+                        Text("Working Copy").bold(!store.changes.isEmpty)
+                    } icon: {
+                        Image(systemName: "square.and.pencil")
+                    }
+                    .badge(store.changes.count).tag(Destination.workingCopy).picoDrop(store, .workingCopy).contextMenu {
                         Button("Discard All Local Changes…") { store.localChange(.discard(store.changes.map(\.path))) }.disabled(store.changes.isEmpty || store.isBusy)
                         Button("Recover Local Changes…") { store.localChange(.recovery) }.disabled(store.isBusy)
                         Divider()
