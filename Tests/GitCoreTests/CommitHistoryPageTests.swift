@@ -70,10 +70,28 @@ import Testing
     let matching = try await f.repo.historyPage(at: revision, options: options)
     #expect(matching.commits.map(\.subject) == ["Incoming two"])
     #expect(matching.incomingHashes == Set(matching.commits.map(\.hash)))
+    #expect(matching.outgoingHashes.isEmpty)
+
+    try await f.git(["commit", "--allow-empty", "-m", "Outgoing one"])
+    try await f.git(["commit", "--allow-empty", "-m", "Outgoing two"])
+    let diverged = try await f.repo.resolveHistory(local)
+    let divergedPage = try await f.repo.historyPage(at: diverged)
+    #expect(divergedPage.incomingHashes == page.incomingHashes)
+    let outgoing = divergedPage.commits.filter { $0.subject.hasPrefix("Outgoing ") }
+    #expect(outgoing.count == 2 && divergedPage.outgoingHashes == Set(outgoing.map(\.hash)))
+    options.query = "hash:" + (try #require(outgoing.first)).shortHash
+    let outgoingMatch = try await f.repo.historyPage(at: diverged, options: options)
+    #expect(outgoingMatch.outgoingHashes == Set(outgoing.prefix(1).map(\.hash)))
+    #expect(outgoingMatch.incomingHashes.isEmpty)
+    let remotePage = try await f.repo.historyPage(at: f.repo.resolveHistory(upstream))
+    #expect(remotePage.outgoingHashes.isEmpty && remotePage.incomingHashes.isEmpty)
+
     try await f.git(["update-ref", "-d", upstream])
     let gone = try await f.repo.resolveHistory(local)
-    #expect(gone.identity != revision.identity)
-    #expect(try await f.repo.historyPage(at: gone).commits.map(\.subject) == ["Initial | commit"])
+    #expect(gone.identity != diverged.identity)
+    let gonePage = try await f.repo.historyPage(at: gone)
+    #expect(gonePage.commits.map(\.subject) == ["Outgoing two", "Outgoing one", "Initial | commit"])
+    #expect(gonePage.outgoingHashes.isEmpty && gonePage.incomingHashes.isEmpty)
 }
 @Test func historyReadHonorsCancellationBeforeLaunching() async throws {
     let f = try await Fixture.make(); defer { f.clean() }

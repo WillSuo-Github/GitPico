@@ -18,6 +18,7 @@ import Testing
     }
     let untracked = try status()
     #expect(untracked.upstream.isEmpty && untracked.text == "HEAD")
+    let snapshotBaseHash = try #require(f.store.snapshot?.head.hash)
     let origin = f.root.appendingPathComponent("BadgeOrigin.git"), peer = f.root.appendingPathComponent("BadgePeer")
     try await git(["init", "--bare", origin.path])
     try await git(["remote", "add", "origin", origin.path])
@@ -47,12 +48,52 @@ import Testing
     #expect(commits.filter { $0.subject.hasPrefix("Remote ") }.count == 3)
     #expect(commits.filter { $0.subject.hasPrefix("Local ") }.count == 2)
     #expect(f.store.historyPresentation.page.incomingHashes == Set(commits.filter { $0.subject.hasPrefix("Remote ") }.map(\.hash)))
+    #expect(f.store.historyPresentation.page.outgoingHashes == Set(commits.filter { $0.subject.hasPrefix("Local ") }.map(\.hash)))
     let incomingRow = try #require(commits.firstIndex { $0.decorations.contains("origin/main") })
+    let outgoingRow = try #require(commits.firstIndex { $0.decorations.contains("HEAD -> main") })
+    let sharedRow = try #require(commits.firstIndex { $0.hash == snapshotBaseHash })
     let coordinator = HistoryCommitTable.Coordinator()
     let tableView = coordinator.makeView()
     tableView.frame = NSRect(x: 0, y: 0, width: 480, height: 320)
-    coordinator.update(HistoryCommitTable(store: f.store, presentation: f.store.historyPresentation, grouped: false, compact: false, showGraph: true, canModifyHistory: f.store.canIntegrate, selection: f.store.selectedCommit?.hash, reveal: nil))
+    func updateTable(compact: Bool = false) {
+        coordinator.update(HistoryCommitTable(store: f.store, presentation: f.store.historyPresentation, grouped: false, compact: compact, showGraph: true, canModifyHistory: f.store.canIntegrate, selection: f.store.selectedCommit?.hash, reveal: nil))
+    }
+    updateTable()
     #expect(coordinator.table.numberOfRows == commits.count)
+    func tooltip(row: Int) -> [String] {
+        coordinator.tableView(coordinator.table, viewFor: coordinator.table.tableColumns.first, row: row)?
+            .toolTip?.components(separatedBy: "\n") ?? []
+    }
+    let pendingPush = String(localized: "Pending Push")
+    let pendingPull = String(localized: "Pending Pull")
+    #expect(tooltip(row: outgoingRow).contains(pendingPush))
+    #expect(!tooltip(row: outgoingRow).contains(pendingPull))
+    #expect(tooltip(row: incomingRow).contains(pendingPull))
+    #expect(!tooltip(row: sharedRow).contains(pendingPush) && !tooltip(row: sharedRow).contains(pendingPull))
+
+    if let path = ProcessInfo.processInfo.environment["GITPICO_OUTGOING_HISTORY_CAPTURE"] {
+        let folder = URL(fileURLWithPath: path, isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let window = RepositoryNativeWindow(tabID: UUID(), permitsPresentation: false)
+        window.tabbingMode = .disallowed; window.styleMask = [.borderless]; window.contentMinSize = .zero
+        window.contentView = tableView
+        defer { window.contentView = nil; window.close() }
+        let captures: [(CGFloat, Bool, NSAppearance.Name, String)] = [
+            (520, false, .aqua, "Diverged"),
+            (320, true, .aqua, "Compact"),
+            (520, false, .darkAqua, "Diverged-Dark")
+        ]
+        for (width, compact, appearance, name) in captures {
+            window.appearance = NSAppearance(named: appearance)
+            updateTable(compact: compact)
+            window.setFrame(NSRect(x: -10000, y: -10000, width: width, height: 335), display: false)
+            tableView.layoutSubtreeIfNeeded()
+            let image = try #require(tableView.bitmapImageRepForCachingDisplay(in: tableView.bounds))
+            tableView.cacheDisplay(in: tableView.bounds, to: image)
+            try #require(image.representation(using: .png, properties: [:])).write(to: folder.appendingPathComponent(name + ".png"))
+        }
+        updateTable()
+    }
     coordinator.table.selectRowIndexes(IndexSet(integer: incomingRow), byExtendingSelection: false)
     await f.store.detailTask?.value
     #expect(f.store.selectedCommit?.subject == "Remote 3")
@@ -66,9 +107,15 @@ import Testing
     try await f.sync()
     let merged = try status()
     #expect(merged.behind == 0 && merged.ahead == 3)
+    f.store.navigate(localBranch); await f.store.historyTask?.value; await f.store.detailTask?.value
+    #expect(f.store.historyPresentation.page.outgoingHashes.count == 3)
     f.store.sync(.push); await f.finish()
+    await f.store.historyTask?.value; await f.store.detailTask?.value
     let pushed = try status()
     #expect(f.store.error == nil && pushed.text == "HEAD")
+    #expect(f.store.destination == localBranch && f.store.historyPresentation.page.outgoingHashes.isEmpty)
+    updateTable()
+    #expect(!tooltip(row: 0).contains(pendingPush))
     try await git(["pull", "--ff-only"], at: peer)
     try await git(["commit", "--allow-empty", "-m", "One more remote commit"], at: peer)
     try await git(["push", "origin", "main"], at: peer)

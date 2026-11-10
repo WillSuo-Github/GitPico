@@ -67,9 +67,11 @@ import Testing
     let tipLabels = tipCell.subviews.compactMap { ($0 as? NSTextField)?.stringValue }
     let headLabels = headCell.subviews.compactMap { ($0 as? NSTextField)?.stringValue }
     let pendingPull = String(localized: "Pending Pull")
-    #expect(tipLabels.contains("origin/main"))
+    #expect(tipLabels.contains { $0 == "origin/main" || $0.hasPrefix("origin/main · ") })
     #expect(headLabels.contains("HEAD"))
-    #expect(tipCell.toolTip?.components(separatedBy: "\n").contains(pendingPull) == true)
+    let tipHelp = tipCell.toolTip?.components(separatedBy: "\n") ?? []
+    #expect(tipHelp.contains(pendingPull))
+    #expect(tipHelp.contains(String(localized: "References")) && tipHelp.contains("origin/main"))
     #expect(headCell.toolTip?.contains(pendingPull) == false)
 
     if let path = ProcessInfo.processInfo.environment["GITPICO_INCOMING_HISTORY_CAPTURE"] {
@@ -93,10 +95,13 @@ import Testing
 }
 
 @Test func headBadgeDistinguishesHeadFromOrdinaryReferenceNames() {
-    #expect(CommitDecorationBadge(["origin/main", "HEAD -> main"]).label == "HEAD")
+    let attached = CommitDecorationBadge(["origin/main", "HEAD -> main"])
+    #expect(attached.label == "HEAD" && attached.inlineLabel == "HEAD · origin/main")
     #expect(CommitDecorationBadge(["HEAD"]).isHead)
     let other = CommitDecorationBadge(["HEADline"])
     #expect(other.label == "HEADline" && !other.isHead)
     let tag = CommitDecorationBadge(["tag: HEADline"])
     #expect(tag.label == "HEADline" && tag.isTag && !tag.isHead)
+    #expect(CommitDecorationBadge(["origin/main", "origin/HEAD"]).inlineLabel == "origin/main · origin/HEAD")
+    #expect(CommitDecorationBadge(["main", "tag: v1", "release"]).inlineLabel == "main · v1 · …")
 }

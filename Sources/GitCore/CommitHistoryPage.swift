@@ -4,19 +4,19 @@ import CryptoKit
 public struct HistoryRevision: Sendable {
     public let identity: String
     let hashes: [String]
-    let trackingLocalTip: String?
+    let trackingComparisonTips: (local: String, upstream: String)?
     public static func reference(_ name: String, hash: String) -> Self {
-        Self(identity: name + ":" + hash, hashes: [hash], trackingLocalTip: nil)
+        Self(identity: name + ":" + hash, hashes: [hash], trackingComparisonTips: nil)
     }
     static func trackingBranch(_ name: String, hash: String, upstream: String, upstreamHash: String) -> Self {
         Self(identity: "\(name):\(hash)\n\(upstream):\(upstreamHash)", hashes: hash == upstreamHash ? [hash] : [hash, upstreamHash],
-             trackingLocalTip: hash == upstreamHash ? nil : hash)
+             trackingComparisonTips: hash == upstreamHash ? nil : (hash, upstreamHash))
     }
     public static func all(references: [Reference], head: HeadPosition) -> Self {
         let signature = references.sorted { $0.fullName < $1.fullName }.map { $0.fullName + ":" + $0.hash + ($0.isCurrent ? ":HEAD" : "") }.joined(separator: "\n") + "\n" + head.branch + ":" + (head.hash ?? "")
         let identity = SHA256.hash(data: Data(signature.utf8)).map { String(format: "%02x", $0) }.joined()
         return Self(identity: identity, hashes: Array(Set(references.map(\.hash) + [head.hash].compactMap { $0 })).sorted(),
-                    trackingLocalTip: nil)
+                    trackingComparisonTips: nil)
     }
 }
 public struct CommitHistoryPage: Sendable {
@@ -24,8 +24,10 @@ public struct CommitHistoryPage: Sendable {
     public let hasMore: Bool
     public let totalCount: Int?
     public let incomingHashes: Set<String>
-    public init(commits: [Commit], hasMore: Bool, totalCount: Int? = nil, incomingHashes: Set<String> = []) {
-        self.commits = commits; self.hasMore = hasMore; self.totalCount = totalCount; self.incomingHashes = incomingHashes
+    public let outgoingHashes: Set<String>
+    public init(commits: [Commit], hasMore: Bool, totalCount: Int? = nil, incomingHashes: Set<String> = [], outgoingHashes: Set<String> = []) {
+        self.commits = commits; self.hasMore = hasMore; self.totalCount = totalCount
+        self.incomingHashes = incomingHashes; self.outgoingHashes = outgoingHashes
     }
 }
 extension GitRepository {
@@ -76,29 +78,34 @@ extension GitRepository {
         let output = try await GitProcess.run(args, at: root, input: Data((tips.joined(separator: "\n") + "\n").utf8), cancellable: true)
         let commits = GitParser.commits(output.data), hasMore = commits.count > options.limit
         let visible = Array(commits.prefix(options.limit))
-        let incoming = try await incomingHistoryHashes(visible, excluding: revision.trackingLocalTip)
-        return CommitHistoryPage(commits: visible, hasMore: hasMore, totalCount: hasMore ? nil : commits.count, incomingHashes: incoming)
+        let total = hasMore ? nil : commits.count
+        guard let tracking = revision.trackingComparisonTips, !visible.isEmpty else {
+            return CommitHistoryPage(commits: visible, hasMore: hasMore, totalCount: total)
+        }
+        async let incoming = historyHashes(visible, unreachableFrom: tracking.local)
+        async let outgoing = historyHashes(visible, unreachableFrom: tracking.upstream)
+        return try await CommitHistoryPage(commits: visible, hasMore: hasMore, totalCount: total,
+                                           incomingHashes: incoming, outgoingHashes: outgoing)
     }
 
-    private func incomingHistoryHashes(_ commits: [Commit], excluding localTip: String?) async throws -> Set<String> {
-        guard let localTip, !commits.isEmpty else { return [] }
+    private func historyHashes(_ commits: [Commit], unreachableFrom tip: String) async throws -> Set<String> {
         let visible = Set(commits.map(\.hash))
         // The page contains commits reachable from either tip. Remove everything
-        // reachable from the local tip, regardless of sort order or search filters.
-        let input = commits.map(\.hash).joined(separator: "\n") + "\n^" + localTip + "\n"
+        // reachable from the given tip, regardless of sort order or search filters.
+        let input = commits.map(\.hash).joined(separator: "\n") + "\n^" + tip + "\n"
         do {
             let output = try await GitProcess.run(["rev-list", "--stdin"], at: root, input: Data(input.utf8), cancellable: true)
             return Set(output.text.split(separator: "\n").lazy.map(String.init).filter { visible.contains($0) })
         } catch let failure as GitFailure where failure.reason == .outputLimitExceeded {
-            // A very old filtered page can be separated from the local tip by
+            // A very old filtered page can be separated from the tip by
             // more history than fits in a bounded process result.
-            var incoming: Set<String> = []
+            var unmatched: Set<String> = []
             for commit in commits {
-                let result = try await GitProcess.run(["merge-base", "--is-ancestor", commit.hash, localTip],
+                let result = try await GitProcess.run(["merge-base", "--is-ancestor", commit.hash, tip],
                                                       at: root, allowed: [0, 1], cancellable: true)
-                if result.status == 1 { incoming.insert(commit.hash) }
+                if result.status == 1 { unmatched.insert(commit.hash) }
             }
-            return incoming
+            return unmatched
         }
     }
 }

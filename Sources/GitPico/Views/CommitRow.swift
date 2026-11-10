@@ -88,17 +88,15 @@ struct CommitReferenceBadge: View {
         let badge = CommitDecorationBadge(decorations)
         let tint: Color = badge.isHead ? .accentColor : badge.isTag ? Pico.warning : Pico.modified
         HStack(spacing: 3) {
-            HStack(spacing: 3) {
-                Image(systemName: badge.isTag ? "tag.fill" : badge.isHead ? "smallcircle.filled.circle" : "arrow.triangle.branch").imageScale(.small)
-                Text(badge.label).lineLimit(1).truncationMode(.middle)
-            }
-            .padding(.horizontal, 5).padding(.vertical, 1.5)
-            .foregroundStyle(selected ? selectionColor : (badge.isHead ? .white : tint))
-            .background(selected ? AnyShapeStyle(selectionColor.opacity(0.2)) : badge.isHead ? AnyShapeStyle(tint) : AnyShapeStyle(tint.opacity(0.15)), in: Capsule())
-            if decorations.count > 1 { Text("+\(decorations.count - 1)").foregroundStyle(selected ? selectionColor.opacity(0.8) : .secondary) }
+            Image(systemName: badge.isTag ? "tag.fill" : badge.isHead ? "smallcircle.filled.circle" : "arrow.triangle.branch").imageScale(.small)
+            Text(badge.inlineLabel).lineLimit(1).truncationMode(decorations.count > 1 ? .tail : .middle)
         }
+        .padding(.horizontal, 5).padding(.vertical, 1.5)
+        .foregroundStyle(selected ? selectionColor : (badge.isHead ? .white : tint))
+        .background(selected ? AnyShapeStyle(selectionColor.opacity(0.2)) : badge.isHead ? AnyShapeStyle(tint) : AnyShapeStyle(tint.opacity(0.15)), in: Capsule())
         .font(.system(size: 9.5, weight: .semibold))
-        .frame(maxWidth: 130, alignment: .trailing).fixedSize(horizontal: false, vertical: true).help(decorations.joined(separator: ", "))
+        .frame(maxWidth: decorations.count > 1 ? 165 : 130, alignment: .trailing).fixedSize(horizontal: false, vertical: true)
+        .help(([String(localized: "References")] + decorations).joined(separator: "\n"))
     }
 }
 

@@ -193,8 +193,11 @@ struct HistoryCommitTable: NSViewRepresentable {
                 cell.textField?.stringValue = title
                 return cell
             case .commit(let commit):
+                let page = input.presentation.page
+                let sync: HistoryCommitSync? = page.incomingHashes.contains(commit.hash) ? .incoming :
+                    page.outgoingHashes.contains(commit.hash) ? .outgoing : nil
                 let content = HistoryCommitAppearance(commit: commit, graph: input.presentation.graph[commit.hash], graphWidth: CGFloat(input.presentation.graphWidth), compact: input.compact, showGraph: input.showGraph,
-                                                      isIncoming: input.presentation.page.incomingHashes.contains(commit.hash))
+                                                      sync: sync)
                 let cell = tableView.makeView(withIdentifier: HistoryCommitCell.reuseID, owner: nil) as? HistoryCommitCell ?? HistoryCommitCell()
                 cell.configure(content, store: input.store)
                 return cell
@@ -210,13 +213,21 @@ final class HistoryTableView: NSTableView {
     }
 }
 
+private enum HistoryCommitSync {
+    case incoming, outgoing
+
+    var symbol: String { self == .incoming ? "arrow.down" : "arrow.up" }
+    var status: String { self == .incoming ? String(localized: "Pending Pull") : String(localized: "Pending Push") }
+}
+
 private struct HistoryCommitAppearance {
     let commit: Commit
     let graph: GraphRow?
     let graphWidth: CGFloat
     let compact: Bool
     let showGraph: Bool
-    let isIncoming: Bool
+    let sync: HistoryCommitSync?
+    var isIncoming: Bool { sync == .incoming }
 }
 
 /// Lightweight drawing keeps cached branch changes out of SwiftUI cell layout.
@@ -230,8 +241,7 @@ private final class HistoryCommitCell: NSTableCellView {
     private let hashLabel = HistoryCommitCell.label(size: 10.5, monospaced: true)
     private let dateLabel = HistoryCommitCell.label(size: 11, alignment: .right)
     private let badgeLabel = HistoryCommitCell.label(size: 9.5, weight: .semibold)
-    private let badgeCountLabel = HistoryCommitCell.label(size: 9.5)
-    private var labels: [NSTextField] { [subjectLabel, authorLabel, hashLabel, dateLabel, badgeLabel, badgeCountLabel] }
+    private var labels: [NSTextField] { [subjectLabel, authorLabel, hashLabel, dateLabel, badgeLabel] }
     override var backgroundStyle: NSView.BackgroundStyle {
         didSet { updateTextColors(); needsDisplay = true }
     }
@@ -264,18 +274,19 @@ private final class HistoryCommitCell: NSTableCellView {
         hashLabel.stringValue = " · " + content.commit.shortHash
         dateLabel.stringValue = content.commit.date.picoRelative
         let badge = CommitDecorationBadge(content.commit.decorations)
-        badgeLabel.stringValue = badge.label
-        badgeCountLabel.stringValue = content.commit.decorations.count > 1 ? "+\(content.commit.decorations.count - 1)" : ""
+        badgeLabel.stringValue = badge.inlineLabel
         updateTextColors()
         needsLayout = true
         needsDisplay = true
         let target = PicoDropTarget.commit(content.commit, .squash)
         drop.validate = { [weak store] in store?.canAcceptDrop($0, on: target) == true }
         drop.accept = { [weak store] in store?.acceptDrop($0, on: target, point: $1, height: $2) == true }
-        let refs = content.commit.decorations.joined(separator: ", ")
-        let status = content.isIncoming ? String(localized: "Pending Pull") : ""
+        let decorations = content.commit.decorations
+        let refs = decorations.joined(separator: ", ")
+        let status = content.sync?.status ?? ""
         setAccessibilityLabel([content.commit.subject, status, content.commit.author, content.commit.shortHash, refs].filter { !$0.isEmpty }.joined(separator: ", "))
-        toolTip = [content.commit.subject, status, content.commit.author + " · " + content.commit.date.formatted(date: .complete, time: .shortened), refs].filter { !$0.isEmpty }.joined(separator: "\n")
+        let referenceLines = decorations.isEmpty ? [] : ["", String(localized: "References")] + decorations
+        toolTip = ([content.commit.subject, status, content.commit.author + " · " + content.commit.date.formatted(date: .complete, time: .shortened)].filter { !$0.isEmpty } + referenceLines).joined(separator: "\n")
     }
     override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
@@ -288,7 +299,7 @@ private final class HistoryCommitCell: NSTableCellView {
         // A key-window check can disagree with the selection background.
         let secondary: NSColor = emphasized ? .alternateSelectedControlTextColor : .secondaryLabelColor
         subjectLabel.textColor = emphasized || content?.isIncoming == true ? secondary : .labelColor
-        for label in [authorLabel, hashLabel, dateLabel, badgeCountLabel] { label.textColor = secondary }
+        for label in [authorLabel, hashLabel, dateLabel] { label.textColor = secondary }
         if let content {
             let badge = CommitDecorationBadge(content.commit.decorations)
             badgeLabel.textColor = emphasized ? .alternateSelectedControlTextColor : badge.isHead ? .white : badgeTint(badge)
@@ -312,15 +323,13 @@ private final class HistoryCommitCell: NSTableCellView {
         guard let content else { return }
         let x = textOrigin
         let top = content.compact ? (bounds.height - 16) / 2 : 7.0
-        let pending = pendingPullRect(y: top)
+        let pending = syncIndicatorRect(y: top)
         let badge = badgeRect(content.commit.decorations, y: top, before: pending)
         let firstBadge = !badge.isEmpty ? badge : pending
         let reserve = firstBadge.isEmpty ? 0 : bounds.width - firstBadge.minX - 12 + 6
         subjectLabel.frame = NSRect(x: x, y: top, width: max(0, bounds.width - 12 - x - reserve), height: 17)
         badgeLabel.isHidden = badge.isEmpty
-        badgeCountLabel.isHidden = badge.isEmpty || content.commit.decorations.count <= 1
         badgeLabel.frame = NSRect(x: badge.minX + 16, y: badge.minY + 1, width: max(0, badge.width - 19), height: 13)
-        badgeCountLabel.frame = NSRect(x: badge.maxX + 3, y: badge.minY, width: 20, height: 15)
         for label in [authorLabel, hashLabel, dateLabel] { label.isHidden = content.compact }
         if !content.compact {
             let available = max(0, bounds.width - 12 - x)
@@ -356,11 +365,11 @@ private final class HistoryCommitCell: NSTableCellView {
         let initialsColor: NSColor = content.isIncoming ? (emphasized ? .alternateSelectedControlTextColor : .secondaryLabelColor) : .white
         drawText(Pico.monogram(commit.author), in: avatar.insetBy(dx: 1, dy: size * 0.23), font: .systemFont(ofSize: size * 0.38, weight: .semibold), color: initialsColor, alignment: .center)
         let top = compact ? (bounds.height - 16) / 2 : 7.0
-        let pending = pendingPullRect(y: top)
+        let pending = syncIndicatorRect(y: top)
         drawBadge(commit.decorations, in: badgeRect(commit.decorations, y: top, before: pending))
-        if !pending.isEmpty {
-            let ink: NSColor = emphasized ? .alternateSelectedControlTextColor : .secondaryLabelColor
-            drawBadgeSymbol("arrow.down", in: pending, color: ink, centered: true)
+        if let sync = content.sync, !pending.isEmpty {
+            let ink: NSColor = emphasized ? .alternateSelectedControlTextColor : .labelColor
+            drawSyncSymbol(sync.symbol, in: pending, color: ink)
         }
     }
 
@@ -375,19 +384,19 @@ private final class HistoryCommitCell: NSTableCellView {
         if badge.isHead { return .controlAccentColor }
         return content?.isIncoming == true ? .secondaryLabelColor : NSColor(badge.isTag ? Pico.warning : Pico.modified)
     }
-    private func pendingPullRect(y: CGFloat) -> NSRect {
-        guard content?.isIncoming == true else { return .zero }
+    private func syncIndicatorRect(y: CGFloat) -> NSRect {
+        guard content?.sync != nil else { return .zero }
         return NSRect(x: bounds.width - 28, y: y + 1, width: 16, height: 15)
     }
     private func badgeRect(_ decorations: [String], y: CGFloat, before pending: NSRect) -> NSRect {
         guard !decorations.isEmpty else { return .zero }
-        let extra: CGFloat = decorations.count > 1 ? 22 : 0
         let right = pending.isEmpty ? bounds.width - 12 : pending.minX - 5
         // Leave room for the subject even when the table is narrow or the graph is wide.
         let subjectAllowance: CGFloat = pending.isEmpty ? 106 : 76
-        let width = min(108, textWidth(badgeLabel) + 22, right - textOrigin - subjectAllowance - extra)
+        let maxBadgeWidth: CGFloat = decorations.count > 1 ? 165 : 108
+        let width = min(maxBadgeWidth, textWidth(badgeLabel) + 22, right - textOrigin - subjectAllowance)
         guard width >= 22 else { return .zero }
-        return NSRect(x: right - width - extra, y: y + 1, width: width, height: 15)
+        return NSRect(x: right - width, y: y + 1, width: width, height: 15)
     }
     private func drawBadge(_ decorations: [String], in rect: NSRect) {
         guard !rect.isEmpty else { return }
@@ -399,10 +408,19 @@ private final class HistoryCommitCell: NSTableCellView {
         let ink: NSColor = emphasized ? selectedText : badge.isHead ? .white : tint
         drawBadgeSymbol(badge.isTag ? "tag.fill" : badge.isHead ? "smallcircle.filled.circle" : "arrow.triangle.branch", in: rect, color: ink)
     }
-    private func drawBadgeSymbol(_ symbol: String, in rect: NSRect, color: NSColor, centered: Bool = false) {
+    private func drawBadgeSymbol(_ symbol: String, in rect: NSRect, color: NSColor) {
         let image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
-        let x = centered ? rect.midX - 4.5 : rect.minX + 4
-        image?.withSymbolConfiguration(.init(pointSize: 9, weight: .semibold))?.withSymbolConfiguration(.init(paletteColors: [color]))?.draw(in: NSRect(x: x, y: rect.minY + 3, width: 9, height: 9), from: .zero, operation: .sourceOver, fraction: 1, respectFlipped: true, hints: nil)
+        image?.withSymbolConfiguration(.init(pointSize: 9, weight: .semibold))?.withSymbolConfiguration(.init(paletteColors: [color]))?.draw(in: NSRect(x: rect.minX + 4, y: rect.minY + 3, width: 9, height: 9), from: .zero, operation: .sourceOver, fraction: 1, respectFlipped: true, hints: nil)
+    }
+
+    private func drawSyncSymbol(_ symbol: String, in rect: NSRect, color: NSColor) {
+        let size: CGFloat = 12
+        let configuration = NSImage.SymbolConfiguration(pointSize: size, weight: .heavy)
+            .applying(.init(paletteColors: [color]))
+        let glyph = NSRect(x: rect.midX - size / 2, y: rect.midY - size / 2, width: size, height: size)
+        NSImage(systemSymbolName: symbol, accessibilityDescription: nil)?
+            .withSymbolConfiguration(configuration)?
+            .draw(in: glyph, from: .zero, operation: .sourceOver, fraction: 1, respectFlipped: true, hints: nil)
     }
 
     private func drawGraph(_ row: GraphRow, in rect: NSRect, muted: Bool) {
