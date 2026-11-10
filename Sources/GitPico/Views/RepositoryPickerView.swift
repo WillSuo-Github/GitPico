@@ -39,6 +39,13 @@ struct RepositoryPickerView: View {
             } else { pickerContent }
         }
         .disabled(tab.isBusy)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            if let warning = tab.pickerDropWarning {
+                NoticeBanner(icon: "exclamationmark.triangle.fill", title: "Add Local Repository", message: warning) {
+                    Button("Dismiss") { tab.pickerDropWarning = nil }
+                }
+            }
+        }
         .overlay {
             if tab.isOpening {
                 RepositoryOpeningProgressView()
@@ -115,23 +122,30 @@ struct RepositoryPickerView: View {
                         Button("Repair Repository Pointers…") { store.infrastructure(.repair) }
                     } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Library tools")
                 }
-                List(selection: $tab.pickerSelection) {
-                    ForEach(entries) { entry in
-                        RepositoryPickerRow(entry: entry, isOpen: workspace.isRepositoryOpen(at: entry.path),
-                                            isSelected: tab.pickerSelection == entry.id, isEmphasized: listFocused) { open(entry) }
-                            .tag(entry.id).contentShape(Rectangle())
-                            .contextMenu {
-                                Button("Open") { open(entry) }
-                                Button(entry.favorite ? "Remove from Favorites" : "Add to Favorites") { do { try workspace.library.setFavorite([entry.id], !entry.favorite) } catch { store.error = error.localizedDescription } }
-                                Button("Locate Repository…") { store.chooseLibraryRepository(relocating: entry.id) }
-                            }
-                    }.onMove(perform: reorderAction)
-                }.listStyle(.inset).scrollContentBackground(.hidden)
-                    .focused($listFocused)
-                    .background(Color(nsColor: .controlBackgroundColor).opacity(0.6), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color(nsColor: .separatorColor).opacity(0.6), lineWidth: 0.5))
-                    .contextMenu(forSelectionType: UUID.self) { _ in } primaryAction: { ids in if let entry = entries.first(where: { ids.contains($0.id) }) { open(entry) } }
-                    .overlay { if entries.isEmpty { EmptyPane(title: tab.pickerQuery.isEmpty ? String(localized: "No repositories here yet") : String(localized: "No matches"), subtitle: tab.pickerQuery.isEmpty ? String(localized: "Open a local repository, clone one, or choose another collection.") : String(localized: "No repository name, path or group matches this search."), icon: tab.pickerQuery.isEmpty ? "tray" : "magnifyingglass") } }
+                ScrollViewReader { scroll in
+                    List(selection: $tab.pickerSelection) {
+                        ForEach(entries) { entry in
+                            RepositoryPickerRow(entry: entry, isOpen: workspace.isRepositoryOpen(at: entry.path),
+                                                isSelected: tab.pickerSelection == entry.id, isEmphasized: listFocused) { open(entry) }
+                                .id(entry.id).tag(entry.id).contentShape(Rectangle())
+                                .contextMenu {
+                                    Button("Open") { open(entry) }
+                                    Button(entry.favorite ? "Remove from Favorites" : "Add to Favorites") { do { try workspace.library.setFavorite([entry.id], !entry.favorite) } catch { store.error = error.localizedDescription } }
+                                    Button("Locate Repository…") { store.chooseLibraryRepository(relocating: entry.id) }
+                                }
+                        }.onMove(perform: reorderAction)
+                    }.listStyle(.inset).scrollContentBackground(.hidden)
+                        .focused($listFocused)
+                        .background(Color(nsColor: .controlBackgroundColor).opacity(0.6), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color(nsColor: .separatorColor).opacity(0.6), lineWidth: 0.5))
+                        .contextMenu(forSelectionType: UUID.self) { _ in } primaryAction: { ids in if let entry = entries.first(where: { ids.contains($0.id) }) { open(entry) } }
+                        .overlay { if entries.isEmpty { EmptyPane(title: tab.pickerQuery.isEmpty ? String(localized: "No repositories here yet") : String(localized: "No matches"), subtitle: tab.pickerQuery.isEmpty ? String(localized: "Open a local repository, clone one, or choose another collection.") : String(localized: "No repository name, path or group matches this search."), icon: tab.pickerQuery.isEmpty ? "tray" : "magnifyingglass") } }
+                        .onChange(of: tab.pickerReveal, initial: true) { _, id in
+                            guard let id else { return }
+                            scroll.scrollTo(id)
+                            tab.pickerReveal = nil
+                        }
+                }
                 HStack {
                     Label("Double-click or press Return to open", systemImage: "return").font(.caption).foregroundStyle(.tertiary)
                     Spacer()

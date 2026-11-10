@@ -8,7 +8,7 @@ import UniformTypeIdentifiers
 
 @MainActor private final class WindowlessDragInfo: NSObject, NSDraggingInfo {
     let draggingPasteboard = NSPasteboard.withUniqueName()
-    var draggingDestinationWindow: NSWindow? { nil }
+    weak var draggingDestinationWindow: NSWindow?
     var draggingSourceOperationMask: NSDragOperation = .copy
     var draggingLocation = NSPoint(x: 20, y: 12)
     var draggedImageLocation: NSPoint { .zero }
@@ -34,6 +34,56 @@ import UniformTypeIdentifiers
         draggingPasteboard.writeObjects(items)
     }
     func releasePasteboard() { draggingPasteboard.releaseGlobally() }
+}
+
+@Test @MainActor func nativePickerDropRegistersOnlyRepositoryRoots() async throws {
+    let temp = FileManager.default.temporaryDirectory.appendingPathComponent("GitPico-picker-drop-\(UUID())")
+    let repo = temp.appendingPathComponent("Dropped Repository")
+    let nested = repo.appendingPathComponent("Subfolder")
+    let ordinary = temp.appendingPathComponent("Ordinary Folder")
+    for folder in [nested, ordinary] {
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+    }
+    defer { try? FileManager.default.removeItem(at: temp) }
+    _ = try await GitProcess.run(["init", "-b", "main"], at: repo)
+    let file = temp.appendingPathComponent("library.json")
+    let library = RepositoryLibrary(file: file, legacy: [])
+    let workspace = RepositoryWorkspace(library: library)
+    let windows = NativeRepositoryWindows(workspace: workspace, permitsPresentation: false)
+    windows.start()
+    defer { windows.stop(); workspace.shutdown() }
+    let tab = workspace.activeTab
+    tab.pickerFilter = .recent
+    tab.pickerQuery = "unrelated search"
+    let window = try #require(windows.window(for: tab.id))
+    let controller = try #require(window.delegate as? RepositoryWindowController)
+    let sender = WindowlessDragInfo()
+    defer { sender.releasePasteboard() }
+    sender.draggingDestinationWindow = window
+    #expect(sender.draggingPasteboard.writeObjects([ordinary as NSURL, repo as NSURL, nested as NSURL]))
+    #expect(controller.draggingEntered(sender) == .copy && controller.prepareForDragOperation(sender))
+    #expect(controller.performDragOperation(sender))
+    #expect(!controller.performDragOperation(sender))
+    await tab.store.operationTask?.value
+
+    let entry = try #require(library.matches().first)
+    #expect(library.matches().map(\.path) == [repo.resolvingSymlinksInPath().path])
+    #expect(RepositoryLibrary(file: file, legacy: []).matches() == [entry])
+    #expect(library.recentPaths.isEmpty && tab.root == nil && tab.showsRepositoryPicker)
+    #expect(tab.pickerFilter == .all && tab.pickerQuery.isEmpty && tab.pickerSelection == entry.id)
+    #expect(tab.pickerDropWarning?.contains(ordinary.lastPathComponent) == true)
+    #expect(tab.pickerDropWarning?.contains(nested.lastPathComponent) == true)
+
+    sender.draggingPasteboard.clearContents()
+    #expect(sender.draggingPasteboard.writeObjects([repo as NSURL]))
+    #expect(controller.performDragOperation(sender))
+    await tab.store.operationTask?.value
+    #expect(library.matches() == [entry] && tab.pickerDropWarning == nil)
+
+    await workspace.open(repo)
+    #expect(!tab.showsRepositoryPicker && tab.store.snapshot != nil)
+    #expect(controller.draggingEntered(sender).isEmpty && !controller.performDragOperation(sender))
+    #expect(!NSApp.isActive && !window.isVisible)
 }
 
 @MainActor private func dropView(_ store: RepositoryStore, target: PicoDropTarget, option: Bool = false) -> NativePicoDropView {

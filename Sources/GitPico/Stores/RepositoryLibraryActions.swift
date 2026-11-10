@@ -1,6 +1,51 @@
 import AppKit
 import GitCore
 
+extension RepositoryTab {
+    func addDroppedRepositories(_ urls: [URL]) -> Bool {
+        guard acceptsRepositoryDrops, !urls.isEmpty else { return false }
+        pickerDropWarning = nil
+        store.isBusy = true
+        store.activity = String(localized: "Checking repository…")
+        store.operationTask = Task {
+            defer { store.isBusy = false; store.activity = "" }
+            var firstAdded: UUID?
+            var rejected: [String] = []
+            var storageError: String?
+            var seen: Set<URL> = []
+            for url in urls where url.isFileURL {
+                let folder = url.standardizedFileURL.resolvingSymlinksInPath()
+                guard seen.insert(folder).inserted else { continue }
+                // Git also resolves subfolders to their parent repository. Import only the dropped root.
+                guard (try? folder.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true,
+                      let repository = try? await GitRepository.open(folder), await repository.root.path == folder.path else {
+                    rejected.append(url.lastPathComponent)
+                    continue
+                }
+                do {
+                    let id = try store.library.register(folder)
+                    firstAdded = firstAdded ?? id
+                } catch {
+                    storageError = error.localizedDescription
+                    break
+                }
+            }
+            if let firstAdded {
+                pickerQuery = ""
+                pickerFilter = .all
+                pickerSelection = firstAdded
+                pickerReveal = firstAdded
+            }
+            if let storageError {
+                pickerDropWarning = storageError
+            } else if !rejected.isEmpty {
+                pickerDropWarning = String(localized: "Choose a Git working directory.") + " " + rejected.formatted(.list(type: .and))
+            }
+        }
+        return true
+    }
+}
+
 extension RepositoryStore {
     func chooseLibraryRepository(relocating id: UUID? = nil) {
         guard !isBusy else { return }

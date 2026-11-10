@@ -180,6 +180,7 @@ import SwiftUI
         window.toolbar?.displayMode = .iconOnly
         // The titlebar background draws an opaque band over the picker's gradient; repository pages keep it for their scroll-edge effect.
         window.titlebarAppearsTransparent = tab.showsRepositoryPicker || tab.store.snapshot == nil
+        window.setRepositoryDropEnabled(tab.acceptsRepositoryDrops)
         if let content = window.contentViewController { configureContentLayout(content) }
     }
     private func configureContentLayout(_ controller: NSViewController) {

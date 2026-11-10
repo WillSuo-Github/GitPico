@@ -26,12 +26,15 @@ extension RepositoryWindowRouting {
     var pickerQuery = ""
     var pickerFilter: RepositoryLibraryFilter = .recent
     var pickerSelection: UUID?
+    var pickerReveal: UUID?
+    var pickerDropWarning: String?
     init(store: RepositoryStore, id: UUID = UUID()) {
         self.id = id
         self.store = store
         if store.library.recentPaths.isEmpty { pickerFilter = .all }
     }
     var showsRepositoryPicker: Bool { isChoosingRepository || root == nil }
+    var acceptsRepositoryDrops: Bool { (showsRepositoryPicker || store.snapshot == nil) && !isBusy }
     var displayedRepositoryPath: String? {
         guard !showsRepositoryPicker, !isOpening, let root, store.snapshot?.root.path == root.path else { return nil }
         return root.path
