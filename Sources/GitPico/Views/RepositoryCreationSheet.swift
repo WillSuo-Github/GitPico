@@ -8,6 +8,34 @@ struct RepositoryCreationRequest: Identifiable {
     var source: String = ""
     var name: String = ""
     var profileID: UUID? = nil
+
+    func suggestedName(for source: String) -> String {
+        guard clone else { return name }
+        if source == self.source, !name.isEmpty { return name }
+
+        let source = source.trimmingCharacters(in: .whitespacesAndNewlines)
+        let path: Substring
+        let isURL = source.range(of: "://").map { !source[..<$0.lowerBound].contains("/") } ?? false
+        if isURL {
+            guard let url = URLComponents(string: source), url.scheme == "file" || url.host?.isEmpty == false else { return "" }
+            path = url.percentEncodedPath[...]
+        } else if let prefix = source.prefixMatch(of: #/(?:[^/@:\s]+@)?(?:\[[^\]/]+\]|[^/:\s]+):/#) {
+            path = source[prefix.range.upperBound...]
+        } else {
+            path = source[...]
+        }
+
+        let components = path.split(separator: "/")
+        guard let last = components.last else { return "" }
+        let component = last == ".git" ? (components.dropLast().last ?? "") : last
+        let decoded = isURL ? (component.removingPercentEncoding ?? "") : String(component)
+        let suggestion = decoded.hasSuffix(".git") ? String(decoded.dropLast(4)) : decoded
+        return Self.isValidFolderName(suggestion) ? suggestion : ""
+    }
+
+    static func isValidFolderName(_ name: String) -> Bool {
+        !name.isEmpty && name != "." && name != ".." && !name.contains("/") && !name.utf8.contains(0)
+    }
 }
 
 struct RepositoryCreationSheet: View {
@@ -15,7 +43,7 @@ struct RepositoryCreationSheet: View {
     let request: RepositoryCreationRequest
     @State private var source = ""
     @State private var profileID: UUID?
-    @State private var name = ""
+    @State private var customName: String?
     @State private var recursive = false
     @State private var enableLFS = false
     @State private var downloadLFS = true
@@ -26,11 +54,11 @@ struct RepositoryCreationSheet: View {
         self.store = store
         self.request = request
         _source = State(initialValue: request.source)
-        _name = State(initialValue: request.name)
         _profileID = State(initialValue: request.profileID)
     }
+    private var name: String { customName ?? request.suggestedName(for: source) }
     var valid: Bool {
-        !name.isEmpty && !name.contains("/") && name != "." && name != ".." &&
+        RepositoryCreationRequest.isValidFolderName(name) &&
             (!request.clone || !source.isEmpty) &&
             (profileID == nil || store.authentication.profiles.contains { $0.id == profileID })
     }
@@ -51,7 +79,7 @@ struct RepositoryCreationSheet: View {
                 if enableLFS { Toggle("Download LFS objects now", isOn: $downloadLFS).toggleStyle(.checkbox); Text("Requires git-lfs. Turn off to clone pointer files and download objects later from Git LFS settings.").font(.caption).foregroundStyle(.secondary) }
                 if recursive { Toggle("Allow local file transport for this clone and its submodules", isOn: $allowLocalTransport).toggleStyle(.checkbox).font(.caption) }
             }
-            TextField("Local folder name", text: $name).textFieldStyle(.roundedBorder)
+            TextField("Local folder name", text: Binding(get: { name }, set: { customName = $0 })).textFieldStyle(.roundedBorder)
             HStack {
                 LabeledContent("Parent", value: parent.path).lineLimit(1).truncationMode(.middle)
                 Button("Choose…") {
