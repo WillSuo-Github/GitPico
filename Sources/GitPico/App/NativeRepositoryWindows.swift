@@ -8,7 +8,7 @@ import SwiftUI
     private var observers: [ObjectIdentifier: NSKeyValueObservation] = [:]
     private var membershipObservers: [ObjectIdentifier: NSKeyValueObservation] = [:]
     private var nativeClosing: Set<UUID> = []
-    private var closedChoosers: Set<UUID> = []
+    private var closedWindow: (tabID: UUID, frame: NSRect)?
     private var synchronizing = false
     private var needsSynchronization = false
     private var stopping = false
@@ -18,7 +18,6 @@ import SwiftUI
     /// While a saved session is restored at launch, windows are built and arranged hidden, then shown once in their final state.
     private(set) var presentationHeld = false
     private var heldSelections: [UUID] = []
-    var hasRepositoryWindows: Bool { !controllers.isEmpty }
 
     init(workspace: RepositoryWorkspace, permitsPresentation: Bool = true) {
         self.workspace = workspace
@@ -26,7 +25,7 @@ import SwiftUI
     }
     func start() {
         workspace.windowRouting = self
-        workspaceChanged()
+        if !presentationHeld { workspaceChanged() }
     }
     func stop() {
         stopping = true
@@ -71,9 +70,23 @@ import SwiftUI
         if presentationHeld { heldSelections.append(window.tabID); return }
         window.tabGroup?.selectedWindow = window
     }
+    func closeSelectedWindow() {
+        window(for: workspace.selectedID)?.performClose(nil)
+    }
+    func reopenIfClosed() {
+        guard !presentationHeld, let closed = closedWindow else { return }
+        closedWindow = nil
+        if let tab = workspace.tabs.first(where: { $0.id == closed.tabID }), window(for: tab.id) == nil {
+            if !tab.showsRepositoryPicker, tab.store.isHistoryDestination, let hash = tab.store.selectedCommit?.hash {
+                tab.store.historyReveal = HistoryReveal(hash: hash, atTop: false)
+            }
+            _ = makeWindow(tab, savedFrame: closed.frame)
+        }
+        workspaceChanged()
+    }
     func reopen() {
-        if presentationHeld { releasePresentation(); return }
-        closedChoosers.remove(workspace.selectedID)
+        guard !presentationHeld else { return }
+        if closedWindow != nil { reopenIfClosed(); return }
         workspaceChanged()
     }
     func workspaceChanged() {
@@ -87,14 +100,15 @@ import SwiftUI
         } while needsSynchronization
     }
     private func reconcile() {
-        closedChoosers.remove(workspace.selectedID)
-        if workspace.tabs.count > 1 {
-            for id in closedChoosers {
-                if let tab = workspace.tabs.first(where: { $0.id == id }), tab.root == nil, !tab.isBusy { _ = workspace.close(id) }
+        if workspace.tabs.count > 1, let closed = closedWindow {
+            closedWindow = nil
+            if let tab = workspace.tabs.first(where: { $0.id == closed.tabID }) {
+                if tab.root == nil, !tab.isBusy { _ = workspace.close(tab.id) }
+                else if window(for: tab.id) == nil { _ = makeWindow(tab, savedFrame: closed.frame) }
             }
         }
         let ids = Set(workspace.tabs.map(\.id))
-        closedChoosers.formIntersection(ids)
+        if let closedWindow, !ids.contains(closedWindow.tabID) { self.closedWindow = nil }
         for id in Array(controllers.keys) where !ids.contains(id) && !nativeClosing.contains(id) {
             let controller = controllers.removeValue(forKey: id)
             controller?.window?.delegate = nil
@@ -105,19 +119,19 @@ import SwiftUI
         if anchor == nil || nativeClosing.contains(anchor!.tabID) {
             anchor = controllers.keys.filter { !nativeClosing.contains($0) }.compactMap { window(for: $0) }.first
         }
-        for tab in workspace.tabs where controllers[tab.id] == nil && !closedChoosers.contains(tab.id) {
+        for tab in workspace.tabs where controllers[tab.id] == nil && closedWindow?.tabID != tab.id {
             let window = makeWindow(tab)
             if let anchor, anchor !== window { anchor.addTabbedWindow(window, ordered: .above) }
             else { anchor = window }
         }
         observeGroups()
-        if let window = window(for: workspace.selectedID), !nativeClosing.contains(window.tabID) {
+        if let window = window(for: workspace.selectedID), !nativeClosing.contains(window.tabID), closedWindow?.tabID != window.tabID {
             lastSelectedID = window.tabID
             if window.tabGroup?.selectedWindow !== window { selectInGroup(window) }
             if permitsPresentation, !presentationHeld, !window.isKeyWindow { window.makeKeyAndOrderFront(nil) }
         }
     }
-    private func makeWindow(_ tab: RepositoryTab) -> RepositoryNativeWindow {
+    private func makeWindow(_ tab: RepositoryTab, savedFrame: NSRect? = nil) -> RepositoryNativeWindow {
         let window = RepositoryNativeWindow(tabID: tab.id, permitsPresentation: permitsPresentation)
         window.repositoryWindows = self
         let content = RepositoryWorkspaceView(workspace: workspace, tab: tab, presentsAlerts: permitsPresentation) { [weak self] in
@@ -126,7 +140,8 @@ import SwiftUI
         window.contentViewController = NSHostingController(rootView: content.environment(\.layoutDirection, AppLocalization.layoutDirection))
         window.setFrame(NSRect(origin: window.frame.origin, size: NSSize(width: 1420, height: 900)), display: false)
         if permitsPresentation {
-            if let source = lastSelectedID.flatMap({ self.window(for: $0) }) { window.setFrame(source.frame, display: false) }
+            if let savedFrame { window.setFrame(visibleFrame(savedFrame), display: false) }
+            else if let source = lastSelectedID.flatMap({ self.window(for: $0) }) { window.setFrame(source.frame, display: false) }
             else {
                 if !window.setFrameUsingName("GitPico.RepositoryWindow") { window.center() }
                 _ = window.setFrameAutosaveName("GitPico.RepositoryWindow")
@@ -229,6 +244,10 @@ import SwiftUI
         return true
     }
     func sessionWindows() -> [WorkspaceWindowGroup] {
+        if let closed = closedWindow {
+            let frame = closed.frame
+            return [WorkspaceWindowGroup(tabs: [closed.tabID], selected: closed.tabID, x: frame.origin.x, y: frame.origin.y, width: frame.width, height: frame.height)]
+        }
         var seen: Set<UUID> = []
         return workspace.tabs.compactMap { tab in
             guard !seen.contains(tab.id), let window = window(for: tab.id) else { return nil }
@@ -238,6 +257,10 @@ import SwiftUI
             let frame = window.frame
             return WorkspaceWindowGroup(tabs: members, selected: selected, x: frame.origin.x, y: frame.origin.y, width: frame.width, height: frame.height)
         }
+    }
+    private func visibleFrame(_ frame: NSRect) -> NSRect {
+        guard !NSScreen.screens.contains(where: { $0.visibleFrame.intersects(frame) }), let screen = NSScreen.main else { return frame }
+        return NSRect(origin: screen.visibleFrame.origin, size: frame.size)
     }
     func restoreWindows(_ groups: [WorkspaceWindowGroup]) {
         guard !groups.isEmpty else { return }
@@ -249,8 +272,7 @@ import SwiftUI
             for window in windows { window.tabGroup?.removeWindow(window) }
             for window in windows.dropFirst() { anchor.addTabbedWindow(window, ordered: .above) }
             if permitsPresentation {
-                var frame = NSRect(x: group.x, y: group.y, width: group.width, height: group.height)
-                if !NSScreen.screens.contains(where: { $0.visibleFrame.intersects(frame) }), let screen = NSScreen.main { frame.origin = screen.visibleFrame.origin }
+                let frame = visibleFrame(NSRect(x: group.x, y: group.y, width: group.width, height: group.height))
                 for window in windows { window.setFrame(frame, display: false) }
             }
             if let selected = window(for: group.selected) { selectInGroup(selected) }
@@ -258,8 +280,11 @@ import SwiftUI
     }
     func shouldClose(_ window: RepositoryNativeWindow) -> Bool {
         guard let tab = workspace.tabs.first(where: { $0.id == window.tabID }) else { return true }
-        if workspace.tabs.count == 1, tab.root == nil, !tab.isBusy {
-            closedChoosers.insert(tab.id)
+        if workspace.tabs.count == 1 {
+            guard workspace.prepareToClose(tab) else { return false }
+            // Preserve the last tab's live navigation without showing a replacement chooser.
+            closedWindow = (tab.id, window.frame)
+            workspace.saveSession()
             return true
         }
         nativeClosing.insert(tab.id)
@@ -269,7 +294,14 @@ import SwiftUI
     }
     func didClose(_ window: RepositoryNativeWindow) {
         controllers.removeValue(forKey: window.tabID)
-        guard !stopping, !closedChoosers.contains(window.tabID) else { return }
+        guard !stopping else { return }
+        if workspace.tabs.count == 1, workspace.selectedID == window.tabID {
+            if closedWindow == nil {
+                closedWindow = (window.tabID, window.frame)
+                workspace.saveSession()
+            }
+            return
+        }
         if workspace.tabs.contains(where: { $0.id == window.tabID }) { _ = workspace.close(window.tabID) }
         workspaceChanged()
     }

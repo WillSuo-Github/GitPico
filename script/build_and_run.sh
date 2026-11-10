@@ -72,6 +72,7 @@ assert path.exists(), 'Native App startup did not produce its verification repor
 result = json.loads(path.read_text())
 assert result['nativeStartupVerification'] and not result['isActive'] and result['visibleWindows'] == 0, result
 assert result['newTabMenuWorks'] and result['closeTabMenuWorks'], result
+assert result['lastCloseKeptRepository'] and result['reopenedLastRepository'], result
 assert result['repositoryMenuContextWorks'], result
 assert result['repositoriesMenuReusesCurrentTab'], result
 assert result['quickActionsUseToolbarSearch'] and result['findUsesToolbarSearch'], result

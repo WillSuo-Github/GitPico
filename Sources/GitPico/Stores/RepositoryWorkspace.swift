@@ -4,7 +4,8 @@ import GitCore
 import Observation
 
 @MainActor protocol RepositoryWindowRouting: AnyObject {
-    var hasRepositoryWindows: Bool { get }
+    func closeSelectedWindow()
+    func reopenIfClosed()
     func prepareNewTab(from id: UUID)
     func workspaceChanged()
     func cycleNativeTabs(_ offset: Int) -> Bool
@@ -105,7 +106,7 @@ extension RepositoryWindowRouting {
         activeStore.searchFocusRequest = nil
         selectedID = id; activeStore.searchFocusRequest = nil
         if recordingVisit { recordRepositoryVisit(activeTab) }
-        windowRouting?.workspaceChanged()
+        if !restoringSession { windowRouting?.workspaceChanged() }
         scheduleSessionSave()
     }
     func cycle(_ offset: Int) {
@@ -120,15 +121,14 @@ extension RepositoryWindowRouting {
         tab.store.searchFocusRequest = nil
         tab.isChoosingRepository = true
         select(tab.id, recordingVisit: recordingVisit)
+        windowRouting?.reopenIfClosed()
     }
     func returnToRepository(from store: RepositoryStore) {
         guard let tab = tab(for: store), tab.root != nil, !tab.isBusy else { return }
         tab.isChoosingRepository = false
         select(tab.id)
     }
-    @discardableResult func close(_ id: UUID) -> Bool {
-        guard let index = tabs.firstIndex(where: { $0.id == id }) else { return false }
-        let tab = tabs[index]
+    func prepareToClose(_ tab: RepositoryTab) -> Bool {
         guard !tab.isBusy else { error = String(localized: "Wait for this tab's repository operation to finish before closing it."); return false }
         if tab.root != nil {
             rememberRepositoryState(tab)
@@ -138,6 +138,12 @@ extension RepositoryWindowRouting {
             do { try drafts.flush(); draftSaveWarning = nil }
             catch { self.error = String(localized: "The tab was kept open because its commit draft could not be saved. \(error.localizedDescription)"); return false }
         }
+        return true
+    }
+    @discardableResult func close(_ id: UUID) -> Bool {
+        guard let index = tabs.firstIndex(where: { $0.id == id }) else { return false }
+        let tab = tabs[index]
+        guard prepareToClose(tab) else { return false }
         tab.store.disconnectNetworkContext(); tab.store.stopAutomaticRefresh(); tab.store.cancelPreviewWork(); tab.store.metadataTask?.cancel()
         tabs.remove(at: index)
         if tabs.isEmpty { newTab() }
@@ -170,7 +176,11 @@ extension RepositoryWindowRouting {
         rememberRepositoryState(target)
         target.isOpening = true
         select(target.id, recordingVisit: false)
-        defer { target.isOpening = false; scheduleSessionSave() }
+        defer {
+            target.isOpening = false
+            if !restoringSession { windowRouting?.reopenIfClosed() }
+            scheduleSessionSave()
+        }
         do {
             let repository = try await GitRepository.open(url), root = await repository.root
             if let existing = tabs.first(where: { $0.id != target.id && $0.root?.path == root.path }) {

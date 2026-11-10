@@ -10,13 +10,18 @@ struct RepositoryCommands: Commands {
                 if let workspace = store.workspace {
                     Button("New Tab") { workspace.newTab() }.keyboardShortcut("t")
                     Button("Close Tab") {
-                        if workspace.windowRouting != nil, let window = NSApp.keyWindow { window.performClose(nil) }
-                        else if workspace.windowRouting == nil || workspace.windowRouting?.hasRepositoryWindows == true { _ = workspace.close(workspace.selectedID) }
+                        if let routing = workspace.windowRouting {
+                            if let window = NSApp.keyWindow { window.performClose(nil) }
+                            else { routing.closeSelectedWindow() }
+                        } else { _ = workspace.close(workspace.selectedID) }
                     }.keyboardShortcut("w")
                     Divider()
                 }
                 Button("Repositories", action: store.showRepositories).disabled(store.isBusy || store.isOpeningRepository)
-                Button("Quick Open…") { store.showingQuickOpen = true }.keyboardShortcut("o", modifiers: [.command, .shift]).disabled(store.isBusy || store.isOpeningRepository)
+                Button("Quick Open…") {
+                    store.workspace?.windowRouting?.reopenIfClosed()
+                    store.showingQuickOpen = true
+                }.keyboardShortcut("o", modifiers: [.command, .shift]).disabled(store.isBusy || store.isOpeningRepository)
                 Button("Open Repository…", action: store.chooseRepository).keyboardShortcut("o").disabled(store.isBusy || store.isOpeningRepository)
                 Button("Clone Git Repository…") { if let workspace = store.workspace { workspace.prepareCreation(clone: true) } else { store.creationRequest = RepositoryCreationRequest(clone: true) } }.keyboardShortcut("o", modifiers: [.command, .option]).disabled(store.isBusy || store.isOpeningRepository)
                 Button("New Repository…") { if let workspace = store.workspace { workspace.prepareCreation(clone: false) } else { store.creationRequest = RepositoryCreationRequest(clone: false) } }.disabled(store.isBusy || store.isOpeningRepository)

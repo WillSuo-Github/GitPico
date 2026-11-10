@@ -34,6 +34,8 @@ import Testing
     #expect(firstWindow.tabGroup?.selectedWindow === firstWindow && f.workspace.selectedID == first)
     f.windows.holdPresentation()
     f.windows.reopen()
+    #expect(f.windows.presentationHeld)
+    f.windows.releasePresentation()
     #expect(!f.windows.presentationHeld)
     #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
 }
@@ -118,7 +120,7 @@ import Testing
     #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
 }
 
-@Test @MainActor func nativeWindowCloseProtectsDraftAndReopensLastChooser() async throws {
+@Test @MainActor func nativeWindowCloseProtectsDraftAndKeepsLastRepository() async throws {
     let f = try await NativeTabFixture.make(corruptDrafts: true); defer { f.clean() }
     let w = f.workspace, original = w.activeTab
     original.store.commitSubject = "Protect draft from native close"
@@ -129,16 +131,60 @@ import Testing
     try Data("{}".utf8).write(to: w.drafts.file)
     w.flushDrafts(); w.error = nil
     originalWindow.performClose(nil)
-    #expect(w.tabs.count == 1 && w.activeTab.root == nil && w.activeTab.id != original.id)
-    let picker = w.activeTab
-    let pickerWindow = try #require(f.windows.window(for: picker.id))
-    pickerWindow.performClose(nil)
-    #expect(f.windows.controllers.isEmpty && w.tabs.count == 1)
+    #expect(f.windows.controllers.isEmpty && w.tabs.count == 1 && w.activeTab === original)
+    #expect(w.drafts.values[try #require(original.root).path]?.subject == "Protect draft from native close")
+    f.windows.workspaceChanged()
+    #expect(f.windows.controllers.isEmpty)
     f.windows.reopen()
-    #expect(f.windows.controllers.count == 1 && w.selectedID == picker.id)
-    f.windows.window(for: picker.id)?.performClose(nil)
-    w.newTab()
-    #expect(f.windows.controllers.count == 1 && w.tabs.count == 1 && w.selectedID != picker.id)
+    #expect(f.windows.controllers.count == 1 && w.activeTab === original && !original.showsRepositoryPicker)
+    f.windows.window(for: original.id)?.performClose(nil)
+    w.showRepositories()
+    #expect(f.windows.controllers.count == 1 && w.activeTab === original && original.showsRepositoryPicker)
+    let empty = w.newTab()
+    #expect(w.close(original.id))
+    try #require(f.windows.window(for: empty.id)).performClose(nil)
+    #expect(f.windows.controllers.isEmpty && w.activeTab === empty)
+    let replacement = w.newTab()
+    #expect(w.tabs.count == 1 && w.activeTab === replacement && f.windows.controllers.count == 1)
+    #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
+}
+
+@Test @MainActor func closingLastHistoryWindowRestoresItsSelectedCommitOnReopenAndRelaunch() async throws {
+    let f = try await NativeTabFixture.make(); defer { f.clean() }
+    let workspace = f.workspace, tab = workspace.activeTab, store = tab.store
+    let root = try #require(tab.root)
+    store.navigate(.history)
+    await store.historyTask?.value
+    let older = try #require(store.visibleCommits.dropFirst().first)
+    store.selectCommit(older)
+    await store.detailTask?.value
+    let original = try #require(f.windows.window(for: tab.id))
+    original.performClose(nil)
+    #expect(f.windows.controllers.isEmpty && !tab.showsRepositoryPicker)
+    #expect(workspace.session.saved?.tabs.first?.navigation.commitHash == older.hash)
+    #expect(workspace.session.saved?.windows.first?.tabs == [tab.id])
+
+    f.windows.reopen()
+    let reopened = try #require(f.windows.window(for: tab.id))
+    #expect(reopened !== original && workspace.activeStore === store)
+    #expect(store.destination == .history && store.selectedCommit?.hash == older.hash)
+    #expect(store.historyReveal?.hash == older.hash)
+
+    // Save while the repository window is open, as the app does on Quit.
+    workspace.shutdown()
+    let relaunched = RepositoryWorkspace(library: workspace.library, draftsFile: workspace.drafts.file)
+    let windows = NativeRepositoryWindows(workspace: relaunched, permitsPresentation: false)
+    defer { windows.stop(); relaunched.shutdown() }
+    windows.holdPresentation()
+    windows.start()
+    windows.reopen()
+    #expect(windows.presentationHeld && windows.controllers.isEmpty)
+    await relaunched.restoreSavedSession()
+    #expect(windows.presentationHeld && windows.window(for: tab.id) != nil)
+    windows.releasePresentation()
+    #expect(!relaunched.activeTab.showsRepositoryPicker && relaunched.activeTab.root == root)
+    #expect(relaunched.activeStore.destination == .history && relaunched.activeStore.selectedCommit?.hash == older.hash)
+    #expect(relaunched.activeStore.historyReveal?.hash == older.hash)
     #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
 }
 

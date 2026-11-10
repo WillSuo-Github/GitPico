@@ -27,7 +27,7 @@ Version stays **0.0.1**, minimum macOS **26.0**. The Xcode build phase generates
 swift test                             # Optional SwiftPM test path
 ```
 
-Background modes preserve any already-running GitPico instance. `--verify` checks its own PID, activity and visible-window count, then separately exercises the actual SwiftUI App/menu startup with suppressed native repository windows. It verifies same-tab Repositories navigation, New Tab / Close Tab menu actions, shortcuts and native tab selection; both verification processes exit without activation.
+Background modes preserve any already-running GitPico instance. `--verify` checks its own PID, activity and visible-window count, then separately exercises the actual SwiftUI App/menu startup with suppressed native repository windows. It verifies same-tab Repositories navigation, New Tab / Close Tab menu actions, shortcuts, native tab selection, and reopening the last repository after closing its window. Both verification processes exit without activation.
 
 The Codex Run action uses this same script. It builds the **GitPico** Xcode scheme into `.build/xcode`, then stages the complete signed app, including GitCore, at `dist/GitPico.app`.
 

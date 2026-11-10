@@ -29,7 +29,7 @@ import GitCore
         menu.performActionForItem(at: menu.index(of: item))
         return true
     }
-    static func finish(_ windows: NativeRepositoryWindows) async {
+    static func finish(_ windows: NativeRepositoryWindows, reopen: () -> Void) async {
         try? await Task.sleep(for: .milliseconds(500))
         let workspace = windows.workspace
         let root = directory.appendingPathComponent("MenuContext")
@@ -71,6 +71,17 @@ import GitCore
         try? await Task.sleep(for: .milliseconds(200))
         let returnedMenuEnabled = item(named: "Refresh", in: NSApp.mainMenu)?.isEnabled == true
         let active = windows.window(for: workspace.selectedID)
+        let singleTabBarHiddenAfterClose = active?.tabGroup?.isTabBarVisible == false
+        let nativeSelectionMatchesModel = active != nil && active?.tabGroup?.selectedWindow === active
+        workspace.activeStore.navigate(.history)
+        await workspace.activeStore.historyTask?.value
+        let destination = workspace.activeStore.destination
+        let lastClosed = invoke(item(named: "Close Tab", in: NSApp.mainMenu))
+        let lastCloseKeptRepository = lastClosed && windows.controllers.isEmpty &&
+            workspace.selectedID == originalID && !workspace.activeTab.showsRepositoryPicker
+        reopen()
+        let reopenedLastRepository = windows.window(for: originalID) != nil &&
+            workspace.activeStore.destination == destination && destination == .history && !workspace.activeTab.showsRepositoryPicker
         let report: [String: Any] = [
             "nativeStartupVerification": true,
             "processIdentifier": ProcessInfo.processInfo.processIdentifier,
@@ -83,6 +94,8 @@ import GitCore
             "closeTabShortcut": closeItem?.keyEquivalent ?? "missing",
             "newTabMenuWorks": newInvoked && newWorks,
             "closeTabMenuWorks": closeInvoked && workspace.tabs.count == initialCount,
+            "lastCloseKeptRepository": lastCloseKeptRepository,
+            "reopenedLastRepository": reopenedLastRepository,
             "repositoryMenuContextWorks": repositoryReady && repositoryMenuEnabled && chooserMenuDisabled && returnedMenuEnabled,
             "repositoriesMenuReusesCurrentTab": repositoriesReused && pickerMenuDisabled && workspace.tabs.count == 1,
             "quickActionsUseToolbarSearch": actionsUseSearch,
@@ -97,8 +110,8 @@ import GitCore
             "nativeTabBarVisible": active?.tabGroup?.isTabBarVisible ?? false,
             "singleTabBarHidden": singleTabBarHidden,
             "multipleTabBarVisible": multipleTabBarVisible,
-            "singleTabBarHiddenAfterClose": active?.tabGroup?.isTabBarVisible == false,
-            "nativeSelectionMatchesModel": active != nil && active?.tabGroup?.selectedWindow === active,
+            "singleTabBarHiddenAfterClose": singleTabBarHiddenAfterClose,
+            "nativeSelectionMatchesModel": nativeSelectionMatchesModel,
             "version": Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown",
             "build": Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "unknown"
         ]

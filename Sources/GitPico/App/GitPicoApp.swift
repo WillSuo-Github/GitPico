@@ -21,11 +21,14 @@ struct GitPicoApp: App {
     }
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(NativeStartupVerification.enabled ? .prohibited : .regular)
-        let restoring = workspace.willRestoreSession
-        if restoring { repositoryWindows.holdPresentation() }
+        if workspace.willRestoreSession { repositoryWindows.holdPresentation() }
         repositoryWindows.start()
         if NativeStartupVerification.enabled {
-            Task { await NativeStartupVerification.finish(repositoryWindows) }
+            Task {
+                await NativeStartupVerification.finish(repositoryWindows) {
+                    _ = self.applicationShouldHandleReopen(NSApp, hasVisibleWindows: false)
+                }
+            }
         } else {
             UpdateController.shared.startIfConfigured()
             workspace.startMonitoring()
@@ -36,19 +39,13 @@ struct GitPicoApp: App {
                 await workspace.startup()
                 repositoryWindows.releasePresentation()
             }
-            if restoring {
-                // Slow repositories should not leave the app without a window; show their opening state instead.
-                Task { [repositoryWindows] in
-                    try? await Task.sleep(for: .seconds(3))
-                    repositoryWindows.releasePresentation()
-                }
-            }
             NSApp.activate(ignoringOtherApps: true)
         }
     }
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        if !flag { repositoryWindows.reopen() }
-        return true
+        guard !flag else { return true }
+        repositoryWindows.reopen()
+        return false
     }
     func applicationDidBecomeActive(_ notification: Notification) {
         if !NativeStartupVerification.enabled { workspace.refreshExternalChanges() }
