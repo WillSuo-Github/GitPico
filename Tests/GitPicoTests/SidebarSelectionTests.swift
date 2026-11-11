@@ -9,6 +9,7 @@ import Testing
     let f = try await WorkingAppFixture.make(); defer { f.clean() }
     let names = ["multi-alpha", "multi-beta", "multi-gamma", "multi-omega"]
     for name in names { _ = try await GitProcess.run(["branch", name], at: f.repository.root) }
+    _ = try await GitProcess.run(["branch", "multi-zeta"], at: f.repository.root)
     try await f.sync()
     f.store.sidebarFilter = "multi-"
     let defaultsName = "GitPico-sidebar-selection-" + UUID().uuidString
@@ -68,12 +69,50 @@ import Testing
     #expect(table.selectedRowIndexes == IndexSet([rows[0], rows[2], rows[3]]))
     try await click(rows[1], modifiers: .command)
     #expect(table.selectedRowIndexes == IndexSet(rows))
+    func contextMenu(at row: Int) throws -> NSMenu {
+        let rect = table.rect(ofRow: row)
+        let point = table.convert(NSPoint(x: rect.midX, y: rect.midY), to: nil)
+        let event = try #require(NSEvent.mouseEvent(with: .rightMouseDown, location: point, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
+            windowNumber: window.windowNumber, context: nil, eventNumber: 3, clickCount: 1, pressure: 1))
+        let menu = try #require(table.menu(for: event))
+        menu.update()
+        return menu
+    }
+    let menu = try contextMenu(at: rows[2])
+    #expect(menu.items.contains { $0.title == "Pin Selected Branches" })
+    #expect(menu.items.contains { $0.title == "Copy Names" })
+    #expect(!menu.items.contains { $0.title == "Rename Branch…" || $0.title == "Preview History" })
+    let deleteIndex = try #require(menu.items.firstIndex { $0.title == "Delete Selected References…" })
+    menu.performActionForItem(at: deleteIndex)
+    await f.store.metadataTask?.value
+    guard case .deleteReferences(let references, let token) = f.store.managementRequest?.action else {
+        Issue.record("Expected a batch deletion review for the complete selection"); return
+    }
+    #expect(Set(references.map(\.name)) == Set(names))
+    #expect(token == f.store.repositoryToken && f.store.operationTask == nil)
+    f.store.managementRequest = nil
+    let pinIndex = try #require(menu.items.firstIndex { $0.title == "Pin Selected Branches" })
+    menu.performActionForItem(at: pinIndex)
+    await f.finish()
+    #expect(f.store.organization.pinned == Set(names.map { "refs/heads/" + $0 }))
+    #expect(f.store.error == nil)
+    let outsideMenu = try contextMenu(at: rows[3] + 1)
+    #expect(outsideMenu.items.contains { $0.title == "Rename Branch…" })
+    #expect(!outsideMenu.items.contains { $0.title == "Delete Selected References…" })
+    let outsideDelete = try #require(outsideMenu.items.firstIndex { $0.title == "Delete Branch…" })
+    outsideMenu.performActionForItem(at: outsideDelete)
+    await f.store.metadataTask?.value
+    guard case .deleteBranch(let outsideRef) = f.store.managementRequest?.action else {
+        Issue.record("Expected a single-item review outside the selection"); return
+    }
+    #expect(outsideRef.name == "multi-zeta")
+    f.store.managementRequest = nil
     // An unrelated view update must preserve the group selection.
     f.store.sidebarFilter = "multi"
     try await Task.sleep(for: .milliseconds(100))
     window.contentView?.layoutSubtreeIfNeeded()
     #expect(table.selectedRowIndexes == IndexSet(rows))
-    #expect(f.store.operationTask == nil && f.store.automaticStashRequest == nil)
+    #expect(!f.store.isBusy && f.store.automaticStashRequest == nil)
     #expect(try await f.repository.headPosition().branch == "refs/heads/main")
     // Normal clicks and external navigation return to a single selection.
     try await click(rows[2])

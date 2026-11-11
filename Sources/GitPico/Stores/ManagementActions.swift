@@ -6,6 +6,7 @@ enum FetchReviewMode: Sendable { case standard, retry, largeTransfer }
 enum ManagementAction: Sendable {
     case createBranch(String, String?), renameBranch(Reference), deleteBranch(Reference), upstream(Reference)
     case createTag(String), renameTag(Reference), deleteTag(Reference), inspectTag(Reference)
+    case deleteReferences([Reference], repositoryToken: UUID)
     case addRemote, editRemote(RemoteConfiguration), renameRemote(RemoteConfiguration), removeRemote(RemoteConfiguration)
     case publish(Reference?, String?, String?, Bool), fetch(RemoteConfiguration?, mode: FetchReviewMode = .standard), recovery
 }

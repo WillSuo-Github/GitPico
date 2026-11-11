@@ -13,6 +13,7 @@ struct ManagementSheet: View {
         case .upstream(let ref): ReferenceEditSheet(store: store, reference: ref, action: .upstream)
         case .renameTag(let ref): ReferenceEditSheet(store: store, reference: ref, action: .rename)
         case .deleteTag(let ref): ReferenceEditSheet(store: store, reference: ref, action: .delete)
+        case .deleteReferences(let references, let token): ReferenceBatchDeleteSheet(store: store, references: references, repositoryToken: token)
         case .inspectTag(let ref): TagInformationSheet(store: store, reference: ref)
         case .addRemote: RemoteEditSheet(store: store, remote: nil, action: .edit)
         case .editRemote(let remote): RemoteEditSheet(store: store, remote: remote, action: .edit)

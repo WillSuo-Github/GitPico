@@ -33,18 +33,20 @@ struct SidebarView: View {
             })) {
                 Section {
                     Label {
-                        Text("Working Copy").bold(!store.changes.isEmpty)
+                        HStack {
+                            Text("Working Copy").bold(!store.changes.isEmpty)
+                            Spacer(minLength: 0)
+                            if !store.changes.isEmpty {
+                                Text(store.changes.count, format: .number)
+                                    .font(.system(size: 10)).bold()
+                                    .foregroundStyle(.secondary)
+                                    .padding(.trailing, 4)
+                            }
+                        }
                     } icon: {
                         Image(systemName: "square.and.pencil")
                     }
-                    .badge(store.changes.count).tag(Destination.workingCopy).picoDrop(store, .workingCopy).contextMenu {
-                        Button("Discard All Local Changes…") { store.localChange(.discard(store.changes.map(\.path))) }.disabled(store.changes.isEmpty || store.isBusy)
-                        Button("Recover Local Changes…") { store.localChange(.recovery) }.disabled(store.isBusy)
-                        Divider()
-                        Button("Apply Patch…", action: store.choosePatch).disabled(store.isBusy)
-                        Button("Save Unstaged Patch…") { store.localChange(.export(.unstaged, [])) }.disabled(store.isBusy)
-                        Button("Save Staged Patch…") { store.localChange(.export(.staged, [])) }.disabled(store.isBusy)
-                    }
+                    .tag(Destination.workingCopy).picoDrop(store, .workingCopy)
                     Label("History", systemImage: "clock.arrow.circlepath").tag(Destination.history)
                     Label("Stashes", systemImage: "tray.full").badge(store.snapshot?.stashes.count ?? 0).tag(Destination.stashes).picoDrop(store, .stashes)
                 } header: { Text("Workspace") }
@@ -97,14 +99,14 @@ struct SidebarView: View {
                     }
                 } header: { Text("Tags").frame(maxWidth: .infinity, alignment: .leading).picoDrop(store, .tags) }
                 Section(isExpanded: $relatedExpanded) {
-                    Label("Worktrees", systemImage: "folder.badge.gearshape").badge(store.worktrees.filter { !$0.isMain && !$0.isBare }.count).tag(Destination.worktrees).contextMenu { Button("Add Worktree…") { store.manageWorktree(.create(nil)) } }
+                    Label("Worktrees", systemImage: "folder.badge.gearshape").badge(store.worktrees.filter { !$0.isMain && !$0.isBare }.count).tag(Destination.worktrees)
                     if store.worktrees.count > 1 {
                         ForEach(store.worktrees.filter { !$0.isBare }) { entry in
                             SidebarWorktreeRow(store: store, entry: entry)
                                 .tag(Destination.worktree(entry.path))
                         }
                     }
-                    Label("Submodules", systemImage: "shippingbox").badge(store.submodules.count).tag(Destination.submodules).contextMenu { Button("Add Submodule…") { store.manageSubmodule(.add) } }
+                    Label("Submodules", systemImage: "shippingbox").badge(store.submodules.count).tag(Destination.submodules)
                     ForEach(store.submodules) { entry in
                         Button { if entry.initialized { store.openSubmodule(entry) } else { store.manageSubmodule(.manage(entry, .initialize)) } } label: { Label(entry.path, systemImage: "shippingbox") }.buttonStyle(.plain).padding(.leading, 12).contextMenu { SubmoduleContextActions(store: store, entry: entry) }
                     }
@@ -115,7 +117,9 @@ struct SidebarView: View {
                     Label("Reflog", systemImage: "list.bullet.rectangle").tag(Destination.reflog)
                 } header: { Text("Tools") }
             }.listStyle(.sidebar)
-            .contextMenu(forSelectionType: Destination.self) { _ in } primaryAction: { selection in
+            .contextMenu(forSelectionType: Destination.self) { destinations in
+                SidebarSelectionContextActions(store: store, selection: SidebarContextSelection(destinations, references: store.snapshot?.references ?? []), repositoryToken: store.repositoryToken)
+            } primaryAction: { selection in
                 store.activateSidebarSelection(selection)
             }
             .disabled(store.isBusy && !store.isFetching)
@@ -167,48 +171,7 @@ struct SidebarView: View {
         .tag(Destination.reference(ref.fullName))
         .itemProvider { store.isBusy ? nil : store.dragProvider(.reference(ref)) }
         .picoDrop(store, .reference(ref))
-        .contextMenu {
-            Button("Preview History") { store.navigate(.reference(ref.fullName)) }
-            if ref.isLocal {
-                Button(ref.isCurrent ? "Current Branch" : "Check Out “\(ref.name)”") { store.switchBranch(ref) }
-                    .disabled(store.checkoutUnavailableReason(ref) != nil)
-            }
-            Divider()
-            Button("Export Files at Revision…") { store.historical(.export, revision: ref.hash) }.disabled(store.isBusy)
-            Button("Archive Files as ZIP…") { store.historical(.archive, revision: ref.hash) }.disabled(store.isBusy)
-            Divider()
-            if ref.isLocal {
-                if let kind = store.flowConfiguration?.kind(of: ref.name), kind != .support { Button("Git Flow: \(kind.finishTitle)…") { store.manageFlow(.finish(ref.name)) }.disabled(store.isBusy || store.activeFlow != nil) }
-                Button("Checkout Branch in New Worktree…") { store.manageWorktree(.create(ref.name)) }.disabled(store.worktrees.contains { $0.branch == ref.fullName })
-                Button(store.organization.pinned.contains(ref.fullName) ? "Unpin Branch" : "Pin Branch") { store.organize(ref, pinned: !store.organization.pinned.contains(ref.fullName)) }
-                Button("Track Upstream Branch…") { store.manage(.upstream(ref)) }
-                Button("Publish / Push Branch…") { store.manage(.publish(ref, nil, nil, false)) }.disabled(store.managedRemotes.isEmpty)
-                Button("Force Push with Lease…") { store.manage(.publish(ref, nil, nil, true)) }.disabled(store.managedRemotes.isEmpty)
-                Button(store.organization.archived.contains(ref.fullName) ? "Unarchive Branch" : "Archive Branch") { store.organize(ref, archived: !store.organization.archived.contains(ref.fullName)) }
-                Button("Rename Branch…") { store.manage(.renameBranch(ref)) }
-                Button("Delete Branch…", role: .destructive) { store.manage(.deleteBranch(ref)) }.disabled(ref.isCurrent)
-            }
-            if ref.isRemote, let remote = store.remoteFor(ref) {
-                Button("Check Out “\(ref.name)”") { store.switchRemoteBranch(ref) }.disabled(!store.canUseRepository || store.snapshot?.operation != RepositoryOperation.none)
-                Button("Check Out as Tracking Branch…") { store.manage(.createBranch(ref.hash, ref.fullName)) }
-                Button("Delete Remote Branch…", role: .destructive) { store.manage(.publish(nil, remote.name, "refs/heads/" + String(ref.name.dropFirst(remote.name.count + 1)), false)) }
-            }
-            if ref.isTag {
-                Button("Tag Information…") { store.manage(.inspectTag(ref)) }
-                Button("Rename Tag…") { store.manage(.renameTag(ref)) }
-                Button("Delete Tag…", role: .destructive) { store.manage(.deleteTag(ref)) }
-                Button("Publish Tag…") { store.manage(.publish(ref, nil, nil, false)) }.disabled(store.managedRemotes.isEmpty)
-            }
-            Divider()
-            Button("Create New Branch from Here…") { store.manage(.createBranch(ref.hash, nil)) }
-            Button("Create New Tag from Here…") { store.manage(.createTag(ref.hash)) }
-            if !ref.isCurrent {
-                Button("Merge into HEAD…") { store.integrationRequest = IntegrationRequest(action: .merge, revision: ref.fullName) }
-                Button("Rebase HEAD onto This Branch…") { store.integrationRequest = IntegrationRequest(action: .rebase, revision: ref.fullName) }
-            }
-            Button("Compare with Revision…") { store.navigate(.comparison(ref.fullName)) }
-            Button("Copy Name") { NSPasteboard.general.clearContents(); NSPasteboard.general.setString(ref.name, forType: .string) }
-        }.help(ref.name + (ref.isCurrent ? String(localized: " · Current branch") : String(localized: " · Click to preview history")))
+        .help(ref.name + (ref.isCurrent ? String(localized: " · Current branch") : String(localized: " · Click to preview history")))
     }
 }
 

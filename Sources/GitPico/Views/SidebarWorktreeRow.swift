@@ -23,6 +23,5 @@ struct SidebarWorktreeRow: View {
         .padding(.leading, 12).padding(.vertical, 2).contentShape(Rectangle())
         .disabled(entry.prunable != nil)
         .help(entry.path + "\n" + (store.worktreePresentation.branch(for: entry) ?? String(localized: "Detached HEAD")))
-        .contextMenu { WorktreeContextActions(store: store, entry: entry) }
     }
 }
