@@ -4,6 +4,7 @@ import SwiftUI
 
 struct SidebarView: View {
     @Bindable var store: RepositoryStore
+    @State private var selectedDestinations: Set<Destination> = []
     var filter: String { store.sidebarFilter }
     @State private var outline = SidebarOutline.empty
     var outlineInput: SidebarOutlineInput { SidebarOutlineInput(references: store.snapshot?.references ?? [], remotes: store.snapshot?.remotes ?? [], pinned: store.organization.pinned, archived: store.organization.archived, filter: filter) }
@@ -25,7 +26,11 @@ struct SidebarView: View {
     var body: some View {
         VStack(spacing: 0) {
             SidebarRepositoryHeader(store: store)
-            List(selection: Binding<Destination?>(get: { selection }, set: { if let value = $0 { store.navigate(value) } })) {
+            List(selection: Binding<Set<Destination>>(get: { selectedDestinations }, set: { values in
+                selectedDestinations = values
+                // A group selection must not choose an arbitrary branch to preview or activate.
+                if values.count == 1, let value = values.first { store.navigate(value) }
+            })) {
                 Section {
                     Label {
                         Text("Working Copy").bold(!store.changes.isEmpty)
@@ -136,6 +141,9 @@ struct SidebarView: View {
                 } label: { Image(systemName: "plus") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Add branch, tag, remote, worktree or submodule")
                 Button { store.navigate(.repositorySettings) } label: { Image(systemName: "gearshape") }.buttonStyle(.borderless).help("Repository settings (⌘5)")
             }.font(.system(size: 11)).padding(.horizontal, 10).frame(height: 34)
+        }
+        .onChange(of: selection, initial: true) { _, value in
+            selectedDestinations = [value]
         }
         .task(id: outlineInput) {
             let input = outlineInput
