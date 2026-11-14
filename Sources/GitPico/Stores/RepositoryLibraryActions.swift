@@ -72,6 +72,15 @@ extension RepositoryStore {
             if !isBusy { error = String(localized: "The saved repository changed. Refresh the repository list.") }
             return
         }
+        let state = await library.refreshFolderState(for: current)
+        guard library.document.repositories.contains(where: { $0.id == current.id && $0.path == current.path }) else {
+            error = String(localized: "The saved repository changed. Refresh the repository list.")
+            return
+        }
+        guard state.canOpen else {
+            error = (state.warning ?? "") + " · " + String(localized: "Locate Repository…")
+            return
+        }
         await open(URL(fileURLWithPath: current.path))
     }
 }

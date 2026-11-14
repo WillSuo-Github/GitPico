@@ -6,6 +6,7 @@ struct RepositoryPickerRow: View {
     let isOpen: Bool
     let isSelected: Bool
     var isEmphasized = true
+    var folderState: RepositoryFolderState = .available
     var open: () -> Void
     @Environment(\.controlActiveState) private var activeState
 
@@ -15,6 +16,7 @@ struct RepositoryPickerRow: View {
     var body: some View {
         HStack(spacing: 12) {
             RepositoryGlyph(name: entry.name, size: 34)
+                .opacity(folderState.warning == nil ? 1 : 0.5)
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     Text(entry.name).font(.system(size: 13, weight: .semibold))
@@ -23,7 +25,8 @@ struct RepositoryPickerRow: View {
                         Image(systemName: "star.fill").font(.system(size: 10))
                             .foregroundStyle(isSelected ? selectedText : .yellow)
                     }
-                    if isOpen {
+                    RepositoryFolderWarning(state: folderState, isSelected: isSelected, selectedText: selectedText)
+                    if isOpen && folderState.canOpen {
                         Text("Open").font(.system(size: 10, weight: .semibold))
                             .foregroundStyle(isSelected ? selectedText : Color.accentColor)
                             .padding(.horizontal, 7).padding(.vertical, 3)
@@ -40,12 +43,21 @@ struct RepositoryPickerRow: View {
                 Text(opened.picoRelative).font(.system(size: 11))
                     .foregroundStyle(isSelected ? selectedText.opacity(0.85) : .secondary)
             }
-            Button(action: open) {
-                Image(systemName: "arrow.right.circle.fill").font(.system(size: 18))
-                    .foregroundStyle(isSelected ? selectedText : Color.accentColor)
-                    .frame(width: 26, height: 26).contentShape(Rectangle())
+            if folderState.canOpen {
+                Button(action: open) {
+                    Image(systemName: "arrow.right.circle.fill").font(.system(size: 18))
+                        .foregroundStyle(isSelected ? selectedText : Color.accentColor)
+                        .frame(width: 26, height: 26).contentShape(Rectangle())
+                }
+                .buttonStyle(.plain).help("Open \(entry.name)").accessibilityLabel("Open \(entry.name)")
+            } else if folderState == .checking {
+                ProgressView().controlSize(.small).frame(width: 26, height: 26)
+            } else {
+                Image(systemName: "folder.badge.questionmark").font(.system(size: 18))
+                    .foregroundStyle(isSelected ? selectedText : .secondary)
+                    .frame(width: 26, height: 26)
+                    .accessibilityLabel(Text(folderState.warning ?? ""))
             }
-            .buttonStyle(.plain).help("Open \(entry.name)").accessibilityLabel("Open \(entry.name)")
         }
         .padding(.vertical, 7).padding(.horizontal, 4)
     }

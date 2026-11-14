@@ -32,6 +32,7 @@ struct RepositoryLibraryDrop: Codable, Sendable {
 @MainActor @Observable
 final class RepositoryLibrary {
     private(set) var document = RepositoryLibraryDocument()
+    var folderStates: [String: RepositoryFolderState] = [:]
     private(set) var error: String?
     private(set) var session = UUID()
     @ObservationIgnored let file: URL

@@ -60,11 +60,12 @@ struct RepositoryLibraryView: View {
                                 HStack(spacing: 5) {
                                     Text(entry.name).font(.callout.weight(.semibold))
                                     if entry.favorite { Image(systemName: "star.fill").font(.system(size: 9)).foregroundStyle(.yellow) }
+                                    RepositoryFolderWarning(state: library.folderState(for: entry), isSelected: selection.contains(entry.id))
                                 }
                                 Text(Pico.abbreviated(entry.path)).font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
                             }
                             Spacer()
-                            if store.workspace?.isRepositoryOpen(at: entry.path) ?? (entry.path == store.snapshot?.root.path && !store.isChoosingRepository) { Chip(text: String(localized: "Open"), tint: .accentColor) }
+                            if library.folderState(for: entry).canOpen && (store.workspace?.isRepositoryOpen(at: entry.path) ?? (entry.path == store.snapshot?.root.path && !store.isChoosingRepository)) { Chip(text: String(localized: "Open"), tint: .accentColor) }
                             Text(library.breadcrumb(entry.group)).font(.caption).foregroundStyle(.tertiary).lineLimit(1)
                         }.padding(.vertical, 4).tag(entry.id).contentShape(Rectangle())
                             .onTapGesture(count: 2) { open(entry) }
@@ -95,9 +96,11 @@ struct RepositoryLibraryView: View {
                 Text("\(entries.count) repositories").font(.caption).foregroundStyle(.secondary)
                 Spacer()
                 Button("Close") { dismiss() }.keyboardShortcut(.cancelAction)
-                Button("Open") { if let current { open(current) } }.keyboardShortcut(.defaultAction).disabled(selection.count != 1)
+                Button("Open") { if let current { open(current) } }.keyboardShortcut(.defaultAction)
+                    .disabled(selection.count != 1 || (current.map { !library.folderState(for: $0).canOpen } ?? true))
             }.padding(14)
         }.frame(width: 960).disabled(store.isBusy)
+            .monitoringRepositoryFolders(in: library)
             .onChange(of: filter) { selection = [] }
             .onChange(of: entries.map(\.id)) { selection.formIntersection(Set(entries.map(\.id))) }
             .sheet(item: $editor) { item in LibraryNameSheet(title: item.title, initial: item.value) { name in
@@ -111,6 +114,7 @@ struct RepositoryLibraryView: View {
     @ViewBuilder func repositoryMenu(_ entry: SavedRepository) -> some View {
         let ids = selection.contains(entry.id) ? selection : [entry.id]
         Button("Open") { open(entry) }
+            .disabled(!library.folderState(for: entry).canOpen)
         Button(entry.favorite ? "Remove from Favorites" : "Add to Favorites") { perform { try library.setFavorite(ids, !entry.favorite) } }
         Button("Rename…") { editor = LibraryEditor(title: "Rename Repository", value: entry.name, kind: .renameRepository(entry.id)) }
         Menu("Move To") {
@@ -139,7 +143,10 @@ struct RepositoryLibraryView: View {
         Button("Remove Group (Keep Repositories)") { perform { try library.removeGroup(group.id) }; if filter == .group(group.id) { filter = .all } }
     }
     func perform(_ action: () throws -> Void) { do { try action(); failure = nil } catch { failure = error.localizedDescription } }
-    func open(_ entry: SavedRepository) { guard !store.isBusy else { return }; dismiss(); Task { await store.openSavedRepository(entry) } }
+    func open(_ entry: SavedRepository) {
+        guard !store.isBusy, library.folderState(for: entry).canOpen else { return }
+        dismiss(); Task { await store.openSavedRepository(entry) }
+    }
 }
 
 private struct LibraryNameSheet: View {

@@ -23,6 +23,7 @@ struct QuickOpenSheet: View {
                         HStack(spacing: 5) {
                             Text(entry.name).font(.system(size: 13, weight: .semibold))
                             if entry.favorite { Image(systemName: "star.fill").font(.system(size: 9)).foregroundStyle(.yellow) }
+                            RepositoryFolderWarning(state: store.library.folderState(for: entry), isSelected: selected == entry.id)
                         }
                         Text(Pico.abbreviated(entry.path)).font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
                     }
@@ -36,17 +37,19 @@ struct QuickOpenSheet: View {
                 Label("↑ ↓ to select · Return to open", systemImage: "keyboard").font(.caption).foregroundStyle(.secondary)
                 Spacer()
                 Button("Cancel") { dismiss() }.keyboardShortcut(.cancelAction)
-                Button("Open", action: open).keyboardShortcut(.defaultAction).disabled(selected == nil || store.isBusy || opening)
+                Button("Open", action: open).keyboardShortcut(.defaultAction)
+                    .disabled(!results.contains { $0.id == selected && store.library.folderState(for: $0).canOpen } || store.isBusy || opening)
             }.padding(12)
             if let error = store.library.error { Text(error).font(.caption).foregroundStyle(.red).padding([.horizontal, .bottom], 12) }
         }.frame(width: 650)
+            .monitoringRepositoryFolders(in: store.library)
             .task { selected = results.first?.id; focused = true }
             .onChange(of: results.map(\.id)) { if !results.contains(where: { $0.id == selected }) { selected = results.first?.id } }
             .onKeyPress(.downArrow) { selected = RepositoryQuickSelection.move(selected, in: results, offset: 1); return .handled }
             .onKeyPress(.upArrow) { selected = RepositoryQuickSelection.move(selected, in: results, offset: -1); return .handled }
     }
     func open() {
-        guard !opening, !store.isBusy, let entry = results.first(where: { $0.id == selected }) else { return }
+        guard !opening, !store.isBusy, let entry = results.first(where: { $0.id == selected }), store.library.folderState(for: entry).canOpen else { return }
         opening = true; dismiss()
         Task { await store.openSavedRepository(entry) }
     }

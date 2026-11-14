@@ -39,6 +39,7 @@ struct RepositoryPickerView: View {
             } else { pickerContent }
         }
         .disabled(tab.isBusy)
+        .monitoringRepositoryFolders(in: workspace.library)
         .safeAreaInset(edge: .top, spacing: 0) {
             if let warning = tab.pickerDropWarning {
                 NoticeBanner(icon: "exclamationmark.triangle.fill", title: "Add Local Repository", message: warning) {
@@ -126,10 +127,12 @@ struct RepositoryPickerView: View {
                     List(selection: $tab.pickerSelection) {
                         ForEach(entries) { entry in
                             RepositoryPickerRow(entry: entry, isOpen: workspace.isRepositoryOpen(at: entry.path),
-                                                isSelected: tab.pickerSelection == entry.id, isEmphasized: listFocused) { open(entry) }
+                                                isSelected: tab.pickerSelection == entry.id, isEmphasized: listFocused,
+                                                folderState: workspace.library.folderState(for: entry)) { open(entry) }
                                 .id(entry.id).tag(entry.id).contentShape(Rectangle())
                                 .contextMenu {
                                     Button("Open") { open(entry) }
+                                        .disabled(!workspace.library.folderState(for: entry).canOpen)
                                     Button(entry.favorite ? "Remove from Favorites" : "Add to Favorites") { do { try workspace.library.setFavorite([entry.id], !entry.favorite) } catch { store.error = error.localizedDescription } }
                                     Button("Locate Repository…") { store.chooseLibraryRepository(relocating: entry.id) }
                                 }
@@ -147,9 +150,15 @@ struct RepositoryPickerView: View {
                         }
                 }
                 HStack {
-                    Label("Double-click or press Return to open", systemImage: "return").font(.caption).foregroundStyle(.tertiary)
+                    if let selection, workspace.library.folderState(for: selection).warning != nil {
+                        Button("Locate Repository…") { store.chooseLibraryRepository(relocating: selection.id) }
+                            .controlSize(.small)
+                    } else {
+                        Label("Double-click or press Return to open", systemImage: "return").font(.caption).foregroundStyle(.tertiary)
+                    }
                     Spacer()
-                    Button("Open Repository", action: openSelected).buttonStyle(.borderedProminent).disabled(selection == nil)
+                    Button("Open Repository", action: openSelected).buttonStyle(.borderedProminent)
+                        .disabled(selection.map { !workspace.library.folderState(for: $0).canOpen } ?? true)
                 }
             }
             if let error = workspace.library.error { Label(error, systemImage: "exclamationmark.triangle.fill").font(.caption).foregroundStyle(Pico.deletion) }
@@ -172,7 +181,10 @@ struct RepositoryPickerView: View {
     }
 
     func openSelected() { if let entry = selection ?? entries.first { open(entry) } }
-    func open(_ entry: SavedRepository) { Task { await store.openSavedRepository(entry) } }
+    func open(_ entry: SavedRepository) {
+        guard workspace.library.folderState(for: entry).canOpen else { return }
+        Task { await store.openSavedRepository(entry) }
+    }
     var reorderAction: ((IndexSet, Int) -> Void)? {
         guard tab.pickerFilter == .all else { return nil }
         let visibleIDs = entries.map(\.id)
