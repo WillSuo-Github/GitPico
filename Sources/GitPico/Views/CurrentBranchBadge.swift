@@ -33,11 +33,20 @@ struct BranchSyncStatus: Equatable {
 
 struct CurrentBranchBadge: View {
     let status: BranchSyncStatus
+    var isSelected = false
+    @Environment(\.self) private var environment
     var body: some View {
+        let accent = Color.accentColor.resolve(in: environment)
+        let luminance = 0.2126 * accent.linearRed + 0.7152 * accent.linearGreen + 0.0722 * accent.linearBlue
+        // Choose the higher-contrast black or white ink for the resolved accent.
+        let ink: Color = luminance > 0.179 ? .black : .white
+        let highlighted = isSelected || environment.backgroundProminence == .increased
         Text(status.text)
-            .font(.system(size: 9, weight: .bold)).monospacedDigit().fixedSize()
-            .padding(.horizontal, 5).padding(.vertical, 2)
-            .background(.quaternary, in: Capsule())
+            .font(.system(size: 9)).bold().monospacedDigit().fixedSize()
+            .foregroundStyle(ink)
+            .padding(.horizontal, 6).padding(.vertical, 3)
+            .background(Color.accentColor, in: Capsule())
+            .overlay { Capsule().strokeBorder(highlighted ? ink : .clear, lineWidth: 1.5) }
             .help(status.help)
             .accessibilityLabel(status.help)
     }

@@ -162,7 +162,7 @@ struct SidebarView: View {
                 Text(title).lineLimit(1).truncationMode(.middle)
                 Spacer(minLength: 0)
                 if let status = BranchSyncStatus.current(ref, snapshot: store.snapshot) {
-                    CurrentBranchBadge(status: status)
+                    CurrentBranchBadge(status: status, isSelected: selectedDestinations.contains(.reference(ref.fullName)))
                 }
             }
         } icon: { Image(systemName: icon) }

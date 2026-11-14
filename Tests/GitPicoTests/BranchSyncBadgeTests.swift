@@ -139,6 +139,8 @@ import Testing
 
 @Test(.enabled(if: ProcessInfo.processInfo.environment["GITPICO_RENDER_COMPONENTS"] == "1", "Explicit offscreen component capture only."))
 @MainActor func renderCurrentBranchSyncBadgesWithoutWindows() throws {
+    let application = NSApplication.shared
+    application.setActivationPolicy(.prohibited)
     let output = URL(fileURLWithPath: try #require(ProcessInfo.processInfo.environment["GITPICO_COMPONENT_OUTPUT"]))
     try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
     let cases: [BranchSyncStatus] = [
@@ -150,19 +152,28 @@ import Testing
         .init(upstream: "", ahead: 0, behind: 0)
     ]
     for scheme in [ColorScheme.light, .dark] {
-        let content = VStack(spacing: 10) {
-            ForEach(cases.indices, id: \.self) { index in
-                HStack {
-                    Image(systemName: "arrow.triangle.branch")
-                    Text("feature").font(.system(size: 12, weight: .medium))
-                    Spacer()
-                    CurrentBranchBadge(status: cases[index])
+        for state in ["normal", "selected", "inactive"] {
+            let selected = state != "normal"
+            let content = VStack(spacing: 10) {
+                ForEach(cases.indices, id: \.self) { index in
+                    HStack {
+                        Image(systemName: "arrow.triangle.branch")
+                        Text("feature").font(.system(size: 12, weight: .medium))
+                        Spacer()
+                        CurrentBranchBadge(status: cases[index], isSelected: selected)
+                    }
+                    .padding(.horizontal, 8).padding(.vertical, 4)
+                    .foregroundStyle(state == "selected" ? Color.white : Color.primary)
+                    .background(state == "selected" ? Color.accentColor : state == "inactive" ? Color.secondary.opacity(0.15) : .clear,
+                                in: RoundedRectangle(cornerRadius: 6))
+                    .environment(\.backgroundProminence, state == "selected" ? .increased : .standard)
                 }
-            }
-        }.padding(12).frame(width: 280).background(Color(nsColor: .textBackgroundColor)).environment(\.colorScheme, scheme)
-        let renderer = ImageRenderer(content: content); renderer.scale = 2
-        let image = NSBitmapImageRep(cgImage: try #require(renderer.cgImage))
-        try #require(image.representation(using: .png, properties: [:])).write(to: output.appendingPathComponent("branch-sync-\(scheme == .dark ? "dark" : "light").png"))
+            }.padding(12).frame(width: 280).background(Color(nsColor: .textBackgroundColor)).environment(\.colorScheme, scheme)
+            let renderer = ImageRenderer(content: content); renderer.scale = 2
+            let image = NSBitmapImageRep(cgImage: try #require(renderer.cgImage))
+            let suffix = state == "normal" ? "" : "-" + state
+            try #require(image.representation(using: .png, properties: [:])).write(to: output.appendingPathComponent("branch-sync-\(scheme == .dark ? "dark" : "light")\(suffix).png"))
+        }
     }
-    #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
+    #expect(!application.isActive && application.windows.filter(\.isVisible).isEmpty)
 }
