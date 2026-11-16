@@ -912,48 +912,48 @@
         }
       }
     },
-    "GitPico stopped this operation at its time limit. For a large fetch, choose a longer time limit in Fetch Options." : {
+    "GitPico stopped this operation at its time limit. Retry Fetch with one remote; retries allow more time for large transfers." : {
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "已达到时间上限，GitPico 停止了本次操作。获取大量数据时，可在 Fetch 选项中延长时间上限。"
+            "value" : "已达到时间上限，GitPico 停止了本次操作。请选择一个远程仓库重试获取；重试会为大量数据传输预留更长时间。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "已達時間上限，GitPico 已停止本次操作。擷取大量資料時，可在 Fetch 選項中延長時間上限。"
+            "value" : "已達時間上限，GitPico 已停止本次操作。請選擇一個遠端儲存庫重試擷取；重試會為大量資料傳輸預留更長時間。"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "已達時間上限，GitPico 已停止本次操作。擷取大量資料時，可在 Fetch 選項中延長時間上限。"
+            "value" : "已達時間上限，GitPico 已停止本次操作。請選擇一個遠端儲存庫重試擷取；重試會為大量資料傳輸預留更長時間。"
           }
         }
       }
     },
-    "The transfer was interrupted. Check the connection or proxy. In Fetch Options, try one remote and one branch, or HTTP/1.1 for HTTPS." : {
+    "The transfer was interrupted. Check the connection or proxy, then retry Fetch with one remote." : {
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "传输中断。请检查网络或代理。在 Fetch 选项中试试只获取一个远端的一条分支；如果使用 HTTPS，也可尝试 HTTP/1.1。"
+            "value" : "传输中断。请检查网络或代理，然后选择一个远程仓库重试获取。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "傳輸中斷。請檢查網絡或代理。在 Fetch 選項中嘗試只擷取一個遠端的一條分支；若使用 HTTPS，也可嘗試 HTTP/1.1。"
+            "value" : "傳輸中斷。請檢查網絡或代理，然後選擇一個遠端儲存庫重試擷取。"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "傳輸中斷。請檢查網絡或代理。在 Fetch 選項中嘗試只擷取一個遠端的一條分支；若使用 HTTPS，也可嘗試 HTTP/1.1。"
+            "value" : "傳輸中斷。請檢查網絡或代理，然後選擇一個遠端儲存庫重試擷取。"
           }
         }
       }

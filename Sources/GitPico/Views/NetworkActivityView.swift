@@ -80,13 +80,13 @@ func networkTransferWasInterrupted(_ output: String) -> Bool {
 func networkFailureAdvice(_ output: String, timedOut: Bool = false) -> String {
     let value = output.lowercased()
     if timedOut {
-        return String(localized: "GitPico stopped this operation at its time limit. For a large fetch, choose a longer time limit in Fetch Options.")
+        return String(localized: "GitPico stopped this operation at its time limit. Retry Fetch with one remote; retries allow more time for large transfers.")
     }
     if value.contains("refusing to allow") && value.contains("workflow") && value.contains("scope") {
         return String(localized: "GitHub requires permission to update GitHub Actions workflows. Open Authentication and choose Sign In Again for the GitHub account used by this repository, then retry Push. If you use a personal access token, update its workflow permission instead.")
     }
     if networkTransferWasInterrupted(output) {
-        return String(localized: "The transfer was interrupted. Check the connection or proxy. In Fetch Options, try one remote and one branch, or HTTP/1.1 for HTTPS.")
+        return String(localized: "The transfer was interrupted. Check the connection or proxy, then retry Fetch with one remote.")
     }
     if ["authentication failed", "permission denied", "could not read username", "invalid username or token",
         "returned error: 401", "returned error: 403", "http 401", "http 403"].contains(where: { value.contains($0) }) {
