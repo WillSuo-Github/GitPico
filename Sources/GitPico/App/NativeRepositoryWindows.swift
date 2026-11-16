@@ -90,7 +90,7 @@ import SwiftUI
         workspaceChanged()
     }
     func workspaceChanged() {
-        guard !stopping else { return }
+        guard !stopping, !workspace.isShuttingDown else { return }
         if synchronizing { needsSynchronization = true; return }
         repeat {
             needsSynchronization = false
@@ -208,14 +208,14 @@ import SwiftUI
         for group in groups { updateTabBarVisibility(group) }
     }
     private func membershipChanged() {
-        guard !stopping, !membershipUpdateScheduled else { return }
+        guard !stopping, !workspace.isShuttingDown, !membershipUpdateScheduled else { return }
         membershipUpdateScheduled = true
         // AppKit emits this KVO while mutating the native group. Re-entering tab-bar
         // layout from that callback can hang older AppKit; inspect only after it returns.
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             self.membershipUpdateScheduled = false
-            guard !self.stopping else { return }
+            guard !self.stopping, !self.workspace.isShuttingDown else { return }
             self.observeGroups()
             self.workspace.scheduleSessionSave()
         }
@@ -232,7 +232,7 @@ import SwiftUI
         didSelect(selected)
     }
     func didSelect(_ window: RepositoryNativeWindow) {
-        guard !stopping, !synchronizing, controllers[window.tabID] != nil else { return }
+        guard !stopping, !workspace.isShuttingDown, !synchronizing, controllers[window.tabID] != nil else { return }
         lastSelectedID = window.tabID
         observeGroups()
         if workspace.selectedID != window.tabID { workspace.select(window.tabID) }
@@ -280,6 +280,7 @@ import SwiftUI
         }
     }
     func shouldClose(_ window: RepositoryNativeWindow) -> Bool {
+        if workspace.isShuttingDown { return true }
         guard let tab = workspace.tabs.first(where: { $0.id == window.tabID }) else { return true }
         if workspace.tabs.count == 1 {
             guard workspace.prepareToClose(tab) else { return false }
@@ -295,7 +296,7 @@ import SwiftUI
     }
     func didClose(_ window: RepositoryNativeWindow) {
         controllers.removeValue(forKey: window.tabID)
-        guard !stopping else { return }
+        guard !stopping, !workspace.isShuttingDown else { return }
         if workspace.tabs.count == 1, workspace.selectedID == window.tabID {
             if closedWindow == nil {
                 closedWindow = (window.tabID, window.frame)

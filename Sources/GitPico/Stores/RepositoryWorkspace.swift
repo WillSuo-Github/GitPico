@@ -67,6 +67,8 @@ extension RepositoryWindowRouting {
     @ObservationIgnored private let makeStore: (RepositoryLibrary) -> RepositoryStore
     @ObservationIgnored private var draftTask: Task<Void, Never>?
     @ObservationIgnored private var didStartup = false
+    @ObservationIgnored private var awaitingInitialSession: Bool
+    @ObservationIgnored private(set) var isShuttingDown = false
     @ObservationIgnored private(set) var monitoringEnabled = false
     @ObservationIgnored weak var windowRouting: (any RepositoryWindowRouting)?
     var activeTab: RepositoryTab { tabs.first { $0.id == selectedID } ?? tabs[0] }
@@ -84,6 +86,7 @@ extension RepositoryWindowRouting {
         self.makeStore = factory
         drafts = RepositoryDraftStore(file: draftsFile ?? library.file.deletingLastPathComponent().appendingPathComponent("repository-drafts.json"))
         session = WorkspaceSessionStore(file: library.file.deletingLastPathComponent().appendingPathComponent("workspace-session.json"))
+        awaitingInitialSession = session.saved != nil
         let first = RepositoryTab(store: factory(library))
         tabs = [first]; selectedID = first.id; first.store.workspace = self
         draftSaveWarning = drafts.error
@@ -155,11 +158,11 @@ extension RepositoryWindowRouting {
         scheduleSessionSave()
         return true
     }
-    /// True when launch will replace the initial chooser tab with saved repositories.
+    /// Hold launch presentation until the complete saved workspace has been restored.
     var willRestoreSession: Bool {
         let args = ProcessInfo.processInfo.arguments
         guard !didStartup, AppPreferences.shared.resumeWorkspace, !args.contains("--repository"), !args.contains("--background-testing"), !NativeStartupVerification.enabled else { return false }
-        return session.saved?.tabs.contains { $0.path != nil } == true
+        return session.saved != nil
     }
     func startup() async {
         guard !didStartup else { return }; didStartup = true
@@ -169,6 +172,8 @@ extension RepositoryWindowRouting {
             await open(URL(fileURLWithPath: args[index + 1]), from: activeStore)
         } else if AppPreferences.shared.resumeWorkspace {
             await restoreSavedSession()
+        } else {
+            awaitingInitialSession = false
         }
     }
     func open(_ url: URL, from source: RepositoryStore? = nil, replacing: Bool = false, recordingVisit: Bool = true) async {
@@ -206,6 +211,7 @@ extension RepositoryWindowRouting {
             target.root = root
             await target.store.openInPlace(root, openedRepository: repository)
             if target.store.snapshot?.root.path != root.path { target.root = target.store.snapshot?.root; return }
+            awaitingInitialSession = false
             if let saved { target.store.commitSubject = saved.subject; target.store.commitBody = saved.body }
             if let state = repositoryStates[root.path], !replacing { await target.store.restoreSessionState(state) }
             target.isChoosingRepository = false
@@ -241,19 +247,39 @@ extension RepositoryWindowRouting {
         do { try drafts.flush(); draftSaveWarning = nil }
         catch { draftSaveWarning = error.localizedDescription }
     }
-    func shutdown() {
+    /// Checkpoint before Sparkle requests termination; leave the running workspace usable if the update is cancelled.
+    @discardableResult func saveForRestart() -> Bool {
+        guard !isShuttingDown else { return true }
+        guard !restoringSession, !tabs.contains(where: \.isBusy), networkActivity.runningCount == 0 else {
+            error = "Wait for repository operations to finish before quitting GitPico."
+            return false
+        }
         sessionTask?.cancel()
-        saveSession()
         for tab in tabs {
             do { try tab.store.flushConflictDrafts() }
-            catch { draftSaveWarning = error.localizedDescription; return }
+            catch { draftSaveWarning = error.localizedDescription; return false }
         }
-        for tab in tabs { tab.store.disconnectNetworkContext(); tab.store.stopAutomaticRefresh(); recordDraft(tab.store) }
+        for tab in tabs { recordDraft(tab.store) }
         flushDrafts()
+        guard draftSaveWarning == nil else { return false }
+        saveSession()
+        guard sessionSaveWarning == nil else {
+            error = String(localized: "Workspace could not be saved") + ": " + (sessionSaveWarning ?? "")
+            return false
+        }
         networkActivity.flush()
+        return true
+    }
+    @discardableResult func shutdown() -> Bool {
+        guard !isShuttingDown else { return true }
+        guard saveForRestart() else { return false }
+        // Later window-close/KVO callbacks must never replace this final snapshot.
+        isShuttingDown = true
+        for tab in tabs { tab.store.disconnectNetworkContext(); tab.store.stopAutomaticRefresh() }
+        return true
     }
     func scheduleSessionSave() {
-        guard didStartup, !restoringSession else { return }
+        guard didStartup, !restoringSession, !isShuttingDown else { return }
         sessionTask?.cancel()
         sessionTask = Task { [weak self] in
             do { try await Task.sleep(for: .milliseconds(400)) } catch { return }
@@ -261,7 +287,7 @@ extension RepositoryWindowRouting {
         }
     }
     func saveSession() {
-        guard !restoringSession, !tabs.contains(where: \.isOpening) else { return }
+        guard !awaitingInitialSession, !restoringSession, !isShuttingDown, !tabs.contains(where: \.isOpening) else { return }
         do {
             try session.save(WorkspaceSession(tabs: tabs.map { WorkspaceSessionTab(id: $0.id, path: $0.root?.path, choosing: $0.isChoosingRepository, navigation: $0.store.sessionState) }, selected: selectedID, windows: windowRouting?.sessionWindows() ?? [], repositoryVisits: repositoryVisits))
             sessionSaveWarning = nil
@@ -271,6 +297,7 @@ extension RepositoryWindowRouting {
     func restoreSavedSession() async {
         guard let saved = session.saved, !tabs.contains(where: \.isBusy) else { return }
         restoringSession = true
+        awaitingInitialSession = false
         defer { restoringSession = false; scheduleSessionSave() }
         for tab in tabs { tab.store.stopAutomaticRefresh(); tab.store.cancelPreviewWork(); tab.store.disconnectNetworkContext() }
         tabs = saved.tabs.map { item in

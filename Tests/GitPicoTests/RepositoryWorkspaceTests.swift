@@ -3,6 +3,22 @@ import GitCore
 import Testing
 @testable import GitPico
 
+@Test @MainActor func quittingBeforeLaunchRestorationKeepsThePreviousSession() async throws {
+    let t = try await TabFixture.make(); defer { t.clean() }
+    let workspace = t.workspace
+    await workspace.open(await t.f.repository.root)
+    workspace.newTab(); await workspace.open(t.second)
+    workspace.shutdown()
+    let original = try Data(contentsOf: workspace.session.file)
+    let launching = RepositoryWorkspace(library: workspace.library, draftsFile: workspace.drafts.file)
+    launching.saveSession()
+    #expect(try Data(contentsOf: workspace.session.file) == original)
+    await launching.open(t.f.root.appendingPathComponent("Missing"))
+    launching.shutdown()
+    #expect(try Data(contentsOf: workspace.session.file) == original)
+    #expect(WorkspaceSessionStore(file: workspace.session.file).saved?.tabs.count == 2)
+}
+
 @Test @MainActor func sleepWakeReconciliationPreservesDraftsSelectionAndExternalEdits() async throws {
     let t = try await TabFixture.make(); defer { t.clean() }
     let workspace = t.workspace

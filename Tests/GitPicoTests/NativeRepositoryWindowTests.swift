@@ -1,8 +1,83 @@
 import AppKit
 import Foundation
 import GitCore
+import Sparkle
 import Testing
 @testable import GitPico
+
+@Test @MainActor func terminationWindowTeardownKeepsSavedTabsAndNavigation() async throws {
+    let f = try await NativeTabFixture.make(); defer { f.clean() }
+    let workspace = f.workspace
+    let first = workspace.activeTab
+    first.store.navigate(.history)
+    await first.store.historyTask?.value; await first.store.detailTask?.value
+    let selectedCommit = first.store.selectedCommit?.hash
+    first.store.commitSubject = "Keep across update restart"
+    let secondRoot = f.base.root.appendingPathComponent("Second")
+    _ = try await GitRepository.create(at: secondRoot)
+    let second = workspace.newTab()
+    await workspace.open(secondRoot)
+    let chooser = workspace.newTab()
+    workspace.select(first.id)
+    f.windows.restoreWindows([
+        WorkspaceWindowGroup(tabs: [second.id, first.id], selected: first.id, x: 100, y: 100, width: 1420, height: 900),
+        WorkspaceWindowGroup(tabs: [chooser.id], selected: chooser.id, x: 200, y: 200, width: 1420, height: 900)
+    ])
+    let update = UpdateController(workspace: workspace)
+    let updater = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: update, userDriverDelegate: nil).updater
+    #expect(update.updaterShouldRelaunchApplication(updater))
+    #expect(!workspace.isShuttingDown)
+    first.store.commitBody = "Edited after the restart checkpoint"
+    update.updaterWillRelaunchApplication(updater)
+    #expect(workspace.shutdown())
+    let saved = try Data(contentsOf: workspace.session.file)
+    let closingWindows = workspace.tabs.compactMap { f.windows.window(for: $0.id) }
+    // AppKit can send close notifications after accepting the application's Quit event.
+    for window in closingWindows { window.close() }
+    workspace.saveSession()
+    #expect(try Data(contentsOf: workspace.session.file) == saved)
+
+    f.windows.stop()
+    let reopened = RepositoryWorkspace(library: workspace.library, draftsFile: workspace.drafts.file)
+    let windows = NativeRepositoryWindows(workspace: reopened, permitsPresentation: false)
+    windows.holdPresentation(); windows.start()
+    defer { windows.stop(); reopened.shutdown() }
+    await reopened.restoreSavedSession()
+    windows.releasePresentation()
+    #expect(reopened.tabs.map(\.id) == [first.id, second.id, chooser.id])
+    #expect(reopened.selectedID == first.id && reopened.activeStore.destination == .history)
+    #expect(reopened.activeStore.selectedCommit?.hash == selectedCommit)
+    #expect(reopened.activeStore.commitSubject == "Keep across update restart")
+    #expect(reopened.activeStore.commitBody == "Edited after the restart checkpoint")
+    #expect(windows.sessionWindows().contains { $0.tabs == [second.id, first.id] && $0.selected == first.id })
+    #expect(windows.sessionWindows().contains { $0.tabs == [chooser.id] })
+    #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
+}
+
+@Test @MainActor func sparkleRestartRefusesBusyOrUnsavedWorkspaceAndAllowsRetry() async throws {
+    let f = try await NativeTabFixture.make(); defer { f.clean() }
+    let workspace = f.workspace
+    let update = UpdateController(workspace: workspace)
+    let updater = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: update, userDriverDelegate: nil).updater
+    workspace.activeStore.isBusy = true
+    #expect(!update.updaterShouldRelaunchApplication(updater))
+    #expect(!workspace.isShuttingDown)
+    workspace.activeStore.isBusy = false
+
+    let external = Data("externally changed workspace".utf8)
+    try external.write(to: workspace.session.file)
+    #expect(!update.updaterShouldRelaunchApplication(updater))
+    #expect(!workspace.shutdown())
+    #expect(workspace.sessionSaveWarning != nil && !workspace.isShuttingDown)
+    #expect(try Data(contentsOf: workspace.session.file) == external)
+    workspace.activeStore.commitSubject = "The cancelled restart is still editable"
+    try FileManager.default.removeItem(at: workspace.session.file)
+    workspace.retrySessionSave()
+    #expect(update.updaterShouldRelaunchApplication(updater))
+    #expect(!workspace.isShuttingDown && workspace.sessionSaveWarning == nil)
+    #expect(RepositoryDraftStore(file: workspace.drafts.file).values[workspace.activeTab.root!.path]?.subject == "The cancelled restart is still editable")
+    #expect(workspace.shutdown())
+}
 
 @Test @MainActor func nativeSessionRestoresDetachedGroupsAndVisualTabOrderWithoutWindows() async throws {
     let f = try await NativeTabFixture.make(); defer { f.clean() }

@@ -30,7 +30,7 @@ struct GitPicoApp: App {
                 }
             }
         } else {
-            UpdateController.shared.startIfConfigured()
+            UpdateController.shared.startIfConfigured(workspace: workspace)
             workspace.startMonitoring()
             let notifications = NSWorkspace.shared.notificationCenter
             notifications.addObserver(self, selector: #selector(systemWillSleep(_:)), name: NSWorkspace.willSleepNotification, object: nil)
@@ -62,9 +62,10 @@ struct GitPicoApp: App {
             workspace.error = "Wait for repository operations to finish before quitting GitPico."
             return .terminateCancel
         }
-        workspace.shutdown()
-        if workspace.draftSaveWarning != nil {
-            workspace.error = String(localized: "Drafts could not be saved. Resolve the draft storage error before quitting.")
+        if !workspace.shutdown() {
+            if workspace.draftSaveWarning != nil {
+                workspace.error = String(localized: "Drafts could not be saved. Resolve the draft storage error before quitting.")
+            }
             return .terminateCancel
         }
         return .terminateNow

@@ -13,8 +13,9 @@ import Sparkle
     var githubProject: String? { Bundle.main.object(forInfoDictionaryKey: "GitPicoUpdateRepository") as? String }
     @ObservationIgnored private var controller: SPUStandardUpdaterController?
     @ObservationIgnored private var observation: AnyCancellable?
+    @ObservationIgnored private weak var workspace: RepositoryWorkspace?
     private var preferenceRevision = 0
-    private override init() { super.init() }
+    init(workspace: RepositoryWorkspace? = nil) { self.workspace = workspace; super.init() }
     var automaticallyChecks: Bool {
         get { _ = preferenceRevision; return controller?.updater.automaticallyChecksForUpdates ?? false }
         set { controller?.updater.automaticallyChecksForUpdates = newValue; preferenceRevision += 1 }
@@ -23,7 +24,8 @@ import Sparkle
         get { _ = preferenceRevision; return controller?.updater.automaticallyDownloadsUpdates ?? false }
         set { controller?.updater.automaticallyDownloadsUpdates = newValue; preferenceRevision += 1 }
     }
-    func startIfConfigured() {
+    func startIfConfigured(workspace: RepositoryWorkspace) {
+        self.workspace = workspace
         guard controller == nil, !ProcessInfo.processInfo.arguments.contains("--background-testing"), !NativeStartupVerification.enabled,
               let raw = Bundle.main.object(forInfoDictionaryKey: "SUFeedURL") as? String,
               let url = URL(string: raw), url.scheme == "https", url.user == nil, url.password == nil,
@@ -45,6 +47,12 @@ import Sparkle
         // Sparkle immediately owns progress, cancellation and visible errors.
         // Public downloads need no account preparation or REST release lookup.
         controller.checkForUpdates(nil)
+    }
+    func updaterShouldRelaunchApplication(_ updater: SPUUpdater) -> Bool {
+        workspace?.saveForRestart() ?? false
+    }
+    func updaterWillRelaunchApplication(_ updater: SPUUpdater) {
+        workspace?.saveForRestart()
     }
     func updater(_ updater: SPUUpdater, shouldDownloadReleaseNotesForUpdate updateItem: SUAppcastItem) -> Bool { false }
     func updater(_ updater: SPUUpdater, shouldProceedWithUpdate updateItem: SUAppcastItem, updateCheck: SPUUpdateCheck) throws {
