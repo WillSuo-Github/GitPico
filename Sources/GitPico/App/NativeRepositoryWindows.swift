@@ -271,7 +271,14 @@ import SwiftUI
             let windows = group.tabs.compactMap { window(for: $0) }
             guard let anchor = windows.first else { continue }
             for window in windows { window.tabGroup?.removeWindow(window) }
-            for window in windows.dropFirst() { anchor.addTabbedWindow(window, ordered: .above) }
+            for (index, window) in windows.enumerated().dropFirst() {
+                if let tabGroup = anchor.tabGroup {
+                    // Relative insertion after the anchor reverses the trailing tabs.
+                    tabGroup.insertWindow(window, at: index)
+                } else {
+                    anchor.addTabbedWindow(window, ordered: .above)
+                }
+            }
             if permitsPresentation {
                 let frame = visibleFrame(NSRect(x: group.x, y: group.y, width: group.width, height: group.height))
                 for window in windows { window.setFrame(frame, display: false) }

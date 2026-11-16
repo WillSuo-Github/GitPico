@@ -5,6 +5,34 @@ import Sparkle
 import Testing
 @testable import GitPico
 
+@Test @MainActor func nativeSessionRestoresThreeAndFourTabsInSavedVisualOrder() async throws {
+    for held in [false, true] {
+        let f = try await NativeTabFixture.make(); defer { f.clean() }
+        let ids = [f.workspace.activeTab.id, f.workspace.newTab().id, f.workspace.newTab().id, f.workspace.newTab().id]
+        for order in [[ids[0], ids[1], ids[2]], [ids[2], ids[0], ids[3], ids[1]]] {
+            let selected = order[1]
+            var groups = [WorkspaceWindowGroup(tabs: order, selected: selected, x: 100, y: 100, width: 1420, height: 900)]
+            if let detached = ids.first(where: { !order.contains($0) }) {
+                groups.append(WorkspaceWindowGroup(tabs: [detached], selected: detached, x: 200, y: 200, width: 1420, height: 900))
+            }
+            // Repeated restore must be stable, both during held launch and on a live group.
+            for _ in 0..<2 {
+                if held { f.windows.holdPresentation() }
+                f.workspace.select(selected)
+                f.windows.restoreWindows(groups)
+                if held { f.windows.releasePresentation() }
+                let group = try #require(f.windows.window(for: selected)?.tabGroup)
+                #expect(group.windows.compactMap { ($0 as? RepositoryNativeWindow)?.tabID } == order)
+                #expect((group.selectedWindow as? RepositoryNativeWindow)?.tabID == selected)
+                #expect(f.windows.sessionWindows().contains { $0.tabs == order && $0.selected == selected })
+                f.workspace.cycle(1)
+                #expect(f.workspace.selectedID == order[2])
+            }
+        }
+    }
+    #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
+}
+
 @Test @MainActor func terminationWindowTeardownKeepsSavedTabsAndNavigation() async throws {
     let f = try await NativeTabFixture.make(); defer { f.clean() }
     let workspace = f.workspace
