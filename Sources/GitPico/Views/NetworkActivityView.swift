@@ -90,7 +90,7 @@ func networkFailureAdvice(_ output: String, timedOut: Bool = false) -> String {
     }
     if ["authentication failed", "permission denied", "could not read username", "could not read password", "invalid username or token",
         "returned error: 401", "returned error: 403", "http 401", "http 403"].contains(where: { value.contains($0) }) {
-        return String(localized: "Check the selected account, token permissions or unlocked SSH keys in Authentication.")
+        return String(localized: "Check Authentication for a matching saved account, or verify that your system Git credential has access to this repository.")
     }
     if value.contains("host key verification") { return String(localized: "Verify the SSH host fingerprint with your hosting service, then trust it using your system SSH setup. GitPico does not bypass host verification.") }
     if value.contains("resolve host") || value.contains("timed out") || value.contains("unable to access") { return String(localized: "Check the network, proxy and server address. Retry Fetch when the connection is available.") }

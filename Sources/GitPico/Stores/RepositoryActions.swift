@@ -15,18 +15,12 @@ extension RepositoryStore {
         isBusy = true; activity = source == nil ? String(localized: "Creating repository…") : String(localized: "Cloning repository…")
         Task {
             do {
-                let context = networkContext(profileID: profileID, useAssignment: false)
-                let created = try await GitNetworkContexts.$current.withValue(context) {
+                let context = networkContext(cloneAccountID: profileID)
+                _ = try await GitNetworkContexts.$current.withValue(context) {
                     try await GitRepository.create(at: url, source: source, recursive: recursive, allowLocalTransport: allowLocalTransport, lfs: lfs)
-                }
-                var assignmentWarning: String?
-                if let profileID {
-                    do { try authentication.assign(profileID, to: await created.root) }
-                    catch { assignmentWarning = String(localized: "Repository created, but the authentication assignment could not be saved. Choose the account again in Authentication. \(error.localizedDescription)") }
                 }
                 isBusy = false; activity = ""
                 await open(url)
-                if let assignmentWarning { self.error = assignmentWarning }
             } catch { self.error = error.localizedDescription; isBusy = false; activity = "" }
         }
     }

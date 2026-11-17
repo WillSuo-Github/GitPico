@@ -20,13 +20,7 @@ struct AuthenticationSettingsView: View {
         Form {
             Section {
                 Text("Sign in with GitHub or GitLab, connect an HTTPS token, or use your existing system Git and SSH setup. Credentials are stored in Keychain.").font(.callout).foregroundStyle(.secondary)
-                if let root = store.snapshot?.root {
-                    Picker("This repository", selection: Binding<UUID?>(get: { store.authentication.profile(for: root)?.id }, set: { id in run { try store.authentication.assign(id, to: root); updateContexts() } })) {
-                        Text("Automatic / System Git").tag(nil as UUID?)
-                        ForEach(store.authentication.profiles) { profile in Text(profile.label).tag(Optional(profile.id)) }
-                    }.disabled(oauth.isRunning || store.networkActivity?.runningCount ?? 0 > 0)
-                    Text("\(root.lastPathComponent) · HTTPS URLs with a username use the matching saved account. Set a default here for URLs without a username. SSH uses system SSH.").font(.caption).foregroundStyle(.secondary)
-                }
+                Text("GitPico chooses credentials automatically. HTTPS URLs with a username use a matching saved account or system Git. Without a username, GitPico uses system Git or the only saved account for that host. SSH uses system SSH.").font(.caption).foregroundStyle(.secondary)
             } header: { Text("Connection") }
             Section("Sign In with Your Browser") {
                 HStack(spacing: 12) {
@@ -59,7 +53,7 @@ struct AuthenticationSettingsView: View {
                 Button("Sign In to This Server") {
                     run {
                         let configuration = try OAuthConfiguration(provider: customProvider, host: customHost.trimmingCharacters(in: .whitespacesAndNewlines), clientID: customClientID.trimmingCharacters(in: .whitespacesAndNewlines))
-                        oauth.start(configuration, authentication: store.authentication, root: store.snapshot?.root, showDevice: { NSWorkspace.shared.open($0) }, saved: updateContexts)
+                        oauth.start(configuration, authentication: store.authentication, showDevice: { NSWorkspace.shared.open($0) }, saved: updateContexts)
                     }
                 }.disabled(busy || oauth.isRunning || customHost.isEmpty || customClientID.isEmpty)
             }
@@ -76,7 +70,7 @@ struct AuthenticationSettingsView: View {
                     }
                 }
                 if store.authentication.profiles.contains(where: { $0.provider == .github && $0.isOAuth }) {
-                    Text("To add GitHub Actions workflow access to an existing GitHub account, choose Sign In Again. Repository assignments are kept.").font(.caption).foregroundStyle(.secondary)
+                    Text("To add GitHub Actions workflow access to an existing GitHub account, choose Sign In Again.").font(.caption).foregroundStyle(.secondary)
                 }
                 Text("Remove deletes this app's local credential. Revoke the provider grant from your authorized applications to withdraw server access.").font(.caption).foregroundStyle(.secondary)
                 HStack { Link("GitHub Authorized Apps", destination: URL(string: "https://github.com/settings/applications")!); Link("GitLab Authorized Apps", destination: URL(string: "https://gitlab.com/-/user_settings/applications")!) }
@@ -94,7 +88,7 @@ struct AuthenticationSettingsView: View {
                     Button(editing == nil ? "Save to Keychain" : "Update in Keychain") {
                         run {
                             if let editing { try store.authentication.replaceToken(editing, token: token) }
-                            else { _ = try store.authentication.add(provider: provider, host: host, username: username, token: token, for: store.snapshot?.root) }
+                            else { _ = try store.authentication.add(provider: provider, host: host, username: username, token: token) }
                             editing = nil; token = ""; updateContexts(); message = String(localized: "Account saved. Verify it, then test access to your remote.")
                         }
                     }.disabled(busy || oauth.isRunning || token.isEmpty || username.isEmpty || host.isEmpty || store.networkActivity?.runningCount ?? 0 > 0)
@@ -136,7 +130,7 @@ struct AuthenticationSettingsView: View {
     private func signIn(_ provider: OAuthProvider) {
         run {
             let configuration = try OAuthAppCatalog.configuration(provider)
-            oauth.start(configuration, authentication: store.authentication, root: store.snapshot?.root, showDevice: { url in NSWorkspace.shared.open(url) }, saved: updateContexts)
+            oauth.start(configuration, authentication: store.authentication, showDevice: { url in NSWorkspace.shared.open(url) }, saved: updateContexts)
         }
     }
     private func reconnect(_ profile: AuthenticationProfile) {
@@ -148,7 +142,7 @@ struct AuthenticationSettingsView: View {
                 let credential = try await Task.detached { try vault.read(profile.id) }.value
                 guard let existing = credential.oauth?.configuration else { throw appFailure("This OAuth credential is missing. Remove the account and sign in again.") }
                 let configuration = try OAuthConfiguration(provider: existing.provider, host: existing.host, clientID: existing.clientID)
-                oauth.start(configuration, authentication: store.authentication, root: nil, reconnecting: profile, showDevice: { url in NSWorkspace.shared.open(url) }, saved: updateContexts)
+                oauth.start(configuration, authentication: store.authentication, reconnecting: profile, showDevice: { url in NSWorkspace.shared.open(url) }, saved: updateContexts)
             } catch { message = GitLogRedaction.clean(error.localizedDescription) }
         }
     }

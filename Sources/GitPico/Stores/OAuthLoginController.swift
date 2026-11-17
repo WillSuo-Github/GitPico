@@ -14,7 +14,7 @@ import Observation
     init(browser: (any OAuthBrowserAuthenticating)? = nil, transport: any OAuthHTTPTransport = OAuthHTTPSClient(), sleep: @escaping @Sendable (TimeInterval) async throws -> Void = { try await Task.sleep(for: .seconds($0)) }) {
         self.browser = browser ?? OAuthBrowserSession(); self.transport = transport; self.sleep = sleep
     }
-    func start(_ configuration: OAuthConfiguration, authentication: AuthenticationStore, root: URL?, reconnecting: AuthenticationProfile? = nil, showDevice: @escaping @MainActor (URL) -> Void = { _ in }, saved: @escaping @MainActor () -> Void) {
+    func start(_ configuration: OAuthConfiguration, authentication: AuthenticationStore, reconnecting: AuthenticationProfile? = nil, showDevice: @escaping @MainActor (URL) -> Void = { _ in }, saved: @escaping @MainActor () -> Void) {
         guard !isRunning else { return }
         isRunning = true; failure = nil; deviceChallenge = nil; message = String(localized: "Starting secure sign-in…")
         task = Task { [weak self] in
@@ -45,7 +45,7 @@ import Observation
                 guard response.status == 200 else { throw appFailure("The provider could not verify this account. No credential was saved; sign in again.") }
                 let account = try HostingAccountClient.account(response.data)
                 try Task.checkCancellation()
-                _ = try authentication.completeOAuth(configuration, grant: grant, username: account.login, root: root, reconnecting: reconnecting)
+                _ = try authentication.completeOAuth(configuration, grant: grant, username: account.login, reconnecting: reconnecting)
                 message = String(localized: "Signed in as \(account.login). Credentials are saved in Keychain.")
                 saved()
             } catch is CancellationError { message = String(localized: "Sign-in cancelled. No account was changed.") }

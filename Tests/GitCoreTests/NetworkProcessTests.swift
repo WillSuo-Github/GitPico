@@ -74,8 +74,9 @@ import Testing
     let second = GitCredentialReference(id: UUID(), host: host, executable: helper.path, username: "ops+ci")
     let otherHost = GitCredentialReference(id: UUID(), host: "other.invalid", executable: helper.path, username: "alice")
     let accounts = [first, second, otherHost]
-    let assigned = GitNetworkContext(credential: fallback, matchingCredentials: accounts) { _ in }
+    let clone = GitNetworkContext(credential: fallback, matchingCredentials: accounts) { _ in }
     let automatic = GitNetworkContext(matchingCredentials: accounts) { _ in }
+    let single = GitNetworkContext(matchingCredentials: [first]) { _ in }
     let background = GitNetworkContext(matchingCredentials: accounts, nonInteractive: true) { _ in }
     func fill(_ url: String, in context: GitNetworkContext) async throws -> GitOutput {
         try await GitNetworkContexts.$current.withValue(context) {
@@ -83,13 +84,16 @@ import Testing
         }
     }
     let cases: [(String, GitNetworkContext, String)] = [
-        ("https://alice@fixture.invalid/repo", assigned, first.id.uuidString),
+        ("https://alice@fixture.invalid/repo", clone, first.id.uuidString),
         ("https://ops%2Bci@fixture.invalid/repo", automatic, second.id.uuidString),
         ("https://alice@other.invalid/repo", automatic, otherHost.id.uuidString),
         ("https://alice@fixture.invalid/repo", background, first.id.uuidString),
-        ("https://fixture.invalid/repo", assigned, fallback.id.uuidString),
+        ("https://fixture.invalid/repo", clone, fallback.id.uuidString),
         ("https://fixture.invalid/repo", automatic, "system"),
         ("https://unknown@fixture.invalid/repo", automatic, "system"),
+        ("https://unknown@fixture.invalid/repo", single, "system"),
+        ("https://fixture.invalid/repo", single, "system"),
+        ("https://other.invalid/repo", background, otherHost.id.uuidString),
         ("https://alice@fixture.invalid:8443/repo", automatic, "system"),
         ("http://alice@fixture.invalid/repo", automatic, "system")
     ]

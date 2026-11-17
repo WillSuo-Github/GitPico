@@ -14,25 +14,23 @@ private final class MemoryCredentialVault: CredentialStoring, Sendable {
     func remove(_ id: UUID) throws { values.withLock { $0.removeValue(forKey: id) } }
 }
 
-@Test @MainActor func authenticationProfilesKeepTokensOutOfSettingsAndSupportRepoAssignment() throws {
+@Test @MainActor func authenticationProfilesKeepTokensOutOfSettings() throws {
     let directory = FileManager.default.temporaryDirectory.appendingPathComponent("GitPico-auth-" + UUID().uuidString)
     try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
     defer { try? FileManager.default.removeItem(at: directory) }
-    let vault = MemoryCredentialVault(), root = directory.appendingPathComponent("Repo")
+    let vault = MemoryCredentialVault()
     let file = directory.appendingPathComponent("authentication.json")
     let store = AuthenticationStore(file: file, vault: vault)
-    let profile = try store.add(provider: .github, host: "GitHub.com", username: "fixture", token: "fixture-secret", for: root)
-    #expect(store.profile(for: root) == profile)
+    let profile = try store.add(provider: .github, host: "GitHub.com", username: "fixture", token: "fixture-secret")
+    #expect(store.profiles == [profile])
     #expect(try vault.read(profile.id).secret == "fixture-secret")
     #expect(!(try String(contentsOf: file, encoding: .utf8)).contains("fixture-secret"))
     let reopened = AuthenticationStore(file: file, vault: vault)
-    #expect(reopened.profile(for: root)?.host == "github.com")
+    #expect(reopened.profiles.first?.host == "github.com")
     try reopened.replaceToken(profile, token: "rotated-secret")
-    #expect(reopened.profile(for: root)?.id == profile.id)
+    #expect(reopened.profiles.first?.id == profile.id)
     #expect(try vault.read(profile.id).secret == "rotated-secret")
     #expect(!(try String(contentsOf: file, encoding: .utf8)).contains("rotated-secret"))
-    try reopened.assign(nil, to: root)
-    #expect(reopened.profile(for: root) == nil)
     try reopened.remove(profile)
     #expect(throws: GitFailure.self) { _ = try vault.read(profile.id) }
     #expect(reopened.profiles.isEmpty)
@@ -47,13 +45,13 @@ private final class MemoryCredentialVault: CredentialStoring, Sendable {
     }
     let file = directory.appendingPathComponent("auth.json"), vault = MemoryCredentialVault()
     let first = AuthenticationStore(file: file, vault: vault), second = AuthenticationStore(file: file, vault: vault)
-    _ = try first.add(provider: .gitlab, host: "example.invalid:8443", username: "first", token: "first-secret", for: nil)
-    #expect(throws: GitFailure.self) { _ = try second.add(provider: .github, host: "other.invalid", username: "second", token: "second-secret", for: nil) }
+    _ = try first.add(provider: .gitlab, host: "example.invalid:8443", username: "first", token: "first-secret")
+    #expect(throws: GitFailure.self) { _ = try second.add(provider: .github, host: "other.invalid", username: "second", token: "second-secret") }
     #expect(second.profiles.isEmpty)
     #expect(AuthenticationStore(file: file, vault: vault).profiles.count == 1)
 }
 
-@Test @MainActor func savedAccountsAreAvailableWithoutBindingAndDuplicateLoginsRespectTheSelectedProfile() async throws {
+@Test @MainActor func savedAccountsIgnoreLegacyBindingsAndCloneHintsStayLocalToOneOperation() async throws {
     let directory = FileManager.default.temporaryDirectory.resolvingSymlinksInPath().appendingPathComponent("GitPico-auth-" + UUID().uuidString)
     try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
     defer { try? FileManager.default.removeItem(at: directory) }
@@ -61,22 +59,28 @@ private final class MemoryCredentialVault: CredentialStoring, Sendable {
     let store = RepositoryStore(library: RepositoryLibrary(file: directory.appendingPathComponent("library.json"), legacy: []), authentication: auth)
     let repo = try await GitRepository.create(at: directory.appendingPathComponent("Repo"))
     let root = await repo.root
-    let old = try auth.add(provider: .github, host: "example.invalid", username: "alice", token: "old", for: nil)
-    let latest = try auth.add(provider: .github, host: "example.invalid", username: "alice", token: "latest", for: nil)
-    let other = try auth.add(provider: .github, host: "example.invalid", username: "bob", token: "other", for: nil)
-    let separateHost = try auth.add(provider: .gitlab, host: "example.invalid:8443", username: "alice", token: "port", for: nil)
+    let old = try auth.add(provider: .github, host: "example.invalid", username: "alice", token: "old")
+    let latest = try auth.add(provider: .github, host: "example.invalid", username: "alice", token: "latest")
+    let other = try auth.add(provider: .github, host: "example.invalid", username: "bob", token: "other")
+    let separateHost = try auth.add(provider: .gitlab, host: "example.invalid:8443", username: "alice", token: "port")
 
+    var document = try #require(JSONSerialization.jsonObject(with: Data(contentsOf: auth.file)) as? [String: Any])
+    document["assignments"] = [root.path: old.id.uuidString]
+    try JSONSerialization.data(withJSONObject: document).write(to: auth.file)
+    auth.reload()
     await store.open(root)
     defer { store.stopAutomaticRefresh() }
     let automatic = store.networkContext()
     #expect(automatic.credential == nil)
     #expect(Set(automatic.matchingCredentials.map(\.id)) == [latest.id, other.id, separateHost.id])
-    #expect(auth.profile(for: root) == nil)
+    let clone = store.networkContext(cloneAccountID: old.id)
+    #expect(clone.credential?.id == old.id)
+    #expect(Set(clone.matchingCredentials.map(\.id)) == [old.id, other.id, separateHost.id])
+    #expect(store.networkContext().credential == nil)
 
-    try auth.assign(old.id, to: root)
-    let selected = store.networkContext()
-    #expect(selected.credential?.id == old.id)
-    #expect(Set(selected.matchingCredentials.map(\.id)) == [old.id, other.id, separateHost.id])
+    try auth.remove(old)
+    let rewritten = try #require(JSONSerialization.jsonObject(with: Data(contentsOf: auth.file)) as? [String: Any])
+    #expect((rewritten["assignments"] as? [String: String]) == [:])
 }
 
 @Test func hostingAccountRequestsBindCredentialsToHTTPSAndProvider() throws {

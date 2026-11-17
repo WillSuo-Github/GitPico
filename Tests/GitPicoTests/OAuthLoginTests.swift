@@ -68,16 +68,15 @@ private func loginTransport(_ values: [[String: Any]]) throws -> LoginTransport 
 private func loginGrant(_ provider: OAuthProvider) -> [String: Any] { ["access_token":"fixture-access", "refresh_token":"fixture-refresh", "token_type":"bearer", "expires_in":7200, "scope":provider == .github ? "repo workflow read:user" : "read_user write_repository"] }
 private func tokenGrant(_ provider: OAuthProvider) throws -> OAuthTokenGrant { try OAuthRequests.grant(OAuthHTTPResponse(status: 200, data: try JSONSerialization.data(withJSONObject: loginGrant(provider)))) }
 
-@Test @MainActor func gitlabBrowserLoginVerifiesBearerIdentityBeforeSavingSecretsAndCapturedAssignment() async throws {
+@Test @MainActor func gitlabBrowserLoginVerifiesBearerIdentityBeforeSavingTheAccount() async throws {
     let f = try LoginFixture(); defer { f.clean() }
     let transport = try loginTransport([loginGrant(.gitlab), ["username":"fixture-user"]]), browser = LoginBrowser()
     let login = OAuthLoginController(browser: browser, transport: transport)
-    let originalRoot = f.directory.appendingPathComponent("OriginalRepo")
     var saved = false
-    login.start(try OAuthAppCatalog.configuration(.gitlab), authentication: f.store, root: originalRoot) { saved = true }
+    login.start(try OAuthAppCatalog.configuration(.gitlab), authentication: f.store) { saved = true }
     await login.finishForTesting()
     #expect(saved && !login.isRunning && login.failure == nil && browser.started)
-    let profile = try #require(f.store.profile(for: originalRoot))
+    let profile = try #require(f.store.profiles.first)
     #expect(profile.isOAuth && profile.username == "fixture-user")
     let credential = try f.vault.read(profile.id)
     #expect(credential.secret == "fixture-access" && credential.oauth?.refreshToken == "fixture-refresh")
@@ -86,7 +85,7 @@ private func tokenGrant(_ provider: OAuthProvider) throws -> OAuthTokenGrant { t
     let requests = await transport.requests
     #expect(requests.last?.value(forHTTPHeaderField: "Authorization") == "Bearer fixture-access")
     #expect(requests.last?.value(forHTTPHeaderField: "PRIVATE-TOKEN") == nil)
-    #expect(AuthenticationStore(file: f.store.file, vault: f.vault).profile(for: originalRoot)?.isOAuth == true)
+    #expect(AuthenticationStore(file: f.store.file, vault: f.vault).profiles.first?.isOAuth == true)
 }
 
 @Test @MainActor func githubDeviceLoginUsesRegisteredPublicClientAndVerifiesIdentityBeforeSaving() async throws {
@@ -94,7 +93,7 @@ private func tokenGrant(_ provider: OAuthProvider) throws -> OAuthTokenGrant { t
     let transport = try loginTransport([["device_code":"fixture-device", "user_code":"ABCD-EFGH", "verification_uri":"https://github.com/login/device", "expires_in":900, "interval":5], loginGrant(.github), ["login":"fixture-user"]])
     let browser = LoginBrowser(), login = OAuthLoginController(browser: browser, transport: transport, sleep: { _ in })
     var presented: URL?
-    login.start(try OAuthAppCatalog.configuration(.github), authentication: f.store, root: nil, showDevice: { presented = $0 }) {}
+    login.start(try OAuthAppCatalog.configuration(.github), authentication: f.store, showDevice: { presented = $0 }) {}
     await login.finishForTesting()
     #expect(login.failure == nil && f.store.profiles.count == 1 && f.store.profiles[0].isOAuth)
     #expect(presented?.absoluteString == "https://github.com/login/device" && !browser.started && login.deviceChallenge == nil)
@@ -118,17 +117,17 @@ private func tokenGrant(_ provider: OAuthProvider) throws -> OAuthTokenGrant { t
     return profile
 }
 
-@Test @MainActor func githubWorkflowReconnectUpgradesTheExistingCredentialAndPreservesAllAssignments() async throws {
+@Test @MainActor func githubWorkflowReconnectUpgradesTheExistingCredentialWithoutChangingItsProfile() async throws {
     let f = try LoginFixture(); defer { f.clean() }
-    let profile = try legacyGitHubProfile(f), assignments = f.store.assignments
+    let profile = try legacyGitHubProfile(f)
     let transport = try loginTransport([["device_code":"fixture-device", "user_code":"ABCD-EFGH", "verification_uri":"https://github.com/login/device", "expires_in":900, "interval":5], loginGrant(.github), ["login":profile.username]])
     let browser = LoginBrowser(), login = OAuthLoginController(browser: browser, transport: transport, sleep: { _ in })
     let configuration = try #require(f.vault.read(profile.id).oauth?.configuration)
     var saved = false
-    login.start(configuration, authentication: f.store, root: nil, reconnecting: profile) { saved = true }
+    login.start(configuration, authentication: f.store, reconnecting: profile) { saved = true }
     await login.finishForTesting()
     #expect(saved && login.failure == nil && !browser.started)
-    #expect(f.store.profiles == [profile] && f.store.assignments == assignments)
+    #expect(f.store.profiles == [profile])
     let updated = try f.vault.read(profile.id)
     #expect(updated.secret == "fixture-access" && updated.oauth?.refreshToken == "fixture-refresh")
     #expect(updated.oauth?.scopes.contains("workflow") == true)
@@ -136,20 +135,20 @@ private func tokenGrant(_ provider: OAuthProvider) throws -> OAuthTokenGrant { t
     #expect(!metadata.contains(updated.secret) && !metadata.contains("fixture-refresh"))
 }
 
-@Test @MainActor func incompleteOrDeclinedGitHubWorkflowReconnectKeepsTheOriginalCredentialAndBindings() async throws {
+@Test @MainActor func incompleteOrDeclinedGitHubWorkflowReconnectKeepsTheOriginalCredentialAndMetadata() async throws {
     for mode in ["missing-scope", "declined", "different-account"] {
         let f = try LoginFixture(); defer { f.clean() }
-        let profile = try legacyGitHubProfile(f), assignments = f.store.assignments
+        let profile = try legacyGitHubProfile(f)
         let original = try Data(contentsOf: f.store.file)
         var grant = loginGrant(.github)
         if mode == "missing-scope" { grant["scope"] = "repo read:user" }
         let response: [String: Any] = mode == "declined" ? ["error": "access_denied"] : grant
         let transport = try loginTransport([["device_code":"fixture-device", "user_code":"ABCD-EFGH", "verification_uri":"https://github.com/login/device", "expires_in":900, "interval":5], response, ["login": "different-user"]])
         let login = OAuthLoginController(browser: LoginBrowser(), transport: transport, sleep: { _ in })
-        login.start(try OAuthAppCatalog.configuration(.github), authentication: f.store, root: nil, reconnecting: profile) { Issue.record("An incomplete reconnect must not save") }
+        login.start(try OAuthAppCatalog.configuration(.github), authentication: f.store, reconnecting: profile) { Issue.record("An incomplete reconnect must not save") }
         await login.finishForTesting()
         #expect(login.failure != nil && !login.isRunning)
-        #expect(f.store.profiles == [profile] && f.store.assignments == assignments)
+        #expect(f.store.profiles == [profile])
         #expect(try f.vault.read(profile.id).secret == "legacy-access" && f.vault.read(profile.id).oauth?.refreshToken == "legacy-refresh")
         #expect(try Data(contentsOf: f.store.file) == original)
         #expect(await transport.requests.count == (mode == "different-account" ? 3 : 2))
@@ -161,10 +160,10 @@ private func tokenGrant(_ provider: OAuthProvider) throws -> OAuthTokenGrant { t
     var object = loginGrant(.github); object["scope"] = "repo read:user"
     let grant = try OAuthRequests.grant(OAuthHTTPResponse(status: 200, data: JSONSerialization.data(withJSONObject: object)))
     let configuration = try OAuthAppCatalog.configuration(.github)
-    #expect(throws: GitFailure.self) { _ = try f.store.completeOAuth(configuration, grant: grant, username: "fixture-user", root: nil) }
+    #expect(throws: GitFailure.self) { _ = try f.store.completeOAuth(configuration, grant: grant, username: "fixture-user") }
     #expect(f.store.profiles.isEmpty && f.vault.values.withLock { $0.isEmpty })
     let existing = try legacyGitHubProfile(f)
-    #expect(throws: GitFailure.self) { _ = try f.store.completeOAuth(configuration, grant: grant, username: existing.username, root: nil, reconnecting: existing) }
+    #expect(throws: GitFailure.self) { _ = try f.store.completeOAuth(configuration, grant: grant, username: existing.username, reconnecting: existing) }
     #expect(try f.vault.read(existing.id).secret == "legacy-access")
 }
 
@@ -173,7 +172,7 @@ private func tokenGrant(_ provider: OAuthProvider) throws -> OAuthTokenGrant { t
         let f = try LoginFixture(); defer { f.clean() }
         let browser = LoginBrowser(mode), transport = try loginTransport([])
         let login = OAuthLoginController(browser: browser, transport: transport)
-        login.start(try OAuthAppCatalog.configuration(.gitlab), authentication: f.store, root: nil) { Issue.record("A rejected sign-in must not save") }
+        login.start(try OAuthAppCatalog.configuration(.gitlab), authentication: f.store) { Issue.record("A rejected sign-in must not save") }
         if mode == .waiting {
             let deadline = ContinuousClock.now.advanced(by: .seconds(2))
             while !browser.started, ContinuousClock.now < deadline { await Task.yield() }
@@ -189,22 +188,22 @@ private func tokenGrant(_ provider: OAuthProvider) throws -> OAuthTokenGrant { t
     let f = try LoginFixture(); defer { f.clean() }
     for values in [[loginGrant(.gitlab), [:]], [["access_token":"fixture", "token_type":"bearer", "scope":"read_user"]]] {
         let transport = try loginTransport(values), login = OAuthLoginController(browser: LoginBrowser(), transport: transport)
-        login.start(try OAuthAppCatalog.configuration(.gitlab), authentication: f.store, root: nil) { Issue.record("Invalid identity/grant must not save") }
+        login.start(try OAuthAppCatalog.configuration(.gitlab), authentication: f.store) { Issue.record("Invalid identity/grant must not save") }
         await login.finishForTesting()
         #expect(login.failure != nil && f.store.profiles.isEmpty && f.vault.values.withLock { $0.isEmpty })
     }
 }
 
-@Test @MainActor func oauthReconnectKeepsBindingsAndRejectsDifferentAccountsOrPATReplacement() throws {
+@Test @MainActor func oauthReconnectKeepsTheProfileAndRejectsDifferentAccountsOrPATReplacement() throws {
     let f = try LoginFixture(); defer { f.clean() }
-    let config = try OAuthAppCatalog.configuration(.gitlab), root = f.directory.appendingPathComponent("Repo")
-    let profile = try f.store.completeOAuth(config, grant: tokenGrant(.gitlab), username: "fixture-user", root: root)
-    #expect(throws: GitFailure.self) { _ = try f.store.completeOAuth(config, grant: tokenGrant(.gitlab), username: "different-user", root: nil, reconnecting: profile) }
+    let config = try OAuthAppCatalog.configuration(.gitlab)
+    let profile = try f.store.completeOAuth(config, grant: tokenGrant(.gitlab), username: "fixture-user")
+    #expect(throws: GitFailure.self) { _ = try f.store.completeOAuth(config, grant: tokenGrant(.gitlab), username: "different-user", reconnecting: profile) }
     #expect(throws: GitFailure.self) { try f.store.replaceToken(profile, token: "manual-token") }
-    let renewed = try f.store.completeOAuth(config, grant: tokenGrant(.gitlab), username: "fixture-user", root: nil, reconnecting: profile)
-    #expect(renewed.id == profile.id && f.store.profile(for: root)?.id == profile.id && f.store.profiles.count == 1)
+    let renewed = try f.store.completeOAuth(config, grant: tokenGrant(.gitlab), username: "fixture-user", reconnecting: profile)
+    #expect(renewed.id == profile.id && f.store.profiles.first?.id == profile.id && f.store.profiles.count == 1)
     try Data("external settings".utf8).write(to: f.store.file)
-    #expect(throws: GitFailure.self) { _ = try f.store.completeOAuth(config, grant: tokenGrant(.gitlab), username: "second", root: nil) }
+    #expect(throws: GitFailure.self) { _ = try f.store.completeOAuth(config, grant: tokenGrant(.gitlab), username: "second") }
     #expect(f.vault.values.withLock { $0.count } == 1)
 }
 

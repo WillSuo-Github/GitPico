@@ -33,11 +33,20 @@ public struct GitNetworkContext: Sendable {
     let credentialIDs: Set<UUID>
     public init(credential: GitCredentialReference? = nil, matchingCredentials: [GitCredentialReference] = [], nonInteractive: Bool = false, sshCommand: String? = nil, observer: @escaping @Sendable (GitNetworkEvent) -> Void) {
         self.credential = credential; self.matchingCredentials = matchingCredentials; self.nonInteractive = nonInteractive; self.sshCommand = sshCommand; self.observer = observer
-        // Git applies the host-wide default first, then a matching username-specific
-        // helper resets that list. Each transport resolves its own URL, including submodules.
-        let references = (credential.map { [$0] } ?? []) + matchingCredentials.filter { $0.username?.isEmpty == false }
-        authenticationArguments = (nonInteractive ? ["-c", "credential.helper="] : []) + references.flatMap(\.configArguments)
-        credentialIDs = Set(references.map(\.id))
+        let named = matchingCredentials.filter { $0.username?.isEmpty == false }
+        // Let Git try its configured helpers first if the URL doesn't choose a
+        // saved login. A single saved identity can answer an unnamed request;
+        // several identities on the same host must never be tried in sequence.
+        let hostFallbacks = Dictionary(grouping: named, by: \.host).sorted { $0.key < $1.key }.compactMap { host, accounts in
+            accounts.count == 1 && host != credential?.host ? accounts.first : nil
+        }
+        // The optional credential is scoped to an individual clone from an
+        // account's repository list. The URL's explicit login still takes priority.
+        authenticationArguments = (nonInteractive ? ["-c", "credential.helper="] : [])
+            + hostFallbacks.flatMap { $0.configArguments(hostWide: true, replacingHelpers: false) }
+            + (credential?.configArguments(hostWide: true) ?? [])
+            + named.flatMap { $0.configArguments() }
+        credentialIDs = Set(((credential.map { [$0] } ?? []) + named).map(\.id))
     }
 }
 public enum GitNetworkContexts {

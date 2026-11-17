@@ -16,9 +16,9 @@ public struct GitCredentialReference: Sendable {
     public init(id: UUID, host: String, executable: String, username: String? = nil) {
         self.id = id; self.host = host.lowercased(); self.executable = executable; self.username = username
     }
-    var configArguments: [String] {
+    func configArguments(hostWide: Bool = false, replacingHelpers: Bool = true) -> [String] {
         let userInfo: String
-        if let username {
+        if !hostWide, let username {
             let unreserved = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~")
             guard !username.isEmpty, let encoded = username.addingPercentEncoding(withAllowedCharacters: unreserved) else { return [] }
             userInfo = encoded + "@"
@@ -26,7 +26,7 @@ public struct GitCredentialReference: Sendable {
         let key = "credential.https://" + userInfo + host + ".helper="
         let helper = "!GITPICO_CREDENTIAL_ID=" + id.uuidString + " GITPICO_CREDENTIAL_HOST=" + shellQuote(host)
             + " " + shellQuote(executable) + " --gitpico-credential-helper"
-        return ["-c", key, "-c", key + helper]
+        return (replacingHelpers ? ["-c", key] : []) + ["-c", key + helper]
     }
 }
 public enum GitCredentialVault {

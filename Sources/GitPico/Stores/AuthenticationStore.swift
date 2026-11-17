@@ -26,9 +26,12 @@ struct SystemCredentialVault: CredentialStoring {
 }
 
 @MainActor @Observable final class AuthenticationStore {
-    private struct Document: Codable { var profiles: [AuthenticationProfile] = []; var assignments: [String: UUID] = [:] }
+    private struct Document: Codable {
+        var profiles: [AuthenticationProfile] = []
+        // Older builds require the key. New builds ignore historical bindings.
+        var assignments: [String: UUID]? = [:]
+    }
     private(set) var profiles: [AuthenticationProfile] = []
-    private(set) var assignments: [String: UUID] = [:]
     var error: String?
     private(set) var revision = 0
     let file: URL
@@ -44,32 +47,24 @@ struct SystemCredentialVault: CredentialStoring {
         do {
             let data = try read()
             let document = try data.map { try JSONDecoder().decode(Document.self, from: $0) } ?? Document()
-            guard document.profiles.count <= 100, document.assignments.count <= 5000, Set(document.profiles.map(\.id)).count == document.profiles.count else { throw appFailure("Authentication settings exceed their limits.") }
+            guard document.profiles.count <= 100, Set(document.profiles.map(\.id)).count == document.profiles.count else { throw appFailure("Authentication settings exceed their limits.") }
             for profile in document.profiles { _ = try Self.host(profile.host) }
-            profiles = document.profiles; assignments = document.assignments; diskData = data; loaded = true; error = nil; revision += 1
+            profiles = document.profiles; diskData = data; loaded = true; error = nil; revision += 1
         } catch { self.error = error.localizedDescription }
     }
     static func host(_ value: String) throws -> String {
         guard let components = URLComponents(string: "https://" + value), let host = components.host, !host.isEmpty, components.user == nil, components.password == nil, components.path.isEmpty, components.query == nil, components.fragment == nil, !value.contains(where: { $0.isWhitespace }), !value.contains("\n") else { throw appFailure("Enter only a hostname and optional port, without a URL, path or credentials.") }
         return host.lowercased() + (components.port.map { ":\($0)" } ?? "")
     }
-    func profile(for root: URL) -> AuthenticationProfile? { profiles.first { $0.id == assignments[root.path] } }
-    @discardableResult func add(provider: HostingProvider, host: String, username: String, token: String, for root: URL?) throws -> AuthenticationProfile {
+    @discardableResult func add(provider: HostingProvider, host: String, username: String, token: String) throws -> AuthenticationProfile {
         guard loaded else { throw appFailure("Reload authentication settings before connecting an account.") }
         let profile = AuthenticationProfile(id: UUID(), provider: provider, host: try Self.host(host), username: username.trimmingCharacters(in: .whitespacesAndNewlines))
         guard !profile.username.isEmpty, !profile.username.contains(where: { $0.isNewline }), !token.isEmpty else { throw appFailure("Enter your account username and personal access token.") }
         let credential = GitStoredCredential(host: profile.host, username: profile.username, secret: token)
         try vault.save(credential, id: profile.id)
-        var values = assignments
-        if let root { values[root.path] = profile.id }
-        do { try persist(profiles + [profile], assignments: values) }
+        do { try persist(profiles + [profile]) }
         catch { try? vault.remove(profile.id); throw error }
         return profile
-    }
-    func assign(_ id: UUID?, to root: URL) throws {
-        guard id == nil || profiles.contains(where: { $0.id == id }) else { throw appFailure("Choose an existing authentication profile.") }
-        var values = assignments; values[root.path] = id
-        try persist(profiles, assignments: values)
     }
     func replaceToken(_ profile: AuthenticationProfile, token: String) throws {
         guard !profile.isOAuth else { throw appFailure("Use Sign In Again to renew an OAuth account.") }
@@ -78,7 +73,7 @@ struct SystemCredentialVault: CredentialStoring {
         try vault.save(GitStoredCredential(host: profile.host, username: profile.username, secret: token), id: profile.id)
         revision += 1
     }
-    @discardableResult func completeOAuth(_ configuration: OAuthConfiguration, grant: OAuthTokenGrant, username: String, root: URL?, reconnecting: AuthenticationProfile? = nil) throws -> AuthenticationProfile {
+    @discardableResult func completeOAuth(_ configuration: OAuthConfiguration, grant: OAuthTokenGrant, username: String, reconnecting: AuthenticationProfile? = nil) throws -> AuthenticationProfile {
         guard loaded else { throw appFailure("Reload authentication settings before signing in.") }
         try grant.requireRepositoryScopes(configuration.provider, includingWorkflows: true)
         let provider: HostingProvider = configuration.provider == .github ? .github : .gitlab
@@ -92,15 +87,14 @@ struct SystemCredentialVault: CredentialStoring {
         let profile = AuthenticationProfile(id: UUID(), provider: provider, host: configuration.host, username: username, method: .oauth)
         let credential = GitStoredCredential(host: configuration.host, username: username, secret: grant.accessToken, oauth: grant.authorization(configuration))
         try vault.save(credential, id: profile.id)
-        var values = assignments; if let root { values[root.path] = profile.id }
-        do { try persist(profiles + [profile], assignments: values) }
+        do { try persist(profiles + [profile]) }
         catch { try? vault.remove(profile.id); throw error }
         return profile
     }
     func remove(_ profile: AuthenticationProfile) throws {
         let saved = try vault.read(profile.id)
         try vault.remove(profile.id)
-        do { try persist(profiles.filter { $0.id != profile.id }, assignments: assignments.filter { $0.value != profile.id }) }
+        do { try persist(profiles.filter { $0.id != profile.id }) }
         catch { try? vault.save(saved, id: profile.id); throw error }
     }
     private func read() throws -> Data? {
@@ -110,8 +104,8 @@ struct SystemCredentialVault: CredentialStoring {
         guard attributes[.type] as? FileAttributeType == .typeRegular, (attributes[.size] as? NSNumber)?.intValue ?? Int.max <= 1_048_576 else { throw appFailure("Authentication settings are not a regular file under 1 MB.") }
         return try Data(contentsOf: file)
     }
-    private func persist(_ profiles: [AuthenticationProfile], assignments: [String: UUID]) throws {
-        guard loaded, profiles.count <= 100, assignments.count <= 5000 else { throw appFailure("Reload authentication settings before saving, or remove unused profiles.") }
+    private func persist(_ profiles: [AuthenticationProfile]) throws {
+        guard loaded, profiles.count <= 100 else { throw appFailure("Reload authentication settings before saving, or remove unused profiles.") }
         try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
         let fd = Darwin.open(file.path + ".lock", O_CREAT | O_RDWR | O_NOFOLLOW, 0o600)
         guard fd >= 0 else { throw appFailure("Cannot lock authentication settings.") }
@@ -119,9 +113,9 @@ struct SystemCredentialVault: CredentialStoring {
         guard flock(fd, LOCK_EX | LOCK_NB) == 0 else { throw appFailure("Authentication settings are being saved by another process.") }
         defer { flock(fd, LOCK_UN) }
         guard try read() == diskData else { throw appFailure("Authentication settings changed in another process. Reload them before editing.") }
-        let data = try JSONEncoder().encode(Document(profiles: profiles, assignments: assignments))
+        let data = try JSONEncoder().encode(Document(profiles: profiles))
         try data.write(to: file, options: .atomic)
-        self.profiles = profiles; self.assignments = assignments; diskData = data; revision += 1; error = nil
+        self.profiles = profiles; diskData = data; revision += 1; error = nil
     }
 }
 

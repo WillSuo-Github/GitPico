@@ -912,6 +912,38 @@
         }
       }
     },
+    "To add GitHub Actions workflow access to an existing GitHub account, choose Sign In Again." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "要为现有 GitHub 账号添加 GitHub Actions 工作流程权限，请选择“重新登录”。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "若要為現有 GitHub 帳號加入 GitHub Actions 工作流程權限，請選擇「重新登入」。"
+          }
+        }
+      }
+    },
+    "GitPico chooses credentials automatically. HTTPS URLs with a username use a matching saved account or system Git. Without a username, GitPico uses system Git or the only saved account for that host. SSH uses system SSH." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitPico 自动选择凭据。HTTPS 地址带用户名时，使用匹配的已保存账号或系统 Git；未指定用户名时，使用系统 Git 或该主机唯一的已保存账号。SSH 使用系统 SSH。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitPico 自動選擇憑證。HTTPS 位址含使用者名稱時，會使用相符的已儲存帳號或系統 Git；未指定使用者名稱時，會使用系統 Git 或該主機唯一的已儲存帳號。SSH 使用系統 SSH。"
+          }
+        }
+      }
+    },
     "GitPico stopped this operation at its time limit. Retry Fetch with one remote; retries allow more time for large transfers." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -68841,6 +68873,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "請檢查儲存庫的 GPG／SSH 驗證程式與受信任的密鑰。缺少驗證程式或密鑰並不代表簽名無效。"
+          }
+        }
+      }
+    },
+    "Check Authentication for a matching saved account, or verify that your system Git credential has access to this repository." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请在“认证”中检查是否保存了匹配的账号，或确认系统 Git 凭据有权访问这个仓库。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請在「驗證」中檢查是否已儲存相符的帳號，或確認系統 Git 憑證有權存取此儲存庫。"
           }
         }
       }

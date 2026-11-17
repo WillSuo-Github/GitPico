@@ -134,12 +134,12 @@ private final class NetworkHistoryWriter: @unchecked Sendable {
 }
 
 extension RepositoryStore {
-    func networkContext(profileID: UUID? = nil, useAssignment: Bool = true, journal: NetworkActivityStore? = nil) -> GitNetworkContext {
-        let profile = profileID.flatMap { id in authentication.profiles.first { $0.id == id } } ?? (useAssignment ? snapshot.flatMap { authentication.profile(for: $0.root) } : nil)
+    func networkContext(cloneAccountID: UUID? = nil) -> GitNetworkContext {
+        let profile = cloneAccountID.flatMap { id in authentication.profiles.first { $0.id == id } }
         let executable = Bundle.main.executablePath ?? CommandLine.arguments[0]
         let reference = profile.map { GitCredentialReference(id: $0.id, host: $0.host, executable: executable) }
-        // If an account has multiple saved credentials, keep the selected one
-        // when it matches; otherwise prefer the most recently connected one.
+        // If an identity has multiple credentials, use the most recently
+        // connected one, except when cloning directly from an account's list.
         let candidates = (profile.map { [$0] } ?? []) + authentication.profiles.reversed()
         var usernamesByHost: [String: Set<String>] = [:]
         let matches: [GitCredentialReference] = candidates.compactMap { account in
@@ -147,7 +147,7 @@ extension RepositoryStore {
             guard !account.username.isEmpty, usernamesByHost[host, default: []].insert(account.username).inserted else { return nil }
             return GitCredentialReference(id: account.id, host: host, executable: executable, username: account.username)
         }
-        let activity = journal ?? networkActivity
+        let activity = networkActivity
         return GitNetworkContext(credential: reference, matchingCredentials: matches) { [weak activity] event in
             Task { @MainActor in activity?.receive(event) }
         }
