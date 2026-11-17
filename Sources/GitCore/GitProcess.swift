@@ -65,7 +65,7 @@ public enum GitProcess {
             // Apple Git 2.54 leaves untracked files behind during stash cleanup in that mode.
             let pathCommands = ["status", "diff", "diff-tree", "show", "log", "blame", "add", "rm", "restore", "ls-files", "ls-tree"]
             let pathOptions = pathCommands.contains(arguments.first ?? "") ? ["--literal-pathspecs"] : []
-            let authentication = (networkContext?.nonInteractive == true ? ["-c", "credential.helper="] : []) + (networkContext?.credential.map { ["-c", "credential.https://" + $0.host + ".helper=", "-c", "credential.https://" + $0.host + ".helper=" + $0.helper] } ?? [])
+            let authentication = networkContext?.authenticationArguments ?? []
             var commandArguments = arguments
             if network != nil {
                 var index = 0
@@ -93,10 +93,6 @@ public enum GitProcess {
                 environment["GIT_ASKPASS"] = "/usr/bin/false"; environment["SSH_ASKPASS"] = "/usr/bin/false"
                 environment["SSH_ASKPASS_REQUIRE"] = "never"; environment["GCM_INTERACTIVE"] = "Never"
                 environment["GIT_SSH_COMMAND"] = (networkContext?.sshCommand ?? "/usr/bin/ssh") + " -o BatchMode=yes -o StrictHostKeyChecking=yes"
-            }
-            if let credential = networkContext?.credential {
-                environment["GITPICO_CREDENTIAL_ID"] = credential.id.uuidString
-                environment["GITPICO_CREDENTIAL_HOST"] = credential.host
             }
             environment["GIT_OPTIONAL_LOCKS"] = "0"
             environment["GIT_PAGER"] = "cat"
@@ -142,7 +138,7 @@ public enum GitProcess {
                 while process.isRunning && Date() < grace { Thread.sleep(forTimeInterval: 0.025) }
                 if process.isRunning { kill(process.processIdentifier, SIGKILL) }
                 process.waitUntilExit()
-                network?.progress(stdout: outURL, stderr: errURL)
+                network?.progress(stdout: outURL, stderr: errURL, completed: true)
                 if network?.cancellation.isCancelled == true { throw GitFailure("Network operation cancelled. The server or working copy may already have changed; review the refreshed state before retrying.") }
                 if cancellable && Task.isCancelled { network?.cancellation.cancel(); throw CancellationError() }
                 let failure = GitFailure("Git timed out after \(Int(timeout)) seconds. Check SSH, signing, hooks, or network access.")
@@ -166,7 +162,7 @@ public enum GitProcess {
             let error = (errorSize > errorLimit ? localized("[Earlier Git output omitted.]\n") : "")
                 + String(decoding: try errorReader.read(upToCount: Int(errorLimit)) ?? Data(), as: UTF8.self)
             let result = GitOutput(data: data, error: error, status: process.terminationStatus)
-            network?.progress(stdout: outURL, stderr: errURL)
+            network?.progress(stdout: outURL, stderr: errURL, completed: true)
             network?.finish(succeeded: allowed.contains(result.status))
             guard allowed.contains(result.status) else {
                 let message = error.trimmingCharacters(in: .whitespacesAndNewlines)

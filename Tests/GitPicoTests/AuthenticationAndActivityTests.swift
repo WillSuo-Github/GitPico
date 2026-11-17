@@ -53,6 +53,32 @@ private final class MemoryCredentialVault: CredentialStoring, Sendable {
     #expect(AuthenticationStore(file: file, vault: vault).profiles.count == 1)
 }
 
+@Test @MainActor func savedAccountsAreAvailableWithoutBindingAndDuplicateLoginsRespectTheSelectedProfile() async throws {
+    let directory = FileManager.default.temporaryDirectory.resolvingSymlinksInPath().appendingPathComponent("GitPico-auth-" + UUID().uuidString)
+    try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: directory) }
+    let auth = AuthenticationStore(file: directory.appendingPathComponent("authentication.json"), vault: MemoryCredentialVault())
+    let store = RepositoryStore(library: RepositoryLibrary(file: directory.appendingPathComponent("library.json"), legacy: []), authentication: auth)
+    let repo = try await GitRepository.create(at: directory.appendingPathComponent("Repo"))
+    let root = await repo.root
+    let old = try auth.add(provider: .github, host: "example.invalid", username: "alice", token: "old", for: nil)
+    let latest = try auth.add(provider: .github, host: "example.invalid", username: "alice", token: "latest", for: nil)
+    let other = try auth.add(provider: .github, host: "example.invalid", username: "bob", token: "other", for: nil)
+    let separateHost = try auth.add(provider: .gitlab, host: "example.invalid:8443", username: "alice", token: "port", for: nil)
+
+    await store.open(root)
+    defer { store.stopAutomaticRefresh() }
+    let automatic = store.networkContext()
+    #expect(automatic.credential == nil)
+    #expect(Set(automatic.matchingCredentials.map(\.id)) == [latest.id, other.id, separateHost.id])
+    #expect(auth.profile(for: root) == nil)
+
+    try auth.assign(old.id, to: root)
+    let selected = store.networkContext()
+    #expect(selected.credential?.id == old.id)
+    #expect(Set(selected.matchingCredentials.map(\.id)) == [old.id, other.id, separateHost.id])
+}
+
 @Test func hostingAccountRequestsBindCredentialsToHTTPSAndProvider() throws {
     let github = AuthenticationProfile(id: UUID(), provider: .github, host: "github.com", username: "fixture")
     let request = try HostingAccountClient.request(github, credential: GitStoredCredential(host: "github.com", username: "fixture", secret: "fixture-secret"))
@@ -145,4 +171,5 @@ private final class MemoryCredentialVault: CredentialStoring, Sendable {
     #expect(advice.contains("personal access token") && !advice.contains("Fetch Options"))
     #expect(networkFailureAdvice(output.replacingOccurrences(of: "OAuth App", with: "Personal Access Token")) == advice)
     #expect(networkFailureAdvice("error: workflow.yml has local conflicts") != advice)
+    #expect(networkFailureAdvice("fatal: could not read Password for '[redacted]: terminal prompts disabled").contains("Authentication"))
 }

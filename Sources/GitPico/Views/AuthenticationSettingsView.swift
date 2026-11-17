@@ -22,10 +22,10 @@ struct AuthenticationSettingsView: View {
                 Text("Sign in with GitHub or GitLab, connect an HTTPS token, or use your existing system Git and SSH setup. Credentials are stored in Keychain.").font(.callout).foregroundStyle(.secondary)
                 if let root = store.snapshot?.root {
                     Picker("This repository", selection: Binding<UUID?>(get: { store.authentication.profile(for: root)?.id }, set: { id in run { try store.authentication.assign(id, to: root); updateContexts() } })) {
-                        Text("System Git / SSH").tag(nil as UUID?)
+                        Text("Automatic / System Git").tag(nil as UUID?)
                         ForEach(store.authentication.profiles) { profile in Text(profile.label).tag(Optional(profile.id)) }
                     }.disabled(oauth.isRunning || store.networkActivity?.runningCount ?? 0 > 0)
-                    Text("\(root.lastPathComponent) · HTTPS profiles apply only to their exact host. SSH remotes continue to use system SSH.").font(.caption).foregroundStyle(.secondary)
+                    Text("\(root.lastPathComponent) · HTTPS URLs with a username use the matching saved account. Set a default here for URLs without a username. SSH uses system SSH.").font(.caption).foregroundStyle(.secondary)
                 }
             } header: { Text("Connection") }
             Section("Sign In with Your Browser") {

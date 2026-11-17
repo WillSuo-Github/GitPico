@@ -12,8 +12,22 @@ public struct GitCredentialReference: Sendable {
     public let id: UUID
     public let host: String
     public let executable: String
-    public init(id: UUID, host: String, executable: String) { self.id = id; self.host = host.lowercased(); self.executable = executable }
-    var helper: String { "!" + shellQuote(executable) + " --gitpico-credential-helper" }
+    public let username: String?
+    public init(id: UUID, host: String, executable: String, username: String? = nil) {
+        self.id = id; self.host = host.lowercased(); self.executable = executable; self.username = username
+    }
+    var configArguments: [String] {
+        let userInfo: String
+        if let username {
+            let unreserved = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~")
+            guard !username.isEmpty, let encoded = username.addingPercentEncoding(withAllowedCharacters: unreserved) else { return [] }
+            userInfo = encoded + "@"
+        } else { userInfo = "" }
+        let key = "credential.https://" + userInfo + host + ".helper="
+        let helper = "!GITPICO_CREDENTIAL_ID=" + id.uuidString + " GITPICO_CREDENTIAL_HOST=" + shellQuote(host)
+            + " " + shellQuote(executable) + " --gitpico-credential-helper"
+        return ["-c", key, "-c", key + helper]
+    }
 }
 public enum GitCredentialVault {
     private static let service = "com.willsuo.GitPico.credentials"

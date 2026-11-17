@@ -25,11 +25,19 @@ public struct GitNetworkEvent: Sendable {
 }
 public struct GitNetworkContext: Sendable {
     public let credential: GitCredentialReference?
+    public let matchingCredentials: [GitCredentialReference]
     public let nonInteractive: Bool
     public let sshCommand: String?
     public let observer: @Sendable (GitNetworkEvent) -> Void
-    public init(credential: GitCredentialReference? = nil, nonInteractive: Bool = false, sshCommand: String? = nil, observer: @escaping @Sendable (GitNetworkEvent) -> Void) {
-        self.credential = credential; self.nonInteractive = nonInteractive; self.sshCommand = sshCommand; self.observer = observer
+    let authenticationArguments: [String]
+    let credentialIDs: Set<UUID>
+    public init(credential: GitCredentialReference? = nil, matchingCredentials: [GitCredentialReference] = [], nonInteractive: Bool = false, sshCommand: String? = nil, observer: @escaping @Sendable (GitNetworkEvent) -> Void) {
+        self.credential = credential; self.matchingCredentials = matchingCredentials; self.nonInteractive = nonInteractive; self.sshCommand = sshCommand; self.observer = observer
+        // Git applies the host-wide default first, then a matching username-specific
+        // helper resets that list. Each transport resolves its own URL, including submodules.
+        let references = (credential.map { [$0] } ?? []) + matchingCredentials.filter { $0.username?.isEmpty == false }
+        authenticationArguments = (nonInteractive ? ["-c", "credential.helper="] : []) + references.flatMap(\.configArguments)
+        credentialIDs = Set(references.map(\.id))
     }
 }
 public enum GitNetworkContexts {
@@ -72,7 +80,8 @@ final class GitNetworkObservation {
         self.context = context; self.command = ["lfs", "submodule"].contains(command) ? command + " " + subcommand : command
         repository = command == "clone" ? URL(fileURLWithPath: arguments.last ?? root.path).lastPathComponent : root.lastPathComponent
         repositoryPath = command == "clone" ? nil : root.path
-        secrets = context.credential.flatMap { try? GitCredentialVault.read($0.id) }.map { [$0.secret, $0.oauth?.refreshToken ?? ""] } ?? []
+        secrets = []
+        refreshCredentialRedactions()
         send(.running, output: localized("Starting \(command)…"))
     }
     func prepareCredential() throws {
@@ -80,13 +89,16 @@ final class GitNetworkObservation {
         // that HTTPS account. An expired HTTPS profile must not block SSH/other hosts.
         if cancellation.isCancelled { throw GitFailure("Network operation cancelled before Git started.") }
     }
-    func progress(stdout: URL, stderr: URL) {
-        if Date() >= nextCredentialCheck {
-            if let id = context.credential?.id, let value = try? GitCredentialVault.read(id) {
+    private func refreshCredentialRedactions() {
+        for id in context.credentialIDs {
+            if let value = try? GitCredentialVault.read(id) {
                 for secret in [value.secret, value.oauth?.refreshToken ?? ""] where !secret.isEmpty && !secrets.contains(secret) { secrets.append(secret) }
             }
-            nextCredentialCheck = Date().addingTimeInterval(1)
         }
+        nextCredentialCheck = Date().addingTimeInterval(1)
+    }
+    func progress(stdout: URL, stderr: URL, completed: Bool = false) {
+        if completed || Date() >= nextCredentialCheck { refreshCredentialRedactions() }
         func tail(_ url: URL) -> String {
             guard let handle = try? FileHandle(forReadingFrom: url) else { return "" }
             defer { try? handle.close() }

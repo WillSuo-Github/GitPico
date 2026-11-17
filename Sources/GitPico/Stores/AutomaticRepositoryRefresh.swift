@@ -47,7 +47,7 @@ extension RepositoryStore {
             guard token == repositoryToken else { return }
             let base = networkContext()
             let ssh = ProcessInfo.processInfo.environment["GIT_SSH_COMMAND"] ?? (custom.isEmpty ? "/usr/bin/ssh" : custom)
-            let context = GitNetworkContext(credential: base.credential, nonInteractive: true, sshCommand: ssh, observer: base.observer)
+            let context = GitNetworkContext(credential: base.credential, matchingCredentials: base.matchingCredentials, nonInteractive: true, sshCommand: ssh, observer: base.observer)
             startedNetwork = true
             try await GitNetworkContexts.$current.withValue(context) { try await repository.sync(.fetch) }
         } catch {

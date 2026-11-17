@@ -88,7 +88,7 @@ func networkFailureAdvice(_ output: String, timedOut: Bool = false) -> String {
     if networkTransferWasInterrupted(output) {
         return String(localized: "The transfer was interrupted. Check the connection or proxy, then retry Fetch with one remote.")
     }
-    if ["authentication failed", "permission denied", "could not read username", "invalid username or token",
+    if ["authentication failed", "permission denied", "could not read username", "could not read password", "invalid username or token",
         "returned error: 401", "returned error: 403", "http 401", "http 403"].contains(where: { value.contains($0) }) {
         return String(localized: "Check the selected account, token permissions or unlocked SSH keys in Authentication.")
     }

@@ -56,6 +56,51 @@ import Testing
     #expect(cleaned.contains("[redacted]"))
 }
 
+@Test func gitSelectsSavedHTTPSAccountsByHostAndUsername() async throws {
+    let fixture = try await Fixture.make(); defer { fixture.clean() }
+    let helper = fixture.url.appendingPathComponent("fixture credential helper")
+    try Data("""
+    #!/bin/sh
+    test "$1" = --gitpico-credential-helper && test "$2" = get || exit 0
+    printf 'username=fixture\\npassword=%s\\n' "$GITPICO_CREDENTIAL_ID"
+    """.utf8).write(to: helper)
+    try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: helper.path)
+    let systemHelper = #"!f() { test "$1" = get && printf 'username=system\npassword=system\n'; }; f"#
+    _ = try await GitProcess.run(["config", "--local", "--add", "credential.helper", ""], at: fixture.url)
+    _ = try await GitProcess.run(["config", "--local", "--add", "credential.helper", systemHelper], at: fixture.url)
+    let host = "fixture.invalid"
+    let fallback = GitCredentialReference(id: UUID(), host: host, executable: helper.path)
+    let first = GitCredentialReference(id: UUID(), host: host, executable: helper.path, username: "alice")
+    let second = GitCredentialReference(id: UUID(), host: host, executable: helper.path, username: "ops+ci")
+    let otherHost = GitCredentialReference(id: UUID(), host: "other.invalid", executable: helper.path, username: "alice")
+    let accounts = [first, second, otherHost]
+    let assigned = GitNetworkContext(credential: fallback, matchingCredentials: accounts) { _ in }
+    let automatic = GitNetworkContext(matchingCredentials: accounts) { _ in }
+    let background = GitNetworkContext(matchingCredentials: accounts, nonInteractive: true) { _ in }
+    func fill(_ url: String, in context: GitNetworkContext) async throws -> GitOutput {
+        try await GitNetworkContexts.$current.withValue(context) {
+            try await GitProcess.run(["credential", "fill"], at: fixture.url, allowed: [0, 128], input: Data("url=\(url)\n\n".utf8))
+        }
+    }
+    let cases: [(String, GitNetworkContext, String)] = [
+        ("https://alice@fixture.invalid/repo", assigned, first.id.uuidString),
+        ("https://ops%2Bci@fixture.invalid/repo", automatic, second.id.uuidString),
+        ("https://alice@other.invalid/repo", automatic, otherHost.id.uuidString),
+        ("https://alice@fixture.invalid/repo", background, first.id.uuidString),
+        ("https://fixture.invalid/repo", assigned, fallback.id.uuidString),
+        ("https://fixture.invalid/repo", automatic, "system"),
+        ("https://unknown@fixture.invalid/repo", automatic, "system"),
+        ("https://alice@fixture.invalid:8443/repo", automatic, "system"),
+        ("http://alice@fixture.invalid/repo", automatic, "system")
+    ]
+    for (url, context, expected) in cases {
+        let result = try await fill(url, in: context)
+        #expect(result.status == 0 && result.text.contains("password=\(expected)\n"), "Unexpected credential source for \(url)")
+    }
+    let noBackgroundFallback = try await fill("https://fixture.invalid/repo", in: background)
+    #expect(noBackgroundFallback.status == 128 && noBackgroundFallback.text.isEmpty)
+}
+
 @Test func localLFSAndSubmoduleInspectionDoesNotCreateNetworkActivity() {
     let root = URL(fileURLWithPath: "/tmp/Fixture"), context = GitNetworkContext { _ in }
     for arguments in [["lfs", "version"], ["lfs", "status"], ["lfs", "ls-files", "--json"], ["lfs", "checkout"], ["submodule", "status"], ["submodule", "sync"]] {
