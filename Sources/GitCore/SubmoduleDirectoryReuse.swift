@@ -113,7 +113,7 @@ extension GitRepository {
                     guard Darwin.rmdir(working.path) == 0 else { throw GitFailure("The reuse directory is no longer empty. Its contents were kept.") }
                 }
                 if plan.directory.mode == .archiveAndClone, let admin { try FileManager.default.removeItem(at: admin) }
-                _ = try await GitProcess.run(["--literal-pathspecs"] + moduleTransportOptions(plan.allowLocalTransport) + ["submodule", "add", "--name", plan.name] + (plan.branch.isEmpty ? [] : ["-b", plan.branch]) + ["--", plan.source, plan.path], at: root, timeout: 120)
+                _ = try await GitProcess.run(["--literal-pathspecs"] + moduleTransportOptions(plan.allowLocalTransport) + ["submodule", "add", "--name", plan.name] + (plan.branch.isEmpty ? [] : ["-b", plan.branch]) + ["--", plan.source, plan.path], at: root, timeout: nil)
             } else {
                 guard let admin, let hash = plan.directory.head?.hash else { throw GitFailure("The reused repository has no verified HEAD.") }
                 if plan.directory.mode == .retainedRepository {

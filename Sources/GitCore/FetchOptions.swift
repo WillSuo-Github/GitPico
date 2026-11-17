@@ -2,17 +2,12 @@ import Foundation
 
 public struct FetchOptions: Sendable {
     public enum Tags: String, CaseIterable, Sendable { case configured, skip, all }
-    public enum TimeLimit: Int, CaseIterable, Sendable {
-        case short = 5, standard = 30, extended = 120
-        var seconds: TimeInterval { TimeInterval(rawValue * 60) }
-    }
 
     public var branch: String?
     public var prune = false
     public var tags: Tags = .configured
     public var recurseSubmodules = false
     public var useHTTP11 = false
-    public var timeLimit: TimeLimit = .standard
 
     public init() {}
 }
@@ -41,6 +36,6 @@ extension GitRepository {
         } else {
             arguments.append("--all")
         }
-        _ = try await GitProcess.run(arguments, at: root, timeout: options.timeLimit.seconds)
+        _ = try await GitProcess.run(arguments, at: root, timeout: nil)
     }
 }

@@ -120,13 +120,13 @@ extension GitRepository {
         guard try await effectivePushURLs(preview.remote).contains(preview.pushURL) else { throw GitFailure("The push destination changed. Reopen the preview.") }
         if (preview.deletes || preview.forceWithLease), let old = preview.remoteHash {
             let exists = try await GitProcess.run(["cat-file", "-e", old], at: root, allowed: [0, 1, 128])
-            if exists.status != 0 { _ = try await GitProcess.run(["fetch", "--no-tags", "--no-write-fetch-head", "--", preview.pushURL, old], at: root, timeout: 120) }
+            if exists.status != 0 { _ = try await GitProcess.run(["fetch", "--no-tags", "--no-write-fetch-head", "--", preview.pushURL, old], at: root, timeout: nil) }
             _ = try await backupReference(fullName: preview.destination, hash: old, title: preview.deletes ? localized("Server reference before deletion: \(preview.remote.name)/\(preview.destination)") : localized("Server reference before force push: \(preview.remote.name)/\(preview.destination)"))
         }
         var args = ["push", "--porcelain"]
         if preview.forceWithLease || preview.deletes { args.append("--force-with-lease=" + preview.destination + ":" + (preview.remoteHash ?? "")) }
         let mapping = (preview.source?.hash ?? "") + ":" + preview.destination
-        _ = try await GitProcess.run(args + ["--", preview.pushURL, mapping], at: root, timeout: 120)
+        _ = try await GitProcess.run(args + ["--", preview.pushURL, mapping], at: root, timeout: nil)
         if preview.destination.hasPrefix("refs/heads/") {
             let short = String(preview.destination.dropFirst("refs/heads/".count))
             let tracking = "refs/remotes/" + preview.remote.name + "/" + short

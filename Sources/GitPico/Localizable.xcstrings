@@ -944,6 +944,22 @@
         }
       }
     },
+    "GitPico stopped this operation at its time limit. For long downloads, run a manual Fetch for the remote you need." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitPico 已停止达到时限的操作。下载较大时，请对所需远端执行手动 Fetch。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitPico 已停止達到時限的操作。下載較大時，請對所需遠端執行手動 Fetch。"
+          }
+        }
+      }
+    },
     "GitPico stopped this operation at its time limit. Retry Fetch with one remote; retries allow more time for large transfers." : {
       "extractionState" : "manual",
       "localizations" : {

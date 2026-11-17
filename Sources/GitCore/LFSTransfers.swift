@@ -56,7 +56,7 @@ extension GitRepository {
             if plan.operation != .checkout {
                 let command = plan.operation == .push ? "push" : "fetch"
                 await progress?(command == "push" ? localized("Uploading LFS objects…") : localized("Downloading LFS objects…"))
-                let result = try await GitProcess.run(["lfs", command] + (plan.allObjects ? ["--all"] : []) + [plan.remote, plan.hash], at: root, timeout: 600, lfsEnvironment: env)
+                let result = try await GitProcess.run(["lfs", command] + (plan.allObjects ? ["--all"] : []) + [plan.remote, plan.hash], at: root, timeout: nil, lfsEnvironment: env)
                 output += result.text + result.error
             }
             if plan.operation == .checkout || plan.operation == .pull {

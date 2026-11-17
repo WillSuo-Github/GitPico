@@ -28,12 +28,13 @@ import Testing
     let start = ContinuousClock.now
     await #expect(throws: GitFailure.self) {
         _ = try await GitNetworkContexts.$current.withValue(context) {
-            try await GitProcess.run(["-c", "core.sshCommand=/bin/sh " + shellQuote(helper.path), "ls-remote", "ssh://git@fixture.invalid/repo"], at: f.url, timeout: 10)
+            try await GitProcess.run(["-c", "core.sshCommand=/bin/sh " + shellQuote(helper.path), "ls-remote", "ssh://git@fixture.invalid/repo"], at: f.url, timeout: nil)
         }
     }
     let values = events.withLock { $0 }
     #expect(values.contains { $0.phase == .running && $0.output.contains("10%") })
     #expect(values.last?.phase == .cancelled)
+    #expect(values.last?.timedOut == false)
     #expect(!values.contains { $0.output.contains("private-fixture-secret") })
     #expect(start.duration(to: .now) < .seconds(2))
 }
@@ -113,6 +114,7 @@ import Testing
     for arguments in [["lfs", "fetch", "origin"], ["submodule", "update", "--init"]] {
         #expect(GitNetworkObservation(arguments: arguments, context: context, root: root)?.command == arguments.prefix(2).joined(separator: " "))
     }
+    #expect(GitNetworkObservation(arguments: ["--literal-pathspecs", "-c", "protocol.file.allow=never", "submodule", "update"], context: context, root: root)?.command == "submodule update")
 }
 
 @Test func unusedHTTPSAccountDoesNotBlockALocalTransportOrRequireKeychainAccess() async throws {

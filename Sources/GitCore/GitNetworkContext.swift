@@ -67,6 +67,18 @@ public enum GitLogRedaction {
         return String(value.suffix(32_768)).replacingOccurrences(of: "\r", with: "\n")
     }
 }
+func gitCommandIndex(in arguments: [String]) -> Int {
+    var index = 0
+    while index < arguments.count {
+        switch arguments[index] {
+        case "-c" where index + 1 < arguments.count: index += 2
+        case "--literal-pathspecs": index += 1
+        default: return index
+        }
+    }
+    return index
+}
+
 final class GitNetworkObservation {
     let context: GitNetworkContext
     let id = UUID(), started = Date()
@@ -79,8 +91,7 @@ final class GitNetworkObservation {
     private var finished = false
     private var nextCredentialCheck = Date.distantPast
     init?(arguments: [String], context: GitNetworkContext?, root: URL) {
-        var index = 0
-        while index < arguments.count, arguments[index] == "-c", index + 1 < arguments.count { index += 2 }
+        let index = gitCommandIndex(in: arguments)
         guard let context, index < arguments.count, ["fetch", "push", "pull", "clone", "ls-remote", "lfs", "submodule"].contains(arguments[index]) else { return nil }
         let command = arguments[index]
         let subcommand = index + 1 < arguments.count ? arguments[index + 1] : ""

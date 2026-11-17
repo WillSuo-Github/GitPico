@@ -21,7 +21,6 @@ import Testing
     options.tags = .skip
     options.prune = true
     options.useHTTP11 = true
-    options.timeLimit = .extended
     try await local.repo.fetch(origin, options: options)
 
     let references = try await local.git(["for-each-ref", "--format=%(refname)", "refs/remotes", "refs/tags"]).text
@@ -37,12 +36,12 @@ import Testing
     await #expect(throws: GitFailure.self) { try await local.repo.fetch(origin, options: invalid) }
 }
 
-@Test func fetchTimeoutRecordsExplicitDeadlineInsteadOfOnlySidebandFailure() async throws {
+@Test func manualFetchCompletesWhenTheSameSlowTransferExceedsAnExplicitDeadline() async throws {
     let remote = try await Fixture.make(); defer { remote.clean() }
     let local = try await Fixture.make(); defer { local.clean() }
     try await local.git(["remote", "add", "origin", remote.url.path])
     let helper = local.url.appendingPathComponent("stall-upload")
-    try Data("#!/bin/sh\nexec /bin/sleep 1\n".utf8).write(to: helper)
+    try Data("#!/bin/sh\n/bin/sleep 1\nexec /usr/bin/git upload-pack \"$@\"\n".utf8).write(to: helper)
     try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: helper.path)
     try await local.git(["config", "remote.origin.uploadpack", helper.path])
     let events = Mutex<[GitNetworkEvent]>([])
@@ -56,4 +55,13 @@ import Testing
     #expect(terminal.count == 1 && terminal.first?.phase == .failed)
     #expect(terminal.first?.timedOut == true)
     #expect(terminal.first?.output.contains("timed out") == true)
+
+    let origin = try #require(try await local.repo.remoteConfigurations().first)
+    try await GitNetworkContexts.$current.withValue(context) {
+        try await local.repo.fetch(origin, options: FetchOptions())
+    }
+    let fetched = try await local.git(["rev-parse", "refs/remotes/origin/main"]).text
+    #expect(fetched == (try await remote.git(["rev-parse", "HEAD"])).text)
+    let completed = events.withLock { $0.last }
+    #expect(completed?.phase == .succeeded && completed?.timedOut == false)
 }

@@ -59,7 +59,7 @@ struct RemoteFetchSheet: View {
         let defaultRemote = store.managedRemotes.first { $0.name == "origin" } ?? store.managedRemotes.first
         _name = State(initialValue: initialRemote?.name ?? defaultRemote?.name ?? "")
         var options = FetchOptions()
-        if mode == .largeTransfer { options.tags = .skip; options.timeLimit = .extended }
+        if mode == .largeTransfer { options.tags = .skip }
         self.options = options
     }
 

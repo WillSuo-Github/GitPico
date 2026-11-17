@@ -255,10 +255,13 @@ extension GitRepository {
         }
         switch plan.operation {
         case .initialize, .update:
-            _ = try await GitProcess.run(["--literal-pathspecs"] + policy + ["submodule", "update", "--init", "--checkout"] + (plan.recursive ? ["--recursive"] : []) + ["--", path], at: root, timeout: 120)
+            _ = try await GitProcess.run(["--literal-pathspecs"] + policy + ["submodule", "update", "--init", "--checkout"] + (plan.recursive ? ["--recursive"] : []) + ["--", path], at: root, timeout: nil)
         case .fetch:
             let child = try await checkedSubmodule(module)
-            _ = try await GitProcess.run(policy + ["fetch", "--all", plan.recursive ? "--recurse-submodules=on-demand" : "--no-recurse-submodules"], at: child.root, timeout: 120)
+            let context = GitNetworkContexts.context(at: root) ?? GitNetworkContexts.context(at: child.root)
+            _ = try await GitNetworkContexts.$current.withValue(context) {
+                try await GitProcess.run(policy + ["fetch", "--all", plan.recursive ? "--recurse-submodules=on-demand" : "--no-recurse-submodules"], at: child.root, timeout: nil)
+            }
         case .checkout:
             let child = try await checkedSubmodule(module)
             _ = try await GitProcess.run(["-c", "submodule.recurse=false", "checkout", "--detach", plan.value, "--"], at: child.root)
@@ -336,7 +339,7 @@ extension GitRepository {
         guard try await headPosition() == expectedHead, try readLocalIndex(try await localIndexURL()) == expectedIndex, try localAttributes(root.appendingPathComponent(path)) == nil else { throw GitFailure("The parent index changed or destination exists. Refresh the preview.") }
         guard !(try await managedSubmodules().contains { $0.path == path || $0.name == (name.isEmpty ? path : name) }) else { throw GitFailure("This submodule name or path is already registered.") }
         if !branch.isEmpty { try await validateReferenceName(branch) }
-        _ = try await GitProcess.run(["--literal-pathspecs"] + moduleTransportOptions(allowLocalTransport) + ["submodule", "add", "--name", name.isEmpty ? path : name] + (branch.isEmpty ? [] : ["-b", branch]) + ["--", source, path], at: root, timeout: 120)
+        _ = try await GitProcess.run(["--literal-pathspecs"] + moduleTransportOptions(allowLocalTransport) + ["submodule", "add", "--name", name.isEmpty ? path : name] + (branch.isEmpty ? [] : ["-b", branch]) + ["--", source, path], at: root, timeout: nil)
     }
     public func submoduleAddIndex() async throws -> Data? { try readLocalIndex(try await localIndexURL()) }
 }

@@ -41,7 +41,7 @@ extension GitRepository {
         case .merge: flags = ["--no-rebase", "--ff", "--no-edit", "--no-autostash"]
         case .rebase: flags = ["--rebase", "--no-autostash"]
         }
-        _ = try await GitProcess.run(["pull"] + flags, at: root, timeout: 120)
+        _ = try await GitProcess.run(["pull"] + flags, at: root, timeout: nil)
         if try await headPosition() != before {
             do { try await recordHistory(before, title: localized("Pull (\(policy.title))"), restoresFiles: false) }
             catch { throw GitFailure("Pull completed, but its Undo record could not be saved. Inspect History or Reflog before another operation. \(error.localizedDescription)") }

@@ -136,13 +136,13 @@ public actor GitRepository {
     }
 
     public enum SyncAction: String, Sendable { case fetch, push }
-    public func sync(_ action: SyncAction) async throws {
+    public func sync(_ action: SyncAction, timeout: TimeInterval? = nil) async throws {
         let arguments: [String]
         switch action {
         case .fetch: arguments = ["fetch", "--all"]
         case .push: arguments = ["push"]
         }
-        _ = try await GitProcess.run(arguments, at: root, timeout: 120)
+        _ = try await GitProcess.run(arguments, at: root, timeout: timeout)
     }
 
     public func saveStash(message: String) async throws {

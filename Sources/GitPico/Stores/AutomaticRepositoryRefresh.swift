@@ -49,7 +49,7 @@ extension RepositoryStore {
             let ssh = ProcessInfo.processInfo.environment["GIT_SSH_COMMAND"] ?? (custom.isEmpty ? "/usr/bin/ssh" : custom)
             let context = GitNetworkContext(credential: base.credential, matchingCredentials: base.matchingCredentials, nonInteractive: true, sshCommand: ssh, observer: base.observer)
             startedNetwork = true
-            try await GitNetworkContexts.$current.withValue(context) { try await repository.sync(.fetch) }
+            try await GitNetworkContexts.$current.withValue(context) { try await repository.sync(.fetch, timeout: 120) }
         } catch {
             if !startedNetwork {
                 let root = await repository.root

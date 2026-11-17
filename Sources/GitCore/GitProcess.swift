@@ -21,7 +21,7 @@ public struct GitOutput: Sendable {
 
 // A worker thread owns each Process. Temporary files avoid pipe-buffer deadlocks.
 public enum GitProcess {
-    public static func run(_ arguments: [String], at root: URL, allowed: Set<Int32> = [0], timeout: TimeInterval = 30, acceptGeneratedMessage: Bool = false, sequenceEditor: URL? = nil, input: Data? = nil, identityEnvironment: [String: String] = [:], indexFile: URL? = nil, maxOutputBytes: Int = 16 * 1024 * 1024, lfsEnvironment: [String: String] = [:], cancellable: Bool = false) async throws -> GitOutput {
+    public static func run(_ arguments: [String], at root: URL, allowed: Set<Int32> = [0], timeout: TimeInterval? = 30, acceptGeneratedMessage: Bool = false, sequenceEditor: URL? = nil, input: Data? = nil, identityEnvironment: [String: String] = [:], indexFile: URL? = nil, maxOutputBytes: Int = 16 * 1024 * 1024, lfsEnvironment: [String: String] = [:], cancellable: Bool = false) async throws -> GitOutput {
         if cancellable { try Task.checkCancellation() }
         guard (1...128 * 1024 * 1024).contains(maxOutputBytes) else { throw GitFailure("Invalid Git output limit.") }
         let trace = GitCommandTrace.current, phase = GitCommandTrace.phase, started = ContinuousClock.now
@@ -42,7 +42,7 @@ public enum GitProcess {
         }
     }
 
-    private static func execute(_ arguments: [String], root: URL, allowed: Set<Int32>, timeout: TimeInterval, acceptGeneratedMessage: Bool, sequenceEditor: URL?, input: Data?, identityEnvironment: [String: String], indexFile: URL?, maxOutputBytes: Int, lfsEnvironment: [String: String], cancellable: Bool, networkContext: GitNetworkContext?) throws -> GitOutput {
+    private static func execute(_ arguments: [String], root: URL, allowed: Set<Int32>, timeout: TimeInterval?, acceptGeneratedMessage: Bool, sequenceEditor: URL?, input: Data?, identityEnvironment: [String: String], indexFile: URL?, maxOutputBytes: Int, lfsEnvironment: [String: String], cancellable: Bool, networkContext: GitNetworkContext?) throws -> GitOutput {
             if cancellable { try Task.checkCancellation() }
             let network = GitNetworkObservation(arguments: arguments, context: networkContext, root: root)
             defer { network?.finish(succeeded: false, message: localized("Git did not finish successfully. Review the output before retrying.")) }
@@ -68,8 +68,7 @@ public enum GitProcess {
             let authentication = networkContext?.authenticationArguments ?? []
             var commandArguments = arguments
             if network != nil {
-                var index = 0
-                while index + 1 < commandArguments.count, commandArguments[index] == "-c" { index += 2 }
+                let index = gitCommandIndex(in: commandArguments)
                 if index < commandArguments.count, ["fetch", "pull", "push", "clone"].contains(commandArguments[index]), !commandArguments.contains("--progress") {
                     commandArguments.insert("--progress", at: index + 1)
                 }
@@ -116,12 +115,13 @@ public enum GitProcess {
             let completion = DispatchSemaphore(value: 0)
             process.terminationHandler = { _ in completion.signal() }
             try process.run()
-            let deadline = ContinuousClock.now.advanced(by: .seconds(timeout))
+            let deadline = timeout.map { ContinuousClock.now.advanced(by: .seconds($0)) }
             let completed: Bool
             if cancellable || network != nil {
                 var exited = false
                 var nextProgress = ContinuousClock.now
-                while !(cancellable && Task.isCancelled) && network?.cancellation.isCancelled != true && ContinuousClock.now < deadline {
+                while !(cancellable && Task.isCancelled) && network?.cancellation.isCancelled != true {
+                    if let deadline, ContinuousClock.now >= deadline { break }
                     if completion.wait(timeout: .now() + .milliseconds(10)) == .success { exited = true; break }
                     if ContinuousClock.now >= nextProgress {
                         network?.progress(stdout: outURL, stderr: errURL)
@@ -129,8 +129,11 @@ public enum GitProcess {
                     }
                 }
                 completed = exited
-            } else {
+            } else if let timeout {
                 completed = completion.wait(timeout: .now() + timeout) == .success
+            } else {
+                completion.wait()
+                completed = true
             }
             if !completed {
                 if process.isRunning { process.terminate() }
@@ -141,6 +144,7 @@ public enum GitProcess {
                 network?.progress(stdout: outURL, stderr: errURL, completed: true)
                 if network?.cancellation.isCancelled == true { throw GitFailure("Network operation cancelled. The server or working copy may already have changed; review the refreshed state before retrying.") }
                 if cancellable && Task.isCancelled { network?.cancellation.cancel(); throw CancellationError() }
+                guard let timeout else { throw CancellationError() }
                 let failure = GitFailure("Git timed out after \(Int(timeout)) seconds. Check SSH, signing, hooks, or network access.")
                 network?.finish(succeeded: false, message: failure.localizedDescription, timedOut: true)
                 throw failure

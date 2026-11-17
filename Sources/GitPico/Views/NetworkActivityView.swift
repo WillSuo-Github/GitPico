@@ -80,7 +80,7 @@ func networkTransferWasInterrupted(_ output: String) -> Bool {
 func networkFailureAdvice(_ output: String, timedOut: Bool = false) -> String {
     let value = output.lowercased()
     if timedOut {
-        return String(localized: "GitPico stopped this operation at its time limit. Retry Fetch with one remote; retries allow more time for large transfers.")
+        return String(localized: "GitPico stopped this operation at its time limit. For long downloads, run a manual Fetch for the remote you need.")
     }
     if value.contains("refusing to allow") && value.contains("workflow") && value.contains("scope") {
         return String(localized: "GitHub requires permission to update GitHub Actions workflows. Open Authentication and choose Sign In Again for the GitHub account used by this repository, then retry Push. If you use a personal access token, update its workflow permission instead.")
