@@ -50,12 +50,15 @@ struct RemoteEditSheet: View {
 struct RemoteFetchSheet: View {
     let store: RepositoryStore
     @State private var name: String
-    @State private var allRemotes = false
+    @AppStorage("fetch.allRemotes") private var savedAllRemotes = true
+    @State private var allRemotesForThisSheet = false
+    private let usesSavedScope: Bool
     private let options: FetchOptions
     @Environment(\.dismiss) private var dismiss
 
     init(store: RepositoryStore, initialRemote: RemoteConfiguration?, mode: FetchReviewMode) {
         self.store = store
+        usesSavedScope = initialRemote == nil
         let defaultRemote = store.managedRemotes.first { $0.name == "origin" } ?? store.managedRemotes.first
         _name = State(initialValue: initialRemote?.name ?? defaultRemote?.name ?? "")
         var options = FetchOptions()
@@ -66,13 +69,15 @@ struct RemoteFetchSheet: View {
     private var selectedRemote: RemoteConfiguration? { store.managedRemotes.first { $0.name == name } }
 
     var body: some View {
+        let scope = usesSavedScope ? $savedAllRemotes : $allRemotesForThisSheet
+        let allRemotes = scope.wrappedValue
         VStack(alignment: .leading, spacing: 16) {
             SheetTitle("Fetch Remote Repository", icon: "arrow.down.circle")
             Picker("Remote", selection: $name) {
                 ForEach(store.managedRemotes) { Text($0.name).tag($0.name) }
             }
             .disabled(allRemotes)
-            Toggle("All Remotes", isOn: $allRemotes)
+            Toggle("All Remotes", isOn: scope)
                 .toggleStyle(.checkbox)
             Text("Fetch updates remote-tracking references without merging or changing your working files.")
                 .font(.callout).foregroundStyle(.secondary)
