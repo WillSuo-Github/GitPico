@@ -11,6 +11,7 @@
 		23CEC5CFF8551B6F92785A2F /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = FE067960E19E32FCB749C0C5 /* AppIcon.icon */; };
 		32EEA7057342B4AACF621735 /* GitCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6B05CF827D25B77F396230D /* GitCore.framework */; };
 		34062C3E56FD5C853F0A5A1A /* GitCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6B05CF827D25B77F396230D /* GitCore.framework */; };
+		70A1105F9165A40CAF1D6BF3 /* Variablur in Frameworks */ = {isa = PBXBuildFile; productRef = AA106A76A9E7D13DAB437901 /* Variablur */; };
 		974648B4762AAAB1810733C5 /* GitCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A6B05CF827D25B77F396230D /* GitCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A110643C5A4511B7E79A9433 /* GitCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A6B05CF827D25B77F396230D /* GitCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		AEE93C285505AA2CB4B4ADC6 /* GitCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6B05CF827D25B77F396230D /* GitCore.framework */; };
@@ -170,6 +171,7 @@
 			files = (
 				32EEA7057342B4AACF621735 /* GitCore.framework in Frameworks */,
 				021098FB9E745B2827F28440 /* Sparkle in Frameworks */,
+				70A1105F9165A40CAF1D6BF3 /* Variablur in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -347,6 +349,7 @@
 			name = GitPico;
 			packageProductDependencies = (
 				609429E4E88AA2A929303213 /* Sparkle */,
+				AA106A76A9E7D13DAB437901 /* Variablur */,
 			);
 			productName = GitPico;
 			productReference = 54E89EF56EA2EC23E3CC8666 /* GitPico.app */;
@@ -452,6 +455,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				A9A195B8B9B202327B0A4C40 /* XCRemoteSwiftPackageReference "Sparkle" */,
+				83A05B9BDB0E3FB043C3A05D /* XCRemoteSwiftPackageReference "Variablur" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B932C2DF5D8A14D52B343804 /* Products */;
@@ -917,6 +921,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		83A05B9BDB0E3FB043C3A05D /* XCRemoteSwiftPackageReference "Variablur" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/daprice/Variablur";
+			requirement = {
+				kind = exactVersion;
+				version = 2.0.0;
+			};
+		};
 		A9A195B8B9B202327B0A4C40 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sparkle-project/Sparkle";
@@ -932,6 +944,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A9A195B8B9B202327B0A4C40 /* XCRemoteSwiftPackageReference "Sparkle" */;
 			productName = Sparkle;
+		};
+		AA106A76A9E7D13DAB437901 /* Variablur */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 83A05B9BDB0E3FB043C3A05D /* XCRemoteSwiftPackageReference "Variablur" */;
+			productName = Variablur;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

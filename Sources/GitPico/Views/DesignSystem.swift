@@ -160,7 +160,6 @@ struct PaneBar<Trailing: View>: View {
             trailing
         }
         .padding(.horizontal, 14).frame(height: Pico.headerHeight)
-        .background(.bar).overlay(alignment: .bottom) { Divider() }
     }
 }
 extension PaneBar where Trailing == EmptyView {

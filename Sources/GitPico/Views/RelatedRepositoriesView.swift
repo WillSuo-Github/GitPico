@@ -6,22 +6,7 @@ struct WorktreesView: View {
     var entries: [ManagedWorktree] { store.worktrees.filter { store.search.isEmpty || ($0.path + " " + ($0.branch ?? "")).localizedCaseInsensitiveContains(store.search) } }
     var selected: ManagedWorktree? { entries.first { store.selectedWorktreePaths.contains($0.id) } }
     var body: some View {
-        VStack(spacing: 0) {
-            PaneBar(title: "Worktrees", subtitle: String(localized: "\(store.worktrees.count) checked-out directories sharing this repository"), icon: "folder.badge.gearshape") {
-                Menu {
-                    Section("Selection") {
-                        Button("Manage Selected Worktrees…") { store.relatedAdministration(.worktrees(store.worktrees.filter { store.selectedWorktreePaths.contains($0.id) })) }.disabled(store.selectedWorktreePaths.isEmpty)
-                        Button("Select All") { store.selectedWorktreePaths = Set(entries.map(\.id)) }
-                    }
-                    Section("Maintenance") {
-                        Button("Management Backups…") { store.relatedAdministration(.backups) }
-                        Button("Move Main Repository…") { store.infrastructure(.move) }
-                        Button("Repair Pointers…") { store.infrastructure(.repair) }
-                        Button("Migration / Repair History…") { store.infrastructure(.history) }
-                    }
-                } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Selection and maintenance")
-                Button { store.manageWorktree(.create(nil)) } label: { Label("Add Worktree", systemImage: "plus") }.buttonStyle(.borderedProminent).controlSize(.small).disabled(store.snapshot?.hasHEAD != true || store.isBusy)
-            }
+        PinnedScrollPane { insets in
             PersistentSplitView(name: "worktrees", width: 340) {
                 List(entries, selection: $store.selectedWorktreePaths) { entry in
                     HStack(alignment: .top, spacing: 10) {
@@ -38,7 +23,7 @@ struct WorktreesView: View {
                             Text(store.worktreePresentation.location(for: entry)).font(.system(size: 11)).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle).help(entry.path)
                         }
                     }.padding(.vertical, 4).tag(entry.id).contentShape(Rectangle()).contextMenu { if store.selectedWorktreePaths.count > 1 { Button("Manage Selected Worktrees…") { store.relatedAdministration(.worktrees(store.worktrees.filter { store.selectedWorktreePaths.contains($0.id) })) }; Divider() }; WorktreeContextActions(store: store, entry: entry) }
-                }.listStyle(.plain)
+                }.listStyle(.plain).pinnedScrollInsets(insets)
                 .contextMenu(forSelectionType: String.self) { _ in } primaryAction: { ids in
                     if let entry = entries.first(where: { ids.contains($0.id) }), entry.prunable == nil, !entry.isBare {
                         store.openWorktree(entry)
@@ -68,8 +53,25 @@ struct WorktreesView: View {
                             Label("Worktrees share history and branches but keep a separate index and working directory. Removing a clean linked worktree keeps its branch, repository data and a restorable directory backup.", systemImage: "info.circle").font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                         }.padding(22).frame(maxWidth: .infinity, alignment: .leading)
                     } else { EmptyPane(title: String(localized: "Select a worktree"), subtitle: String(localized: "Worktrees let you check out several branches side by side."), icon: "folder.badge.gearshape").padding(.top, 60) }
-                }
+                }.pinnedScrollInsets(insets)
             }
+        } top: {
+            PaneBar(title: "Worktrees", subtitle: String(localized: "\(store.worktrees.count) checked-out directories sharing this repository"), icon: "folder.badge.gearshape") {
+                Menu {
+                    Section("Selection") {
+                        Button("Manage Selected Worktrees…") { store.relatedAdministration(.worktrees(store.worktrees.filter { store.selectedWorktreePaths.contains($0.id) })) }.disabled(store.selectedWorktreePaths.isEmpty)
+                        Button("Select All") { store.selectedWorktreePaths = Set(entries.map(\.id)) }
+                    }
+                    Section("Maintenance") {
+                        Button("Management Backups…") { store.relatedAdministration(.backups) }
+                        Button("Move Main Repository…") { store.infrastructure(.move) }
+                        Button("Repair Pointers…") { store.infrastructure(.repair) }
+                        Button("Migration / Repair History…") { store.infrastructure(.history) }
+                    }
+                } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Selection and maintenance")
+                Button { store.manageWorktree(.create(nil)) } label: { Label("Add Worktree", systemImage: "plus") }.buttonStyle(.borderedProminent).controlSize(.small).disabled(store.snapshot?.hasHEAD != true || store.isBusy)
+            }
+        } bottom: {
             if let error = store.worktreeError { Label(error, systemImage: "exclamationmark.triangle.fill").foregroundStyle(Pico.deletion).font(.caption).frame(maxWidth: .infinity, alignment: .leading).padding(12) }
         }.disabled(store.isBusy)
         .onChange(of: entries.map(\.id), initial: true) { updateSelection() }
@@ -107,16 +109,7 @@ struct SubmodulesView: View {
     var selected: ManagedSubmodule? { entries.first { selection.contains($0.id) } }
     func needsAttention(_ entry: ManagedSubmodule) -> Bool { entry.dirty || entry.diagnostic != nil || entry.conflicted || !entry.initialized }
     var body: some View {
-        VStack(spacing: 0) {
-            PaneBar(title: "Submodules", subtitle: store.submodules.isEmpty ? String(localized: "No nested repositories") : String(localized: "\(store.submodules.count) nested repositories"), icon: "shippingbox") {
-                Menu {
-                    Button("Manage Selected Submodules…") { store.relatedAdministration(.submodules(store.submodules.filter { selection.contains($0.id) })) }.disabled(selection.isEmpty)
-                    Button("Select All") { selection = Set(entries.map(\.id)) }
-                    Divider()
-                    Button("Management Backups…") { store.relatedAdministration(.backups) }
-                } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Selection and maintenance")
-                Button { store.manageSubmodule(.add) } label: { Label("Add Submodule", systemImage: "plus") }.buttonStyle(.borderedProminent).controlSize(.small).disabled(store.isBusy)
-            }
+        PinnedScrollPane { insets in
             PersistentSplitView(name: "submodules", width: 340) {
                 List(entries, selection: $selection) { entry in
                     HStack(alignment: .top, spacing: 10) {
@@ -128,7 +121,7 @@ struct SubmodulesView: View {
                             Text(entry.url).font(.system(size: 11)).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle)
                         }
                     }.padding(.vertical, 4).tag(entry.id).contentShape(Rectangle()).onTapGesture(count: 2) { if entry.initialized { store.openSubmodule(entry) } else { store.manageSubmodule(.manage(entry, .initialize)) } }.contextMenu { if selection.count > 1 { Button("Manage Selected Submodules…") { store.relatedAdministration(.submodules(store.submodules.filter { selection.contains($0.id) })) }; Divider() }; SubmoduleContextActions(store: store, entry: entry) }
-                }.listStyle(.plain)
+                }.listStyle(.plain).pinnedScrollInsets(insets)
             } trailing: {
                 ScrollView {
                     if let entry = selected {
@@ -155,8 +148,19 @@ struct SubmodulesView: View {
                             Label("Updates check out the revision recorded by the parent. After choosing another revision, stage the submodule in the parent's Working Copy to record its gitlink. No parent commit is created automatically.", systemImage: "info.circle").font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                         }.padding(22).frame(maxWidth: .infinity, alignment: .leading)
                     } else { EmptyPane(title: store.submodules.isEmpty ? String(localized: "No submodules") : String(localized: "Select a submodule"), subtitle: String(localized: "Submodules embed another Git repository at a pinned revision."), icon: "shippingbox").padding(.top, 60) }
-                }
+                }.pinnedScrollInsets(insets)
             }
+        } top: {
+            PaneBar(title: "Submodules", subtitle: store.submodules.isEmpty ? String(localized: "No nested repositories") : String(localized: "\(store.submodules.count) nested repositories"), icon: "shippingbox") {
+                Menu {
+                    Button("Manage Selected Submodules…") { store.relatedAdministration(.submodules(store.submodules.filter { selection.contains($0.id) })) }.disabled(selection.isEmpty)
+                    Button("Select All") { selection = Set(entries.map(\.id)) }
+                    Divider()
+                    Button("Management Backups…") { store.relatedAdministration(.backups) }
+                } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Selection and maintenance")
+                Button { store.manageSubmodule(.add) } label: { Label("Add Submodule", systemImage: "plus") }.buttonStyle(.borderedProminent).controlSize(.small).disabled(store.isBusy)
+            }
+        } bottom: {
             if let error = store.submoduleError { Label(error, systemImage: "exclamationmark.triangle.fill").foregroundStyle(Pico.deletion).font(.caption).frame(maxWidth: .infinity, alignment: .leading).padding(12) }
         }.disabled(store.isBusy).onChange(of: entries.map(\.id), initial: true) { selection.formIntersection(entries.map(\.id)); if selection.isEmpty { selection = Set(entries.prefix(1).map(\.id)) } }
     }

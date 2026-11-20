@@ -69,7 +69,6 @@ struct DiffFindBar: View {
                 Button { query = "" } label: { Image(systemName: "xmark.circle.fill") }.help("Clear diff search").accessibilityLabel("Clear diff search")
             }
         }.buttonStyle(.borderless).font(.system(size: 12)).padding(.horizontal, 14).frame(height: 32)
-            .background(.bar).overlay(alignment: .bottom) { Divider() }
             .onChange(of: query) { selection = matches.first; didNavigate() }
             .onChange(of: matches) { if !matches.contains(selection ?? "") { selection = matches.first; didNavigate() } }
     }

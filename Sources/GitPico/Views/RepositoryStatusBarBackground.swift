@@ -18,10 +18,10 @@ struct RepositoryStatusBarBackground: View {
 
     var body: some View {
         ZStack {
-            Rectangle().fill(.bar)
+            ScrollBarBackdrop(edge: .bottom)
             Color.accentColor.opacity(isRunning ? (colorScheme == .dark ? 0.1 : 0.06) : 0)
                 .animation(Self.transition(isRunning: isRunning, reduceMotion: reduceMotion), value: isRunning)
         }
-        .clipped().allowsHitTesting(false).accessibilityHidden(true)
+        .allowsHitTesting(false).accessibilityHidden(true)
     }
 }

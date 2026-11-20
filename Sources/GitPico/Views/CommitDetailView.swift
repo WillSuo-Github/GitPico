@@ -14,67 +14,74 @@ struct CommitDetailView: View {
     @State private var expandedFiles: Set<String> = []
     @State private var parentComparison: MergeParentComparison?
     var body: some View {
-        VStack(spacing: 0) {
+        Group {
             if let commit = store.selectedCommit {
-                HStack(spacing: 8) {
-                    HashChip(hash: commit.hash)
-                    if commit.parents.count > 1 { Chip(text: String(localized: "Merge"), icon: "arrow.triangle.merge", tint: .purple) }
-                    Spacer()
-                    if commit.parents.count > 1 {
-                        Menu("Compare Parent") {
-                            ForEach(Array(commit.parents.enumerated()), id: \.offset) { index, parent in
-                                Button("Parent \(index + 1) · \(String(parent.prefix(8)))") { parentComparison = MergeParentComparison(parent: parent, commit: commit.hash) }
-                            }
-                        }.fixedSize().controlSize(.small).help("Compare the merge result with a specific parent")
-                    }
-                    if store.destination == .reflog {
-                        Menu("Recover") {
-                            Button("Create Branch Here…") { store.recoveryRequest = RecoveryRequest(action: .branch(commit.hash)) }
-                            Button("Restore HEAD Here…") { store.recoveryRequest = RecoveryRequest(action: .restore(commit.hash)) }
-                        }.fixedSize().controlSize(.small)
-                    }
-                    if !tree { DiffLayoutPicker() }
-                    Picker("View", selection: $tree) { Text("Changes").tag(false); Text("Files").tag(true) }.pickerStyle(.segmented).labelsHidden().fixedSize()
-                }.padding(.horizontal, 14).frame(height: Pico.headerHeight).background(.bar).overlay(alignment: .bottom) { Divider() }
-                if tree, let repository = store.repository { HistoricTreeView(store: store, repository: repository, commit: commit, showHistory: { store.navigate(.fileHistory($0, commit.hash)) }).id(commit.hash) }
-                else if let detail = store.commitDetail {
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 0) {
-                            CommitSummaryHeader(message: detail.message, author: detail.metadata.author, email: detail.metadata.authorEmail, date: detail.metadata.authorDate, decorations: commit.decorations) {
-                                HStack(spacing: 6) {
-                                    Text(commit.parents.count > 1 ? "Parents" : "Parent").foregroundStyle(.secondary)
-                                    if commit.parents.isEmpty { Text("Root commit").foregroundStyle(.tertiary) }
-                                    ForEach(commit.parents, id: \.self) { HashChip(hash: $0, length: 7) }
-                                    Spacer(minLength: 0)
-                                    Button { withAnimation(.snappy) { metadataExpanded.toggle() } } label: {
-                                        Label(metadataExpanded ? "Less" : "Details", systemImage: metadataExpanded ? "chevron.up" : "chevron.down").labelStyle(.titleAndIcon)
-                                    }.buttonStyle(.borderless).help("Show committer, dates and tree")
-                                }.font(.system(size: 11))
-                                if metadataExpanded {
-                                    if let repository = store.repository { SignatureVerificationView(repository: repository, revision: commit.hash).id(commit.hash) }
-                                    Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 6) {
-                                        MetadataRow(label: "Author", value: "\(detail.metadata.author) <\(detail.metadata.authorEmail)>")
-                                        MetadataRow(label: "Authored", value: detail.metadata.authorDate.formatted(date: .long, time: .standard))
-                                        MetadataRow(label: "Committer", value: "\(detail.metadata.committer) <\(detail.metadata.committerEmail)>")
-                                        MetadataRow(label: "Committed", value: detail.metadata.committerDate.formatted(date: .long, time: .standard))
-                                        MetadataRow(label: "Commit", value: commit.hash, monospaced: true)
-                                        MetadataRow(label: "Tree", value: detail.metadata.tree, monospaced: true)
-                                    }.card(padding: 12).transition(.opacity.combined(with: .move(edge: .top)))
+                PinnedScrollPane { insets in
+                    if tree, let repository = store.repository { HistoricTreeView(store: store, repository: repository, commit: commit, showHistory: { store.navigate(.fileHistory($0, commit.hash)) }, scrollInsets: insets).id(commit.hash) }
+                    else if let detail = store.commitDetail {
+                        ScrollView {
+                            LazyVStack(alignment: .leading, spacing: 0) {
+                                CommitSummaryHeader(message: detail.message, author: detail.metadata.author, email: detail.metadata.authorEmail, date: detail.metadata.authorDate, decorations: commit.decorations) {
+                                    HStack(spacing: 6) {
+                                        Text(commit.parents.count > 1 ? "Parents" : "Parent").foregroundStyle(.secondary)
+                                        if commit.parents.isEmpty { Text("Root commit").foregroundStyle(.tertiary) }
+                                        ForEach(commit.parents, id: \.self) { HashChip(hash: $0, length: 7) }
+                                        Spacer(minLength: 0)
+                                        Button { withAnimation(.snappy) { metadataExpanded.toggle() } } label: {
+                                            Label(metadataExpanded ? "Less" : "Details", systemImage: metadataExpanded ? "chevron.up" : "chevron.down").labelStyle(.titleAndIcon)
+                                        }.buttonStyle(.borderless).help("Show committer, dates and tree")
+                                    }.font(.system(size: 11))
+                                    if metadataExpanded {
+                                        if let repository = store.repository { SignatureVerificationView(repository: repository, revision: commit.hash).id(commit.hash) }
+                                        Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 6) {
+                                            MetadataRow(label: "Author", value: "\(detail.metadata.author) <\(detail.metadata.authorEmail)>")
+                                            MetadataRow(label: "Authored", value: detail.metadata.authorDate.formatted(date: .long, time: .standard))
+                                            MetadataRow(label: "Committer", value: "\(detail.metadata.committer) <\(detail.metadata.committerEmail)>")
+                                            MetadataRow(label: "Committed", value: detail.metadata.committerDate.formatted(date: .long, time: .standard))
+                                            MetadataRow(label: "Commit", value: commit.hash, monospaced: true)
+                                            MetadataRow(label: "Tree", value: detail.metadata.tree, monospaced: true)
+                                        }.card(padding: 12).transition(.opacity.combined(with: .move(edge: .top)))
+                                    }
+                                }
+                                ChangedFilesHeader(count: detail.files.count, additions: detail.additions, deletions: detail.deletions, allExpanded: !detail.files.isEmpty && expandedFiles.count == detail.files.count) {
+                                    expandedFiles = expandedFiles.count == detail.files.count ? [] : Set(detail.files.map(\.path))
+                                }
+                                if let repository = store.repository {
+                                    ForEach(detail.files) { file in
+                                        CommitFileDisclosure(store: store, repository: repository, commit: commit, file: file, showHistory: { store.navigate(.fileHistory(file.path, commit.hash)) }, stats: detail.statistics[file.path], expanded: Binding(get: { expandedFiles.contains(file.path) }, set: { if $0 { expandedFiles.insert(file.path) } else { expandedFiles.remove(file.path) } }))
+                                    }
                                 }
                             }
-                            ChangedFilesHeader(count: detail.files.count, additions: detail.additions, deletions: detail.deletions, allExpanded: !detail.files.isEmpty && expandedFiles.count == detail.files.count) {
-                                expandedFiles = expandedFiles.count == detail.files.count ? [] : Set(detail.files.map(\.path))
-                            }
-                            if let repository = store.repository {
-                                ForEach(detail.files) { file in
-                                    CommitFileDisclosure(store: store, repository: repository, commit: commit, file: file, showHistory: { store.navigate(.fileHistory(file.path, commit.hash)) }, stats: detail.statistics[file.path], expanded: Binding(get: { expandedFiles.contains(file.path) }, set: { if $0 { expandedFiles.insert(file.path) } else { expandedFiles.remove(file.path) } }))
+                        }.pinnedScrollInsets(insets)
+                    } else { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity).padding(insets) }
+                } top: {
+                    HStack(spacing: 8) {
+                        HashChip(hash: commit.hash)
+                        if commit.parents.count > 1 { Chip(text: String(localized: "Merge"), icon: "arrow.triangle.merge", tint: .purple) }
+                        Spacer()
+                        if commit.parents.count > 1 {
+                            Menu("Compare Parent") {
+                                ForEach(Array(commit.parents.enumerated()), id: \.offset) { index, parent in
+                                    Button("Parent \(index + 1) · \(String(parent.prefix(8)))") { parentComparison = MergeParentComparison(parent: parent, commit: commit.hash) }
                                 }
-                            }
+                            }.fixedSize().controlSize(.small).help("Compare the merge result with a specific parent")
                         }
-                    }
-                } else { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
-            } else { EmptyPane(title: String(localized: "Select a commit"), subtitle: String(localized: "Pick a commit to read its message and review every changed file."), icon: "clock.arrow.circlepath") }
-        }.onChange(of: store.selectedCommit?.id) { expandedFiles = [] }
+                        if store.destination == .reflog {
+                            Menu("Recover") {
+                                Button("Create Branch Here…") { store.recoveryRequest = RecoveryRequest(action: .branch(commit.hash)) }
+                                Button("Restore HEAD Here…") { store.recoveryRequest = RecoveryRequest(action: .restore(commit.hash)) }
+                            }.fixedSize().controlSize(.small)
+                        }
+                        if !tree { DiffLayoutPicker() }
+                        Picker("View", selection: $tree) { Text("Changes").tag(false); Text("Files").tag(true) }.pickerStyle(.segmented).labelsHidden().fixedSize()
+                    }.padding(.horizontal, 14).frame(height: Pico.headerHeight)
+                }
+            } else {
+                EmptyPane(title: String(localized: "Select a commit"), subtitle: String(localized: "Pick a commit to read its message and review every changed file."), icon: "clock.arrow.circlepath")
+            }
+
+        }
+        .onChange(of: store.selectedCommit?.id) { expandedFiles = [] }
         .sheet(item: $parentComparison) { request in
             if let repository = store.repository {
                 VStack(spacing: 12) {
@@ -231,6 +238,7 @@ private struct CommitFileDisclosureStyle: DisclosureGroupStyle {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .progressiveScrollBlur()
             .accessibilityValue(configuration.isExpanded ? Text("Expanded") : Text("Collapsed"))
 
             if configuration.isExpanded {
@@ -245,6 +253,7 @@ struct HistoricTreeView: View {
     let repository: GitRepository
     let commit: Commit
     var showHistory: ((String) -> Void)? = nil
+    var scrollInsets = EdgeInsets()
     @State private var files: [String] = []
     @State private var selection: Set<String> = []
     var selected: String? { selection.sorted().first }
@@ -258,7 +267,7 @@ struct HistoricTreeView: View {
                         HistoricalFileMenu(store: store, revision: commit.hash, paths: selection.contains(node.path) ? selection.sorted() : [node.path])
                     }
                 }
-            }.listStyle(.plain).frame(height: 180)
+            }.listStyle(.plain).pinnedScrollInsets(scrollInsets).frame(height: 180 + scrollInsets.top)
             Divider()
             GeometryReader { geometry in
                 ScrollView([.horizontal, .vertical]) { Text(text).font(.system(size: 11, design: .monospaced)).textSelection(.enabled).padding(14).frame(minWidth: geometry.size.width, minHeight: geometry.size.height, alignment: .topLeading) }.defaultScrollAnchor(.topLeading)

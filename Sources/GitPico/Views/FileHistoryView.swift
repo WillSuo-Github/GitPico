@@ -27,7 +27,32 @@ struct FileHistoryView: View {
     }
     var body: some View {
         PersistentSplitView(name: "fileHistory", width: 320) {
-            VStack(spacing: 0) {
+            PinnedScrollPane { insets in
+                if let error { InspectionErrorView(message: error) }
+                else if isLoading && history == nil { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
+                else if path.isEmpty { EmptyPane(title: String(localized: "File History"), subtitle: String(localized: "Choose a tracked file to inspect its commits, including earlier names."), icon: "doc.text.magnifyingglass") }
+                else {
+                    List(selection: $selected) {
+                            ForEach(filtered) { entry in
+                                CommitRow(commit: entry.commit, graph: nil, graphWidth: 0, selected: selected == entry.id, fileActions: sourceRevision(entry).map { HistoricalFileMenu(store: store, revision: $0, paths: [entry.path], destination: path) })
+                                    .tag(entry.id)
+                                    .padding(.horizontal, 6)
+                                    .contentShape(Rectangle())
+                                    .onTapGesture(count: 2) { showCommit(entry.commit) }
+                            }
+                            if history?.hasMore == true {
+                                Button(limit < 10_000 ? "Load 500 More Commits" : "10,000 revision limit reached") { limit = min(10_000, limit + 500) }.controlSize(.small).padding(14).disabled(isLoading || limit >= 10_000)
+                            }
+                    }.listStyle(.plain).pinnedScrollInsets(insets).accessibilityLabel("File history commits")
+                    .onKeyPress(.return) {
+                        guard let entry = filtered.first(where: { $0.id == selected }) else { return .ignored }
+                        showCommit(entry.commit); return .handled
+                    }
+                    .overlay {
+                        if filtered.isEmpty { Text(history?.hasMore == true ? "No matches in loaded revisions. Search older revisions to continue." : "No matching file revisions.").font(.caption).foregroundStyle(.secondary).padding() }
+                    }
+                }
+            } top: {
                 VStack(alignment: .leading, spacing: 8) {
                     Label(path.isEmpty ? String(localized: "File History") : (path as NSString).lastPathComponent, systemImage: "doc.text.magnifyingglass")
                         .font(.system(size: 13, weight: .semibold)).lineLimit(2).textSelection(.enabled).help(path)
@@ -49,30 +74,8 @@ struct FileHistoryView: View {
                                 .controlSize(.small).disabled(isLoading || limit >= 10_000)
                         }
                     }
-                }.padding(12).frame(maxWidth: .infinity, alignment: .leading).background(.bar).overlay(alignment: .bottom) { Divider() }
-                if let error { InspectionErrorView(message: error) }
-                else if isLoading && history == nil { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
-                else if path.isEmpty { EmptyPane(title: String(localized: "File History"), subtitle: String(localized: "Choose a tracked file to inspect its commits, including earlier names."), icon: "doc.text.magnifyingglass") }
-                else {
-                    List(selection: $selected) {
-                            ForEach(filtered) { entry in
-                                CommitRow(commit: entry.commit, graph: nil, graphWidth: 0, selected: selected == entry.id, fileActions: sourceRevision(entry).map { HistoricalFileMenu(store: store, revision: $0, paths: [entry.path], destination: path) })
-                                    .tag(entry.id)
-                                    .padding(.horizontal, 6)
-                                    .contentShape(Rectangle())
-                                    .onTapGesture(count: 2) { showCommit(entry.commit) }
-                            }
-                            if history?.hasMore == true {
-                                Button(limit < 10_000 ? "Load 500 More Commits" : "10,000 revision limit reached") { limit = min(10_000, limit + 500) }.controlSize(.small).padding(14).disabled(isLoading || limit >= 10_000)
-                            }
-                    }.listStyle(.plain).accessibilityLabel("File history commits")
-                    .onKeyPress(.return) {
-                        guard let entry = filtered.first(where: { $0.id == selected }) else { return .ignored }
-                        showCommit(entry.commit); return .handled
-                    }
-                    if filtered.isEmpty { Text(history?.hasMore == true ? "No matches in loaded revisions. Search older revisions to continue." : "No matching file revisions.").font(.caption).foregroundStyle(.secondary).padding() }
-                }
-                Divider()
+                }.padding(12).frame(maxWidth: .infinity, alignment: .leading)
+            } bottom: {
                 HStack {
                     Text("From \(String((history?.tip ?? revision).prefix(12)))").help(revision)
                     Spacer()
@@ -80,7 +83,15 @@ struct FileHistoryView: View {
                 }.font(.system(size: 10)).foregroundStyle(.secondary).padding(10)
             }
         } trailing: {
-            VStack(spacing: 0) {
+            PinnedScrollPane { insets in
+                if let current {
+                    if loadingPreview { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity).padding(insets) }
+                    else if let previewError { InspectionErrorView(message: previewError).padding(insets) }
+                    else if mode == "Diff" { DiffView(text: preview, title: current.path, showsHeader: false, scrollTopInset: insets.top) }
+                    else if mode == "Blame" { BlameView(lines: blame, inspect: { hash in Task { do { inspectedCommit = try await repository.commit(at: hash) } catch { previewError = error.localizedDescription } } }, scrollInsets: insets) }
+                    else { InspectionTextView(text: preview, scrollInsets: insets) }
+                } else { EmptyPane(title: String(localized: "Select a revision"), subtitle: String(localized: "Pick a commit to see how this file changed, its full contents or line-by-line blame."), icon: "doc.text").padding(insets) }
+            } top: {
                 HStack(spacing: 10) {
                     if let current { HashChip(hash: current.commit.hash) }
                     if let current {
@@ -99,7 +110,7 @@ struct FileHistoryView: View {
                     if mode == "Diff" { DiffLayoutPicker() }
                     if mode == "Blame" { Toggle("Ignore Whitespace", isOn: $ignoreWhitespace).toggleStyle(.checkbox).font(.caption) }
                     Picker("File view", selection: $mode) { Text("Diff").tag("Diff"); Text("Raw").tag("Raw"); Text("Blame").tag("Blame") }.pickerStyle(.segmented).labelsHidden().fixedSize()
-                }.padding(.horizontal, 14).frame(height: Pico.headerHeight).background(.bar).overlay(alignment: .bottom) { Divider() }
+                }.padding(.horizontal, 14).frame(height: Pico.headerHeight)
                 if let current {
                     HStack(spacing: 10) {
                         AuthorAvatar(name: current.commit.author, size: 26)
@@ -110,13 +121,7 @@ struct FileHistoryView: View {
                         Spacer(minLength: 0)
                         if current.isDeleted { Chip(text: String(localized: "Deleted here"), tint: Pico.deletion) }
                     }.padding(.horizontal, 14).padding(.vertical, 9)
-                    Divider()
-                    if loadingPreview { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
-                    else if let previewError { InspectionErrorView(message: previewError) }
-                    else if mode == "Diff" { DiffView(text: preview, title: current.path, showsHeader: false) }
-                    else if mode == "Blame" { BlameView(lines: blame, inspect: { hash in Task { do { inspectedCommit = try await repository.commit(at: hash) } catch { previewError = error.localizedDescription } } }) }
-                    else { InspectionTextView(text: preview) }
-                } else { EmptyPane(title: String(localized: "Select a revision"), subtitle: String(localized: "Pick a commit to see how this file changed, its full contents or line-by-line blame."), icon: "doc.text") }
+                }
             }
         }
         .task(id: "\(limit):\(allReferences)") { await loadHistory() }
@@ -199,6 +204,7 @@ struct InspectionFilePicker: View {
 struct BlameView: View {
     let lines: [BlameLine]
     let inspect: (String) -> Void
+    var scrollInsets = EdgeInsets()
     @State private var preferences = AppPreferences.shared
     var body: some View {
         GeometryReader { geometry in
@@ -227,16 +233,17 @@ struct BlameView: View {
                             .frame(minWidth: geometry.size.width, alignment: .leading).background(line.number.isMultiple(of: 2) ? Color.secondary.opacity(0.035) : .clear)
                     }
                 }
-            }.defaultScrollAnchor(.topLeading).environment(\.layoutDirection, .leftToRight)
+            }.defaultScrollAnchor(.topLeading).pinnedScrollInsets(scrollInsets).environment(\.layoutDirection, .leftToRight)
         }
     }
 }
 
 struct InspectionTextView: View {
     let text: String
+    var scrollInsets = EdgeInsets()
     var body: some View {
         GeometryReader { geometry in
-            ScrollView([.horizontal, .vertical]) { Text(text.isEmpty ? String(localized: "Empty file") : text).font(.system(size: 12, design: .monospaced)).textSelection(.enabled).padding(14).frame(minWidth: geometry.size.width, minHeight: geometry.size.height, alignment: .topLeading) }.defaultScrollAnchor(.topLeading).environment(\.layoutDirection, .leftToRight)
+            ScrollView([.horizontal, .vertical]) { Text(text.isEmpty ? String(localized: "Empty file") : text).font(.system(size: 12, design: .monospaced)).textSelection(.enabled).padding(14).frame(minWidth: geometry.size.width, minHeight: max(0, geometry.size.height - scrollInsets.top - scrollInsets.bottom), alignment: .topLeading) }.defaultScrollAnchor(.topLeading).pinnedScrollInsets(scrollInsets).environment(\.layoutDirection, .leftToRight)
         }
     }
 }

@@ -8,6 +8,7 @@ struct DiffView: View {
     var subtitle: String = ""
     var isLoading = false
     var showsHeader = true
+    var scrollTopInset: CGFloat = 0
     @State private var preferences = AppPreferences.shared
     @State private var code: [Int: DiffCodeLine] = [:]
     @State private var findQuery = ""
@@ -15,24 +16,16 @@ struct DiffView: View {
     @State private var findReveal = UUID()
 
     var body: some View {
-        VStack(spacing: 0) {
-            if let title, showsHeader {
-                FileTitleBar(path: title, subtitle: subtitle) {
-                    DiffLayoutPicker()
-                    Button { Pico.copy(text) } label: { Image(systemName: "doc.on.doc") }.buttonStyle(.borderless).help("Copy diff")
-                }
-            }
+        let document = DiffDocument(text)
+        let lines = document.lines.filter { !$0.isFileHeader }
+        PinnedScrollPane { insets in
             if isLoading {
-                ProgressView("Loading changes…").frame(maxWidth: .infinity, maxHeight: .infinity)
+                ProgressView("Loading changes…").frame(maxWidth: .infinity, maxHeight: .infinity).padding(insets)
             } else if title == nil {
-                EmptyPane(title: String(localized: "No file selected"), subtitle: String(localized: "Select a file to inspect its changes."), icon: "doc")
+                EmptyPane(title: String(localized: "No file selected"), subtitle: String(localized: "Select a file to inspect its changes."), icon: "doc").padding(insets)
             } else if text.isEmpty {
-                EmptyPane(title: String(localized: "No textual changes"), subtitle: String(localized: "This file may have only metadata or conflict changes."), icon: "doc.text.magnifyingglass")
+                EmptyPane(title: String(localized: "No textual changes"), subtitle: String(localized: "This file may have only metadata or conflict changes."), icon: "doc.text.magnifyingglass").padding(insets)
             } else {
-                let document = DiffDocument(text)
-                let lines = document.lines.filter { !$0.isFileHeader }
-                let matches = findQuery.isEmpty ? [] : lines.filter { CodeHighlighting.contains(code[$0.id]?.source ?? CodeHighlighting.source($0), query: findQuery) }.map { "line:\($0.id)" }
-                DiffFindBar(query: $findQuery, matches: matches, selection: $focusedLine) { findReveal = UUID() }
                 ScrollViewReader { proxy in
                 Group {
                 if preferences.splitDiff {
@@ -40,7 +33,7 @@ struct DiffView: View {
                         ScrollView(.vertical) {
                             SplitDiffView(lines: lines, fontSize: preferences.diffFontSize, minimumWidth: geometry.size.width, code: code, query: findQuery, focusedLine: focusedLine)
                             if document.isTruncated { Text("Preview limited to 8,000 lines.").font(.caption).foregroundStyle(.secondary).padding(12) }
-                        }
+                        }.pinnedScrollInsets(insets)
                     }
                 } else { GeometryReader { geometry in
                     ScrollView([.horizontal, .vertical]) {
@@ -56,14 +49,25 @@ struct DiffView: View {
                             }
                         }
                         .padding(.vertical, 7)
-                        .frame(minWidth: geometry.size.width, minHeight: geometry.size.height, alignment: .topLeading)
+                        .frame(minWidth: geometry.size.width, minHeight: max(0, geometry.size.height - insets.top), alignment: .topLeading)
                     }
-                    .defaultScrollAnchor(.topLeading)
+                    .defaultScrollAnchor(.topLeading).pinnedScrollInsets(insets)
                 } }
                 }.onChange(of: findReveal) { if let focusedLine { proxy.scrollTo(focusedLine, anchor: .center) } }
                 }
             }
-        }.background(.background)
+        } top: {
+            if let title, showsHeader {
+                FileTitleBar(path: title, subtitle: subtitle, hasBackground: false) {
+                    DiffLayoutPicker()
+                    Button { Pico.copy(text) } label: { Image(systemName: "doc.on.doc") }.buttonStyle(.borderless).help("Copy diff")
+                }
+            }
+            if !isLoading, title != nil, !text.isEmpty {
+                let matches = findQuery.isEmpty ? [] : lines.filter { CodeHighlighting.contains(code[$0.id]?.source ?? CodeHighlighting.source($0), query: findQuery) }.map { "line:\($0.id)" }
+                DiffFindBar(query: $findQuery, matches: matches, selection: $focusedLine) { findReveal = UUID() }
+            }
+        }.padding(.top, scrollTopInset).background(.background)
             .task(id: text + (title ?? "")) {
                 let text = text, path = title ?? CodeHighlighting.path(in: text)
                 let value = await Task.detached(priority: .userInitiated) { CodeHighlighting.prepare(DiffDocument(text).lines, path: path) }.value
@@ -94,6 +98,7 @@ struct DiffLineView: View {
             }
             .foregroundStyle(isChange ? AnyShapeStyle(tint.opacity(0.9)) : AnyShapeStyle(.tertiary))
             .background(tint.opacity(isChange ? 0.10 : 0))
+            .progressiveScrollBlur()
             HStack(spacing: 0) {
                 if [.context, .addition, .deletion].contains(line.kind) { Text(String(line.text.prefix(1))).foregroundStyle(.secondary) }
                 DiffCodeText(line: code ?? DiffCodeLine(source: [.context, .addition, .deletion].contains(line.kind) ? String(line.text.dropFirst()) : line.text, path: ""), query: query)
@@ -120,6 +125,7 @@ struct FileTitleBar<Trailing: View>: View {
     let path: String
     var subtitle: String = ""
     var status: String? = nil
+    var hasBackground = true
     @ViewBuilder var trailing: Trailing
     var folder: String { (path as NSString).deletingLastPathComponent }
     var body: some View {
@@ -134,7 +140,8 @@ struct FileTitleBar<Trailing: View>: View {
             trailing
         }
         .font(.system(size: 12)).padding(.horizontal, 14).frame(height: Pico.headerHeight)
-        .background(.bar).overlay(alignment: .bottom) { Divider() }
+        .background { if hasBackground { Rectangle().fill(.bar) } }
+        .overlay(alignment: .bottom) { if hasBackground { Divider() } }
     }
 }
 

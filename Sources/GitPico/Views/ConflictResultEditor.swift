@@ -7,11 +7,13 @@ struct ConflictResultEditor: NSViewRepresentable {
     var reveal: String?
     var focusRequest: UUID
     var disabled = false
+    var scrollInsets = EdgeInsets()
     func makeCoordinator() -> Coordinator { Coordinator(self) }
     func makeNSView(context: Context) -> NSScrollView {
         let scroll = NSScrollView()
         scroll.hasVerticalScroller = true; scroll.hasHorizontalScroller = true
         scroll.autohidesScrollers = true
+        scroll.automaticallyAdjustsContentInsets = false
         let editor = NSTextView(frame: NSRect(x: 0, y: 0, width: 800, height: 300))
         editor.isRichText = false; editor.allowsUndo = true
         editor.isAutomaticQuoteSubstitutionEnabled = false
@@ -33,6 +35,11 @@ struct ConflictResultEditor: NSViewRepresentable {
     func updateNSView(_ scroll: NSScrollView, context: Context) {
         guard let editor = scroll.documentView as? NSTextView else { return }
         context.coordinator.parent = self
+        if scroll.contentInsets.top != scrollInsets.top || scroll.contentInsets.bottom != scrollInsets.bottom {
+            let insets = NSEdgeInsets(top: scrollInsets.top, left: 0, bottom: scrollInsets.bottom, right: 0)
+            scroll.contentInsets = insets
+            scroll.scrollerInsets = insets
+        }
         if editor.string != text {
             let selection = editor.selectedRange()
             context.coordinator.updating = true

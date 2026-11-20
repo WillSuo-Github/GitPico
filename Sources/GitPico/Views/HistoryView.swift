@@ -8,7 +8,10 @@ struct HistoryView: View {
     var commits: [Commit] { store.visibleCommits }
     var body: some View {
         PersistentSplitView(name: "history", width: 320) {
-            VStack(spacing: 0) {
+            PinnedScrollPane { insets in
+                HistoryCommitTable(store: store, presentation: store.historyPresentation, grouped: preferences.historyGroups, compact: preferences.historyCompact, showGraph: preferences.historyShowGraph && store.search.isEmpty, canModifyHistory: store.canIntegrate, selection: store.selectedCommit?.hash, reveal: store.historyReveal, insets: insets)
+                    .overlay { if commits.isEmpty { if store.isLoadingHistory { ProgressView("Loading history…") } else { EmptyPane(title: store.historyError ?? (store.search.isEmpty ? String(localized: "No commits yet") : String(localized: "No matching commits")), subtitle: store.search.isEmpty ? "" : String(localized: "Try a different message, author or hash."), icon: store.search.isEmpty ? "clock" : "magnifyingglass") } } }
+            } top: {
                 PaneBar(title: store.destination.ref == nil ? "All Branches" : "\(store.destination.title)",
                         subtitle: store.destination.ref == nil ? String(localized: "Branches, remotes and tags · \(commits.count)\(store.historyPresentation.page.hasMore ? "+" : "") commits") : String(localized: "\(commits.count)\(store.historyPresentation.page.hasMore ? "+" : "") commits"),
                         icon: store.destination.ref == nil ? "clock.arrow.circlepath" : "arrow.triangle.branch") {
@@ -45,7 +48,7 @@ struct HistoryView: View {
                 }
                 if !store.search.isEmpty {
                     SearchScopeBar(title: String(localized: "Commit history · all reachable matches"), query: store.search) { store.search = "" }
-                        .padding(10).background(.bar)
+                        .padding(10)
                 }
                 if store.selectedHistoryHashes.count > 1 {
                     HStack(spacing: 8) {
@@ -53,14 +56,13 @@ struct HistoryView: View {
                         Spacer(minLength: 0)
                         Button("Cherry-Pick…") { store.reviewSelectedCommits(.cherryPick) }
                         Button("Revert…") { store.reviewSelectedCommits(.revert) }
-                    }.controlSize(.small).padding(10).background(.bar).disabled(!store.canIntegrate)
+                    }.controlSize(.small).padding(10).disabled(!store.canIntegrate)
                 }
                 if let failure = store.historyError, !commits.isEmpty {
                     HStack { Image(systemName: "exclamationmark.triangle"); Text(failure).lineLimit(2); Spacer(); Button("Retry") { store.requestHistory() } }
                         .font(.caption).padding(8).background(Pico.warning.opacity(0.1))
                 }
-                HistoryCommitTable(store: store, presentation: store.historyPresentation, grouped: preferences.historyGroups, compact: preferences.historyCompact, showGraph: preferences.historyShowGraph && store.search.isEmpty, canModifyHistory: store.canIntegrate, selection: store.selectedCommit?.hash, reveal: store.historyReveal)
-                    .overlay { if commits.isEmpty { if store.isLoadingHistory { ProgressView("Loading history…") } else { EmptyPane(title: store.historyError ?? (store.search.isEmpty ? String(localized: "No commits yet") : String(localized: "No matching commits")), subtitle: store.search.isEmpty ? "" : String(localized: "Try a different message, author or hash."), icon: store.search.isEmpty ? "clock" : "magnifyingglass") } } }
+            } bottom: {
                 if store.historyPresentation.page.hasMore {
                     if store.historyOptions.limit < 20_000 {
                         Button("Load More · \(commits.count) shown", action: store.loadMoreHistory).frame(maxWidth: .infinity).padding(8).disabled(store.isLoadingHistory || store.isBusy)

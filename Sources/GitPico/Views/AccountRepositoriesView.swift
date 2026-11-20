@@ -61,21 +61,7 @@ struct AccountRepositoriesView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let repositories {
-                repositoryList
-                HStack {
-                    if !indexReady {
-                        ProgressView().controlSize(.small)
-                        Text("Checking repository…").font(.caption).foregroundStyle(.secondary)
-                    } else {
-                        Text("\(repositories.count) repositories").font(.caption).foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    if indexReady, let repository = selectedRepository {
-                        Button(copies(for: repository, in: savedByPath).isEmpty ? "Clone" : "Open Local") { activate(repository) }
-                            .buttonStyle(.borderedProminent)
-                            .disabled(checkingFolder)
-                    }
-                }
+                repositoryList(count: repositories.count)
             } else {
                 ProgressView("Loading…")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -132,21 +118,9 @@ struct AccountRepositoriesView: View {
         }
     }
 
-    private var repositoryList: some View {
+    private func repositoryList(count: Int) -> some View {
         let savedByPath = savedByPath
-        return VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                SectionCaption("Repositories")
-                Spacer()
-                HStack(spacing: 6) {
-                    Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                    RepositoryPickerSearchField(text: $query, isFocused: $searchFocused, submit: activateSelection,
-                                                placeholder: String(localized: "Search in \(String(localized: "Repositories"))"))
-                }
-                .padding(.horizontal, 10).frame(width: 270, height: 28)
-                .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 8))
-                .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(searchFocused ? Color.accentColor : Color(nsColor: .separatorColor), lineWidth: searchFocused ? 1.5 : 0.5))
-            }
+        return PinnedScrollPane { insets in
             List(selection: $selection) {
                 ForEach(visibleRepositories) { repository in
                     let local = copies(for: repository, in: savedByPath)
@@ -187,9 +161,7 @@ struct AccountRepositoriesView: View {
                     }
                 }
             }
-            .listStyle(.inset).scrollContentBackground(.hidden)
-            .background(Color(nsColor: .controlBackgroundColor).opacity(0.6), in: RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color(nsColor: .separatorColor).opacity(0.6), lineWidth: 0.5).allowsHitTesting(false))
+            .listStyle(.inset).scrollContentBackground(.hidden).pinnedScrollInsets(insets)
             .contextMenu(forSelectionType: Int64.self) { _ in } primaryAction: { ids in
                 if let repository = visibleRepositories.first(where: { ids.contains($0.id) }) { activate(repository) }
             }
@@ -205,7 +177,38 @@ struct AccountRepositoriesView: View {
                               icon: query.isEmpty ? "tray" : "magnifyingglass")
                 }
             }
+        } top: {
+            HStack {
+                SectionCaption("Repositories")
+                Spacer()
+                HStack(spacing: 6) {
+                    Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+                    RepositoryPickerSearchField(text: $query, isFocused: $searchFocused, submit: activateSelection,
+                                                placeholder: String(localized: "Search in \(String(localized: "Repositories"))"))
+                }
+                .padding(.horizontal, 10).frame(width: 270, height: 28)
+                .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 8))
+                .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(searchFocused ? Color.accentColor : Color(nsColor: .separatorColor), lineWidth: searchFocused ? 1.5 : 0.5))
+            }.padding(.horizontal, 10).padding(.vertical, 8)
+        } bottom: {
+            HStack {
+                if !indexReady {
+                    ProgressView().controlSize(.small)
+                    Text("Checking repository…").font(.caption).foregroundStyle(.secondary)
+                } else {
+                    Text("\(count) repositories").font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer()
+                if indexReady, let repository = selectedRepository {
+                    Button(copies(for: repository, in: savedByPath).isEmpty ? "Clone" : "Open Local") { activate(repository) }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(checkingFolder)
+                }
+            }.padding(.horizontal, 10).padding(.vertical, 8)
         }
+        .background(Color(nsColor: .controlBackgroundColor).opacity(0.6), in: RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color(nsColor: .separatorColor).opacity(0.6), lineWidth: 0.5).allowsHitTesting(false))
     }
 
     private func copies(for repository: AccountRepository, in savedByPath: [String: SavedRepository]) -> [SavedRepository] {

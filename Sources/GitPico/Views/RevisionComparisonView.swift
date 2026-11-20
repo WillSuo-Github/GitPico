@@ -42,11 +42,7 @@ struct RevisionComparisonView: View {
             else if let error { InspectionErrorView(message: error) }
             else if let comparison {
                 PersistentSplitView(name: "comparison", width: 310) {
-                    VStack(spacing: 0) {
-                        PaneBar(title: "\(comparison.files.count) changed files", subtitle: "\(comparison.left.prefix(8)) → \(comparison.right.prefix(8))", icon: "doc.on.doc") {
-                            DiffStat(additions: comparison.statistics.values.reduce(0) { $0 + $1.additions }, deletions: comparison.statistics.values.reduce(0) { $0 + $1.deletions }, showsBar: false)
-                        }
-                        TextField("Filter files", text: $query).textFieldStyle(.roundedBorder).padding(.horizontal, 10).padding(.vertical, 8)
+                    PinnedScrollPane { insets in
                         List(selection: $selected) {
                             ForEach(files) { file in
                                 HStack(spacing: 8) {
@@ -56,7 +52,13 @@ struct RevisionComparisonView: View {
                                     if let stats = comparison.statistics[file.path] { if stats.isBinary { Chip(text: String(localized: "Binary"), tint: .secondary) } else { DiffStat(additions: stats.additions, deletions: stats.deletions, showsBar: false) } }
                                 }.tag(file.path).padding(.vertical, 3).contextMenu { Button("Compare in External Tool…") { store.externalTool(.comparison(comparison.left, comparison.right, file.path, comparison.originalPaths[file.path])) } }
                             }
-                        }.listStyle(.plain)
+                        }.listStyle(.plain).pinnedScrollInsets(insets)
+                    } top: {
+                        PaneBar(title: "\(comparison.files.count) changed files", subtitle: "\(comparison.left.prefix(8)) → \(comparison.right.prefix(8))", icon: "doc.on.doc") {
+                            DiffStat(additions: comparison.statistics.values.reduce(0) { $0 + $1.additions }, deletions: comparison.statistics.values.reduce(0) { $0 + $1.deletions }, showsBar: false)
+                        }
+                        TextField("Filter files", text: $query).textFieldStyle(.roundedBorder).padding(.horizontal, 10).padding(.vertical, 8)
+                    } bottom: {
                         if comparison.files.isEmpty { Text("These revisions have identical trees.").font(.caption).foregroundStyle(.secondary).padding() }
                     }
                 } trailing: {

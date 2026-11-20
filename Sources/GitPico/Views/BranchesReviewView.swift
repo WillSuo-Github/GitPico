@@ -13,12 +13,7 @@ struct BranchesReviewView: View {
     var visible: [BranchComparison] { comparisons.filter { store.search.isEmpty || $0.branch.name.localizedCaseInsensitiveContains(store.search) } }
     var baseName: String { branches.first { $0.fullName == base }?.name ?? base }
     var body: some View {
-        VStack(spacing: 0) {
-            PaneBar(title: "Branches Review", subtitle: String(localized: "\(comparisons.count) local branches compared with \(baseName)") + " · " + String(localized: "\(comparisons.filter(\.isMerged).count) merged"), icon: "arrow.left.arrow.right") {
-                Text("Base").foregroundStyle(.secondary).font(.system(size: 11))
-                Picker("Base branch", selection: $base) { ForEach(branches) { Text($0.name).tag($0.fullName) } }.labelsHidden().fixedSize()
-                Button("Review Cleanup…") { showingCleanup = true }.controlSize(.small).disabled(base.isEmpty || store.isBusy)
-            }
+        PinnedScrollPane { insets in
             PersistentSplitView(name: "branchesReview", width: 300, minimum: 240) {
                 List(selection: $selected) {
                     ForEach(visible, id: \.branch.id) { comparison in
@@ -33,7 +28,7 @@ struct BranchesReviewView: View {
                             AheadBehind(ahead: comparison.ahead, behind: comparison.behind)
                         }.padding(.vertical, 5).tag(comparison.branch.id)
                     }
-                }.listStyle(.plain)
+                }.listStyle(.plain).pinnedScrollInsets(insets)
                 .overlay { if comparisons.isEmpty, failure == nil { EmptyPane(title: branches.count < 2 ? String(localized: "Only one branch") : String(localized: "Comparing…"), subtitle: branches.count < 2 ? String(localized: "Create another local branch to review it against \(baseName).") : "", icon: "arrow.triangle.branch") } }
             } trailing: {
                 VStack(alignment: .leading, spacing: 0) {
@@ -76,7 +71,13 @@ struct BranchesReviewView: View {
                         .overlay { if (changeset ? item.files.isEmpty : item.commits.isEmpty) { EmptyPane(title: changeset ? String(localized: "No file differences") : String(localized: "No unique commits"), subtitle: String(localized: "Everything on this branch is already in \(baseName)."), icon: "checkmark.seal") } }
                     } else if let failure { InspectionErrorView(message: failure) }
                     else { EmptyPane(title: String(localized: "Select a branch"), subtitle: String(localized: "See how far it has drifted from \(baseName) and what would be merged."), icon: "arrow.triangle.branch") }
-                }.frame(minWidth: 400, maxWidth: .infinity, maxHeight: .infinity)
+                }.padding(.top, insets.top).frame(minWidth: 400, maxWidth: .infinity, maxHeight: .infinity)
+            }
+        } top: {
+            PaneBar(title: "Branches Review", subtitle: String(localized: "\(comparisons.count) local branches compared with \(baseName)") + " · " + String(localized: "\(comparisons.filter(\.isMerged).count) merged"), icon: "arrow.left.arrow.right") {
+                Text("Base").foregroundStyle(.secondary).font(.system(size: 11))
+                Picker("Base branch", selection: $base) { ForEach(branches) { Text($0.name).tag($0.fullName) } }.labelsHidden().fixedSize()
+                Button("Review Cleanup…") { showingCleanup = true }.controlSize(.small).disabled(base.isEmpty || store.isBusy)
             }
         }.sheet(isPresented: $showingCleanup) { BranchCleanupSheet(store: store, base: base) }
         .task(id: base + (store.snapshot?.references.map { $0.fullName + $0.hash + $0.upstream }.joined() ?? "")) {

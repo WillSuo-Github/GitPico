@@ -1,6 +1,7 @@
 import AppKit
 import Foundation
 import GitCore
+import SwiftUI
 import Testing
 import UniformTypeIdentifiers
 @testable import GitPico
@@ -96,8 +97,8 @@ import UniformTypeIdentifiers
     let coordinator = HistoryCommitTable.Coordinator()
     let scroll = coordinator.makeView()
     scroll.frame = NSRect(x: 0, y: 0, width: 380, height: 200)
-    func update(grouped: Bool = true, compact: Bool = false, reveal: HistoryReveal? = nil) {
-        coordinator.update(HistoryCommitTable(store: f.store, presentation: f.store.historyPresentation, grouped: grouped, compact: compact, showGraph: true, canModifyHistory: f.store.canIntegrate, selection: f.store.selectedCommit?.hash, reveal: reveal))
+    func update(grouped: Bool = true, compact: Bool = false, reveal: HistoryReveal? = nil, insets: EdgeInsets = EdgeInsets()) {
+        coordinator.update(HistoryCommitTable(store: f.store, presentation: f.store.historyPresentation, grouped: grouped, compact: compact, showGraph: true, canModifyHistory: f.store.canIntegrate, selection: f.store.selectedCommit?.hash, reveal: reveal, insets: insets))
         scroll.layoutSubtreeIfNeeded()
     }
     update()
@@ -110,8 +111,19 @@ import UniformTypeIdentifiers
     await f.store.detailTask?.value
     let selection = f.store.selectedCommit?.hash
     let far = f.store.visibleCommits[25]
-    update(reveal: HistoryReveal(hash: far.hash, atTop: false))
-    #expect(scroll.contentView.bounds.intersects(table.rect(ofRow: 26)))
+    let insets = EdgeInsets(top: 56, leading: 0, bottom: 32, trailing: 0)
+    update(reveal: HistoryReveal(hash: far.hash, atTop: false), insets: insets)
+    let clip = scroll.contentView
+    let unobstructedMiddle = (clip.bounds.minY + insets.top + clip.bounds.maxY - insets.bottom) / 2
+    #expect(abs(unobstructedMiddle - table.rect(ofRow: 26).midY) < 1)
+    #expect(clip.bounds.height == scroll.bounds.height)
+    update(reveal: HistoryReveal(hash: far.hash, atTop: true), insets: insets)
+    #expect(abs(clip.bounds.minY + insets.top - table.rect(ofRow: 26).minY) < 1)
+    let first = f.store.visibleCommits[0]
+    update(reveal: HistoryReveal(hash: first.hash, atTop: true), insets: insets)
+    #expect(clip.bounds.minY + insets.top <= table.rect(ofRow: 1).minY)
+    table.scrollRowToVisible(table.numberOfRows - 1)
+    #expect(clip.bounds.maxY - insets.bottom >= table.rect(ofRow: table.numberOfRows - 1).maxY - 1)
     update(grouped: false, compact: true)
     #expect(table.numberOfRows == f.store.visibleCommits.count)
     #expect(table.rect(ofRow: 4).height == 32)

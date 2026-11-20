@@ -42,6 +42,7 @@ struct SplitDiffView: View {
                         } else if select != nil { Color.clear.frame(width: 25, height: 19) }
                         Text((right ? line?.newNumber : line?.oldNumber).map(String.init) ?? "")
                             .foregroundStyle(gutterStyle(line)).frame(width: 42, alignment: .trailing).padding(.trailing, 10)
+                            .progressiveScrollBlur()
                         if let line {
                             DiffCodeText(line: code[line.id] ?? DiffCodeLine(source: [.context, .addition, .deletion].contains(line.kind) ? String(line.text.dropFirst()) : line.text, path: ""), query: query)
                                 .padding(.trailing, 16)

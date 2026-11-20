@@ -30,8 +30,7 @@ struct StashFileDisclosure: View {
                         let document = prepared?.patch ?? PatchDocument(diff)
                         let previews = prepared?.previews ?? document.preview()
                         let matches = findQuery.isEmpty ? [] : previews.flatMap { preview in preview.lines.filter { CodeHighlighting.contains(prepared?.code[preview.id]?[$0.id]?.source ?? CodeHighlighting.source($0), query: findQuery) }.map { "\(preview.id):\($0.id)" } }
-                        VStack(spacing: 0) {
-                        DiffFindBar(query: $findQuery, matches: matches, selection: $focusedLine) { findReveal = UUID() }
+                        PinnedScrollPane { insets in
                         ScrollViewReader { proxy in
                         ScrollView(.vertical) {
                         VStack(alignment: .leading, spacing: 0) {
@@ -71,8 +70,11 @@ struct StashFileDisclosure: View {
                             }
                         }
                         }
-                        }.onChange(of: findReveal) { if let focusedLine { proxy.scrollTo(focusedLine, anchor: .center) } }
+                        }.pinnedScrollInsets(insets)
+                            .onChange(of: findReveal) { if let focusedLine { proxy.scrollTo(focusedLine, anchor: .center) } }
                         }
+                        } top: {
+                            DiffFindBar(query: $findQuery, matches: matches, selection: $focusedLine) { findReveal = UUID() }
                         }.frame(height: min(520, max(160, CGFloat(previews.reduce(0) { $0 + $1.lines.count }) * 21 + CGFloat(document.hunks.count) * 30 + 90)))
                     }
                 } else if let error { Text(error).foregroundStyle(.red).font(.caption).padding(12) }

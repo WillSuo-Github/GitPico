@@ -29,14 +29,7 @@ struct RepositoryLibraryView: View {
     var current: SavedRepository? { entries.first { selection.contains($0.id) } }
     var currentGroup: UUID? { if case .group(let id) = filter { id } else { nil } }
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                SheetTitle("Repositories")
-                Spacer()
-                TextField("Search name, path or group", text: $query).textFieldStyle(.roundedBorder).frame(width: 290)
-                Button { library.reload(); failure = nil } label: { Image(systemName: "arrow.clockwise") }.help("Reload repository library")
-            }.padding(16)
-            Divider()
+        PinnedScrollPane { insets in
             HStack(spacing: 0) {
                 List(selection: Binding<RepositoryLibraryFilter?>(get: { filter }, set: { if let value = $0 { filter = value } })) {
                     Label("All Repositories", systemImage: "tray.full").tag(RepositoryLibraryFilter.all).dropDestination(for: RepositoryLibraryDrop.self, action: { (tokens: [RepositoryLibraryDrop], _: CGPoint) -> Bool in library.acceptDrop(tokens, to: nil) })
@@ -50,41 +43,45 @@ struct RepositoryLibraryView: View {
                                 .contextMenu { groupMenu(group) }
                         }
                     }
-                }.listStyle(.sidebar).frame(width: 240)
+                }.listStyle(.sidebar).pinnedScrollInsets(insets).frame(width: 240)
                 Divider()
-                VStack(spacing: 0) {
-                    List(entries, selection: $selection) { entry in
-                        HStack(spacing: 10) {
-                            RepositoryGlyph(name: entry.name, size: 28)
-                            VStack(alignment: .leading, spacing: 3) {
-                                HStack(spacing: 5) {
-                                    Text(entry.name).font(.callout.weight(.semibold))
-                                    if entry.favorite { Image(systemName: "star.fill").font(.system(size: 9)).foregroundStyle(.yellow) }
-                                    RepositoryFolderWarning(state: library.folderState(for: entry), isSelected: selection.contains(entry.id))
-                                }
-                                Text(Pico.abbreviated(entry.path)).font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+                List(entries, selection: $selection) { entry in
+                    HStack(spacing: 10) {
+                        RepositoryGlyph(name: entry.name, size: 28)
+                        VStack(alignment: .leading, spacing: 3) {
+                            HStack(spacing: 5) {
+                                Text(entry.name).font(.callout.weight(.semibold))
+                                if entry.favorite { Image(systemName: "star.fill").font(.system(size: 9)).foregroundStyle(.yellow) }
+                                RepositoryFolderWarning(state: library.folderState(for: entry), isSelected: selection.contains(entry.id))
                             }
-                            Spacer()
-                            if library.folderState(for: entry).canOpen && (store.workspace?.isRepositoryOpen(at: entry.path) ?? (entry.path == store.snapshot?.root.path && !store.isChoosingRepository)) { Chip(text: String(localized: "Open"), tint: .accentColor) }
-                            Text(library.breadcrumb(entry.group)).font(.caption).foregroundStyle(.tertiary).lineLimit(1)
-                        }.padding(.vertical, 4).tag(entry.id).contentShape(Rectangle())
-                            .onTapGesture(count: 2) { open(entry) }
-                            .contextMenu { repositoryMenu(entry) }
-                            .draggable(RepositoryLibraryDrop(session: library.session, repositories: selection.contains(entry.id) ? Array(selection) : [entry.id]))
-                            .dropDestination(for: RepositoryLibraryDrop.self, action: { (tokens: [RepositoryLibraryDrop], _: CGPoint) -> Bool in library.acceptDrop(tokens, to: entry.group, before: entry.id) })
-                    }.listStyle(.plain)
-                        .overlay { if entries.isEmpty { ContentUnavailableView("No repositories", systemImage: "folder", description: Text(query.isEmpty ? "Add a local Git repository to this library." : "No repositories match this search.")) } }
-                    if let current {
-                        Divider()
-                        HStack {
-                            Text(current.path).font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
-                            Spacer()
-                            Button("Locate…") { store.chooseLibraryRepository(relocating: current.id) }.controlSize(.small)
-                        }.padding(12)
-                    }
-                }
-            }.frame(height: 420)
-            Divider()
+                            Text(Pico.abbreviated(entry.path)).font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+                        }
+                        Spacer()
+                        if library.folderState(for: entry).canOpen && (store.workspace?.isRepositoryOpen(at: entry.path) ?? (entry.path == store.snapshot?.root.path && !store.isChoosingRepository)) { Chip(text: String(localized: "Open"), tint: .accentColor) }
+                        Text(library.breadcrumb(entry.group)).font(.caption).foregroundStyle(.tertiary).lineLimit(1)
+                    }.padding(.vertical, 4).tag(entry.id).contentShape(Rectangle())
+                        .onTapGesture(count: 2) { open(entry) }
+                        .contextMenu { repositoryMenu(entry) }
+                        .draggable(RepositoryLibraryDrop(session: library.session, repositories: selection.contains(entry.id) ? Array(selection) : [entry.id]))
+                        .dropDestination(for: RepositoryLibraryDrop.self, action: { (tokens: [RepositoryLibraryDrop], _: CGPoint) -> Bool in library.acceptDrop(tokens, to: entry.group, before: entry.id) })
+                }.listStyle(.plain).pinnedScrollInsets(insets)
+                    .overlay { if entries.isEmpty { ContentUnavailableView("No repositories", systemImage: "folder", description: Text(query.isEmpty ? "Add a local Git repository to this library." : "No repositories match this search.")) } }
+            }
+        } top: {
+            HStack {
+                SheetTitle("Repositories")
+                Spacer()
+                TextField("Search name, path or group", text: $query).textFieldStyle(.roundedBorder).frame(width: 290)
+                Button { library.reload(); failure = nil } label: { Image(systemName: "arrow.clockwise") }.help("Reload repository library")
+            }.padding(16)
+        } bottom: {
+            if let current {
+                HStack {
+                    Text(current.path).font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
+                    Spacer()
+                    Button("Locate…") { store.chooseLibraryRepository(relocating: current.id) }.controlSize(.small)
+                }.padding(12)
+            }
             if let error = failure ?? library.error { HStack { Text(error).font(.caption).foregroundStyle(.red).textSelection(.enabled); Spacer() }.padding([.horizontal, .top], 12) }
             HStack {
                 Menu {
@@ -99,7 +96,7 @@ struct RepositoryLibraryView: View {
                 Button("Open") { if let current { open(current) } }.keyboardShortcut(.defaultAction)
                     .disabled(selection.count != 1 || (current.map { !library.folderState(for: $0).canOpen } ?? true))
             }.padding(14)
-        }.frame(width: 960).disabled(store.isBusy)
+        }.frame(width: 960, height: 520).disabled(store.isBusy)
             .monitoringRepositoryFolders(in: library)
             .onChange(of: filter) { selection = [] }
             .onChange(of: entries.map(\.id)) { selection.formIntersection(Set(entries.map(\.id))) }

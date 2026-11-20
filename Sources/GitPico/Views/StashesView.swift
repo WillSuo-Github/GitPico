@@ -6,17 +6,7 @@ struct StashesView: View {
     var stashes: [Stash] { (store.snapshot?.stashes ?? []).filter { store.search.isEmpty || $0.subject.localizedCaseInsensitiveContains(store.search) } }
     var body: some View {
         PersistentSplitView(name: "stashes", width: 320) {
-            VStack(spacing: 0) {
-                PaneBar(title: "Stashes", subtitle: stashes.isEmpty ? String(localized: "Nothing saved") : String(localized: "\(store.snapshot?.stashes.count ?? 0) saved"), icon: "tray.full") {
-                    Button { store.stashAction(.save([], false)) } label: { Label("Save Stash", systemImage: "plus") }.labelStyle(.iconOnly).buttonStyle(.borderless).disabled(store.changes.isEmpty).help("Save local changes to a new stash")
-                    Menu {
-                        Button("Save Stash…") { store.stashAction(.save([], false)) }.disabled(store.changes.isEmpty)
-                        Button("Create Snapshot…") { store.stashAction(.save([], true)) }.disabled(store.changes.isEmpty)
-                        Divider()
-                        Button("Recover Deleted Items…") { store.manage(.recovery) }
-                        Button("Delete All Stashes…", role: .destructive) { store.stashAction(.clear(store.snapshot?.stashes ?? [])) }.disabled(store.snapshot?.stashes.isEmpty != false)
-                    } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
-                }
+            PinnedScrollPane { insets in
                 List(selection: Binding(get: { store.selectedStash?.id }, set: { id in if let stash = stashes.first(where: { $0.id == id }) { store.selectStash(stash) } })) {
                     ForEach(stashes) { stash in
                         HStack(alignment: .top, spacing: 10) {
@@ -40,8 +30,19 @@ struct StashesView: View {
                             Button("Delete Stash…", role: .destructive) { store.stashAction(.delete(stash)) }
                         }
                     }
-                }.listStyle(.plain)
+                }.listStyle(.plain).pinnedScrollInsets(insets)
                 .overlay { if stashes.isEmpty { EmptyPane(title: store.search.isEmpty ? String(localized: "No stashes") : String(localized: "No matching stashes"), subtitle: store.search.isEmpty ? String(localized: "Stash shelves local changes so you can switch tasks and bring them back later.") : String(localized: "No stash message matches this search."), icon: "tray") } }
+            } top: {
+                PaneBar(title: "Stashes", subtitle: stashes.isEmpty ? String(localized: "Nothing saved") : String(localized: "\(store.snapshot?.stashes.count ?? 0) saved"), icon: "tray.full") {
+                    Button { store.stashAction(.save([], false)) } label: { Label("Save Stash", systemImage: "plus") }.labelStyle(.iconOnly).buttonStyle(.borderless).disabled(store.changes.isEmpty).help("Save local changes to a new stash")
+                    Menu {
+                        Button("Save Stash…") { store.stashAction(.save([], false)) }.disabled(store.changes.isEmpty)
+                        Button("Create Snapshot…") { store.stashAction(.save([], true)) }.disabled(store.changes.isEmpty)
+                        Divider()
+                        Button("Recover Deleted Items…") { store.manage(.recovery) }
+                        Button("Delete All Stashes…", role: .destructive) { store.stashAction(.clear(store.snapshot?.stashes ?? [])) }.disabled(store.snapshot?.stashes.isEmpty != false)
+                    } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+                }
             }
         } trailing: {
             if let stash = store.selectedStash, let repository = store.repository { StashDetailView(store: store, repository: repository, stash: stash).id(stash.id) }
@@ -73,22 +74,8 @@ struct StashDetailView: View {
     @State private var expanded: Set<String> = []
     @State private var selected: Set<String> = []
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 8) {
-                HashChip(hash: stash.hash)
-                Chip(text: stash.name, icon: "tray.full", tint: .secondary, monospaced: true)
-                Spacer()
-                DiffLayoutPicker()
-                Menu {
-                    Button("Rename Stash…") { store.stashAction(.rename(stash)) }
-                    Button("Create Branch from Stash…") { store.stashAction(.branch(stash)) }
-                    Divider()
-                    Button("Recover Deleted Items…") { store.manage(.recovery) }
-                    Button("Delete Stash…", role: .destructive) { store.stashAction(.delete(stash)) }
-                } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("More stash actions")
-                Button("Apply…") { store.stashAction(.apply(stash)) }.buttonStyle(.borderedProminent).controlSize(.small).help("Apply this stash to the working copy")
-            }.padding(.horizontal, 14).frame(height: Pico.headerHeight).background(.bar).overlay(alignment: .bottom) { Divider() }
-            if let failure { InspectionErrorView(message: failure) }
+        PinnedScrollPane { insets in
+            if let failure { InspectionErrorView(message: failure).padding(insets) }
             else if let detail {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
@@ -111,8 +98,23 @@ struct StashDetailView: View {
                             StashFileDisclosure(store: store, repository: repository, stash: stash, file: file, statistics: detail.statistics[file.path], expanded: Binding(get: { expanded.contains(file.path) }, set: { if $0 { expanded.insert(file.path) } else { expanded.remove(file.path) } }), selected: Binding(get: { selected.contains(file.path) }, set: { if $0 { selected.insert(file.path) } else { selected.remove(file.path) } }))
                         }
                     }
-                }
-            } else { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
+                }.pinnedScrollInsets(insets)
+            } else { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity).padding(insets) }
+        } top: {
+            HStack(spacing: 8) {
+                HashChip(hash: stash.hash)
+                Chip(text: stash.name, icon: "tray.full", tint: .secondary, monospaced: true)
+                Spacer()
+                DiffLayoutPicker()
+                Menu {
+                    Button("Rename Stash…") { store.stashAction(.rename(stash)) }
+                    Button("Create Branch from Stash…") { store.stashAction(.branch(stash)) }
+                    Divider()
+                    Button("Recover Deleted Items…") { store.manage(.recovery) }
+                    Button("Delete Stash…", role: .destructive) { store.stashAction(.delete(stash)) }
+                } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("More stash actions")
+                Button("Apply…") { store.stashAction(.apply(stash)) }.buttonStyle(.borderedProminent).controlSize(.small).help("Apply this stash to the working copy")
+            }.padding(.horizontal, 14).frame(height: Pico.headerHeight)
         }.task { do { detail = try await repository.stashDetail(stash) } catch { failure = error.localizedDescription } }
     }
 }

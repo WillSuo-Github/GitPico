@@ -59,7 +59,6 @@ struct RepositoryStatusBar: View {
         .background {
             RepositoryStatusBarBackground(isRunning: store.isBusy)
         }
-        .overlay(alignment: .top) { Divider() }
     }
     private var separator: some View { Divider().frame(height: 12) }
 }

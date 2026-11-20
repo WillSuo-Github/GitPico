@@ -11,13 +11,7 @@ struct ReflogView: View {
     var filtered: [ReflogEntry] { entries.filter { store.search.isEmpty || ($0.message + " " + $0.hash + " " + $0.name).localizedCaseInsensitiveContains(store.search) } }
     var body: some View {
         PersistentSplitView(name: "reflog", width: 320) {
-            VStack(spacing: 0) {
-                PaneBar(title: "Reflog", subtitle: String(localized: "\(entries.count) events"), icon: "list.bullet.rectangle") {
-                    Picker("Reference", selection: $ref) {
-                        Text("HEAD").tag("HEAD")
-                        ForEach((store.snapshot?.references ?? []).filter { $0.isLocal || $0.isRemote }) { Text($0.name).tag($0.fullName) }
-                    }.labelsHidden().frame(maxWidth: 150)
-                }
+            PinnedScrollPane { insets in
                 List(selection: $selected) {
                     ForEach(filtered) { entry in
                         HStack(alignment: .top, spacing: 10) {
@@ -41,8 +35,15 @@ struct ReflogView: View {
                             }
                     }
                     if entries.count == limit { Button("Load More Events") { limit += 500 } }
-                }.listStyle(.plain)
+                }.listStyle(.plain).pinnedScrollInsets(insets)
                     .overlay { if let error { EmptyPane(title: String(localized: "Unable to load Reflog"), subtitle: error, icon: "exclamationmark.triangle") } else if filtered.isEmpty { EmptyPane(title: store.search.isEmpty ? String(localized: "No reflog events") : String(localized: "No matching events"), subtitle: String(localized: "Git records every local HEAD and branch movement here, so lost commits can be recovered."), icon: "list.bullet.rectangle") } }
+            } top: {
+                PaneBar(title: "Reflog", subtitle: String(localized: "\(entries.count) events"), icon: "list.bullet.rectangle") {
+                    Picker("Reference", selection: $ref) {
+                        Text("HEAD").tag("HEAD")
+                        ForEach((store.snapshot?.references ?? []).filter { $0.isLocal || $0.isRemote }) { Text($0.name).tag($0.fullName) }
+                    }.labelsHidden().frame(maxWidth: 150)
+                }
             }
         } trailing: {
             CommitDetailView(store: store)

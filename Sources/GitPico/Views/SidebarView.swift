@@ -24,8 +24,7 @@ struct SidebarView: View {
     @AppStorage("sidebar.relatedExpanded") private var relatedExpanded = true
     @AppStorage("sidebar.toolsExpanded") private var toolsExpanded = true
     var body: some View {
-        VStack(spacing: 0) {
-            SidebarRepositoryHeader(store: store)
+        PinnedScrollPane { insets in
             List(selection: Binding<Set<Destination>>(get: { selectedDestinations }, set: { values in
                 selectedDestinations = values
                 // A group selection must not choose an arbitrary branch to preview or activate.
@@ -116,14 +115,16 @@ struct SidebarView: View {
                     Label("Branches Review", systemImage: "arrow.left.arrow.right").tag(Destination.branchesReview)
                     Label("Reflog", systemImage: "list.bullet.rectangle").tag(Destination.reflog)
                 } header: { Text("Tools") }
-            }.listStyle(.sidebar)
+            }.listStyle(.sidebar).pinnedScrollInsets(insets)
             .contextMenu(forSelectionType: Destination.self) { destinations in
                 SidebarSelectionContextActions(store: store, selection: SidebarContextSelection(destinations, references: store.snapshot?.references ?? []), repositoryToken: store.repositoryToken)
             } primaryAction: { selection in
                 store.activateSidebarSelection(selection)
             }
             .disabled(store.isBusy && !store.isFetching)
-            Divider()
+        } top: {
+            SidebarRepositoryHeader(store: store)
+        } bottom: {
             HStack(spacing: 8) {
                 HStack(spacing: 5) {
                     Image(systemName: "line.3.horizontal.decrease").foregroundStyle(.secondary)

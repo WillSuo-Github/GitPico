@@ -64,29 +64,36 @@ struct ConflictResolverView: View {
                         }.font(.system(size: 12)).controlSize(.regular).padding(10).background(.bar).disabled(store.isBusy)
                         Divider()
                     }
-                    HStack {
-                        Text("Result").fontWeight(.semibold)
-                        Spacer()
-                        Text(document.hasMarkers ? (document.regions.isEmpty ? "Conflict markers remain · edit the result" : "\(document.regions.count) unresolved blocks · edit or choose a version") : "Ready to mark resolved").foregroundStyle(document.hasMarkers ? Pico.warning : Pico.addition)
-                    }.font(.system(size: 11)).padding(.horizontal, 14).frame(height: 30).background(.bar)
-                    ConflictResultEditor(text: $result, reveal: region?.original, focusRequest: focusRequest, disabled: store.isBusy)
-                        .environment(\.layoutDirection, .leftToRight)
-                } else {
-                    EmptyPane(title: String(localized: "Choose a complete version"), subtitle: snapshot.versions.contains(where: { $0.mode == "160000" }) ? String(localized: "Accepting stages the selected Git object only. Nested directories and working files are preserved, including file/submodule type conflicts. Update the working copy separately after resolving.") : String(localized: "Choose Current or Incoming for binary files and symbolic links. Link targets are preserved without reading the target file."), icon: "doc.badge.gearshape")
                 }
-                Divider()
-                HStack(spacing: 10) {
-                    Menu(snapshot.versions.contains(where: { $0.mode == "160000" }) ? "Accept Index Version Only" : "Accept Entire File") {
-                        Button(snapshot.version(2) == nil ? "Accept Current Deletion" : "Accept Current File") { store.resolveConflict(snapshot, resolution: .version(2)) }
-                        Button(snapshot.version(3) == nil ? "Accept Incoming Deletion" : "Accept Incoming File") { store.resolveConflict(snapshot, resolution: .version(3)) }
-                    }.fixedSize()
-                    Spacer()
+                PinnedScrollPane { insets in
                     if snapshot.canEdit {
-                        Button("Save & Mark Resolved") { store.resolveConflict(snapshot, resolution: .edited(result)) }
-                            .buttonStyle(.borderedProminent).disabled(document.hasMarkers).keyboardShortcut("s", modifiers: .command)
+                        ConflictResultEditor(text: $result, reveal: region?.original, focusRequest: focusRequest, disabled: store.isBusy, scrollInsets: insets)
+                            .environment(\.layoutDirection, .leftToRight)
+                    } else {
+                        EmptyPane(title: String(localized: "Choose a complete version"), subtitle: snapshot.versions.contains(where: { $0.mode == "160000" }) ? String(localized: "Accepting stages the selected Git object only. Nested directories and working files are preserved, including file/submodule type conflicts. Update the working copy separately after resolving.") : String(localized: "Choose Current or Incoming for binary files and symbolic links. Link targets are preserved without reading the target file."), icon: "doc.badge.gearshape").padding(insets)
                     }
-                }.font(.system(size: 11)).controlSize(.small).padding(12).disabled(store.isBusy)
-                Text("Saving also stages this file. Draft edits are automatically saved for recovery after restarting.").font(.caption2).foregroundStyle(.secondary).padding(.bottom, 8)
+                } top: {
+                    if snapshot.canEdit {
+                        HStack {
+                            Text("Result").fontWeight(.semibold)
+                            Spacer()
+                            Text(document.hasMarkers ? (document.regions.isEmpty ? "Conflict markers remain · edit the result" : "\(document.regions.count) unresolved blocks · edit or choose a version") : "Ready to mark resolved").foregroundStyle(document.hasMarkers ? Pico.warning : Pico.addition)
+                        }.font(.system(size: 11)).padding(.horizontal, 14).frame(height: 30)
+                    }
+                } bottom: {
+                    HStack(spacing: 10) {
+                        Menu(snapshot.versions.contains(where: { $0.mode == "160000" }) ? "Accept Index Version Only" : "Accept Entire File") {
+                            Button(snapshot.version(2) == nil ? "Accept Current Deletion" : "Accept Current File") { store.resolveConflict(snapshot, resolution: .version(2)) }
+                            Button(snapshot.version(3) == nil ? "Accept Incoming Deletion" : "Accept Incoming File") { store.resolveConflict(snapshot, resolution: .version(3)) }
+                        }.fixedSize()
+                        Spacer()
+                        if snapshot.canEdit {
+                            Button("Save & Mark Resolved") { store.resolveConflict(snapshot, resolution: .edited(result)) }
+                                .buttonStyle(.borderedProminent).disabled(document.hasMarkers).keyboardShortcut("s", modifiers: .command)
+                        }
+                    }.font(.system(size: 11)).controlSize(.small).padding(12).disabled(store.isBusy)
+                    Text("Saving also stages this file. Draft edits are automatically saved for recovery after restarting.").font(.caption2).foregroundStyle(.secondary).padding(.bottom, 8)
+                }
             } else if let loadError {
                 EmptyPane(title: String(localized: "Unable to load conflict"), subtitle: loadError, icon: "exclamationmark.triangle")
             } else { ProgressView("Loading conflict versions…").frame(maxWidth: .infinity, maxHeight: .infinity) }
@@ -138,21 +145,22 @@ private struct ConflictSourceView: View {
     let version: ConflictVersion?
     var preview: String? = nil
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        PinnedScrollPane { insets in
+            GeometryReader { geometry in
+                ScrollView([.horizontal, .vertical]) {
+                    Text(preview ?? version.map { $0.text ?? String(localized: "Binary or large file · \($0.data.count) bytes") } ?? String(localized: "File deleted / absent in this version"))
+                        .font(.system(size: 11, design: .monospaced)).textSelection(.enabled).padding(12)
+                        .frame(minWidth: geometry.size.width, minHeight: max(0, geometry.size.height - insets.top), alignment: .topLeading)
+                }.defaultScrollAnchor(.topLeading).pinnedScrollInsets(insets)
+            }
+        } top: {
             HStack(spacing: 6) {
                 Circle().fill(tint).frame(width: 7, height: 7)
                 Text(title).fontWeight(.semibold).lineLimit(1).truncationMode(.middle).help(title)
                 Text(stage).foregroundStyle(.secondary)
                 Spacer()
             }
-                .font(.system(size: 11)).padding(.horizontal, 12).frame(height: 29).background(tint.opacity(0.08)).overlay(alignment: .bottom) { Rectangle().fill(tint.opacity(0.4)).frame(height: 1) }
-            GeometryReader { geometry in
-                ScrollView([.horizontal, .vertical]) {
-                    Text(preview ?? version.map { $0.text ?? String(localized: "Binary or large file · \($0.data.count) bytes") } ?? String(localized: "File deleted / absent in this version"))
-                        .font(.system(size: 11, design: .monospaced)).textSelection(.enabled).padding(12)
-                        .frame(minWidth: geometry.size.width, minHeight: geometry.size.height, alignment: .topLeading)
-                }.defaultScrollAnchor(.topLeading)
-            }
+                .font(.system(size: 11)).padding(.horizontal, 12).frame(height: 29).background(tint.opacity(0.08))
         }.frame(maxWidth: .infinity)
     }
 }

@@ -32,10 +32,11 @@ struct WorkingFilePreview: View {
     @State private var text = ""
     @State private var loading = true
     var body: some View {
-        VStack(spacing: 0) {
-            PaneHeader(title: "\(path)", subtitle: String(localized: "Working Copy"), icon: "doc.text")
-            if loading { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
-            else { InspectionTextView(text: text) }
+        PinnedScrollPane { insets in
+            if loading { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity).padding(insets) }
+            else { InspectionTextView(text: text, scrollInsets: insets) }
+        } top: {
+            PaneBar(title: "\(path)", subtitle: String(localized: "Working Copy"), icon: "doc.text")
         }.task {
             do {
                 let data = try await repository.workingFileData(path)

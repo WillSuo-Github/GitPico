@@ -8,7 +8,20 @@ struct WorkingCopyView: View {
     var isFiltered: Bool { !store.search.isEmpty || store.workingOnlyConflicts || store.showAllFiles || store.showIgnoredFiles }
     var body: some View {
         PersistentSplitView(name: "working", width: 340) {
-            VStack(spacing: 0) {
+            PinnedScrollPane { insets in
+                List(selection: Binding<Set<String>>(get: { store.selectedWorkingFiles }, set: { store.setWorkingSelection($0) })) {
+                    ForEach(files) { file in
+                        Group {
+                            if let change = file.change { WorkingFileRow(store: store, file: change).picoDrag(store, .workingFiles(store.selectedWorkingFiles.contains(file.path) ? store.selectedWorkingFiles.sorted().filter { path in store.changes.contains { $0.path == path } } : [file.path])) }
+                            else { BrowserFileRow(store: store, file: file) }
+                        }.tag(file.path).listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
+                    }
+                }.listStyle(.plain).pinnedScrollInsets(insets).disabled(store.isBusy && !store.isFetching)
+                .overlay {
+                    if files.isEmpty && store.isLoadingWorkingFiles { ProgressView("Loading files…") }
+                    else if files.isEmpty { EmptyPane(title: isFiltered ? String(localized: "No matching files") : String(localized: "Nothing to commit"), subtitle: isFiltered ? String(localized: "Change the file filter or refresh.") : String(localized: "Your working copy matches HEAD. Show All Files to browse the tree."), icon: isFiltered ? "line.3.horizontal.decrease.circle" : "checkmark.seal") }
+                }
+            } top: {
                 WorkingListHeader(store: store)
                 if store.snapshot?.operation != RepositoryOperation.none {
                     WorkingOperationPanel(store: store, onlyConflicts: $store.workingOnlyConflicts)
@@ -20,20 +33,9 @@ struct WorkingCopyView: View {
                         Button("Stage") { store.stageSelectedFiles() }.disabled(store.isBusy || !store.workingTargets().contains { $0.isUnstaged && !$0.isConflicted })
                         Button("Unstage") { store.unstageSelectedFiles() }.disabled(store.isBusy || !store.workingTargets().contains { $0.isStaged && !$0.isConflicted })
                     }.font(.system(size: 11)).controlSize(.small).padding(.horizontal, 12).frame(height: 30)
-                        .background(Color.accentColor.opacity(0.07)).overlay(alignment: .bottom) { Divider() }
+                        .background(Color.accentColor.opacity(0.07))
                 }
-                List(selection: Binding<Set<String>>(get: { store.selectedWorkingFiles }, set: { store.setWorkingSelection($0) })) {
-                    ForEach(files) { file in
-                        Group {
-                            if let change = file.change { WorkingFileRow(store: store, file: change).picoDrag(store, .workingFiles(store.selectedWorkingFiles.contains(file.path) ? store.selectedWorkingFiles.sorted().filter { path in store.changes.contains { $0.path == path } } : [file.path])) }
-                            else { BrowserFileRow(store: store, file: file) }
-                        }.tag(file.path).listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
-                    }
-                }.listStyle(.plain).disabled(store.isBusy && !store.isFetching)
-                .overlay {
-                    if files.isEmpty && store.isLoadingWorkingFiles { ProgressView("Loading files…") }
-                    else if files.isEmpty { EmptyPane(title: isFiltered ? String(localized: "No matching files") : String(localized: "Nothing to commit"), subtitle: isFiltered ? String(localized: "Change the file filter or refresh.") : String(localized: "Your working copy matches HEAD. Show All Files to browse the tree."), icon: isFiltered ? "line.3.horizontal.decrease.circle" : "checkmark.seal") }
-                }
+            } bottom: {
                 if store.snapshot?.operation == RepositoryOperation.none {
                     CommitComposer(store: store)
                 }
@@ -91,7 +93,6 @@ struct WorkingListHeader: View {
             }
         }
         .padding(.horizontal, 14).padding(.vertical, 9)
-        .background(.bar).overlay(alignment: .bottom) { Divider() }
     }
 }
 
@@ -217,7 +218,6 @@ struct CommitComposer: View {
             }
         }
         .padding(12)
-        .background(.bar).overlay(alignment: .top) { Divider() }
         .disabled(store.isBusy && !store.isFetching).onChange(of: store.amend) { store.updateAmend() }
         .sheet(item: $insertion) { CommitTemplateInsertionView(store: store, insertion: $0) }
         .onDisappear { ai.cancel() }
@@ -304,13 +304,6 @@ struct WorkingDiffView: View {
         .onChange(of: store.diffContext) { if let file = store.currentChange { store.selectChange(file, staged: store.stagedDiff) } }
         .onChange(of: store.ignoreWhitespace) { if let file = store.currentChange { store.selectChange(file, staged: store.stagedDiff) } }
     }
-}
-
-struct PaneHeader: View {
-    let title: LocalizedStringResource
-    var subtitle: String? = nil
-    let icon: String
-    var body: some View { PaneBar(title: title, subtitle: subtitle, icon: icon) }
 }
 
 struct StatusBadge: View {

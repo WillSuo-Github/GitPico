@@ -33,29 +33,7 @@ struct ChunkDiffView: View {
             let matches = findQuery.isEmpty ? [] : previews.flatMap { preview in
                 preview.lines.filter { CodeHighlighting.contains(prepared.code[preview.id]?[$0.id]?.source ?? CodeHighlighting.source($0), query: findQuery) }.map { "\(preview.id):\($0.id)" }
             }
-            VStack(spacing: 0) {
-                DiffFindBar(query: $findQuery, matches: matches, selection: $focusedLine) { findReveal = UUID() }
-                HStack(spacing: 10) {
-                    DiffStat(additions: patch.additions, deletions: patch.deletions)
-                    Text("\(patch.hunks.count) chunks").foregroundStyle(.secondary)
-                    Spacer()
-                    if lineAction != nil, patch.supportsChunkStaging {
-                        if selectedLines.ids.isEmpty {
-                            Label("Click the gutter to pick lines", systemImage: "hand.point.up.left").foregroundStyle(.tertiary)
-                        } else {
-                            Text("\(selectedLines.ids.count) lines selected").foregroundStyle(.secondary)
-                            Menu {
-                                Button("Clear Selection") { selectedLines.clear() }
-                                if let exportLines { Button("Save Lines as Patch…") { exportLines(selectedLines.ids) } }
-                            } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
-                            if let discardLines { Button("Discard Lines…", role: .destructive) { discardLines(selectedLines.ids) } }
-                            Button(lineActionTitle) { lineAction?(selectedLines.ids) }
-                                .buttonStyle(.borderedProminent)
-                                .keyboardShortcut(.return, modifiers: [.command, .shift])
-                        }
-                    }
-                }.font(.system(size: 11)).controlSize(.small).padding(.horizontal, 14).frame(height: 34).disabled(disabled)
-                Divider()
+            PinnedScrollPane { insets in
                 GeometryReader { geometry in
                     ScrollViewReader { proxy in
                     ScrollView(.vertical) {
@@ -99,11 +77,33 @@ struct ChunkDiffView: View {
                                 }
                             }
                             if previews.count < patch.hunks.count || previews.last?.isTruncated == true { Text("Preview limited to 8,000 lines. Review the complete diff in an external tool.").font(.caption).foregroundStyle(.secondary).padding(12) }
-                        }.frame(minWidth: geometry.size.width, minHeight: geometry.size.height, alignment: .topLeading)
-                    }.defaultScrollAnchor(.topLeading)
+                        }.frame(minWidth: geometry.size.width, minHeight: max(0, geometry.size.height - insets.top), alignment: .topLeading)
+                    }.defaultScrollAnchor(.topLeading).pinnedScrollInsets(insets)
                         .onChange(of: findReveal) { if let focusedLine { proxy.scrollTo(focusedLine, anchor: .center) } }
                     }
                 }.background(Color(nsColor: .textBackgroundColor))
+            } top: {
+                DiffFindBar(query: $findQuery, matches: matches, selection: $focusedLine) { findReveal = UUID() }
+                HStack(spacing: 10) {
+                    DiffStat(additions: patch.additions, deletions: patch.deletions)
+                    Text("\(patch.hunks.count) chunks").foregroundStyle(.secondary)
+                    Spacer()
+                    if lineAction != nil, patch.supportsChunkStaging {
+                        if selectedLines.ids.isEmpty {
+                            Label("Click the gutter to pick lines", systemImage: "hand.point.up.left").foregroundStyle(.tertiary)
+                        } else {
+                            Text("\(selectedLines.ids.count) lines selected").foregroundStyle(.secondary)
+                            Menu {
+                                Button("Clear Selection") { selectedLines.clear() }
+                                if let exportLines { Button("Save Lines as Patch…") { exportLines(selectedLines.ids) } }
+                            } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+                            if let discardLines { Button("Discard Lines…", role: .destructive) { discardLines(selectedLines.ids) } }
+                            Button(lineActionTitle) { lineAction?(selectedLines.ids) }
+                                .buttonStyle(.borderedProminent)
+                                .keyboardShortcut(.return, modifiers: [.command, .shift])
+                        }
+                    }
+                }.font(.system(size: 11)).controlSize(.small).padding(.horizontal, 14).frame(height: 34).disabled(disabled)
             }
         }
         }

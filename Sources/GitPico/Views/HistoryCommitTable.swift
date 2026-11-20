@@ -14,6 +14,7 @@ struct HistoryCommitTable: NSViewRepresentable {
     let canModifyHistory: Bool
     let selection: String?
     let reveal: HistoryReveal?
+    var insets = EdgeInsets()
 
     func makeCoordinator() -> Coordinator { Coordinator() }
     func makeNSView(context: Context) -> NSScrollView { context.coordinator.makeView() }
@@ -77,7 +78,13 @@ struct HistoryCommitTable: NSViewRepresentable {
             let restyled = old?.compact != value.compact || old?.showGraph != value.showGraph || old?.canModifyHistory != value.canModifyHistory
             let previousIDs = replaced ? rows.map(\.id) : []
             let scroll = table.enclosingScrollView
-            let wasAtTop = (scroll?.contentView.bounds.minY ?? 0) <= 1
+            let wasAtTop = scroll.map { $0.contentView.bounds.minY + $0.contentView.contentInsets.top <= 1 } ?? true
+            if let scroll, old?.insets != value.insets {
+                scroll.automaticallyAdjustsContentInsets = false
+                let insets = NSEdgeInsets(top: value.insets.top, left: 0, bottom: value.insets.bottom, right: 0)
+                scroll.contentInsets = insets
+                scroll.scrollerInsets = insets
+            }
             if replaced {
                 rows = []
                 commitRows = [:]
@@ -123,18 +130,25 @@ struct HistoryCommitTable: NSViewRepresentable {
             }
             // AppKit can anchor an inserted block to the old top row. At the
             // top of the list, keep the new tips visible without changing selection.
-            if replaced, wasAtTop, let scroll, scroll.contentView.bounds.minY > 1 {
-                scroll.contentView.scroll(to: .zero)
-                scroll.reflectScrolledClipView(scroll.contentView)
+            if wasAtTop, replaced || old?.insets != value.insets, let scroll {
+                scrollDocument(scroll, to: -scroll.contentView.contentInsets.top)
             }
             if let reveal = value.reveal, reveal.id != lastReveal, let row = commitRows[reveal.hash], let scroll = table.enclosingScrollView {
                 lastReveal = reveal.id
                 let rect = table.rect(ofRow: row)
-                let height = scroll.contentView.bounds.height
-                let y = reveal.atTop ? rect.minY : rect.midY - height / 2
-                scroll.contentView.scroll(to: NSPoint(x: 0, y: max(0, min(y, table.bounds.height - height))))
-                scroll.reflectScrolledClipView(scroll.contentView)
+                let insets = scroll.contentView.contentInsets
+                let height = max(0, scroll.contentView.bounds.height - insets.top - insets.bottom)
+                let y = (reveal.atTop ? rect.minY : rect.midY - height / 2) - insets.top
+                scrollDocument(scroll, to: y)
             }
+        }
+
+        private func scrollDocument(_ scroll: NSScrollView, to y: CGFloat) {
+            let clip = scroll.contentView
+            var bounds = clip.bounds
+            bounds.origin.y = y
+            clip.scroll(to: clip.constrainBoundsRect(bounds).origin)
+            scroll.reflectScrolledClipView(clip)
         }
 
         private func append(_ commits: [Commit]) {
