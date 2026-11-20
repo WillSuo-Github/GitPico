@@ -69,28 +69,22 @@ private struct PinnedScrollBar<Content: View>: View {
 struct ScrollBarBackdrop: View {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let edge: VerticalEdge
+    var tint: Color = .clear
 
     var body: some View {
-        GeometryReader { geometry in
-            let overlap = PinnedScrollEdges.overlap
-            let barHeight = geometry.size.height
-            if barHeight > 0 {
-                if reduceTransparency {
-                    Rectangle().fill(.background)
-                } else {
-                    let fraction = min(1, PinnedScrollEdges.tintTransition / (barHeight + overlap))
-                    Rectangle().fill(.regularMaterial)
-                        .overlay { Rectangle().fill(.background.opacity(0.7)) }
-                        .mask {
-                            LinearGradient(
-                                gradient: PinnedScrollEdges.gradient,
-                                startPoint: UnitPoint(x: 0.5, y: edge == .top ? 1 - fraction : fraction),
-                                endPoint: edge == .top ? .bottom : .top
-                            )
-                        }
-                        .frame(height: barHeight + overlap)
-                        .offset(y: edge == .top ? 0 : -overlap)
-                }
+        Group {
+            if reduceTransparency {
+                Rectangle().fill(.background).overlay { tint }
+            } else {
+                Rectangle().fill(.ultraThinMaterial)
+                    .overlay { tint }
+                    .mask {
+                        LinearGradient(
+                            gradient: PinnedScrollEdges.gradient,
+                            startPoint: edge == .top ? .top : .bottom,
+                            endPoint: edge == .top ? .bottom : .top
+                        )
+                    }
             }
         }
         .allowsHitTesting(false)
@@ -99,9 +93,6 @@ struct ScrollBarBackdrop: View {
 }
 
 private struct PinnedScrollEdges: Sendable {
-    static let overlap: CGFloat = 12
-    static let tintTransition: CGFloat = 24
-    static let blurTransition: CGFloat = 40
     static let radius: CGFloat = 8
     static let gradient = Gradient(stops: [
         .init(color: .white, location: 0),
@@ -130,17 +121,17 @@ private struct ProgressiveScrollBlur: ViewModifier {
                 .visualEffect { effect, geometry in
                     let frame = geometry.frame(in: .named(edges.viewport))
                     let viewportHeight = geometry.bounds(of: .named(edges.viewport))?.height ?? 0
-                    let top = edges.insets.top + PinnedScrollEdges.overlap
-                    let bottom = viewportHeight - edges.insets.bottom - PinnedScrollEdges.overlap
+                    let top = edges.insets.top
+                    let bottom = viewportHeight - edges.insets.bottom
                     let blurTop = edges.insets.top > 0 && frame.minY < top && frame.maxY > 0
                     let blurBottom = edges.insets.bottom > 0 && frame.maxY > bottom && frame.minY < viewportHeight
                     let mask = Image(size: geometry.size) { context in
                         let bounds = Path(CGRect(origin: .zero, size: geometry.size))
                         if blurTop {
-                            fill(context, bounds: bounds, clearAt: top - frame.minY, direction: -1)
+                            fill(context, bounds: bounds, blurredAt: -frame.minY, clearAt: top - frame.minY)
                         }
                         if blurBottom {
-                            fill(context, bounds: bounds, clearAt: bottom - frame.minY, direction: 1)
+                            fill(context, bounds: bounds, blurredAt: viewportHeight - frame.minY, clearAt: bottom - frame.minY)
                         }
                     }
                     return effect.variableBlur(radius: PinnedScrollEdges.radius, mask: mask, isEnabled: viewportHeight > 0 && (blurTop || blurBottom))
@@ -151,11 +142,11 @@ private struct ProgressiveScrollBlur: ViewModifier {
         }
     }
 
-    private nonisolated func fill(_ context: GraphicsContext, bounds: Path, clearAt y: CGFloat, direction: CGFloat) {
+    private nonisolated func fill(_ context: GraphicsContext, bounds: Path, blurredAt outer: CGFloat, clearAt inner: CGFloat) {
         context.fill(bounds, with: .linearGradient(
             PinnedScrollEdges.gradient,
-            startPoint: CGPoint(x: 0, y: y + direction * PinnedScrollEdges.blurTransition),
-            endPoint: CGPoint(x: 0, y: y)
+            startPoint: CGPoint(x: 0, y: outer),
+            endPoint: CGPoint(x: 0, y: inner)
         ))
     }
 }

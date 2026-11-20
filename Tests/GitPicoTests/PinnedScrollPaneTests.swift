@@ -44,3 +44,33 @@ func pinnedBarsInsetTheContentsWithoutShrinkingTheViewport(useList: Bool) async 
     #expect(abs(geometry.visibleRect.minY + insets.top) < 1)
     #expect(!window.isVisible && !NSApp.isActive)
 }
+
+@Test(
+    .enabled(if: !NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency, "Requires transparent materials."),
+    arguments: [VerticalEdge.top, .bottom]
+) @MainActor
+func scrollBarBackdropFadesAcrossTheBarWithoutExtendingPastIt(edge: VerticalEdge) throws {
+    let backdrop = VStack(spacing: 0) {
+        Color.clear.frame(height: 16)
+        Color.clear.frame(height: 80).background { ScrollBarBackdrop(edge: edge, tint: .red) }
+        Color.clear.frame(height: 16)
+    }
+    .frame(width: 24)
+    .background(.blue)
+    let renderer = ImageRenderer(content: backdrop)
+    renderer.scale = 1
+    let bitmap = NSBitmapImageRep(cgImage: try #require(renderer.cgImage))
+
+    func red(at y: Int) throws -> CGFloat {
+        let color = try #require(bitmap.colorAt(x: 12, y: y)?.usingColorSpace(.sRGB))
+        return color.redComponent
+    }
+
+    let outer = try red(at: edge == .top ? 24 : 87)
+    let middle = try red(at: 55)
+    let inner = try red(at: edge == .top ? 87 : 24)
+    #expect(outer > middle + 0.15)
+    #expect(middle > inner + 0.15)
+    #expect(try red(at: 12) < 0.05)
+    #expect(try red(at: 99) < 0.05)
+}

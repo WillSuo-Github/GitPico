@@ -33,7 +33,6 @@ struct WorkingCopyView: View {
                         Button("Stage") { store.stageSelectedFiles() }.disabled(store.isBusy || !store.workingTargets().contains { $0.isUnstaged && !$0.isConflicted })
                         Button("Unstage") { store.unstageSelectedFiles() }.disabled(store.isBusy || !store.workingTargets().contains { $0.isStaged && !$0.isConflicted })
                     }.font(.system(size: 11)).controlSize(.small).padding(.horizontal, 12).frame(height: 30)
-                        .background(Color.accentColor.opacity(0.07))
                 }
             } bottom: {
                 if store.snapshot?.operation == RepositoryOperation.none {

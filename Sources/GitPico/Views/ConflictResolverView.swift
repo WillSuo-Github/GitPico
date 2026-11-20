@@ -160,7 +160,7 @@ private struct ConflictSourceView: View {
                 Text(stage).foregroundStyle(.secondary)
                 Spacer()
             }
-                .font(.system(size: 11)).padding(.horizontal, 12).frame(height: 29).background(tint.opacity(0.08))
+                .font(.system(size: 11)).padding(.horizontal, 12).frame(height: 29)
         }.frame(maxWidth: .infinity)
     }
 }

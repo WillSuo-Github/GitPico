@@ -59,8 +59,8 @@ struct HistoryView: View {
                     }.controlSize(.small).padding(10).disabled(!store.canIntegrate)
                 }
                 if let failure = store.historyError, !commits.isEmpty {
-                    HStack { Image(systemName: "exclamationmark.triangle"); Text(failure).lineLimit(2); Spacer(); Button("Retry") { store.requestHistory() } }
-                        .font(.caption).padding(8).background(Pico.warning.opacity(0.1))
+                    HStack { Image(systemName: "exclamationmark.triangle").foregroundStyle(Pico.warning); Text(failure).lineLimit(2); Spacer(); Button("Retry") { store.requestHistory() } }
+                        .font(.caption).padding(8)
                 }
             } bottom: {
                 if store.historyPresentation.page.hasMore {

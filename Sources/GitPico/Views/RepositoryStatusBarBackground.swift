@@ -17,11 +17,7 @@ struct RepositoryStatusBarBackground: View {
     }
 
     var body: some View {
-        ZStack {
-            ScrollBarBackdrop(edge: .bottom)
-            Color.accentColor.opacity(isRunning ? (colorScheme == .dark ? 0.1 : 0.06) : 0)
-                .animation(Self.transition(isRunning: isRunning, reduceMotion: reduceMotion), value: isRunning)
-        }
-        .allowsHitTesting(false).accessibilityHidden(true)
+        ScrollBarBackdrop(edge: .bottom, tint: Color.accentColor.opacity(isRunning ? (colorScheme == .dark ? 0.1 : 0.06) : 0))
+            .animation(Self.transition(isRunning: isRunning, reduceMotion: reduceMotion), value: isRunning)
     }
 }
