@@ -45,6 +45,7 @@ struct ConflictResolverView: View {
                     Divider()
                     ConflictSourceView(title: labels?.incoming ?? String(localized: "Incoming"), stage: String(localized: "Incoming"), tint: .purple, version: snapshot.version(3), preview: showFullSources ? nil : region?.incoming)
                 }.frame(height: sourceHeight)
+                    .environment(\.repositoryStatusBarInset, 0)
                 Divider()
                 if snapshot.canEdit {
                     if !document.regions.isEmpty {

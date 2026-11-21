@@ -5,6 +5,7 @@ import SwiftUI
 struct ContentView: View {
     @Bindable var store: RepositoryStore
     var showsSidebar = true
+    var statusBarInset: CGFloat = 0
     var body: some View {
         Group {
             if store.snapshot == nil || store.isChoosingRepository {
@@ -17,7 +18,10 @@ struct ContentView: View {
                         .navigationSplitViewColumnWidth(min: 220, ideal: 359, max: 450)
                         .toolbar { ToolbarItem { RepositoryMenu(store: store) } }
                 } detail: { RepositoryDetailView(store: store) }
-            } else { RepositoryDetailView(store: store) }
+            } else {
+                RepositoryDetailView(store: store)
+                    .environment(\.repositoryStatusBarInset, statusBarInset)
+            }
         }
         .frame(minWidth: showsSidebar ? 1080 : 0, minHeight: showsSidebar ? 680 : 0)
         .navigationTitle(store.isChoosingRepository ? String(localized: "Repositories") : store.title)

@@ -178,8 +178,8 @@ import SwiftUI
             }
         } else { window.tab.accessoryView = nil }
         window.toolbar?.displayMode = .iconOnly
-        // The titlebar background draws an opaque band over the picker's gradient; repository pages keep it for their scroll-edge effect.
-        window.titlebarAppearsTransparent = tab.showsRepositoryPicker || tab.store.snapshot == nil
+        // Let the workspace paint one surface through the titlebar and its pinned headers.
+        window.titlebarAppearsTransparent = true
         window.setRepositoryDropEnabled(tab.acceptsRepositoryDrops)
         if let content = window.contentViewController { configureContentLayout(content) }
     }

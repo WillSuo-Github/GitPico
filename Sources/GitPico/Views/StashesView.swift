@@ -94,6 +94,7 @@ struct StashDetailView: View {
                                 Button("Apply \(selected.count) Selected…") { store.stashAction(.files(stash, selected.sorted())) }.controlSize(.small)
                             }
                         }
+                        .background(.bar.opacity(0.6))
                         ForEach(detail.files) { file in
                             StashFileDisclosure(store: store, repository: repository, stash: stash, file: file, statistics: detail.statistics[file.path], expanded: Binding(get: { expanded.contains(file.path) }, set: { if $0 { expanded.insert(file.path) } else { expanded.remove(file.path) } }), selected: Binding(get: { selected.contains(file.path) }, set: { if $0 { selected.insert(file.path) } else { selected.remove(file.path) } }))
                         }

@@ -45,6 +45,7 @@ struct BinaryComparisonView: View {
     let left: BinaryFileSource
     let right: BinaryFileSource
     var version: Date? = nil
+    @Environment(\.repositoryStatusBarInset) private var statusBarInset
     @State private var sides: [BinaryPreviewSide] = []
     @State private var previewPath: String?
     @State private var failure: String?
@@ -76,7 +77,9 @@ struct BinaryComparisonView: View {
                     Text(before.exists && after.exists && before.digest == after.digest ? "The file contents are identical." : "The file contents differ.").font(.callout).foregroundStyle(.secondary)
                 } else { ProgressView("Loading file comparison…").frame(maxWidth: .infinity).padding(30) }
             }.padding(16)
-        }.task(id: BinaryPreviewRequest(path: path, original: originalPath, left: left, right: right, version: version)) {
+        }
+        .pinnedScrollInsets(EdgeInsets(top: 0, leading: 0, bottom: statusBarInset, trailing: 0))
+        .task(id: BinaryPreviewRequest(path: path, original: originalPath, left: left, right: right, version: version)) {
             if previewPath != path { sides = []; previewPath = path }
             failure = nil
             do {

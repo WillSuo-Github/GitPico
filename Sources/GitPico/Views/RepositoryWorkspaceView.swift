@@ -5,6 +5,8 @@ struct RepositoryWorkspaceView: View {
     @Bindable var tab: RepositoryTab
     var presentsAlerts: Bool
     var descriptorChanged: () -> Void
+    private var showsRepository: Bool { !tab.showsRepositoryPicker && tab.store.snapshot != nil }
+    private var statusBarInset: CGFloat { showsRepository ? RepositoryStatusBar.height : 0 }
     init(workspace: RepositoryWorkspace, tab: RepositoryTab? = nil, presentsAlerts: Bool = true, descriptorChanged: @escaping () -> Void = {}) {
         self.workspace = workspace
         self.tab = tab ?? workspace.activeTab
@@ -15,13 +17,14 @@ struct RepositoryWorkspaceView: View {
         NavigationSplitView {
             VStack(spacing: 0) {
                 Group {
-                    if tab.showsRepositoryPicker || tab.store.snapshot == nil {
-                        RepositoryPickerSidebarView(workspace: workspace, tab: tab)
-                    } else {
+                    if showsRepository {
                         SidebarView(store: tab.store)
+                            .environment(\.repositoryStatusBarInset, statusBarInset)
+                    } else {
+                        RepositoryPickerSidebarView(workspace: workspace, tab: tab)
                     }
                 }
-                    .safeAreaPadding(.bottom, RepositoryStatusBar.height)
+                .safeAreaPadding(.bottom, showsRepository ? 0 : RepositoryStatusBar.height)
             }
             .navigationSplitViewColumnWidth(min: 240, ideal: 280, max: 400)
             .toolbar {
@@ -41,17 +44,30 @@ struct RepositoryWorkspaceView: View {
                         Button("Retry", action: workspace.retrySessionSave)
                     }
                 }
-                ContentView(store: tab.store, showsSidebar: false)
+                ContentView(store: tab.store, showsSidebar: false, statusBarInset: statusBarInset)
             }
-            // The split view's columns ignore the window-level inset; keep fixed bottom controls above the status bar.
-            .safeAreaPadding(.bottom, RepositoryStatusBar.height)
+            .safeAreaPadding(.bottom, showsRepository ? 0 : RepositoryStatusBar.height)
+            .overlay(alignment: .bottom) {
+                if showsRepository {
+                    RepositoryStatusBarBackground(isRunning: tab.store.isBusy)
+                        .frame(height: statusBarInset)
+                }
+            }
         }
         .navigationSplitViewStyle(.balanced)
+        .background {
+            if showsRepository { Rectangle().fill(.windowBackground).ignoresSafeArea(.container, edges: .top) }
+        }
         .frame(minWidth: 1080, minHeight: 680)
         .disabled(tab.isOpening)
         .toolbar { RepositoryToolbar(store: tab.store) }
         .toolbar(removing: .title)
-        .safeAreaInset(edge: .bottom, spacing: 0) { RepositoryStatusBar(store: tab.store) }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !showsRepository { RepositoryStatusBar(store: tab.store) }
+        }
+        .overlay(alignment: .bottom) {
+            if showsRepository { RepositoryStatusBar(store: tab.store, showsBackground: false) }
+        }
         .onChange(of: tab.title, initial: true) { descriptorChanged() }
         .onChange(of: tab.isBusy) { descriptorChanged() }
         .onChange(of: tab.store.snapshot == nil) { descriptorChanged() }

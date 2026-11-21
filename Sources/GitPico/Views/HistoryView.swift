@@ -3,13 +3,14 @@ import SwiftUI
 
 struct HistoryView: View {
     @Bindable var store: RepositoryStore
+    @Environment(\.repositoryStatusBarInset) private var statusBarHeight
     @State private var preferences = AppPreferences.shared
     @State private var showingSearchFilters = false
     var commits: [Commit] { store.visibleCommits }
     var body: some View {
         PersistentSplitView(name: "history", width: 320) {
-            PinnedScrollPane { insets in
-                HistoryCommitTable(store: store, presentation: store.historyPresentation, grouped: preferences.historyGroups, compact: preferences.historyCompact, showGraph: preferences.historyShowGraph && store.search.isEmpty, canModifyHistory: store.canIntegrate, selection: store.selectedCommit?.hash, reveal: store.historyReveal, insets: insets)
+            PinnedScrollPane(bottomIsFloating: true) { insets in
+                HistoryCommitTable(store: store, presentation: store.historyPresentation, grouped: preferences.historyGroups, compact: preferences.historyCompact, showGraph: preferences.historyShowGraph && store.search.isEmpty, canModifyHistory: store.canIntegrate, selection: store.selectedCommit?.hash, reveal: store.historyReveal, insets: insets, statusBarHeight: statusBarHeight)
                     .overlay { if commits.isEmpty { if store.isLoadingHistory { ProgressView("Loading history…") } else { EmptyPane(title: store.historyError ?? (store.search.isEmpty ? String(localized: "No commits yet") : String(localized: "No matching commits")), subtitle: store.search.isEmpty ? "" : String(localized: "Try a different message, author or hash."), icon: store.search.isEmpty ? "clock" : "magnifyingglass") } } }
             } top: {
                 PaneBar(title: store.destination.ref == nil ? "All Branches" : "\(store.destination.title)",
@@ -65,7 +66,11 @@ struct HistoryView: View {
             } bottom: {
                 if store.historyPresentation.page.hasMore {
                     if store.historyOptions.limit < 20_000 {
-                        Button("Load More · \(commits.count) shown", action: store.loadMoreHistory).frame(maxWidth: .infinity).padding(8).disabled(store.isLoadingHistory || store.isBusy)
+                        Button("Load More · \(commits.count) shown", action: store.loadMoreHistory)
+                            .buttonStyle(.bordered)
+                            .background(.windowBackground, in: RoundedRectangle(cornerRadius: 7))
+                            .padding(8)
+                            .disabled(store.isLoadingHistory || store.isBusy)
                     } else {
                         Text("Showing the first 20,000 matches. Narrow the search to find older commits.").font(.caption).foregroundStyle(.secondary).padding(8)
                     }
@@ -74,6 +79,7 @@ struct HistoryView: View {
         } trailing: {
             CommitDetailView(store: store)
         }
+        .background(.windowBackground)
         .onChange(of: store.historyOptions.firstParent) { store.requestHistory() }
         .onChange(of: store.historyOptions.sortByDate) { store.requestHistory() }
     }

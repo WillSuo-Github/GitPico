@@ -4,6 +4,7 @@ import SwiftUI
 struct RepositoryStatusBar: View {
     static let height: CGFloat = 28
     @Bindable var store: RepositoryStore
+    var showsBackground = true
 
     var body: some View {
         HStack(spacing: 10) {
@@ -57,7 +58,10 @@ struct RepositoryStatusBar: View {
         }
         .font(.system(size: 11)).lineLimit(1).padding(.horizontal, 14).frame(height: Self.height)
         .background {
-            RepositoryStatusBarBackground(isRunning: store.isBusy)
+            Color.clear.contentShape(Rectangle()).onTapGesture {}.accessibilityHidden(true)
+        }
+        .background {
+            if showsBackground { RepositoryStatusBarBackground(isRunning: store.isBusy) }
         }
     }
     private var separator: some View { Divider().frame(height: 12) }

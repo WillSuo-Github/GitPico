@@ -16,6 +16,7 @@ struct ChunkDiffView: View {
     var discardChunk: ((Int) -> Void)? = nil
     var discardLines: ((Set<PatchLineID>) -> Void)? = nil
     var exportLines: ((Set<PatchLineID>) -> Void)? = nil
+    var backgroundStyle = AnyShapeStyle(Color(nsColor: .textBackgroundColor))
     @State private var preferences = AppPreferences.shared
     @State private var selectedLines = PatchLineSelection()
     @State private var findQuery = ""
@@ -77,11 +78,11 @@ struct ChunkDiffView: View {
                                 }
                             }
                             if previews.count < patch.hunks.count || previews.last?.isTruncated == true { Text("Preview limited to 8,000 lines. Review the complete diff in an external tool.").font(.caption).foregroundStyle(.secondary).padding(12) }
-                        }.frame(minWidth: geometry.size.width, minHeight: max(0, geometry.size.height - insets.top), alignment: .topLeading)
+                        }.frame(minWidth: geometry.size.width, minHeight: max(0, geometry.size.height - insets.top - insets.bottom), alignment: .topLeading)
                     }.defaultScrollAnchor(.topLeading).pinnedScrollInsets(insets)
                         .onChange(of: findReveal) { if let focusedLine { proxy.scrollTo(focusedLine, anchor: .center) } }
                     }
-                }.background(Color(nsColor: .textBackgroundColor))
+                }.background(backgroundStyle)
             } top: {
                 DiffFindBar(query: $findQuery, matches: matches, selection: $focusedLine) { findReveal = UUID() }
                 HStack(spacing: 10) {

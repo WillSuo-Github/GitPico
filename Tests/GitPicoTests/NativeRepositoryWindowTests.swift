@@ -173,13 +173,13 @@ import Testing
     first.store.showRepositories()
     #expect(w.tabs.count == 1 && first.showsRepositoryPicker && f.windows.window(for: first.id) === firstWindow)
     #expect(firstWindow.tabGroup?.isTabBarVisible == false)
-    // Only the picker lets its gradient run under the toolbar; repository pages keep the titlebar scroll-edge effect.
+    // Both destinations draw their background through the native toolbar.
     try await Task.sleep(for: .milliseconds(300))
     #expect(firstWindow.titlebarAppearsTransparent)
     w.returnToRepository(from: first.store)
     #expect(!first.showsRepositoryPicker && first.store.commitSubject == "Keep native tab draft")
     try await Task.sleep(for: .milliseconds(300))
-    #expect(!firstWindow.titlebarAppearsTransparent)
+    #expect(firstWindow.titlebarAppearsTransparent)
     let second = w.newTab()
     let secondWindow = try #require(f.windows.window(for: second.id))
     #expect(firstWindow.tabGroup === secondWindow.tabGroup)
@@ -217,10 +217,161 @@ import Testing
     #expect(window.titlebarAppearsTransparent && !tab.store.canGoBack && tab.store.canGoForward)
     await w.navigateRepositories(.forward, from: tab.store)
     f.windows.updateDescriptor(tab.id)
-    #expect(!tab.showsRepositoryPicker && window.title == tab.title && !window.titlebarAppearsTransparent)
+    #expect(!tab.showsRepositoryPicker && window.title == tab.title && window.titlebarAppearsTransparent)
     #expect(tab.store.commitSubject == "Keep native navigation draft")
     #expect(w.tabs.count == 1 && f.windows.window(for: tab.id) === window)
     #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
+}
+
+@Test(arguments: [false, true]) @MainActor
+func nativeHistoryScrollsBehindTheStatusBar(paginated: Bool) async throws {
+    let fixture = try await PreviewFixture.make(commits: 40, branches: 1)
+    defer { fixture.clean() }
+    let workspace = RepositoryWorkspace(library: fixture.store.library, draftsFile: fixture.root.appendingPathComponent("drafts.json"))
+    await workspace.open(await fixture.repository.root)
+    let tab = workspace.activeTab
+    let windows = NativeRepositoryWindows(workspace: workspace, permitsPresentation: false)
+    windows.start()
+    defer { windows.stop(); workspace.shutdown() }
+    let window = try #require(windows.window(for: tab.id))
+    window.setContentSize(NSSize(width: 1200, height: 720))
+    let content = try #require(window.contentView)
+    let expectedCommits = paginated ? 30 : 40
+    tab.store.navigate(.history)
+    tab.store.historyOptions.limit = expectedCommits
+    tab.store.requestHistory()
+
+    func historyTable(in view: NSView) -> HistoryTableView? {
+        if let table = view as? HistoryTableView { return table }
+        return view.subviews.lazy.compactMap { historyTable(in: $0) }.first
+    }
+    for _ in 0..<100 {
+        content.layoutSubtreeIfNeeded()
+        if let table = historyTable(in: content),
+           table.numberOfRows >= expectedCommits,
+           let insets = table.enclosingScrollView?.contentView.contentInsets,
+           insets.top > 0,
+           (insets.bottom > RepositoryStatusBar.height) == paginated { break }
+        try await Task.sleep(for: .milliseconds(20))
+    }
+    let table = try #require(historyTable(in: content))
+    let scroll = try #require(table.enclosingScrollView)
+    let clip = scroll.contentView
+    try #require(table.numberOfRows >= expectedCommits)
+    #expect(tab.store.historyPresentation.page.hasMore == paginated)
+    #expect(!scroll.drawsBackground && table.backgroundColor == .clear)
+    let viewport = clip.convert(clip.bounds, to: nil)
+    let windowBounds = content.convert(content.bounds, to: nil)
+    let statusTop = windowBounds.minY + RepositoryStatusBar.height
+    #expect(abs(viewport.minY - windowBounds.minY) < 1)
+    if !NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency {
+        let blur = try #require(scroll.subviews.first { !$0.backgroundFilters.isEmpty })
+        let frame = blur.convert(blur.bounds, to: nil)
+        #expect(abs(frame.minY - windowBounds.minY) < 1)
+        #expect(abs(frame.maxY - statusTop) < 1)
+    }
+    let bottomInset = clip.contentInsets.bottom
+    #expect(paginated ? bottomInset > RepositoryStatusBar.height : bottomInset == RepositoryStatusBar.height)
+
+    var bounds = clip.bounds
+    bounds.origin.y = table.rect(ofRow: 20).midY - bounds.height + RepositoryStatusBar.height / 2
+    clip.scroll(to: clip.constrainBoundsRect(bounds).origin)
+    let passingRow = table.convert(table.rect(ofRow: 20), to: nil)
+    #expect(passingRow.midY > windowBounds.minY && passingRow.midY < statusTop)
+
+    bounds.origin.y = table.bounds.maxY
+    clip.scroll(to: clip.constrainBoundsRect(bounds).origin)
+    let lastRow = table.convert(table.rect(ofRow: table.numberOfRows - 1), to: nil)
+    #expect(lastRow.minY >= windowBounds.minY + bottomInset - 1)
+    if paginated {
+        tab.store.loadMoreHistory()
+        await tab.store.historyTask?.value
+        for _ in 0..<50 {
+            content.layoutSubtreeIfNeeded()
+            if clip.contentInsets.bottom == RepositoryStatusBar.height { break }
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        #expect(tab.store.visibleCommits.count == 40)
+        #expect(!tab.store.historyPresentation.page.hasMore)
+        #expect(clip.contentInsets.bottom == RepositoryStatusBar.height)
+    }
+    #expect(!window.isVisible && !NSApp.isActive)
+}
+
+@Test @MainActor func nativeSidebarScrollsBehindBothFixedBars() async throws {
+    let fixture = try await PreviewFixture.make(commits: 1, branches: 1)
+    defer { fixture.clean() }
+    let tip = try #require(fixture.tips.first)
+    let tags = (1...45).map { "create refs/tags/sidebar-preview-\($0) \(tip)\n" }.joined()
+    _ = try await GitProcess.run(["update-ref", "--stdin"], at: fixture.repository.root, input: Data(tags.utf8))
+    let workspace = RepositoryWorkspace(library: fixture.store.library, draftsFile: fixture.root.appendingPathComponent("drafts.json"))
+    await workspace.open(await fixture.repository.root)
+    let windows = NativeRepositoryWindows(workspace: workspace, permitsPresentation: false)
+    windows.start()
+    defer { windows.stop(); workspace.shutdown() }
+    let window = try #require(windows.window(for: workspace.activeTab.id))
+    window.setContentSize(NSSize(width: 1200, height: 720))
+    let content = try #require(window.contentView)
+
+    func outline(in view: NSView) -> NSOutlineView? {
+        if let table = view as? NSOutlineView, table.convert(table.bounds, to: nil).minX < 1 { return table }
+        return view.subviews.lazy.compactMap { outline(in: $0) }.first
+    }
+    for _ in 0..<100 {
+        content.layoutSubtreeIfNeeded()
+        if let table = outline(in: content), table.numberOfRows >= 45,
+           table.enclosingScrollView?.contentView.layer?.mask is CAGradientLayer { break }
+        try await Task.sleep(for: .milliseconds(20))
+    }
+
+    let table = try #require(outline(in: content))
+    try #require(table.numberOfRows >= 45)
+    let scroll = try #require(table.enclosingScrollView)
+    let clip = scroll.contentView
+    let layer = try #require(clip.layer)
+    let mask = try #require(layer.mask as? CAGradientLayer)
+    #expect(mask.startPoint.y == (clip.isFlipped ? 0 : 1))
+    let insets = clip.contentInsets
+    let viewport = clip.convert(clip.bounds, to: nil)
+    #expect(insets.top > 0 && insets.bottom > RepositoryStatusBar.height)
+    #expect(viewport.maxY <= window.contentLayoutRect.maxY + 1)
+    #expect(abs(viewport.minY - content.convert(content.bounds, to: nil).minY) < 1)
+
+    var position = clip.bounds
+    position.origin.y = table.rect(ofRow: 15).midY - insets.top / 2
+    clip.scroll(to: clip.constrainBoundsRect(position).origin)
+    let passingRow = table.convert(table.rect(ofRow: 15), to: nil)
+    #expect(passingRow.midY > viewport.maxY - insets.top && passingRow.midY < viewport.maxY)
+    #expect(layer.mask === mask && mask.frame == layer.bounds)
+    if !NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency {
+        let stops = try #require(mask.locations)
+        let colors = try #require(mask.colors as? [CGColor])
+        let headerEnd = insets.top / viewport.height
+        #expect(stops[1].doubleValue < headerEnd / 2)
+        #expect((0.12...0.20).contains(colors[1].alpha))
+        let shoulder = try #require(stops.lastIndex { $0.doubleValue < headerEnd })
+        #expect((0.12...0.20).contains(colors[shoulder].alpha))
+        #expect(stops[shoulder + 1].doubleValue > headerEnd)
+        #expect(colors[shoulder + 1].alpha == 1)
+        let statusStart = 1 - RepositoryStatusBar.height / viewport.height
+        let statusStop = try #require(stops.firstIndex { $0.doubleValue > statusStart })
+        #expect((0.08...0.24).contains(colors[statusStop].alpha))
+    }
+
+    position.origin.y = table.bounds.minY - insets.top
+    clip.scroll(to: clip.constrainBoundsRect(position).origin)
+    #expect(table.convert(table.rect(ofRow: 0), to: nil).maxY <= viewport.maxY - insets.top + 1)
+
+    position.origin.y = table.rect(ofRow: 32).midY - position.height + RepositoryStatusBar.height / 2
+    clip.scroll(to: clip.constrainBoundsRect(position).origin)
+    let statusRow = table.convert(table.rect(ofRow: 32), to: nil)
+    #expect(statusRow.midY > viewport.minY && statusRow.midY < viewport.minY + RepositoryStatusBar.height)
+
+    position.origin.y = table.bounds.maxY
+    clip.scroll(to: clip.constrainBoundsRect(position).origin)
+    let lastRow = table.convert(table.rect(ofRow: table.numberOfRows - 1), to: nil)
+    #expect(lastRow.minY >= viewport.minY + insets.bottom - 1)
+    #expect(!window.isVisible && !NSApp.isActive)
 }
 
 @Test @MainActor func nativeWindowCloseProtectsDraftAndKeepsLastRepository() async throws {

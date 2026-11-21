@@ -68,6 +68,7 @@ struct BranchesReviewView: View {
                                 }.buttonStyle(.plain)
                             } }
                         }.listStyle(.plain)
+                        .pinnedScrollInsets(EdgeInsets(top: 0, leading: 0, bottom: insets.bottom, trailing: 0))
                         .overlay { if (changeset ? item.files.isEmpty : item.commits.isEmpty) { EmptyPane(title: changeset ? String(localized: "No file differences") : String(localized: "No unique commits"), subtitle: String(localized: "Everything on this branch is already in \(baseName)."), icon: "checkmark.seal") } }
                     } else if let failure { InspectionErrorView(message: failure) }
                     else { EmptyPane(title: String(localized: "Select a branch"), subtitle: String(localized: "See how far it has drifted from \(baseName) and what would be merged."), icon: "arrow.triangle.branch") }

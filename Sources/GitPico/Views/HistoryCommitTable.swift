@@ -1,4 +1,5 @@
 import AppKit
+import CoreImage
 import GitCore
 import SwiftUI
 import UniformTypeIdentifiers
@@ -6,6 +7,7 @@ import UniformTypeIdentifiers
 /// Fixed row heights avoid measuring SwiftUI cells again on every branch change.
 /// The store owns history and selection; the coordinator only indexes visible rows.
 struct HistoryCommitTable: NSViewRepresentable {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let store: RepositoryStore
     let presentation: HistoryPresentation
     let grouped: Bool
@@ -15,10 +17,14 @@ struct HistoryCommitTable: NSViewRepresentable {
     let selection: String?
     let reveal: HistoryReveal?
     var insets = EdgeInsets()
+    var statusBarHeight: CGFloat = 0
 
     func makeCoordinator() -> Coordinator { Coordinator() }
-    func makeNSView(context: Context) -> NSScrollView { context.coordinator.makeView() }
-    func updateNSView(_ view: NSScrollView, context: Context) { context.coordinator.update(self) }
+    func makeNSView(context: Context) -> HistoryScrollView { context.coordinator.makeView() }
+    func updateNSView(_ view: HistoryScrollView, context: Context) {
+        view.setStatusBlurHeight(reduceTransparency ? 0 : statusBarHeight)
+        context.coordinator.update(self)
+    }
 
     @MainActor final class Coordinator: NSObject, NSTableViewDataSource, NSTableViewDelegate {
         let table = HistoryTableView()
@@ -35,17 +41,17 @@ struct HistoryCommitTable: NSViewRepresentable {
             }
         }
 
-        func makeView() -> NSScrollView {
-            let scroll = NSScrollView()
+        func makeView() -> HistoryScrollView {
+            let scroll = HistoryScrollView()
             scroll.hasVerticalScroller = true
             scroll.autohidesScrollers = true
-            scroll.drawsBackground = true
-            scroll.backgroundColor = .textBackgroundColor
+            // The SwiftUI history pane supplies the window surface behind the table.
+            scroll.drawsBackground = false
             let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("history"))
             table.addTableColumn(column)
             table.headerView = nil
             table.style = .plain
-            table.backgroundColor = .textBackgroundColor
+            table.backgroundColor = .clear
             table.intercellSpacing = .zero
             table.usesAutomaticRowHeights = false
             table.floatsGroupRows = false
@@ -218,6 +224,59 @@ struct HistoryCommitTable: NSViewRepresentable {
             }
         }
     }
+}
+
+final class HistoryScrollView: NSScrollView {
+    private var statusBlur: ScrollEdgeBlurView?
+    private var statusBlurHeight: CGFloat = 0
+
+    func setStatusBlurHeight(_ height: CGFloat) {
+        guard height != statusBlurHeight else { return }
+        statusBlurHeight = height
+        if height > 0, statusBlur == nil {
+            let blur = ScrollEdgeBlurView(edge: .bottom)
+            addSubview(blur, positioned: .above, relativeTo: contentView)
+            statusBlur = blur
+        } else if height == 0 {
+            statusBlur?.removeFromSuperview()
+            statusBlur = nil
+        }
+        tile()
+    }
+
+    override func tile() {
+        super.tile()
+        let viewport = contentView.frame
+        let height = min(viewport.height, statusBlurHeight)
+        let bottom = isFlipped ? viewport.maxY - height : viewport.minY
+        statusBlur?.frame = NSRect(x: viewport.minX, y: bottom, width: viewport.width, height: height)
+    }
+}
+
+final class ScrollEdgeBlurView: NSView {
+    private let fade = CAGradientLayer()
+
+    init(edge: VerticalEdge, radius: CGFloat = 7) {
+        super.init(frame: .zero)
+        wantsLayer = true
+        if let blur = CIFilter(name: "CIGaussianBlur", parameters: [kCIInputRadiusKey: radius]) {
+            backgroundFilters = [blur]
+        }
+        fade.colors = [NSColor.white.cgColor, NSColor.clear.cgColor]
+        fade.startPoint = CGPoint(x: 0.5, y: edge == .top ? 1 : 0)
+        fade.endPoint = CGPoint(x: 0.5, y: edge == .top ? 0 : 1)
+        layer?.masksToBounds = true
+        layer?.mask = fade
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override func layout() {
+        super.layout()
+        fade.frame = bounds
+    }
+
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
 }
 
 final class HistoryTableView: NSTableView {
@@ -448,6 +507,12 @@ private final class HistoryCommitCell: NSTableCellView {
             tint.setStroke()
             path.lineWidth = 1.6; path.stroke()
         }
+        let node = NSBezierPath(ovalIn: NSRect(x: x(row.lane) - 3.5, y: mid - 3.5, width: 7, height: 7))
+        let connections = NSBezierPath(rect: rect)
+        connections.append(node)
+        connections.windingRule = .evenOdd
+        NSGraphicsContext.saveGraphicsState()
+        connections.addClip()
         for edge in row.incoming {
             let path = NSBezierPath(); path.move(to: NSPoint(x: x(edge.from), y: rect.minY)); path.line(to: NSPoint(x: x(edge.to), y: mid)); stroke(path, color: edge.color)
         }
@@ -455,7 +520,7 @@ private final class HistoryCommitCell: NSTableCellView {
             let path = NSBezierPath(); path.move(to: NSPoint(x: x(edge.from), y: mid))
             path.curve(to: NSPoint(x: x(edge.to), y: rect.maxY), controlPoint1: NSPoint(x: x(edge.from), y: mid + 16), controlPoint2: NSPoint(x: x(edge.to), y: rect.maxY - 16)); stroke(path, color: edge.color)
         }
-        let node = NSBezierPath(ovalIn: NSRect(x: x(row.lane) - 3.5, y: mid - 3.5, width: 7, height: 7))
-        NSColor.textBackgroundColor.setFill(); node.fill(); stroke(node, color: row.color)
+        NSGraphicsContext.restoreGraphicsState()
+        stroke(node, color: row.color)
     }
 }

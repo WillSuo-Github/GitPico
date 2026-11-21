@@ -87,7 +87,10 @@ struct FileHistoryView: View {
                 if let current {
                     if loadingPreview { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity).padding(insets) }
                     else if let previewError { InspectionErrorView(message: previewError).padding(insets) }
-                    else if mode == "Diff" { DiffView(text: preview, title: current.path, showsHeader: false, scrollTopInset: insets.top) }
+                    else if mode == "Diff" {
+                        DiffView(text: preview, title: current.path, showsHeader: false, scrollTopInset: insets.top)
+                            .environment(\.repositoryStatusBarInset, insets.bottom)
+                    }
                     else if mode == "Blame" { BlameView(lines: blame, inspect: { hash in Task { do { inspectedCommit = try await repository.commit(at: hash) } catch { previewError = error.localizedDescription } } }, scrollInsets: insets) }
                     else { InspectionTextView(text: preview, scrollInsets: insets) }
                 } else { EmptyPane(title: String(localized: "Select a revision"), subtitle: String(localized: "Pick a commit to see how this file changed, its full contents or line-by-line blame."), icon: "doc.text").padding(insets) }

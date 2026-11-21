@@ -49,7 +49,7 @@ struct DiffView: View {
                             }
                         }
                         .padding(.vertical, 7)
-                        .frame(minWidth: geometry.size.width, minHeight: max(0, geometry.size.height - insets.top), alignment: .topLeading)
+                        .frame(minWidth: geometry.size.width, minHeight: max(0, geometry.size.height - insets.top - insets.bottom), alignment: .topLeading)
                     }
                     .defaultScrollAnchor(.topLeading).pinnedScrollInsets(insets)
                 } }

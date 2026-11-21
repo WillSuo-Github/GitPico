@@ -88,6 +88,7 @@ struct CommitDetailView: View {
                     HStack { SheetTitle("Merge Parent Comparison", icon: "arrow.triangle.merge"); Spacer(); Button("Close") { parentComparison = nil }.keyboardShortcut(.cancelAction) }
                     RevisionComparisonView(store: store, repository: repository, initialLeft: request.parent, initialRight: request.commit)
                 }.padding(20).frame(width: 1060, height: 720)
+                    .environment(\.repositoryStatusBarInset, 0)
             }
         }
     }
@@ -156,7 +157,7 @@ struct ChangedFilesHeader<Trailing: View>: View {
             Button(allExpanded ? "Collapse All" : "Expand All", action: toggle).buttonStyle(.borderless).font(.system(size: 11)).disabled(count == 0)
         }
         .padding(.horizontal, 16).frame(height: 34)
-        .background(.bar.opacity(0.6)).overlay(alignment: .top) { Divider() }
+        .overlay(alignment: .top) { Divider() }
     }
 }
 extension ChangedFilesHeader where Trailing == EmptyView {
@@ -185,7 +186,7 @@ struct CommitFileDisclosure: View {
                 if stats?.isBinary == true || BinaryComparisonView.isImageCandidate(file.path) {
                     BinaryComparisonView(repository: repository, path: file.path, left: commit.parents.first.map { .revision($0) } ?? .empty, right: .revision(commit.hash)).frame(minHeight: 320)
                 } else if let prepared {
-                    ChunkDiffView(prepared: prepared, leftTitle: String(localized: "Parent"), rightTitle: commit.shortHash)
+                    ChunkDiffView(prepared: prepared, leftTitle: String(localized: "Parent"), rightTitle: commit.shortHash, backgroundStyle: AnyShapeStyle(.windowBackground))
                         .frame(height: min(520, max(160, CGFloat(prepared.previews.reduce(0) { $0 + $1.lines.count }) * 21 + CGFloat(prepared.previews.count) * 30 + 90)))
                 } else if let error { Text(error).font(.caption).foregroundStyle(.red).padding(12) }
                 else { ProgressView().controlSize(.small).padding(12) }
@@ -267,10 +268,18 @@ struct HistoricTreeView: View {
                         HistoricalFileMenu(store: store, revision: commit.hash, paths: selection.contains(node.path) ? selection.sorted() : [node.path])
                     }
                 }
-            }.listStyle(.plain).pinnedScrollInsets(scrollInsets).frame(height: 180 + scrollInsets.top)
+            }.listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .pinnedScrollInsets(EdgeInsets(top: scrollInsets.top, leading: 0, bottom: 0, trailing: 0))
+                .frame(height: 180 + scrollInsets.top)
             Divider()
             GeometryReader { geometry in
-                ScrollView([.horizontal, .vertical]) { Text(text).font(.system(size: 11, design: .monospaced)).textSelection(.enabled).padding(14).frame(minWidth: geometry.size.width, minHeight: geometry.size.height, alignment: .topLeading) }.defaultScrollAnchor(.topLeading)
+                ScrollView([.horizontal, .vertical]) {
+                    Text(text).font(.system(size: 11, design: .monospaced)).textSelection(.enabled).padding(14)
+                        .frame(minWidth: geometry.size.width, minHeight: max(0, geometry.size.height - scrollInsets.bottom), alignment: .topLeading)
+                }
+                .defaultScrollAnchor(.topLeading)
+                .pinnedScrollInsets(EdgeInsets(top: 0, leading: 0, bottom: scrollInsets.bottom, trailing: 0))
             }
         }
         .task { do { files = try await repository.fileTree(at: commit.hash) } catch { text = error.localizedDescription } }

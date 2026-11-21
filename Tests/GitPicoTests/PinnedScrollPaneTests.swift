@@ -3,11 +3,14 @@ import SwiftUI
 import Testing
 @testable import GitPico
 
-@Test(arguments: [false, true]) @MainActor
-func pinnedBarsInsetTheContentsWithoutShrinkingTheViewport(useList: Bool) async throws {
-    let insets = EdgeInsets(top: 44, leading: 0, bottom: 36, trailing: 0)
+@Test(arguments: [false, true], [false, true]) @MainActor
+func pinnedBarsInsetTheContentsWithoutShrinkingTheViewport(useList: Bool, floatingBottom: Bool) async throws {
+    let statusBarHeight = RepositoryStatusBar.height
+    let footerHeight: CGFloat = 36
+    let insets = EdgeInsets(top: 44, leading: 0, bottom: footerHeight + statusBarHeight, trailing: 0)
     var latest: ScrollGeometry?
-    let fixture = PinnedScrollPane { measuredInsets in
+    var footerFrame: CGRect?
+    let fixture = PinnedScrollPane(bottomIsFloating: floatingBottom) { measuredInsets in
         Group {
             if useList {
                 List(0..<30, id: \.self) { index in Text(verbatim: "Row \(index)").frame(height: 24) }
@@ -25,8 +28,11 @@ func pinnedBarsInsetTheContentsWithoutShrinkingTheViewport(useList: Bool) async 
     } top: {
         Text(verbatim: "Upper controls").frame(height: insets.top)
     } bottom: {
-        Text(verbatim: "Lower controls").frame(height: insets.bottom)
+        Text(verbatim: "Lower controls").frame(height: footerHeight)
+            .onGeometryChange(for: CGRect.self, of: { $0.frame(in: .named("fixture")) }) { footerFrame = $0 }
     }
+    .environment(\.repositoryStatusBarInset, statusBarHeight)
+    .coordinateSpace(.named("fixture"))
     let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 320, height: 220), styleMask: .borderless, backing: .buffered, defer: false)
     window.isReleasedWhenClosed = false
     let host = NSHostingView(rootView: fixture)
@@ -34,7 +40,7 @@ func pinnedBarsInsetTheContentsWithoutShrinkingTheViewport(useList: Bool) async 
     defer { window.contentView = nil; window.close() }
     for _ in 0..<40 {
         host.layoutSubtreeIfNeeded()
-        if latest?.contentInsets == insets { break }
+        if latest?.contentInsets == insets, footerFrame != nil { break }
         try await Task.sleep(for: .milliseconds(20))
     }
     let geometry = try #require(latest)
@@ -42,35 +48,84 @@ func pinnedBarsInsetTheContentsWithoutShrinkingTheViewport(useList: Bool) async 
     #expect(geometry.contentInsets.bottom == insets.bottom)
     #expect(abs(geometry.visibleRect.height - 220) < 1)
     #expect(abs(geometry.visibleRect.minY + insets.top) < 1)
+    let footer = try #require(footerFrame)
+    #expect(abs(footer.maxY - (220 - statusBarHeight)) < 1)
     #expect(!window.isVisible && !NSApp.isActive)
 }
 
 @Test(
     .enabled(if: !NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency, "Requires transparent materials."),
-    arguments: [VerticalEdge.top, .bottom]
+    arguments: [VerticalEdge.top, .bottom], [ColorScheme.light, .dark]
 ) @MainActor
-func scrollBarBackdropFadesAcrossTheBarWithoutExtendingPastIt(edge: VerticalEdge) throws {
-    let backdrop = VStack(spacing: 0) {
-        Color.clear.frame(height: 16)
-        Color.clear.frame(height: 80).background { ScrollBarBackdrop(edge: edge, tint: .red) }
-        Color.clear.frame(height: 16)
+func scrollBarBackdropFadesAcrossTheBarWithoutExtendingPastIt(edge: VerticalEdge, scheme: ColorScheme) throws {
+    let backdrop = HStack(spacing: 0) {
+        VStack(spacing: 0) {
+            Color.clear.frame(height: 16)
+            Color.clear.frame(height: 80).background { ScrollBarBackdrop(edge: edge) }
+            Color.clear.frame(height: 16)
+        }
+        .frame(width: 24)
+        .background(.blue)
+        Color.clear.frame(width: 8, height: 112).background(.windowBackground).background(.background)
     }
-    .frame(width: 24)
-    .background(.blue)
+    .environment(\.colorScheme, scheme)
     let renderer = ImageRenderer(content: backdrop)
     renderer.scale = 1
     let bitmap = NSBitmapImageRep(cgImage: try #require(renderer.cgImage))
 
-    func red(at y: Int) throws -> CGFloat {
-        let color = try #require(bitmap.colorAt(x: 12, y: y)?.usingColorSpace(.sRGB))
-        return color.redComponent
+    func pixel(at y: Int, x: Int = 12) throws -> NSColor {
+        try #require(bitmap.colorAt(x: x, y: y)?.usingColorSpace(.sRGB))
     }
 
-    let outer = try red(at: edge == .top ? 24 : 87)
-    let middle = try red(at: 55)
-    let inner = try red(at: edge == .top ? 87 : 24)
-    #expect(outer > middle + 0.15)
-    #expect(middle > inner + 0.15)
-    #expect(try red(at: 12) < 0.05)
-    #expect(try red(at: 99) < 0.05)
+    func difference(_ a: NSColor, _ b: NSColor) -> CGFloat {
+        max(abs(a.redComponent - b.redComponent), abs(a.greenComponent - b.greenComponent), abs(a.blueComponent - b.blueComponent))
+    }
+
+    let surface = try pixel(at: 55, x: 28)
+    let content = try pixel(at: 8)
+    let outer = try pixel(at: edge == .top ? 17 : 94)
+    let behindControls = try pixel(at: edge == .top ? 73 : 55)
+    let transition = try pixel(at: edge == .top ? 86 : 38)
+    let inner = try pixel(at: edge == .top ? 95 : 16)
+    #expect(difference(outer, surface) < 0.015)
+    if edge == .top {
+        #expect(difference(behindControls, surface) < 0.065)
+        #expect(difference(transition, content) > 0.14)
+    } else {
+        #expect(difference(behindControls, surface) > 0.075)
+        #expect(difference(behindControls, content) > 0.20)
+        #expect(difference(transition, content) > 0.10)
+    }
+    #expect(difference(transition, surface) > 0.12)
+    #expect(difference(inner, content) < 0.07)
+    #expect(try difference(pixel(at: 99), content) < 0.01)
+}
+
+@Test(
+    .enabled(if: !NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency, "Requires transparent materials."),
+    arguments: [VerticalEdge.top, .bottom], [ColorScheme.light, .dark]
+) @MainActor
+func scrollBarBackdropKeepsAUniformWindowSurface(edge: VerticalEdge, scheme: ColorScheme) throws {
+    let surface = Color.clear.frame(width: 48, height: 86)
+        .overlay(alignment: edge == .top ? .top : .bottom) {
+            ScrollBarBackdrop(edge: edge).frame(height: edge == .top ? Pico.headerHeight : RepositoryStatusBar.height)
+        }
+        .background(.windowBackground)
+        .background(.background)
+        .environment(\.colorScheme, scheme)
+    let renderer = ImageRenderer(content: surface)
+    renderer.scale = 2
+    let bitmap = NSBitmapImageRep(cgImage: try #require(renderer.cgImage))
+    let x = bitmap.pixelsWide / 2
+    let referenceY = edge == .top ? bitmap.pixelsHigh - 2 : 1
+    let reference = try #require(bitmap.colorAt(x: x, y: referenceY)?.usingColorSpace(.sRGB))
+    var largestDelta: CGFloat = 0
+    for y in 0..<bitmap.pixelsHigh {
+        let actual = try #require(bitmap.colorAt(x: x, y: y)?.usingColorSpace(.sRGB))
+        largestDelta = max(largestDelta,
+                           abs(actual.redComponent - reference.redComponent),
+                           abs(actual.greenComponent - reference.greenComponent),
+                           abs(actual.blueComponent - reference.blueComponent))
+    }
+    #expect(largestDelta <= 1.0 / 255)
 }
