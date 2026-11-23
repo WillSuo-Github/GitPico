@@ -1,6 +1,6 @@
 import Foundation
 
-public struct SplitDiffRow: Identifiable, Sendable {
+public struct SplitDiffRow: Identifiable, Sendable, Equatable {
     public let id: Int
     public let left: DiffLine?
     public let right: DiffLine?

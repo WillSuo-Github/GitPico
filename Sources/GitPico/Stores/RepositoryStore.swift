@@ -370,7 +370,7 @@ final class RepositoryStore {
         await rebuildWorkingList()
         lastUpdated = Date()
         if let selected = currentChange { selectChange(selected, staged: selected.isStaged && (!selected.isUnstaged || stagedDiff)) }
-        else if selectedChange != nil && !workingFileEntries.contains(where: { $0.path == selectedChange }) { selectedChange = nil; diff = "" }
+        else if selectedChange != nil && !workingFileEntries.contains(where: { $0.path == selectedChange }) { selectedChange = nil; diff = ""; workingPreparedDiff = nil; workingDiffRequest = nil }
         if destination != .reflog, let selectedCommit {
             if let updated = snapshot?.commits.first(where: { $0.id == selectedCommit.id }) {
                 self.selectedCommit = updated
@@ -399,7 +399,7 @@ final class RepositoryStore {
         rememberNavigation()
         cancelPreviewWork(); searchFocusRequest = nil; detailToken = UUID(); destination = value; restoreNavigation(value)
         selectedCommit = nil; commitDetail = nil; selectedChange = nil
-        selectedStash = nil; selectedCommitPath = nil; diff = ""; isLoadingDiff = false
+        selectedStash = nil; selectedCommitPath = nil; diff = ""; workingPreparedDiff = nil; isLoadingDiff = false
         if isHistoryDestination { requestHistory(preservingSelection: false) }
         requestDeferredMetadata(value)
     }
@@ -424,13 +424,15 @@ final class RepositoryStore {
         detailTask?.cancel()
         let token = UUID(); detailToken = token; isLoadingDiff = true; diffError = nil
         let context = diffContext, whitespace = ignoreWhitespace, reader = workingDiffReader
+        let path = change.path
         detailTask = Task {
             do {
                 let value = try await reader.diff(change, staged: staged, context: context, ignoreWhitespace: whitespace, in: repository)
                 guard !Task.isCancelled, detailToken == token else { return }
-                let prepared: PreparedPatch
-                if let previous, previous.source == value { prepared = previous }
-                else { prepared = await Task.detached(priority: .userInitiated) { PreparedPatch.make(value) }.value }
+                let prepared = await Task.detached(priority: .userInitiated) {
+                    if let previous, previous.source == value { return previous }
+                    return PreparedPatch.make(value, path: path)
+                }.value
                 guard !Task.isCancelled, detailToken == token else { return }
                 workingPreparedDiff = prepared; diff = value; isLoadingDiff = false
             } catch is CancellationError { }
@@ -543,7 +545,7 @@ final class RepositoryStore {
             let outcome: CommitOutcome
             do { outcome = try await repository.commit(message: message, amend: shouldAmend, signOff: shouldSignOff) }
             catch { self.error = error.localizedDescription; try? await reloadIncrementally(history: false); return }
-            draftBeforeAmend = nil; commitSubject = ""; commitBody = ""; amend = false; diff = ""
+            draftBeforeAmend = nil; commitSubject = ""; commitBody = ""; amend = false; diff = ""; workingPreparedDiff = nil; workingDiffRequest = nil
             commitFeedback = shouldAmend ? String(localized: "Commit amended.") : String(localized: "Commit created.")
             commitWarning = outcome.undoWarning
             do { try await reloadIncrementally(history: true) }

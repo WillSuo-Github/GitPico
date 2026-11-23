@@ -207,6 +207,7 @@ private struct SidebarScrollBlur: ViewModifier {
 private struct ProgressiveScrollBlur: ViewModifier {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.pinnedScrollEdges) private var edges
+    nonisolated private static let emptyMask = Image(size: CGSize(width: 1, height: 1)) { _ in }
 
     func body(content: Content) -> some View {
         if let edges, !reduceTransparency {
@@ -228,16 +229,19 @@ private struct ProgressiveScrollBlur: ViewModifier {
                     let footerEnd = footerStart + footerHeight
                     let blurTop = edges.top > 0 && frame.minY < edges.top && frame.maxY > 0
                     let blurFooter = footerHeight > 0 && frame.maxY > footerStart && frame.minY < footerEnd
-                    let mask = Image(size: geometry.size) { context in
-                        let bounds = Path(CGRect(origin: .zero, size: geometry.size))
-                        if blurTop {
-                            fill(context, bounds: bounds, edge: .top, blurredAt: -frame.minY, clearAt: edges.top - frame.minY)
+                    let enabled = viewportHeight > 0 && (blurTop || blurFooter)
+                    let mask = enabled
+                        ? Image(size: geometry.size) { context in
+                            let bounds = Path(CGRect(origin: .zero, size: geometry.size))
+                            if blurTop {
+                                fill(context, bounds: bounds, edge: .top, blurredAt: -frame.minY, clearAt: edges.top - frame.minY)
+                            }
+                            if blurFooter {
+                                fill(context, bounds: bounds, edge: .bottom, blurredAt: footerEnd - frame.minY, clearAt: footerStart - frame.minY)
+                            }
                         }
-                        if blurFooter {
-                            fill(context, bounds: bounds, edge: .bottom, blurredAt: footerEnd - frame.minY, clearAt: footerStart - frame.minY)
-                        }
-                    }
-                    return effect.variableBlur(radius: PinnedScrollEdges.radius, mask: mask, isEnabled: viewportHeight > 0 && (blurTop || blurFooter))
+                        : Self.emptyMask
+                    return effect.variableBlur(radius: PinnedScrollEdges.radius, mask: mask, isEnabled: enabled)
                 }
                 .padding(-bleed)
         } else {

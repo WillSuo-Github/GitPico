@@ -9,15 +9,30 @@ struct DiffView: View {
     var isLoading = false
     var showsHeader = true
     var scrollTopInset: CGFloat = 0
+    var initialPrepared: PreparedDiff? = nil
     @State private var preferences = AppPreferences.shared
-    @State private var code: [Int: DiffCodeLine] = [:]
+    @State private var prepared: PreparedDiff?
+    @State private var preparedInput: DiffInputKey?
     @State private var findQuery = ""
     @State private var focusedLine: String?
     @State private var findReveal = UUID()
+    @State private var findMatches: [String] = []
+    @State private var matchedLineIDs: Set<String> = []
+    @State private var splitScroll = SplitHorizontalScrollState()
+
+    private struct DiffInputKey: Equatable {
+        let text: String
+        let title: String?
+    }
+
+    private struct FindKey: Equatable {
+        let diffID: UUID?
+        let query: String
+    }
 
     var body: some View {
-        let document = DiffDocument(text)
-        let lines = document.lines.filter { !$0.isFileHeader }
+        let inputKey = DiffInputKey(text: text, title: title)
+        let currentPrepared = preparedInput == inputKey ? prepared : (preparedInput == nil ? initialPrepared : nil)
         PinnedScrollPane { insets in
             if isLoading {
                 ProgressView("Loading changes…").frame(maxWidth: .infinity, maxHeight: .infinity).padding(insets)
@@ -25,36 +40,102 @@ struct DiffView: View {
                 EmptyPane(title: String(localized: "No file selected"), subtitle: String(localized: "Select a file to inspect its changes."), icon: "doc").padding(insets)
             } else if text.isEmpty {
                 EmptyPane(title: String(localized: "No textual changes"), subtitle: String(localized: "This file may have only metadata or conflict changes."), icon: "doc.text.magnifyingglass").padding(insets)
-            } else {
+            } else if let currentPrepared {
                 ScrollViewReader { proxy in
                 Group {
                 if preferences.splitDiff {
                     GeometryReader { geometry in
+                        let layout = DiffLayoutMetrics.splitLayout(
+                            leftColumns: currentPrepared.maxSplitLeftColumns,
+                            rightColumns: currentPrepared.maxSplitRightColumns,
+                            fontSize: preferences.diffFontSize,
+                            selectable: false,
+                            totalWidth: geometry.size.width
+                        )
+                        let rowHeight = DiffLayoutMetrics.splitRowHeight(fontSize: preferences.diffFontSize)
                         ScrollView(.vertical) {
-                            SplitDiffView(lines: lines, fontSize: preferences.diffFontSize, minimumWidth: geometry.size.width, code: code, query: findQuery, focusedLine: focusedLine)
-                            if document.isTruncated { Text("Preview limited to 8,000 lines.").font(.caption).foregroundStyle(.secondary).padding(12) }
+                            LazyVStack(alignment: .leading, spacing: 0) {
+                                ForEach(currentPrepared.splitRows) { row in
+                                    let leftKey = row.left.map { "line:\($0.id)" }
+                                    let rightKey = row.right.map { "line:\($0.id)" }
+                                    SplitDiffRowView(
+                                        row: row,
+                                        fontSize: preferences.diffFontSize,
+                                        halfWidth: layout.halfWidth,
+                                        rowHeight: rowHeight,
+                                        leftCode: row.left.flatMap { currentPrepared.code[$0.id] },
+                                        rightCode: row.right.flatMap { currentPrepared.code[$0.id] },
+                                        leftSelected: false,
+                                        rightSelected: false,
+                                        leftFocused: leftKey != nil && focusedLine == leftKey,
+                                        rightFocused: rightKey != nil && focusedLine == rightKey,
+                                        leftQuery: leftKey.map { matchedLineIDs.contains($0) ? findQuery : "" } ?? "",
+                                        rightQuery: rightKey.map { matchedLineIDs.contains($0) ? findQuery : "" } ?? "",
+                                        showsSelectionSlot: false,
+                                        scrollState: splitScroll,
+                                        select: nil
+                                    )
+                                    .equatable()
+                                    .id("split:line:\(row.id)")
+                                }
+                                if currentPrepared.isTruncated {
+                                    Text("Preview limited to 8,000 lines.").font(.caption).foregroundStyle(.secondary).padding(12)
+                                }
+                            }
+                            .frame(minWidth: geometry.size.width, minHeight: max(0, geometry.size.height - insets.top - insets.bottom), alignment: .topLeading)
                         }.pinnedScrollInsets(insets)
+                        .background(SplitHorizontalWheelBridge(scrollState: splitScroll, maxLeftOffset: layout.maxLeftOffset, maxRightOffset: layout.maxRightOffset))
+                        .overlay(alignment: .bottom) {
+                            SplitHorizontalScrollbarOverlay(
+                                scrollState: splitScroll,
+                                halfWidth: layout.halfWidth,
+                                gutterWidth: layout.gutterWidth,
+                                maxLeftOffset: layout.maxLeftOffset,
+                                maxRightOffset: layout.maxRightOffset,
+                                bottomInset: insets.bottom
+                            )
+                        }
                     }
                 } else { GeometryReader { geometry in
+                    let contentWidth = DiffLayoutMetrics.unifiedContentWidth(
+                        columns: currentPrepared.maxUnifiedColumns,
+                        fontSize: preferences.diffFontSize,
+                        selectable: false,
+                        minimumWidth: geometry.size.width
+                    )
                     ScrollView([.horizontal, .vertical]) {
                         LazyVStack(alignment: .leading, spacing: 0) {
-                            ForEach(lines) { line in
-                                DiffLineView(line: line, fontSize: preferences.diffFontSize, code: code[line.id], query: findQuery).frame(minWidth: geometry.size.width, alignment: .leading)
-                                    .id("line:\(line.id)")
-                                    .overlay { if focusedLine == "line:\(line.id)" { Rectangle().strokeBorder(Color.accentColor, lineWidth: 1) } }
+                            ForEach(currentPrepared.lines) { line in
+                                let lineKey = "line:\(line.id)"
+                                DiffLineView(
+                                    line: line,
+                                    fontSize: preferences.diffFontSize,
+                                    code: currentPrepared.code[line.id],
+                                    query: matchedLineIDs.contains(lineKey) ? findQuery : ""
+                                )
+                                .equatable()
+                                .frame(minWidth: contentWidth, alignment: .leading)
+                                .id(lineKey)
+                                .overlay { if focusedLine == lineKey { Rectangle().strokeBorder(Color.accentColor, lineWidth: 1) } }
                             }
-                            if document.isTruncated {
+                            if currentPrepared.isTruncated {
                                 Text("Preview limited to 8,000 lines. Copy the diff to inspect the complete output.")
                                     .font(.caption).foregroundStyle(.secondary).padding(14)
                             }
                         }
                         .padding(.vertical, 7)
-                        .frame(minWidth: geometry.size.width, minHeight: max(0, geometry.size.height - insets.top - insets.bottom), alignment: .topLeading)
+                        .frame(minWidth: contentWidth, minHeight: max(0, geometry.size.height - insets.top - insets.bottom), alignment: .topLeading)
                     }
                     .defaultScrollAnchor(.topLeading).pinnedScrollInsets(insets)
                 } }
-                }.onChange(of: findReveal) { if let focusedLine { proxy.scrollTo(focusedLine, anchor: .center) } }
+                }.onChange(of: findReveal) {
+                    guard let focusedLine else { return }
+                    let target = preferences.splitDiff ? (currentPrepared.splitScrollTargets[focusedLine] ?? focusedLine) : focusedLine
+                    proxy.scrollTo(target, anchor: .center)
                 }
+                }
+            } else {
+                ProgressView("Loading changes…").frame(maxWidth: .infinity, maxHeight: .infinity).padding(insets)
             }
         } top: {
             if let title, showsHeader {
@@ -64,19 +145,44 @@ struct DiffView: View {
                 }
             }
             if !isLoading, title != nil, !text.isEmpty {
-                let matches = findQuery.isEmpty ? [] : lines.filter { CodeHighlighting.contains(code[$0.id]?.source ?? CodeHighlighting.source($0), query: findQuery) }.map { "line:\($0.id)" }
-                DiffFindBar(query: $findQuery, matches: matches, selection: $focusedLine) { findReveal = UUID() }
+                DiffFindBar(query: $findQuery, matches: findMatches, selection: $focusedLine) { findReveal = UUID() }
             }
         }.padding(.top, scrollTopInset).background(.background)
-            .task(id: text + (title ?? "")) {
-                let text = text, path = title ?? CodeHighlighting.path(in: text)
-                let value = await Task.detached(priority: .userInitiated) { CodeHighlighting.prepare(DiffDocument(text).lines, path: path) }.value
-                guard !Task.isCancelled else { return }; code = value
+            .task(id: inputKey) {
+                guard !text.isEmpty else {
+                    prepared = nil
+                    preparedInput = inputKey
+                    return
+                }
+                if let initialPrepared, preparedInput == nil {
+                    prepared = initialPrepared
+                    preparedInput = inputKey
+                    return
+                }
+                let source = text
+                let path = title
+                let value = await Task.detached(priority: .userInitiated) { PreparedDiff.make(source, path: path) }.value
+                guard !Task.isCancelled else { return }
+                prepared = value
+                preparedInput = inputKey
+                splitScroll.reset()
+            }
+            .task(id: FindKey(diffID: currentPrepared?.id, query: findQuery)) {
+                guard let currentPrepared, !findQuery.isEmpty else {
+                    findMatches = []
+                    matchedLineIDs = []
+                    return
+                }
+                let query = findQuery
+                let matches = await Task.detached(priority: .userInitiated) { currentPrepared.matchingLineIDs(query: query) }.value
+                guard !Task.isCancelled else { return }
+                findMatches = matches
+                matchedLineIDs = Set(matches)
             }
     }
 }
 
-struct DiffLineView: View {
+struct DiffLineView: View, Equatable {
     let line: DiffLine
     let fontSize: Double
     var code: DiffCodeLine? = nil
@@ -101,7 +207,7 @@ struct DiffLineView: View {
             .progressiveScrollBlur()
             HStack(spacing: 0) {
                 if [.context, .addition, .deletion].contains(line.kind) { Text(String(line.text.prefix(1))).foregroundStyle(.secondary) }
-                DiffCodeText(line: code ?? DiffCodeLine(source: [.context, .addition, .deletion].contains(line.kind) ? String(line.text.dropFirst()) : line.text, path: ""), query: query)
+                DiffCodeText(line: code ?? DiffCodeLine(source: CodeHighlighting.source(line), path: ""), query: query).equatable()
             }.foregroundStyle(line.kind == .metadata ? Color.secondary : line.kind == .hunk ? Color.accentColor.opacity(0.9) : Color.primary)
                 .padding(.leading, 10).padding(.trailing, 20)
             Spacer(minLength: 0)

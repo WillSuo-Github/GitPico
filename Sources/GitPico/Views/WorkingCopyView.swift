@@ -285,7 +285,7 @@ struct WorkingDiffView: View {
                 }
                 if let error = store.diffError {
                     VStack(spacing: 12) { Text(error).foregroundStyle(.secondary).textSelection(.enabled); Button("Retry") { store.selectChange(file, staged: store.stagedDiff) } }.padding().frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if let repository = store.repository, BinaryComparisonView.isImageCandidate(file.path) || store.diff.contains("Binary files ") {
+                } else if let repository = store.repository, BinaryComparisonView.isImageCandidate(file.path) || store.workingPreparedDiff?.isBinary == true {
                     BinaryComparisonView(repository: repository, path: file.path, originalPath: store.stagedDiff ? file.originalPath : nil,
                         left: store.stagedDiff ? (store.snapshot?.hasHEAD == true ? .revision("HEAD") : .empty) : .index,
                         right: store.stagedDiff ? .index : .workingCopy, version: store.lastUpdated).id(store.repositoryToken.uuidString + file.path)
