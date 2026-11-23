@@ -84,19 +84,14 @@ func scrollBarBackdropFadesAcrossTheBarWithoutExtendingPastIt(edge: VerticalEdge
     let surface = try pixel(at: 55, x: 28)
     let content = try pixel(at: 8)
     let outer = try pixel(at: edge == .top ? 17 : 94)
-    let behindControls = try pixel(at: edge == .top ? 73 : 55)
-    let transition = try pixel(at: edge == .top ? 86 : 38)
+    let behindControls = try pixel(at: edge == .top ? 56 : 55)
+    let transition = try pixel(at: edge == .top ? 74 : 38)
     let inner = try pixel(at: edge == .top ? 95 : 16)
     #expect(difference(outer, surface) < 0.015)
-    if edge == .top {
-        #expect(difference(behindControls, surface) < 0.065)
-        #expect(difference(transition, content) > 0.14)
-    } else {
-        #expect(difference(behindControls, surface) > 0.075)
-        #expect(difference(behindControls, content) > 0.20)
-        #expect(difference(transition, content) > 0.10)
-    }
+    #expect(difference(behindControls, surface) > 0.075)
+    #expect(difference(behindControls, content) > 0.20)
     #expect(difference(transition, surface) > 0.12)
+    #expect(difference(transition, content) > 0.10)
     #expect(difference(inner, content) < 0.07)
     #expect(try difference(pixel(at: 99), content) < 0.01)
 }

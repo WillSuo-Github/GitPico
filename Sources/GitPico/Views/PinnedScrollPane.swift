@@ -137,11 +137,12 @@ private struct PinnedScrollEdges: Sendable {
     static let radius: CGFloat = 14
     private static let topGradient = Gradient(stops: [
         .init(color: .white, location: 0),
-        .init(color: .white.opacity(0.996), location: 0.35),
-        .init(color: .white.opacity(0.987), location: 0.65),
-        .init(color: .white.opacity(0.94), location: 0.77),
-        .init(color: .white.opacity(0.68), location: 0.87),
-        .init(color: .white.opacity(0.32), location: 0.95),
+        .init(color: .white.opacity(0.98), location: 0.22),
+        .init(color: .white.opacity(0.93), location: 0.38),
+        .init(color: .white.opacity(0.87), location: 0.50),
+        .init(color: .white.opacity(0.70), location: 0.65),
+        .init(color: .white.opacity(0.40), location: 0.80),
+        .init(color: .white.opacity(0.09), location: 0.94),
         .init(color: .clear, location: 1)
     ])
     private static let bottomGradient = Gradient(stops: [

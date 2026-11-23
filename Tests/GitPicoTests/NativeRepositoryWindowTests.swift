@@ -265,10 +265,13 @@ func nativeHistoryScrollsBehindTheStatusBar(paginated: Bool) async throws {
     let statusTop = windowBounds.minY + RepositoryStatusBar.height
     #expect(abs(viewport.minY - windowBounds.minY) < 1)
     if !NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency {
-        let blur = try #require(scroll.subviews.first { !$0.backgroundFilters.isEmpty })
-        let frame = blur.convert(blur.bounds, to: nil)
-        #expect(abs(frame.minY - windowBounds.minY) < 1)
-        #expect(abs(frame.maxY - statusTop) < 1)
+        let blurs = scroll.subviews.filter { !$0.backgroundFilters.isEmpty }
+        #expect(blurs.count == 2)
+        let frames = blurs.map { $0.convert($0.bounds, to: nil) }
+        let bottomFrame = try #require(frames.first { abs($0.minY - windowBounds.minY) < 1 })
+        #expect(abs(bottomFrame.maxY - statusTop) < 1)
+        let topFrame = try #require(frames.first { abs($0.maxY - viewport.maxY) < 1 })
+        #expect(abs(topFrame.minY - (viewport.maxY - clip.contentInsets.top)) < 1)
     }
     let bottomInset = clip.contentInsets.bottom
     #expect(paginated ? bottomInset > RepositoryStatusBar.height : bottomInset == RepositoryStatusBar.height)
