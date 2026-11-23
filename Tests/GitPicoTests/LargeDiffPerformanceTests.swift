@@ -1,6 +1,7 @@
 import AppKit
 import Foundation
 import GitCore
+import QuartzCore
 import SwiftUI
 import Testing
 @testable import GitPico
@@ -95,6 +96,130 @@ private func makeSyntheticMinifiedDiff(lineLength: Int) -> String {
         #expect(chunkTime < 2.0)
         #expect(diffTime < 2.0)
         #expect(minifiedTime < 2.0)
+    }
+
+    #expect(!NSApplication.shared.isActive && NSApplication.shared.windows.filter(\.isVisible).isEmpty)
+}
+
+@Test @MainActor func nativeDiffTableScrollsRecyclesAndSupportsSelectionAndCopy() async throws {
+    let originalSplit = AppPreferences.shared.splitDiff
+    defer { AppPreferences.shared.splitDiff = originalSplit }
+
+    let largeDiff = makeSyntheticLargeSwiftDiff(lineCount: 12_000)
+    let preparedPatch = PreparedPatch.make(largeDiff, path: "Sources/GeneratedBig.swift")
+
+    func findViews<T: NSView>(of type: T.Type, in root: NSView) -> [T] {
+        var found: [T] = []
+        if let match = root as? T { found.append(match) }
+        for subview in root.subviews { found.append(contentsOf: findViews(of: type, in: subview)) }
+        return found
+    }
+
+    func countSubviews(in root: NSView) -> Int {
+        1 + root.subviews.reduce(0) { $0 + countSubviews(in: $1) }
+    }
+
+    for split in [false, true] {
+        AppPreferences.shared.splitDiff = split
+        var toggledCount = 0
+        let window = RepositoryNativeWindow(tabID: UUID(), permitsPresentation: false)
+        window.tabbingMode = .disallowed
+        window.styleMask = [.borderless]
+        window.contentMinSize = .zero
+        window.appearance = NSAppearance(named: .aqua)
+        defer { window.contentView = nil; window.close() }
+
+        let host = NSHostingView(
+            rootView: ChunkDiffView(
+                prepared: preparedPatch,
+                chunkAction: { _ in },
+                lineAction: { _ in toggledCount += 1 }
+            )
+            .frame(width: 1100, height: 760)
+            .environment(\.colorScheme, .light)
+        )
+        window.contentView = host
+        window.setFrame(NSRect(x: -10000, y: -10000, width: 1100, height: 760), display: false)
+        host.layoutSubtreeIfNeeded()
+        CATransaction.flush()
+
+        let scrollView = try #require(findViews(of: DiffScrollView.self, in: host).first)
+        let tableView = try #require(findViews(of: DiffTableView.self, in: host).first)
+        let delegate = try #require(tableView.interactionDelegate)
+
+        #expect(tableView.numberOfRows > 5_000)
+        let initialSubviews = countSubviews(in: host)
+
+        let clipView = scrollView.contentView
+        let maxY = max(0, tableView.bounds.height - clipView.bounds.height)
+        for step in 1...40 {
+            let nextY = min(maxY, CGFloat(step) * 400)
+            clipView.scroll(to: NSPoint(x: 0, y: nextY))
+            scrollView.reflectScrolledClipView(clipView)
+            host.layoutSubtreeIfNeeded()
+            CATransaction.flush()
+        }
+        let afterScrollSubviews = countSubviews(in: host)
+        #expect(afterScrollSubviews < initialSubviews + 120)
+
+        clipView.scroll(to: NSPoint(x: 0, y: -scrollView.contentInsets.top))
+        scrollView.reflectScrolledClipView(clipView)
+        host.layoutSubtreeIfNeeded()
+
+        // Truncated hunks must not expose selectable gutters.
+        let firstCodeRow = split ? 2 : 1
+        let firstCodeRect = tableView.rect(ofRow: firstCodeRow)
+        if case .selectableGutter = delegate.interactionTarget(at: NSPoint(x: firstCodeRect.minX + 12, y: firstCodeRect.midY)) {
+            Issue.record("Truncated hunk should not allow line gutter selection")
+        }
+
+        let codeRow = firstCodeRow
+        let codeRect = tableView.rect(ofRow: codeRow)
+        let probeX = split ? codeRect.minX + 120 : codeRect.minX + 160
+        let codePoint = NSPoint(x: probeX, y: codeRect.midY)
+        let position = try #require(delegate.textPosition(at: codePoint, lockedColumn: nil))
+        let wordSel = delegate.wordSelection(at: position)
+        delegate.setTextSelection(wordSel)
+        #expect(delegate.hasActiveTextSelection)
+        let copiedWord = try #require(delegate.selectedTextForCopy())
+        #expect(!copiedWord.isEmpty)
+
+        delegate.selectAllText()
+        let copiedAll = try #require(delegate.selectedTextForCopy())
+        #expect(copiedAll.contains("computeItem_100"))
+
+        tableView.cancelOperation(nil)
+        #expect(!delegate.hasActiveTextSelection)
+        #expect(toggledCount == 0)
+
+        // Non-truncated patch must support gutter line selection in both Unified and Split modes.
+        let smallPatch = PreparedPatch.make(makeSyntheticLargeSwiftDiff(lineCount: 40), path: "Sources/Small.swift")
+        let smallHost = NSHostingView(
+            rootView: ChunkDiffView(
+                prepared: smallPatch,
+                chunkAction: { _ in },
+                lineAction: { _ in }
+            )
+            .frame(width: 1100, height: 600)
+            .environment(\.colorScheme, .light)
+        )
+        window.contentView = smallHost
+        smallHost.layoutSubtreeIfNeeded()
+        CATransaction.flush()
+
+        let smallTable = try #require(findViews(of: DiffTableView.self, in: smallHost).first)
+        let smallDelegate = try #require(smallTable.interactionDelegate)
+        var foundSelectableRow: Int?
+        for row in 0..<min(smallTable.numberOfRows, 10) {
+            let rect = smallTable.rect(ofRow: row)
+            let gutterPoint = NSPoint(x: rect.minX + 12, y: rect.midY)
+            if case .selectableGutter(let hunkID, let line) = smallDelegate.interactionTarget(at: gutterPoint) {
+                foundSelectableRow = row
+                smallDelegate.toggleSelectableLine(hunkID: hunkID, line: line)
+                break
+            }
+        }
+        #expect(foundSelectableRow != nil)
     }
 
     #expect(!NSApplication.shared.isActive && NSApplication.shared.windows.filter(\.isVisible).isEmpty)
@@ -224,6 +349,97 @@ private func makeSyntheticMinifiedDiff(lineLength: Int) -> String {
         label: "ChunkDiffView Split (200KB minified line)",
         view: ChunkDiffView(prepared: preparedMinified, chunkAction: { _ in }, lineAction: { _ in })
     )
+
+    func findScrollView(in root: NSView) -> NSScrollView? {
+        if let scroll = root as? DiffScrollView { return scroll }
+        for subview in root.subviews {
+            if let match = findScrollView(in: subview) { return match }
+        }
+        return nil
+    }
+
+    func countSubviews(in root: NSView) -> Int {
+        1 + root.subviews.reduce(0) { $0 + countSubviews(in: $1) }
+    }
+
+    func countSublayers(in layer: CALayer?) -> Int {
+        guard let layer else { return 0 }
+        return 1 + (layer.sublayers ?? []).reduce(0) { $0 + countSublayers(in: $1) }
+    }
+
+    func measureScroll<Content: View>(label: String, view: Content, steps: Int, stepY: CGFloat, includeDraw: Bool) {
+        let window = RepositoryNativeWindow(tabID: UUID(), permitsPresentation: false)
+        window.tabbingMode = .disallowed
+        window.styleMask = [.borderless]
+        window.contentMinSize = .zero
+        window.appearance = NSAppearance(named: .aqua)
+        defer { window.contentView = nil; window.close() }
+
+        let host = NSHostingView(rootView: view.frame(width: 1100, height: 760).environment(\.colorScheme, .light))
+        window.contentView = host
+        window.setFrame(NSRect(x: -10000, y: -10000, width: 1100, height: 760), display: false)
+        host.layoutSubtreeIfNeeded()
+        CATransaction.flush()
+
+        guard let scrollView = findScrollView(in: host) else {
+            print("[SCROLL] \(label): NO DiffScrollView found")
+            return
+        }
+        let clipView = scrollView.contentView
+        let docHeight = scrollView.documentView?.bounds.height ?? 0
+        let initSubviews = countSubviews(in: host)
+        let initLayers = countSublayers(in: host.layer)
+        let maxY = max(0, docHeight - clipView.bounds.height)
+        let rep = includeDraw ? host.bitmapImageRepForCachingDisplay(in: host.bounds) : nil
+
+        var frameMs: [Double] = []
+        frameMs.reserveCapacity(steps)
+        var y: CGFloat = 0
+        for _ in 0..<steps {
+            y = min(maxY, y + stepY)
+            if y >= maxY { y = 0 }
+            let frameStart = ContinuousClock.now
+            clipView.scroll(to: NSPoint(x: 0, y: y))
+            scrollView.reflectScrolledClipView(clipView)
+            host.layoutSubtreeIfNeeded()
+            if let rep {
+                host.cacheDisplay(in: host.bounds, to: rep)
+            }
+            CATransaction.flush()
+            frameMs.append(elapsedSeconds(frameStart) * 1000.0)
+        }
+        let endSubviews = countSubviews(in: host)
+        let endLayers = countSublayers(in: host.layer)
+        let sorted = frameMs.sorted()
+        let avg = frameMs.reduce(0, +) / Double(frameMs.count)
+        let p50 = sorted[sorted.count / 2]
+        let p95 = sorted[min(sorted.count - 1, Int(Double(sorted.count) * 0.95))]
+        let maxVal = sorted.last ?? 0
+        let over8 = frameMs.filter { $0 > 8.33 }.count
+        let over16 = frameMs.filter { $0 > 16.67 }.count
+        print(String(
+            format: "[SCROLL] %@: subviews=%d->%d layers=%d->%d avg=%.2fms p50=%.2fms p95=%.2fms max=%.2fms >8.3ms=%d/%d >16.7ms=%d/%d",
+            label, initSubviews, endSubviews, initLayers, endLayers, avg, p50, p95, maxVal, over8, steps, over16, steps
+        ))
+    }
+
+    let scrollDiff = makeSyntheticLargeSwiftDiff(lineCount: 12_000)
+    let scrollPreparedPatch = PreparedPatch.make(scrollDiff, path: "Sources/GeneratedBig.swift")
+    let scrollPreparedDiff = PreparedDiff.make(scrollDiff, path: "Sources/GeneratedBig.swift")
+
+    AppPreferences.shared.splitDiff = false
+    measureScroll(label: "ChunkDiffView Unified layout+flush (step=120)", view: ChunkDiffView(prepared: scrollPreparedPatch, chunkAction: { _ in }, lineAction: { _ in }), steps: 80, stepY: 120, includeDraw: false)
+    measureScroll(label: "ChunkDiffView Unified layout+flush (fast step=400)", view: ChunkDiffView(prepared: scrollPreparedPatch, chunkAction: { _ in }, lineAction: { _ in }), steps: 80, stepY: 400, includeDraw: false)
+    measureScroll(label: "ChunkDiffView Unified layout+draw+flush (step=120)", view: ChunkDiffView(prepared: scrollPreparedPatch, chunkAction: { _ in }, lineAction: { _ in }), steps: 80, stepY: 120, includeDraw: true)
+    measureScroll(label: "ChunkDiffView Unified layout+draw+flush (fast step=400)", view: ChunkDiffView(prepared: scrollPreparedPatch, chunkAction: { _ in }, lineAction: { _ in }), steps: 80, stepY: 400, includeDraw: true)
+    measureScroll(label: "DiffView Unified layout+flush (fast step=400)", view: DiffView(text: scrollDiff, title: "Sources/GeneratedBig.swift", initialPrepared: scrollPreparedDiff), steps: 80, stepY: 400, includeDraw: false)
+
+    AppPreferences.shared.splitDiff = true
+    measureScroll(label: "ChunkDiffView Split layout+flush (step=120)", view: ChunkDiffView(prepared: scrollPreparedPatch, chunkAction: { _ in }, lineAction: { _ in }), steps: 80, stepY: 120, includeDraw: false)
+    measureScroll(label: "ChunkDiffView Split layout+flush (fast step=400)", view: ChunkDiffView(prepared: scrollPreparedPatch, chunkAction: { _ in }, lineAction: { _ in }), steps: 80, stepY: 400, includeDraw: false)
+    measureScroll(label: "ChunkDiffView Split layout+draw+flush (step=120)", view: ChunkDiffView(prepared: scrollPreparedPatch, chunkAction: { _ in }, lineAction: { _ in }), steps: 80, stepY: 120, includeDraw: true)
+    measureScroll(label: "ChunkDiffView Split layout+draw+flush (fast step=400)", view: ChunkDiffView(prepared: scrollPreparedPatch, chunkAction: { _ in }, lineAction: { _ in }), steps: 80, stepY: 400, includeDraw: true)
+    measureScroll(label: "DiffView Split layout+flush (fast step=400)", view: DiffView(text: scrollDiff, title: "Sources/GeneratedBig.swift", initialPrepared: scrollPreparedDiff), steps: 80, stepY: 400, includeDraw: false)
 
     #expect(!NSApplication.shared.isActive && NSApplication.shared.windows.filter(\.isVisible).isEmpty)
 }

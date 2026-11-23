@@ -28,6 +28,10 @@ struct DiffLayoutPicker: View {
         max(21, ceil(fontSize * 1.65))
     }
 
+    static func unifiedRowHeight(fontSize: Double) -> CGFloat {
+        max(21, ceil(fontSize * 1.65))
+    }
+
     static func unifiedContentWidth(columns: Int, fontSize: Double, selectable: Bool, minimumWidth: CGFloat) -> CGFloat {
         let gutter: CGFloat = (selectable ? 25 : 0) + 90 + 40
         let estimated = gutter + CGFloat(columns) * monospaceCharacterWidth(fontSize: fontSize)
@@ -41,7 +45,7 @@ struct DiffLayoutPicker: View {
         selectable: Bool,
         totalWidth: CGFloat
     ) -> (halfWidth: CGFloat, gutterWidth: CGFloat, maxLeftOffset: CGFloat, maxRightOffset: CGFloat) {
-        let halfWidth = max(0, (totalWidth - 1) / 2)
+        let halfWidth = floor(max(0, (totalWidth - 1) / 2))
         let gutterWidth: CGFloat = (selectable ? 25 : 0) + 52
         let codeViewportWidth = max(0, halfWidth - gutterWidth)
         let charWidth = monospaceCharacterWidth(fontSize: fontSize)
@@ -231,7 +235,6 @@ private struct SplitDiffSideCell: View {
                 .foregroundStyle(gutterStyle(line))
                 .frame(width: 42, alignment: .trailing)
                 .padding(.trailing, 10)
-                .progressiveScrollBlur()
             if let line {
                 let resolved = code ?? DiffCodeLine(source: CodeHighlighting.source(line), path: "")
                 SplitCodeViewport(line: resolved, query: query, scrollState: scrollState, isRight: right)

@@ -18,7 +18,6 @@ struct DiffView: View {
     @State private var findReveal = UUID()
     @State private var findMatches: [String] = []
     @State private var matchedLineIDs: Set<String> = []
-    @State private var splitScroll = SplitHorizontalScrollState()
 
     private struct DiffInputKey: Equatable {
         let text: String
@@ -41,99 +40,24 @@ struct DiffView: View {
             } else if text.isEmpty {
                 EmptyPane(title: String(localized: "No textual changes"), subtitle: String(localized: "This file may have only metadata or conflict changes."), icon: "doc.text.magnifyingglass").padding(insets)
             } else if let currentPrepared {
-                ScrollViewReader { proxy in
-                Group {
-                if preferences.splitDiff {
-                    GeometryReader { geometry in
-                        let layout = DiffLayoutMetrics.splitLayout(
-                            leftColumns: currentPrepared.maxSplitLeftColumns,
-                            rightColumns: currentPrepared.maxSplitRightColumns,
-                            fontSize: preferences.diffFontSize,
-                            selectable: false,
-                            totalWidth: geometry.size.width
-                        )
-                        let rowHeight = DiffLayoutMetrics.splitRowHeight(fontSize: preferences.diffFontSize)
-                        ScrollView(.vertical) {
-                            LazyVStack(alignment: .leading, spacing: 0) {
-                                ForEach(currentPrepared.splitRows) { row in
-                                    let leftKey = row.left.map { "line:\($0.id)" }
-                                    let rightKey = row.right.map { "line:\($0.id)" }
-                                    SplitDiffRowView(
-                                        row: row,
-                                        fontSize: preferences.diffFontSize,
-                                        halfWidth: layout.halfWidth,
-                                        rowHeight: rowHeight,
-                                        leftCode: row.left.flatMap { currentPrepared.code[$0.id] },
-                                        rightCode: row.right.flatMap { currentPrepared.code[$0.id] },
-                                        leftSelected: false,
-                                        rightSelected: false,
-                                        leftFocused: leftKey != nil && focusedLine == leftKey,
-                                        rightFocused: rightKey != nil && focusedLine == rightKey,
-                                        leftQuery: leftKey.map { matchedLineIDs.contains($0) ? findQuery : "" } ?? "",
-                                        rightQuery: rightKey.map { matchedLineIDs.contains($0) ? findQuery : "" } ?? "",
-                                        showsSelectionSlot: false,
-                                        scrollState: splitScroll,
-                                        select: nil
-                                    )
-                                    .equatable()
-                                    .id("split:line:\(row.id)")
-                                }
-                                if currentPrepared.isTruncated {
-                                    Text("Preview limited to 8,000 lines.").font(.caption).foregroundStyle(.secondary).padding(12)
-                                }
-                            }
-                            .frame(minWidth: geometry.size.width, minHeight: max(0, geometry.size.height - insets.top - insets.bottom), alignment: .topLeading)
-                        }.pinnedScrollInsets(insets)
-                        .background(SplitHorizontalWheelBridge(scrollState: splitScroll, maxLeftOffset: layout.maxLeftOffset, maxRightOffset: layout.maxRightOffset))
-                        .overlay(alignment: .bottom) {
-                            SplitHorizontalScrollbarOverlay(
-                                scrollState: splitScroll,
-                                halfWidth: layout.halfWidth,
-                                gutterWidth: layout.gutterWidth,
-                                maxLeftOffset: layout.maxLeftOffset,
-                                maxRightOffset: layout.maxRightOffset,
-                                bottomInset: insets.bottom
-                            )
-                        }
-                    }
-                } else { GeometryReader { geometry in
-                    let contentWidth = DiffLayoutMetrics.unifiedContentWidth(
-                        columns: currentPrepared.maxUnifiedColumns,
-                        fontSize: preferences.diffFontSize,
-                        selectable: false,
-                        minimumWidth: geometry.size.width
-                    )
-                    ScrollView([.horizontal, .vertical]) {
-                        LazyVStack(alignment: .leading, spacing: 0) {
-                            ForEach(currentPrepared.lines) { line in
-                                let lineKey = "line:\(line.id)"
-                                DiffLineView(
-                                    line: line,
-                                    fontSize: preferences.diffFontSize,
-                                    code: currentPrepared.code[line.id],
-                                    query: matchedLineIDs.contains(lineKey) ? findQuery : ""
-                                )
-                                .equatable()
-                                .frame(minWidth: contentWidth, alignment: .leading)
-                                .id(lineKey)
-                                .overlay { if focusedLine == lineKey { Rectangle().strokeBorder(Color.accentColor, lineWidth: 1) } }
-                            }
-                            if currentPrepared.isTruncated {
-                                Text("Preview limited to 8,000 lines. Copy the diff to inspect the complete output.")
-                                    .font(.caption).foregroundStyle(.secondary).padding(14)
-                            }
-                        }
-                        .padding(.vertical, 7)
-                        .frame(minWidth: contentWidth, minHeight: max(0, geometry.size.height - insets.top - insets.bottom), alignment: .topLeading)
-                    }
-                    .defaultScrollAnchor(.topLeading).pinnedScrollInsets(insets)
-                } }
-                }.onChange(of: findReveal) {
-                    guard let focusedLine else { return }
-                    let target = preferences.splitDiff ? (currentPrepared.splitScrollTargets[focusedLine] ?? focusedLine) : focusedLine
-                    proxy.scrollTo(target, anchor: .center)
-                }
-                }
+                NativeDiffTable(
+                    source: .diff(
+                        prepared: currentPrepared,
+                        truncationMessage: preferences.splitDiff
+                            ? String(localized: "Preview limited to 8,000 lines.")
+                            : String(localized: "Preview limited to 8,000 lines. Copy the diff to inspect the complete output.")
+                    ),
+                    splitMode: preferences.splitDiff,
+                    fontSize: preferences.diffFontSize,
+                    selectedLines: [],
+                    focusedLine: focusedLine,
+                    findQuery: findQuery,
+                    matchedLineIDs: matchedLineIDs,
+                    findReveal: findReveal,
+                    disabled: false,
+                    insets: insets,
+                    actions: NativeDiffActions()
+                )
             } else {
                 ProgressView("Loading changes…").frame(maxWidth: .infinity, maxHeight: .infinity).padding(insets)
             }
@@ -165,7 +89,6 @@ struct DiffView: View {
                 guard !Task.isCancelled else { return }
                 prepared = value
                 preparedInput = inputKey
-                splitScroll.reset()
             }
             .task(id: FindKey(diffID: currentPrepared?.id, query: findQuery)) {
                 guard let currentPrepared, !findQuery.isEmpty else {
@@ -204,7 +127,6 @@ struct DiffLineView: View, Equatable {
             }
             .foregroundStyle(isChange ? AnyShapeStyle(tint.opacity(0.9)) : AnyShapeStyle(.tertiary))
             .background(tint.opacity(isChange ? 0.10 : 0))
-            .progressiveScrollBlur()
             HStack(spacing: 0) {
                 if [.context, .addition, .deletion].contains(line.kind) { Text(String(line.text.prefix(1))).foregroundStyle(.secondary) }
                 DiffCodeText(line: code ?? DiffCodeLine(source: CodeHighlighting.source(line), path: ""), query: query).equatable()

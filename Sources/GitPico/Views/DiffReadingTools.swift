@@ -23,12 +23,12 @@ struct DiffCodeText: View, Equatable {
                 return columns + 26
             }
             units += scalarUnits
-            columns += scalar.value < 0x80 ? 1 : 2
+            columns += scalar.value == 0x09 ? 4 : (scalar.value < 0x80 ? 1 : 2)
         }
         return max(1, columns)
     }
 
-    private static func displayedSlice(of source: String) -> (text: String, utf16Limit: Int, omittedCharacters: Int) {
+    nonisolated static func displayedSlice(of source: String) -> (text: String, utf16Limit: Int, omittedCharacters: Int) {
         let totalUTF16 = source.utf16.count
         guard totalUTF16 > maxDisplayedUTF16Units else { return (source, totalUTF16, 0) }
         let utf16 = source.utf16
