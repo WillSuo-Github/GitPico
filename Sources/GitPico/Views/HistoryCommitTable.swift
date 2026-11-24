@@ -1,5 +1,4 @@
 import AppKit
-import CoreImage
 import GitCore
 import SwiftUI
 import UniformTypeIdentifiers
@@ -7,7 +6,6 @@ import UniformTypeIdentifiers
 /// Fixed row heights avoid measuring SwiftUI cells again on every branch change.
 /// The store owns history and selection; the coordinator only indexes visible rows.
 struct HistoryCommitTable: NSViewRepresentable {
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let store: RepositoryStore
     let presentation: HistoryPresentation
     let grouped: Bool
@@ -17,15 +15,10 @@ struct HistoryCommitTable: NSViewRepresentable {
     let selection: String?
     let reveal: HistoryReveal?
     var insets = EdgeInsets()
-    var statusBarHeight: CGFloat = 0
 
     func makeCoordinator() -> Coordinator { Coordinator() }
-    func makeNSView(context: Context) -> HistoryScrollView { context.coordinator.makeView() }
-    func updateNSView(_ view: HistoryScrollView, context: Context) {
-        view.setEdgeBlurHeights(
-            top: reduceTransparency ? 0 : insets.top,
-            bottom: reduceTransparency ? 0 : statusBarHeight
-        )
+    func makeNSView(context: Context) -> NSScrollView { context.coordinator.makeView() }
+    func updateNSView(_ view: NSScrollView, context: Context) {
         context.coordinator.update(self)
     }
 
@@ -44,8 +37,8 @@ struct HistoryCommitTable: NSViewRepresentable {
             }
         }
 
-        func makeView() -> HistoryScrollView {
-            let scroll = HistoryScrollView()
+        func makeView() -> NSScrollView {
+            let scroll = NSScrollView()
             scroll.hasVerticalScroller = true
             scroll.autohidesScrollers = true
             // The SwiftUI history pane supplies the window surface behind the table.
@@ -227,92 +220,6 @@ struct HistoryCommitTable: NSViewRepresentable {
             }
         }
     }
-}
-
-final class HistoryScrollView: NSScrollView {
-    private var topBlur: ScrollEdgeBlurView?
-    private var statusBlur: ScrollEdgeBlurView?
-    private var topBlurHeight: CGFloat = 0
-    private var statusBlurHeight: CGFloat = 0
-
-    func setEdgeBlurHeights(top: CGFloat, bottom: CGFloat) {
-        var changed = false
-        if abs(top - topBlurHeight) > 0.25 {
-            topBlurHeight = top
-            changed = true
-            if top > 0, topBlur == nil {
-                let blur = ScrollEdgeBlurView(edge: .top)
-                addSubview(blur, positioned: .above, relativeTo: contentView)
-                topBlur = blur
-            } else if top <= 0 {
-                topBlur?.removeFromSuperview()
-                topBlur = nil
-            }
-        }
-        if abs(bottom - statusBlurHeight) > 0.25 {
-            statusBlurHeight = bottom
-            changed = true
-            if bottom > 0, statusBlur == nil {
-                let blur = ScrollEdgeBlurView(edge: .bottom)
-                addSubview(blur, positioned: .above, relativeTo: contentView)
-                statusBlur = blur
-            } else if bottom <= 0 {
-                statusBlur?.removeFromSuperview()
-                statusBlur = nil
-            }
-        }
-        if changed {
-            tile()
-        }
-    }
-
-    override func tile() {
-        super.tile()
-        let viewport = contentView.frame
-        if let topBlur {
-            let height = min(viewport.height, topBlurHeight)
-            let top = isFlipped ? viewport.minY : viewport.maxY - height
-            topBlur.frame = NSRect(x: viewport.minX, y: top, width: viewport.width, height: height)
-        }
-        if let statusBlur {
-            let height = min(viewport.height, statusBlurHeight)
-            let bottom = isFlipped ? viewport.maxY - height : viewport.minY
-            statusBlur.frame = NSRect(x: viewport.minX, y: bottom, width: viewport.width, height: height)
-        }
-    }
-}
-
-final class ScrollEdgeBlurView: NSView {
-    private let fade = CAGradientLayer()
-
-    init(edge: VerticalEdge, radius: CGFloat = 8) {
-        super.init(frame: .zero)
-        wantsLayer = true
-        if let blur = CIFilter(name: "CIGaussianBlur", parameters: [kCIInputRadiusKey: radius]) {
-            backgroundFilters = [blur]
-        }
-        fade.colors = [
-            NSColor.white.cgColor,
-            NSColor.white.withAlphaComponent(0.96).cgColor,
-            NSColor.white.withAlphaComponent(0.70).cgColor,
-            NSColor.white.withAlphaComponent(0.22).cgColor,
-            NSColor.clear.cgColor
-        ]
-        fade.locations = [0, 0.42, 0.72, 0.90, 1]
-        fade.startPoint = CGPoint(x: 0.5, y: edge == .top ? 1 : 0)
-        fade.endPoint = CGPoint(x: 0.5, y: edge == .top ? 0 : 1)
-        layer?.masksToBounds = true
-        layer?.mask = fade
-    }
-
-    required init?(coder: NSCoder) { nil }
-
-    override func layout() {
-        super.layout()
-        fade.frame = bounds
-    }
-
-    override func hitTest(_ point: NSPoint) -> NSView? { nil }
 }
 
 final class HistoryTableView: NSTableView {

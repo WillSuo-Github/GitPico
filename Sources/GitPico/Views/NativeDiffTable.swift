@@ -96,7 +96,6 @@ struct NativeDiffActions {
 
 struct NativeDiffTable: NSViewRepresentable {
     @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     let source: NativeDiffSource
     let splitMode: Bool
@@ -123,10 +122,6 @@ struct NativeDiffTable: NSViewRepresentable {
         if view.appearance?.name != targetAppearance?.name {
             view.appearance = targetAppearance
         }
-        view.setEdgeBlurHeights(
-            top: reduceTransparency ? 0 : insets.top,
-            bottom: reduceTransparency ? 0 : insets.bottom
-        )
         context.coordinator.update(self)
     }
 
@@ -2855,11 +2850,6 @@ private final class SplitHorizontalScrollerHost: NSScrollView {
 }
 
 final class DiffScrollView: NSScrollView {
-    private var topBlur: ScrollEdgeBlurView?
-    private var bottomBlur: ScrollEdgeBlurView?
-    private var topBlurHeight: CGFloat = 0
-    private var bottomBlurHeight: CGFloat = 0
-
     private let leftSplitScroller = SplitHorizontalScrollerHost()
     private let rightSplitScroller = SplitHorizontalScrollerHost()
 
@@ -2900,37 +2890,6 @@ final class DiffScrollView: NSScrollView {
     func teardown() {
         leftSplitScroller.teardown()
         rightSplitScroller.teardown()
-    }
-
-    func setEdgeBlurHeights(top: CGFloat, bottom: CGFloat) {
-        var changed = false
-        if abs(top - topBlurHeight) > 0.25 {
-            topBlurHeight = top
-            changed = true
-            if top > 0, topBlur == nil {
-                let blur = ScrollEdgeBlurView(edge: .top)
-                addSubview(blur, positioned: .above, relativeTo: contentView)
-                topBlur = blur
-            } else if top == 0 {
-                topBlur?.removeFromSuperview()
-                topBlur = nil
-            }
-        }
-        if abs(bottom - bottomBlurHeight) > 0.25 {
-            bottomBlurHeight = bottom
-            changed = true
-            if bottom > 0, bottomBlur == nil {
-                let blur = ScrollEdgeBlurView(edge: .bottom)
-                addSubview(blur, positioned: .above, relativeTo: contentView)
-                bottomBlur = blur
-            } else if bottom == 0 {
-                bottomBlur?.removeFromSuperview()
-                bottomBlur = nil
-            }
-        }
-        if changed {
-            tile()
-        }
     }
 
     func resetSplitOffsets() {
@@ -3016,16 +2975,6 @@ final class DiffScrollView: NSScrollView {
         if abs(viewport.width - lastReportedViewportWidth) > 0.25 {
             lastReportedViewportWidth = viewport.width
             onViewportWidthChanged?(viewport.width)
-        }
-        if let topBlur {
-            let height = min(viewport.height, topBlurHeight)
-            let originY = isFlipped ? viewport.minY : viewport.maxY - height
-            topBlur.frame = NSRect(x: viewport.minX, y: originY, width: viewport.width, height: height)
-        }
-        if let bottomBlur {
-            let height = min(viewport.height, bottomBlurHeight)
-            let originY = isFlipped ? viewport.maxY - height : viewport.minY
-            bottomBlur.frame = NSRect(x: viewport.minX, y: originY, width: viewport.width, height: height)
         }
         layoutSplitScrollers()
         syncSplitScrollers(flashLeft: false, flashRight: false)

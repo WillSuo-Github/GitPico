@@ -3,14 +3,13 @@ import SwiftUI
 
 struct HistoryView: View {
     @Bindable var store: RepositoryStore
-    @Environment(\.repositoryStatusBarInset) private var statusBarHeight
     @State private var preferences = AppPreferences.shared
     @State private var showingSearchFilters = false
     var commits: [Commit] { store.visibleCommits }
     var body: some View {
         PersistentSplitView(name: "history", width: 320) {
             PinnedScrollPane(bottomIsFloating: true) { insets in
-                HistoryCommitTable(store: store, presentation: store.historyPresentation, grouped: preferences.historyGroups, compact: preferences.historyCompact, showGraph: preferences.historyShowGraph && store.search.isEmpty, canModifyHistory: store.canIntegrate, selection: store.selectedCommit?.hash, reveal: store.historyReveal, insets: insets, statusBarHeight: statusBarHeight)
+                HistoryCommitTable(store: store, presentation: store.historyPresentation, grouped: preferences.historyGroups, compact: preferences.historyCompact, showGraph: preferences.historyShowGraph && store.search.isEmpty, canModifyHistory: store.canIntegrate, selection: store.selectedCommit?.hash, reveal: store.historyReveal, insets: insets)
                     .overlay { if commits.isEmpty { if store.isLoadingHistory { ProgressView("Loading history…") } else { EmptyPane(title: store.historyError ?? (store.search.isEmpty ? String(localized: "No commits yet") : String(localized: "No matching commits")), subtitle: store.search.isEmpty ? "" : String(localized: "Try a different message, author or hash."), icon: store.search.isEmpty ? "clock" : "magnifyingglass") } } }
             } top: {
                 PaneBar(title: store.destination.ref == nil ? "All Branches" : "\(store.destination.title)",

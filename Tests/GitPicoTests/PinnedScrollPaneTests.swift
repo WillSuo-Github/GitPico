@@ -69,9 +69,7 @@ func scrollBarBackdropFadesAcrossTheBarWithoutExtendingPastIt(edge: VerticalEdge
         Color.clear.frame(width: 8, height: 112).background(.windowBackground).background(.background)
     }
     .environment(\.colorScheme, scheme)
-    let renderer = ImageRenderer(content: backdrop)
-    renderer.scale = 1
-    let bitmap = NSBitmapImageRep(cgImage: try #require(renderer.cgImage))
+    let bitmap = try renderHostedBitmap(backdrop, size: CGSize(width: 32, height: 112), scale: 1, scheme: scheme)
 
     func pixel(at y: Int, x: Int = 12) throws -> NSColor {
         try #require(bitmap.colorAt(x: x, y: y)?.usingColorSpace(.sRGB))
@@ -87,13 +85,48 @@ func scrollBarBackdropFadesAcrossTheBarWithoutExtendingPastIt(edge: VerticalEdge
     let behindControls = try pixel(at: edge == .top ? 56 : 55)
     let transition = try pixel(at: edge == .top ? 74 : 38)
     let inner = try pixel(at: edge == .top ? 95 : 16)
-    #expect(difference(outer, surface) < 0.015)
+    #expect(difference(outer, surface) > 0.05)
+    #expect(difference(outer, surface) < 0.16)
+    #expect(difference(outer, content) > 0.70)
     #expect(difference(behindControls, surface) > 0.075)
     #expect(difference(behindControls, content) > 0.20)
     #expect(difference(transition, surface) > 0.12)
     #expect(difference(transition, content) > 0.10)
     #expect(difference(inner, content) < 0.07)
     #expect(try difference(pixel(at: 99), content) < 0.01)
+}
+
+@Test @MainActor
+func variableBlurViewConfiguresProgressiveBackdropLayer() throws {
+    let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 240, height: 120), styleMask: .borderless, backing: .buffered, defer: false)
+    window.isReleasedWhenClosed = false
+    let container = NSView(frame: NSRect(x: 0, y: 0, width: 240, height: 120))
+    window.contentView = container
+    defer { window.contentView = nil; window.close() }
+
+    let blurView = VariableBlurNSView(maxBlurRadius: 10, direction: .blurredBottomClearTop, transitionHeight: 28)
+    blurView.frame = NSRect(x: 0, y: 0, width: 240, height: 28)
+    container.addSubview(blurView)
+    blurView.layoutSubtreeIfNeeded()
+
+    #expect(blurView.isFlipped)
+    #expect(!blurView.isOpaque)
+    #expect(blurView.hitTest(NSPoint(x: 12, y: 12)) == nil)
+    #expect(blurView.isUsingVariableBlurBackdrop)
+    let backdrop = try #require(blurView.layer?.sublayers?.first { NSStringFromClass(type(of: $0)) == "CABackdropLayer" })
+    #expect(!backdrop.isHidden)
+    #expect((backdrop.filters?.count ?? 0) == 1)
+
+    blurView.frame = NSRect(x: 0, y: 0, width: 420, height: 28)
+    blurView.layoutSubtreeIfNeeded()
+    #expect(backdrop.frame == NSRect(x: 0, y: 0, width: 420, height: 28))
+    #expect(!backdrop.isHidden)
+    #expect((backdrop.filters?.count ?? 0) == 1)
+
+    blurView.frame = .zero
+    blurView.layoutSubtreeIfNeeded()
+    #expect(backdrop.isHidden)
+    #expect(!window.isVisible && !NSApp.isActive)
 }
 
 @Test(
@@ -108,9 +141,7 @@ func scrollBarBackdropKeepsAUniformWindowSurface(edge: VerticalEdge, scheme: Col
         .background(.windowBackground)
         .background(.background)
         .environment(\.colorScheme, scheme)
-    let renderer = ImageRenderer(content: surface)
-    renderer.scale = 2
-    let bitmap = NSBitmapImageRep(cgImage: try #require(renderer.cgImage))
+    let bitmap = try renderHostedBitmap(surface, size: CGSize(width: 48, height: 86), scale: 2, scheme: scheme)
     let x = bitmap.pixelsWide / 2
     let referenceY = edge == .top ? bitmap.pixelsHigh - 2 : 1
     let reference = try #require(bitmap.colorAt(x: x, y: referenceY)?.usingColorSpace(.sRGB))
@@ -123,4 +154,36 @@ func scrollBarBackdropKeepsAUniformWindowSurface(edge: VerticalEdge, scheme: Col
                            abs(actual.blueComponent - reference.blueComponent))
     }
     #expect(largestDelta <= 1.0 / 255)
+}
+
+@MainActor
+private func renderHostedBitmap<Content: View>(_ content: Content, size: CGSize, scale: Int, scheme: ColorScheme) throws -> NSBitmapImageRep {
+    let rect = NSRect(origin: .zero, size: size)
+    let window = NSWindow(contentRect: rect, styleMask: .borderless, backing: .buffered, defer: false)
+    window.isReleasedWhenClosed = false
+    window.appearance = NSAppearance(named: scheme == .dark ? .darkAqua : .aqua)
+    let host = NSHostingView(rootView: content.frame(width: size.width, height: size.height))
+    host.frame = rect
+    window.contentView = host
+    defer { window.contentView = nil; window.close() }
+    host.layoutSubtreeIfNeeded()
+
+    let pixelsWide = Int(size.width) * scale
+    let pixelsHigh = Int(size.height) * scale
+    let bitmap = try #require(NSBitmapImageRep(
+        bitmapDataPlanes: nil,
+        pixelsWide: pixelsWide,
+        pixelsHigh: pixelsHigh,
+        bitsPerSample: 8,
+        samplesPerPixel: 4,
+        hasAlpha: true,
+        isPlanar: false,
+        colorSpaceName: .calibratedRGB,
+        bytesPerRow: 0,
+        bitsPerPixel: 0
+    ))
+    bitmap.size = size
+    host.cacheDisplay(in: rect, to: bitmap)
+    #expect(!window.isVisible && !NSApp.isActive)
+    return bitmap
 }

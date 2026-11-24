@@ -49,8 +49,11 @@ struct RepositoryWorkspaceView: View {
             .safeAreaPadding(.bottom, showsRepository ? 0 : RepositoryStatusBar.height)
             .overlay(alignment: .bottom) {
                 if showsRepository {
-                    RepositoryStatusBarBackground(isRunning: tab.store.isBusy)
-                        .frame(height: statusBarInset)
+                    RepositoryStatusBarBackground(
+                        isRunning: tab.store.isBusy,
+                        featherHeight: RepositoryStatusBarBackground.featherHeight
+                    )
+                    .frame(height: statusBarInset + RepositoryStatusBarBackground.featherHeight)
                 }
             }
         }

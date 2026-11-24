@@ -261,17 +261,34 @@ func nativeHistoryScrollsBehindTheStatusBar(paginated: Bool) async throws {
     #expect(tab.store.historyPresentation.page.hasMore == paginated)
     #expect(!scroll.drawsBackground && table.backgroundColor == .clear)
     let viewport = clip.convert(clip.bounds, to: nil)
+    let scrollFrame = scroll.convert(scroll.bounds, to: nil)
     let windowBounds = content.convert(content.bounds, to: nil)
     let statusTop = windowBounds.minY + RepositoryStatusBar.height
+    let statusBackdropTop = statusTop + RepositoryStatusBarBackground.featherHeight
     #expect(abs(viewport.minY - windowBounds.minY) < 1)
     if !NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency {
-        let blurs = scroll.subviews.filter { !$0.backgroundFilters.isEmpty }
-        #expect(blurs.count == 2)
-        let frames = blurs.map { $0.convert($0.bounds, to: nil) }
-        let bottomFrame = try #require(frames.first { abs($0.minY - windowBounds.minY) < 1 })
-        #expect(abs(bottomFrame.maxY - statusTop) < 1)
-        let topFrame = try #require(frames.first { abs($0.maxY - viewport.maxY) < 1 })
-        #expect(abs(topFrame.minY - (viewport.maxY - clip.contentInsets.top)) < 1)
+        #expect(scroll.subviews.allSatisfy { $0.backgroundFilters.isEmpty })
+        func variableBlurs(in view: NSView) -> [VariableBlurNSView] {
+            let current = (view as? VariableBlurNSView).map { [$0] } ?? []
+            return current + view.subviews.flatMap(variableBlurs)
+        }
+        let blurs = variableBlurs(in: content)
+        let bottomBlur = try #require(blurs.first { blur in
+            let frame = blur.convert(blur.bounds, to: nil)
+            return abs(frame.minY - windowBounds.minY) < 1 &&
+                abs(frame.maxY - statusBackdropTop) < 1 &&
+                frame.minX <= viewport.minX + 1 &&
+                frame.maxX >= viewport.maxX - 1
+        })
+        #expect(bottomBlur.isUsingVariableBlurBackdrop)
+        let topBlur = try #require(blurs.first { blur in
+            let frame = blur.convert(blur.bounds, to: nil)
+            return abs(frame.maxY - scrollFrame.maxY) < 1 &&
+                abs(frame.minY - (scrollFrame.maxY - clip.contentInsets.top)) < 1 &&
+                abs(frame.minX - scrollFrame.minX) < 1 &&
+                abs(frame.width - scrollFrame.width) < 1
+        })
+        #expect(topBlur.isUsingVariableBlurBackdrop)
     }
     let bottomInset = clip.contentInsets.bottom
     #expect(paginated ? bottomInset > RepositoryStatusBar.height : bottomInset == RepositoryStatusBar.height)

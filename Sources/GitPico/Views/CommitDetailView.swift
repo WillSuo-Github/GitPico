@@ -239,7 +239,6 @@ private struct CommitFileDisclosureStyle: DisclosureGroupStyle {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .progressiveScrollBlur()
             .accessibilityValue(configuration.isExpanded ? Text("Expanded") : Text("Collapsed"))
 
             if configuration.isExpanded {

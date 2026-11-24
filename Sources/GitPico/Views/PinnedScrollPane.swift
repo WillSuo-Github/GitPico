@@ -93,43 +93,78 @@ struct ScrollBarBackdrop: View {
     var tint: Color = .clear
     var coveredBottom: CGFloat = 0
 
-    private static let statusGradient = Gradient(stops: [
-        .init(color: .white, location: 0),
-        .init(color: .white.opacity(0.98), location: 0.22),
-        .init(color: .white.opacity(0.93), location: 0.38),
-        .init(color: .white.opacity(0.87), location: 0.50),
-        .init(color: .white.opacity(0.70), location: 0.65),
-        .init(color: .white.opacity(0.40), location: 0.80),
-        .init(color: .white.opacity(0.09), location: 0.94),
-        .init(color: .clear, location: 1)
-    ])
+    static let topBlurRadius: CGFloat = 10
+    static let bottomBlurRadius: CGFloat = 10
+    static let tintOpacity: Double = 0.90
+    static let maxTransitionHeight: CGFloat = 48
 
-    private func fade(_ gradient: Gradient) -> some View {
+    private var blurDirection: VariableBlurDirection {
+        edge == .top ? .blurredTopClearBottom : .blurredBottomClearTop
+    }
+
+    private var blurRadius: CGFloat {
+        edge == .top ? Self.topBlurRadius : Self.bottomBlurRadius
+    }
+
+    private func tintGradient(barHeight: CGFloat, transition: CGFloat) -> LinearGradient {
+        let safeHeight = max(1, barHeight)
+        let fadeFraction = min(1, transition / safeHeight)
+        let solidEnd = max(0, 1 - fadeFraction)
+        let alpha = Self.tintOpacity
+        var stops: [Gradient.Stop] = [.init(color: .white.opacity(alpha), location: 0)]
+        if solidEnd > 0 {
+            stops.append(.init(color: .white.opacity(alpha), location: solidEnd))
+        }
+        stops.append(contentsOf: [
+            .init(color: .white.opacity(alpha * 0.90), location: solidEnd + fadeFraction * 0.28),
+            .init(color: .white.opacity(alpha * 0.64), location: solidEnd + fadeFraction * 0.52),
+            .init(color: .white.opacity(alpha * 0.31), location: solidEnd + fadeFraction * 0.74),
+            .init(color: .white.opacity(alpha * 0.08), location: solidEnd + fadeFraction * 0.90),
+            .init(color: .clear, location: 1)
+        ])
+        return LinearGradient(
+            gradient: Gradient(stops: stops),
+            startPoint: edge == .top ? .top : .bottom,
+            endPoint: edge == .top ? .bottom : .top
+        )
+    }
+
+    private func tintMask(barHeight: CGFloat, transition: CGFloat) -> some View {
         VStack(spacing: 0) {
-            LinearGradient(
-                gradient: gradient,
-                startPoint: edge == .top ? .top : .bottom,
-                endPoint: edge == .top ? .bottom : .top
-            )
+            tintGradient(barHeight: barHeight, transition: transition)
             // Continue the footer surface underneath the window status bar so
             // rows do not reappear at the junction between the two backgrounds.
-            if coveredBottom > 0 { Color.white.frame(height: coveredBottom) }
+            if coveredBottom > 0 {
+                Color.white.opacity(Self.tintOpacity).frame(height: coveredBottom)
+            }
         }
     }
 
     var body: some View {
         // The same surface runs through both edges so the fade adds no color over an empty pane.
-        let gradient = edge == .bottom && coveredBottom == 0 ? Self.statusGradient : PinnedScrollEdges.gradient(for: edge)
-        Rectangle().fill(.windowBackground)
-            .background(.background)
-            .compositingGroup()
-            .overlay { tint }
-            .mask {
-                if reduceTransparency { Rectangle() }
-                else { fade(gradient) }
+        GeometryReader { geometry in
+            let barHeight = max(0, geometry.size.height - coveredBottom)
+            let transition = min(barHeight, Self.maxTransitionHeight)
+            ZStack {
+                if !reduceTransparency, barHeight > 0 {
+                    VariableBlurView(
+                        maxBlurRadius: blurRadius,
+                        direction: blurDirection,
+                        transitionHeight: transition
+                    )
+                }
+                Rectangle().fill(.windowBackground)
+                    .background(.background)
+                    .compositingGroup()
+                    .overlay { tint }
+                    .mask {
+                        if reduceTransparency { Rectangle() }
+                        else { tintMask(barHeight: barHeight, transition: transition) }
+                    }
             }
-            .allowsHitTesting(false)
-            .accessibilityHidden(true)
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }
 
