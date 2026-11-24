@@ -23,14 +23,13 @@ import SwiftUI
         if links.count == 1, let link = links.first {
             Link(destination: link.repository.reviewsWebURL) {
                 Label(link.repository.provider == .github ? "Pull Requests on GitHub" : "Merge Requests on GitLab", systemImage: "arrow.up.right.square")
-                    .sidebarScrollBlur()
             }.help("Open in your browser")
         } else if !links.isEmpty {
             Menu {
                 ForEach(links, id: \.name) { link in
                     Link("\(link.name) · \(link.repository.project)", destination: link.repository.reviewsWebURL)
                 }
-            } label: { Label("Pull / Merge Requests on Web", systemImage: "arrow.up.right.square").sidebarScrollBlur() }
+            } label: { Label("Pull / Merge Requests on Web", systemImage: "arrow.up.right.square") }
         }
     }
 }

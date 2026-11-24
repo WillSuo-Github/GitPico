@@ -7,16 +7,14 @@ let package = Package(
     platforms: [.macOS("26.0")],
     products: [.executable(name: "GitPico", targets: ["GitPico"])],
     dependencies: [
-        .package(url: "https://github.com/sparkle-project/Sparkle", exact: "2.10.1"),
-        .package(url: "https://github.com/daprice/Variablur", exact: "2.0.0")
+        .package(url: "https://github.com/sparkle-project/Sparkle", exact: "2.10.1")
     ],
     targets: [
         .target(name: "GitCore", resources: [.process("Localizable.xcstrings")]),
         .executableTarget(name: "GitPico", dependencies: [
             "GitCore",
-            .product(name: "Sparkle", package: "Sparkle"),
-            .product(name: "Variablur", package: "Variablur")
-        ], resources: [.process("Localizable.xcstrings"), .copy("Variablur-LICENSE.txt")]),
+            .product(name: "Sparkle", package: "Sparkle")
+        ], resources: [.process("Localizable.xcstrings")]),
         .testTarget(name: "GitCoreTests", dependencies: ["GitCore"]),
         .testTarget(name: "GitPicoTests", dependencies: ["GitPico", "GitCore"])
     ]

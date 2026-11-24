@@ -5,8 +5,6 @@ import SwiftUI
 struct SidebarView: View {
     @Bindable var store: RepositoryStore
     @Environment(\.repositoryStatusBarInset) private var statusBarInset
-    @State private var viewport = CGRect.zero
-    @State private var headerHeight: CGFloat = 0
     private static let filterBarHeight: CGFloat = 34
     @State private var selectedDestinations: Set<Destination> = []
     var filter: String { store.sidebarFilter }
@@ -49,36 +47,35 @@ struct SidebarView: View {
                     } icon: {
                         Image(systemName: "square.and.pencil")
                     }
-                    .sidebarScrollBlur()
                     .tag(Destination.workingCopy).picoDrop(store, .workingCopy)
-                    Label("History", systemImage: "clock.arrow.circlepath").sidebarScrollBlur().tag(Destination.history)
-                    Label("Stashes", systemImage: "tray.full").sidebarScrollBlur().badge(store.snapshot?.stashes.count ?? 0).tag(Destination.stashes).picoDrop(store, .stashes)
-                } header: { Text("Workspace").sidebarScrollBlur() }
+                    Label("History", systemImage: "clock.arrow.circlepath").tag(Destination.history)
+                    Label("Stashes", systemImage: "tray.full").badge(store.snapshot?.stashes.count ?? 0).tag(Destination.stashes).picoDrop(store, .stashes)
+                } header: { Text("Workspace") }
                 Section(isExpanded: $branchesExpanded) {
                     ForEach(outline.pinned) { ref in
                         referenceRow(ref, title: ref.name, icon: "pin")
                     }
                     OutlineGroup(outline.branches, children: \.children) { node in
                         if let ref = node.reference { referenceRow(ref, title: node.name, icon: "arrow.triangle.branch") }
-                        else { Label(node.name, systemImage: "folder").sidebarScrollBlur() }
+                        else { Label(node.name, systemImage: "folder") }
                     }
-                } header: { Text("Branches").sidebarScrollBlur().frame(maxWidth: .infinity, alignment: .leading).picoDrop(store, .branches) }
+                } header: { Text("Branches").frame(maxWidth: .infinity, alignment: .leading).picoDrop(store, .branches) }
                 if !outline.archived.isEmpty {
                     Section {
                         OutlineGroup(outline.archived, children: \.children) { node in
                             if let ref = node.reference { referenceRow(ref, title: node.name, icon: "archivebox") }
-                            else { Label(node.name, systemImage: "folder").sidebarScrollBlur() }
+                            else { Label(node.name, systemImage: "folder") }
                         }
-                    } header: { Text("Archived Branches").sidebarScrollBlur() }
+                    } header: { Text("Archived Branches") }
                 }
                 Section(isExpanded: $remotesExpanded) {
                     ForEach(store.snapshot?.remotes ?? [], id: \.self) { remote in
                         DisclosureGroup {
                             OutlineGroup(outline.remotes[remote] ?? [], children: \.children) { node in
                                 if let ref = node.reference { referenceRow(ref, title: node.name, icon: "arrow.triangle.branch") }
-                                else { Label(node.name, systemImage: "folder").sidebarScrollBlur() }
+                                else { Label(node.name, systemImage: "folder") }
                             }
-                        } label: { Label(remote, systemImage: "cloud").sidebarScrollBlur().picoDrop(store, .remote(remote)).contextMenu {
+                        } label: { Label(remote, systemImage: "cloud").picoDrop(store, .remote(remote)).contextMenu {
                             if let value = store.managedRemotes.first(where: { $0.name == remote }) {
                                 Button("Fetch…") { store.manage(.fetch(value)) }
                                 Button("Edit Remote…") { store.manage(.editRemote(value)) }
@@ -88,39 +85,38 @@ struct SidebarView: View {
                         } }
                     }
                     if store.snapshot?.remotes.isEmpty != false {
-                        Button { store.manage(.addRemote) } label: { Label("Add Remote…", systemImage: "plus.circle").sidebarScrollBlur() }.buttonStyle(.plain).foregroundStyle(.secondary)
+                        Button { store.manage(.addRemote) } label: { Label("Add Remote…", systemImage: "plus.circle") }.buttonStyle(.plain).foregroundStyle(.secondary)
                     }
-                } header: { Text("Remotes").sidebarScrollBlur() }
+                } header: { Text("Remotes") }
                 Section(isExpanded: $tagsExpanded) {
                     OutlineGroup(outline.tags, children: \.children) { node in
                         if let ref = node.reference { referenceRow(ref, title: node.name, icon: "tag") }
-                        else { Label(node.name, systemImage: "folder").sidebarScrollBlur() }
+                        else { Label(node.name, systemImage: "folder") }
                     }
                     if outline.tags.isEmpty {
                         if filter.isEmpty {
-                            Button { store.manage(.createTag("HEAD")) } label: { Label("New Tag…", systemImage: "plus.circle").sidebarScrollBlur() }.buttonStyle(.plain).foregroundStyle(.secondary).disabled(store.snapshot?.hasHEAD != true)
-                        } else { Text("No matching tags").sidebarScrollBlur().foregroundStyle(.tertiary) }
+                            Button { store.manage(.createTag("HEAD")) } label: { Label("New Tag…", systemImage: "plus.circle") }.buttonStyle(.plain).foregroundStyle(.secondary).disabled(store.snapshot?.hasHEAD != true)
+                        } else { Text("No matching tags").foregroundStyle(.tertiary) }
                     }
-                } header: { Text("Tags").sidebarScrollBlur().frame(maxWidth: .infinity, alignment: .leading).picoDrop(store, .tags) }
+                } header: { Text("Tags").frame(maxWidth: .infinity, alignment: .leading).picoDrop(store, .tags) }
                 Section(isExpanded: $relatedExpanded) {
-                    Label("Worktrees", systemImage: "folder.badge.gearshape").sidebarScrollBlur().badge(store.worktrees.filter { !$0.isMain && !$0.isBare }.count).tag(Destination.worktrees)
+                    Label("Worktrees", systemImage: "folder.badge.gearshape").badge(store.worktrees.filter { !$0.isMain && !$0.isBare }.count).tag(Destination.worktrees)
                     if store.worktrees.count > 1 {
                         ForEach(store.worktrees.filter { !$0.isBare }) { entry in
                             SidebarWorktreeRow(store: store, entry: entry)
-                                .sidebarScrollBlur()
                                 .tag(Destination.worktree(entry.path))
                         }
                     }
-                    Label("Submodules", systemImage: "shippingbox").sidebarScrollBlur().badge(store.submodules.count).tag(Destination.submodules)
+                    Label("Submodules", systemImage: "shippingbox").badge(store.submodules.count).tag(Destination.submodules)
                     ForEach(store.submodules) { entry in
-                        Button { if entry.initialized { store.openSubmodule(entry) } else { store.manageSubmodule(.manage(entry, .initialize)) } } label: { Label(entry.path, systemImage: "shippingbox").sidebarScrollBlur() }.buttonStyle(.plain).padding(.leading, 12).contextMenu { SubmoduleContextActions(store: store, entry: entry) }
+                        Button { if entry.initialized { store.openSubmodule(entry) } else { store.manageSubmodule(.manage(entry, .initialize)) } } label: { Label(entry.path, systemImage: "shippingbox") }.buttonStyle(.plain).padding(.leading, 12).contextMenu { SubmoduleContextActions(store: store, entry: entry) }
                     }
-                } header: { Text("Related Repositories").sidebarScrollBlur() }
+                } header: { Text("Related Repositories") }
                 Section(isExpanded: $toolsExpanded) {
                     HostedReviewWebMenu(store: store)
-                    Label("Branches Review", systemImage: "arrow.left.arrow.right").sidebarScrollBlur().tag(Destination.branchesReview)
-                    Label("Reflog", systemImage: "list.bullet.rectangle").sidebarScrollBlur().tag(Destination.reflog)
-                } header: { Text("Tools").sidebarScrollBlur() }
+                    Label("Branches Review", systemImage: "arrow.left.arrow.right").tag(Destination.branchesReview)
+                    Label("Reflog", systemImage: "list.bullet.rectangle").tag(Destination.reflog)
+                } header: { Text("Tools") }
             }.listStyle(.sidebar)
             .contextMenu(forSelectionType: Destination.self) { destinations in
                 SidebarSelectionContextActions(store: store, selection: SidebarContextSelection(destinations, references: store.snapshot?.references ?? []), repositoryToken: store.repositoryToken)
@@ -131,7 +127,7 @@ struct SidebarView: View {
             .scrollEdgeEffectHidden(true, for: .vertical)
             .safeAreaInset(edge: .top, spacing: 0) {
                 SidebarRepositoryHeader(store: store)
-                    .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) { headerHeight = $0 }
+                    .background { ScrollBarBackdrop(edge: .top, showsWindowSurface: false) }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 HStack(spacing: 8) {
@@ -157,10 +153,9 @@ struct SidebarView: View {
                 }.font(.system(size: 11)).padding(.horizontal, 10).frame(height: Self.filterBarHeight)
                     // Reserve room for the status labels while the list scrolls behind them.
                     .padding(.bottom, statusBarInset)
+                    .background { ScrollBarBackdrop(edge: .bottom, coveredBottom: statusBarInset, showsWindowSurface: false) }
             }
         }
-        .progressiveScrollBlurViewport(viewport, top: headerHeight, bottom: Self.filterBarHeight + statusBarInset)
-        .onGeometryChange(for: CGRect.self, of: { $0.frame(in: .global) }) { viewport = $0 }
         // Keep the sidebar's header margin outside the viewport, below the window toolbar.
         .padding(.top, 6)
         .background { SidebarScrollEdges().allowsHitTesting(false).accessibilityHidden(true) }
@@ -183,8 +178,8 @@ struct SidebarView: View {
                 if let status = BranchSyncStatus.current(ref, snapshot: store.snapshot) {
                     CurrentBranchBadge(status: status, isSelected: selectedDestinations.contains(.reference(ref.fullName)))
                 }
-            }.sidebarScrollBlur()
-        } icon: { Image(systemName: icon).sidebarScrollBlur() }
+            }
+        } icon: { Image(systemName: icon) }
         .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())
         .tag(Destination.reference(ref.fullName))

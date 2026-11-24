@@ -15,9 +15,6 @@ packages:
   Sparkle:
     url: https://github.com/sparkle-project/Sparkle
     exactVersion: 2.10.1
-  Variablur:
-    url: https://github.com/daprice/Variablur
-    exactVersion: 2.0.0
 settings:
   base:
     SWIFT_VERSION: "6.0"
@@ -64,7 +61,6 @@ targets:
       - target: GitCore
         embed: true
       - package: Sparkle
-      - package: Variablur
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.willsuo.GitPico

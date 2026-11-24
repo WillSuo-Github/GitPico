@@ -156,6 +156,30 @@ func scrollBarBackdropKeepsAUniformWindowSurface(edge: VerticalEdge, scheme: Col
     #expect(largestDelta <= 1.0 / 255)
 }
 
+@Test(
+    .enabled(if: !NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency, "Requires transparent materials."),
+    arguments: [VerticalEdge.top, .bottom], [ColorScheme.light, .dark]
+) @MainActor
+func scrollBarBackdropWithoutWindowSurfaceOmitsOpaqueTint(edge: VerticalEdge, scheme: ColorScheme) throws {
+    let surface = Color.blue.frame(width: 32, height: 64)
+        .overlay(alignment: edge == .top ? .top : .bottom) {
+            ScrollBarBackdrop(edge: edge, showsWindowSurface: false).frame(height: 44)
+        }
+        .environment(\.colorScheme, scheme)
+    let bitmap = try renderHostedBitmap(surface, size: CGSize(width: 32, height: 64), scale: 1, scheme: scheme)
+    let column = bitmap.pixelsWide / 2
+    let uncoveredRow = edge == .top ? bitmap.pixelsHigh - 2 : 1
+    let coveredRow = edge == .top ? 12 : bitmap.pixelsHigh - 13
+    let uncovered = try #require(bitmap.colorAt(x: column, y: uncoveredRow)?.usingColorSpace(.sRGB))
+    let covered = try #require(bitmap.colorAt(x: column, y: coveredRow)?.usingColorSpace(.sRGB))
+    let delta = max(
+        abs(covered.redComponent - uncovered.redComponent),
+        abs(covered.greenComponent - uncovered.greenComponent),
+        abs(covered.blueComponent - uncovered.blueComponent)
+    )
+    #expect(delta <= 1.0 / 255)
+}
+
 @MainActor
 private func renderHostedBitmap<Content: View>(_ content: Content, size: CGSize, scale: Int, scheme: ColorScheme) throws -> NSBitmapImageRep {
     let rect = NSRect(origin: .zero, size: size)

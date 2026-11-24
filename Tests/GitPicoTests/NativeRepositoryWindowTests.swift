@@ -364,6 +364,47 @@ func nativeHistoryScrollsBehindTheStatusBar(paginated: Bool) async throws {
     #expect(passingRow.midY > viewport.maxY - insets.top && passingRow.midY < viewport.maxY)
     #expect(layer.mask === mask && mask.frame == layer.bounds)
     if !NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency {
+        func variableBlurs(in view: NSView) -> [VariableBlurNSView] {
+            let current = (view as? VariableBlurNSView).map { [$0] } ?? []
+            return current + view.subviews.flatMap(variableBlurs)
+        }
+        let scrollFrame = scroll.convert(scroll.bounds, to: nil)
+        let blurs = variableBlurs(in: content)
+        let topBlur = try #require(blurs.first { blur in
+            let frame = blur.convert(blur.bounds, to: nil)
+            return abs(frame.maxY - viewport.maxY) < 1 &&
+                abs(frame.minY - (viewport.maxY - insets.top)) < 1 &&
+                abs(frame.minX - scrollFrame.minX) < 1 &&
+                abs(frame.width - scrollFrame.width) < 1
+        })
+        #expect(topBlur.isUsingVariableBlurBackdrop)
+        let topBackdrop = try #require(topBlur.layer?.sublayers?.first { NSStringFromClass(type(of: $0)) == "CABackdropLayer" })
+        #expect(!topBackdrop.isHidden && (topBackdrop.filters?.count ?? 0) == 1)
+
+        let bottomBlur = try #require(blurs.first { blur in
+            let frame = blur.convert(blur.bounds, to: nil)
+            return abs(frame.minY - viewport.minY) < 1 &&
+                abs(frame.maxY - (viewport.minY + insets.bottom)) < 1 &&
+                abs(frame.minX - scrollFrame.minX) < 1 &&
+                abs(frame.width - scrollFrame.width) < 1
+        })
+        #expect(bottomBlur.isUsingVariableBlurBackdrop)
+        let bottomBackdrop = try #require(bottomBlur.layer?.sublayers?.first { NSStringFromClass(type(of: $0)) == "CABackdropLayer" })
+        #expect(!bottomBackdrop.isHidden && (bottomBackdrop.filters?.count ?? 0) == 1)
+
+        func isOrderedAbove(_ upper: NSView, lower: NSView) -> Bool {
+            let upperChain = Array(sequence(first: upper, next: \.superview))
+            let lowerChain = Array(sequence(first: lower, next: \.superview))
+            guard let shared = upperChain.first(where: { candidate in lowerChain.contains(where: { $0 === candidate }) }),
+                  let upperChild = upperChain.first(where: { $0.superview === shared }),
+                  let lowerChild = lowerChain.first(where: { $0.superview === shared }),
+                  let upperIndex = shared.subviews.firstIndex(of: upperChild),
+                  let lowerIndex = shared.subviews.firstIndex(of: lowerChild) else { return false }
+            return upperIndex > lowerIndex
+        }
+        #expect(isOrderedAbove(topBlur, lower: scroll))
+        #expect(isOrderedAbove(bottomBlur, lower: scroll))
+
         let stops = try #require(mask.locations)
         let colors = try #require(mask.colors as? [CGColor])
         let headerEnd = insets.top / viewport.height

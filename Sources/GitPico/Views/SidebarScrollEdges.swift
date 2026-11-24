@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// Fades the outline's native drawing over the sidebar surface. SwiftUI rows supply their own blur.
+/// Fades the outline's native drawing over the sidebar surface beneath the variable-blur bars.
 struct SidebarScrollEdges: NSViewRepresentable {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
