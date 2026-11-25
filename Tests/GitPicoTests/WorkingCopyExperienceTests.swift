@@ -290,3 +290,39 @@ actor RecordingWorkingReader: WorkingDiffReading {
     #expect(abs(narrowStagedHeight - wideStagedHeight) <= 1)
     #expect(!NSApplication.shared.isActive && NSApplication.shared.windows.filter(\.isVisible).isEmpty)
 }
+
+@Test @MainActor func commitComposerDescriptionDisclosureInterpolatesHeightAndRespectsReduceMotion() async throws {
+    #expect(CommitComposer.bodyAnimation(reduceMotion: false) != nil)
+    #expect(CommitComposer.bodyAnimation(reduceMotion: true) == nil)
+
+    func measureDisclosure(progress: CGFloat) -> CGFloat {
+        let view = AnimatedVerticalDisclosure(progress: progress, expandedHeight: CommitComposer.bodySectionHeight) {
+            Color.clear.frame(height: CommitComposer.bodySectionHeight)
+        }
+        .frame(width: 300)
+        let host = NSHostingView(rootView: view)
+        host.layoutSubtreeIfNeeded()
+        return host.fittingSize.height
+    }
+
+    #expect(abs(measureDisclosure(progress: 0) - 0) <= 0.5)
+    #expect(abs(measureDisclosure(progress: 0.5) - CommitComposer.bodySectionHeight * 0.5) <= 0.5)
+    #expect(abs(measureDisclosure(progress: 1) - CommitComposer.bodySectionHeight) <= 0.5)
+
+    let fixture = try await WorkingAppFixture.make(); defer { fixture.clean() }
+    try await fixture.write("a.txt", "hello\n"); try await fixture.sync()
+    fixture.store.stage(fixture.store.changes); await fixture.finish()
+    fixture.store.commitSubject = "Animate description height"
+
+    func measureComposer() -> CGFloat {
+        let host = NSHostingView(rootView: CommitComposer(store: fixture.store).frame(width: 340))
+        host.layoutSubtreeIfNeeded()
+        return host.fittingSize.height
+    }
+
+    let collapsedHeight = measureComposer()
+    fixture.store.commitBody = "Body content"
+    let expandedHeight = measureComposer()
+    #expect(abs((expandedHeight - collapsedHeight) - CommitComposer.bodySectionHeight) <= 1)
+    #expect(!NSApplication.shared.isActive && NSApplication.shared.windows.filter(\.isVisible).isEmpty)
+}

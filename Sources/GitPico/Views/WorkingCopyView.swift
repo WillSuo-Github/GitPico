@@ -144,6 +144,13 @@ struct CommitComposer: View {
     static let outerHorizontalPadding: CGFloat = 8
     static let outerTopPadding: CGFloat = 6
     static let outerBottomPadding: CGFloat = 6
+    static let bodyEditorHeight: CGFloat = 76
+    static let bodyVerticalPadding: CGFloat = 4
+    static let bodySectionHeight: CGFloat = 1 + bodyEditorHeight + bodyVerticalPadding * 2
+
+    static func bodyAnimation(reduceMotion: Bool) -> Animation? {
+        reduceMotion ? nil : .spring(duration: 0.26, bounce: 0)
+    }
 
     @Bindable var store: RepositoryStore
     @State private var workflows: CommitWorkflowLibrary
@@ -153,6 +160,10 @@ struct CommitComposer: View {
     @AppStorage("aiCommit.scope") private var aiScope: AICommitScope = .staged
     @FocusState private var subjectFocused: Bool
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.repositoryStatusMotionEnabled) private var motionEnabled
+    private var reduceMotion: Bool { systemReduceMotion || !motionEnabled }
+    private var isBodyVisible: Bool { showBody || !store.commitBody.isEmpty }
     init(store: RepositoryStore, workflows: CommitWorkflowLibrary = .shared) {
         self.store = store; _workflows = State(initialValue: workflows)
     }
@@ -172,13 +183,31 @@ struct CommitComposer: View {
                                         aiHelp: aiHelp, scope: $aiScope, showBody: $showBody,
                                         hasDescription: !store.commitBody.isEmpty, generate: toggleAI)
                 }.padding(.leading, 10).padding(.trailing, 6).frame(height: 32)
-                if showBody || !store.commitBody.isEmpty {
-                    Divider().padding(.horizontal, 8)
-                    TextEditor(text: $store.commitBody).font(.system(size: 12)).frame(height: 76).scrollContentBackground(.hidden).padding(.horizontal, 5).padding(.vertical, 4).accessibilityLabel("Commit description")
-                        .overlay(alignment: .topLeading) { if store.commitBody.isEmpty { Text("Description").font(.system(size: 12)).foregroundStyle(.tertiary).padding(.horizontal, 10).padding(.vertical, 4).allowsHitTesting(false) } }
+                AnimatedVerticalDisclosure(progress: isBodyVisible ? 1 : 0, expandedHeight: Self.bodySectionHeight) {
+                    VStack(spacing: 0) {
+                        Divider().padding(.horizontal, 8)
+                        TextEditor(text: $store.commitBody)
+                            .font(.system(size: 12))
+                            .frame(height: Self.bodyEditorHeight)
+                            .scrollContentBackground(.hidden)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, Self.bodyVerticalPadding)
+                            .accessibilityLabel("Commit description")
+                            .overlay(alignment: .topLeading) {
+                                if store.commitBody.isEmpty {
+                                    Text("Description")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(.tertiary)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 4)
+                                        .allowsHitTesting(false)
+                                }
+                            }
+                    }
                 }
             }
             .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(subjectFocused ? Color.accentColor.opacity(0.7) : Color(nsColor: .separatorColor), lineWidth: subjectFocused ? 1.5 : 0.5))
             HStack(spacing: 6) {
                 CommitIdentityMenu(store: store, library: workflows).frame(minWidth: 0, maxWidth: 140, alignment: .leading)
@@ -237,6 +266,7 @@ struct CommitComposer: View {
         .padding(.horizontal, Self.outerHorizontalPadding)
         .padding(.top, Self.outerTopPadding)
         .padding(.bottom, Self.outerBottomPadding)
+        .animation(Self.bodyAnimation(reduceMotion: reduceMotion), value: isBodyVisible)
         .disabled(store.isBusy && !store.isFetching).onChange(of: store.amend) { store.updateAmend() }
         .sheet(item: $insertion) { CommitTemplateInsertionView(store: store, insertion: $0) }
         .onDisappear { ai.cancel() }
@@ -265,6 +295,34 @@ struct CommitComposer: View {
         if store.amend { return (String(localized: "Amend replaces the HEAD commit."), "info.circle", Pico.warning) }
         if let reason = store.commitUnavailableReason { return (reason, "info.circle", .secondary) }
         return nil
+    }
+}
+
+struct AnimatedVerticalDisclosure<Content: View>: View, Animatable {
+    nonisolated var progress: CGFloat
+    let expandedHeight: CGFloat
+    @ViewBuilder let content: () -> Content
+
+    nonisolated var animatableData: CGFloat {
+        get { progress }
+        set { progress = newValue }
+    }
+
+    var body: some View {
+        let clamped = min(max(progress, 0), 1)
+        let visibleOpacity = Double(min(max((clamped - 0.12) / 0.88, 0), 1))
+        ZStack(alignment: .top) {
+            if clamped > 0.001 {
+                content()
+                    .frame(height: expandedHeight, alignment: .top)
+                    .opacity(visibleOpacity)
+                    .transition(.identity)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: expandedHeight * clamped, alignment: .top)
+        .clipped()
+        .allowsHitTesting(clamped > 0.95)
     }
 }
 

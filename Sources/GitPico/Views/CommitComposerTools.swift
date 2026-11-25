@@ -10,17 +10,27 @@ struct CommitComposerTools: View {
     @Binding var showBody: Bool
     let hasDescription: Bool
     let generate: () -> Void
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.repositoryStatusMotionEnabled) private var motionEnabled
 
     private var descriptionActive: Bool { showBody || hasDescription }
+    private var reduceMotion: Bool { systemReduceMotion || !motionEnabled }
 
     var body: some View {
         HStack(spacing: 6) {
             aiControls
-            Button { showBody.toggle() } label: {
+            Button {
+                if let animation = CommitComposer.bodyAnimation(reduceMotion: reduceMotion) {
+                    withAnimation(animation) { showBody.toggle() }
+                } else {
+                    showBody.toggle()
+                }
+            } label: {
                 Image(systemName: "text.alignleft")
                     .font(.system(size: 12, weight: .regular)).frame(width: 24)
             }
             .buttonStyle(CommitToolButtonStyle(tint: descriptionActive ? .accentColor : .secondary))
+            .animation(CommitComposer.bodyAnimation(reduceMotion: reduceMotion), value: descriptionActive)
             .help(showBody ? "Hide description" : "Add a description")
             .accessibilityLabel(showBody ? "Hide description" : "Add a description")
         }
