@@ -12,24 +12,24 @@ struct WelcomeView: View {
                 Text("GitPico").font(.system(size: 38, weight: .bold, design: .rounded))
                 Text("A little clarity for every commit.").font(.title3).foregroundStyle(.secondary)
             }
-            .staggeredEntrance(isShowing: entered, index: 0, style: .hero)
+            .staggeredEntrance(isShowing: entered, index: 0, style: .card)
             VStack(spacing: 14) {
                 Button(action: store.chooseRepository) { Label("Open Repository…", systemImage: "folder") }.buttonStyle(.borderedProminent).controlSize(.large).keyboardShortcut("o")
                 HStack { Button("Repositories…") { store.showingRepositoryLibrary = true }; Button("Quick Open…") { store.showingQuickOpen = true } }
                 Button("Repair Repository Pointers…") { store.infrastructure(.repair) }
             }
-            .staggeredEntrance(isShowing: entered, index: 1, style: .hero)
+            .staggeredEntrance(isShowing: entered, index: 1, style: .card)
             if let error = store.library.error { Text(error).font(.caption).foregroundStyle(.red).frame(maxWidth: 500) }
             if !store.recentPaths.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
                     SectionCaption("Recent Repositories")
-                        .staggeredEntrance(isShowing: entered, index: 2, style: .section)
+                        .staggeredEntrance(isShowing: entered, index: 2, style: .card)
                     ForEach(Array(store.recentPaths.prefix(5).enumerated()), id: \.element) { index, path in
                         Button { Task { await store.open(URL(fileURLWithPath: path)) } } label: {
                             HStack { RepositoryGlyph(name: store.library.displayName(for: path), size: 24); Text(store.library.displayName(for: path)); Spacer(); Image(systemName: "chevron.forward").font(.caption).foregroundStyle(.tertiary) }
                                 .contentShape(Rectangle()).padding(.vertical, 5)
                         }.buttonStyle(.plain).help(path)
-                        .staggeredEntrance(isShowing: entered, index: index, style: .row)
+                        .staggeredEntrance(isShowing: entered, index: index, style: .item)
                     }
                 }.frame(width: 320).padding(.top, 20)
             }

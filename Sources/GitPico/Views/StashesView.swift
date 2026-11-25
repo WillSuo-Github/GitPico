@@ -9,7 +9,7 @@ struct StashesView: View {
         PersistentSplitView(name: "stashes", width: 320) {
             PinnedScrollPane { insets in
                 List(selection: Binding(get: { store.selectedStash?.id }, set: { id in if let stash = stashes.first(where: { $0.id == id }) { store.selectStash(stash) } })) {
-                    ForEach(Array(stashes.enumerated()), id: \.element.id) { index, stash in
+                    ForEach(stashes) { stash in
                         HStack(alignment: .top, spacing: 10) {
                             Image(systemName: "tray.full").font(.system(size: 13)).foregroundStyle(.tint).frame(width: 28, height: 28)
                                 .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
@@ -23,7 +23,6 @@ struct StashesView: View {
                                 }.font(.system(size: 11)).foregroundStyle(.secondary)
                             }
                         }.padding(.vertical, 6).contentShape(Rectangle()).onTapGesture { store.selectStash(stash) }
-                        .staggeredEntrance(isShowing: listEntered, index: index, style: .row)
                         .tag(stash.id).picoDrag(store, .stash(stash))
                         .contextMenu {
                             Button("Apply Stash…") { store.stashAction(.apply(stash)) }
@@ -34,6 +33,7 @@ struct StashesView: View {
                         }
                     }
                 }.listStyle(.plain).pinnedScrollInsets(insets)
+                .staggeredEntrance(isShowing: listEntered, index: 0, style: .pane)
                 .overlay { if stashes.isEmpty { EmptyPane(title: store.search.isEmpty ? String(localized: "No stashes") : String(localized: "No matching stashes"), subtitle: store.search.isEmpty ? String(localized: "Stash shelves local changes so you can switch tasks and bring them back later.") : String(localized: "No stash message matches this search."), icon: "tray") } }
             } top: {
                 PaneBar(title: "Stashes", subtitle: stashes.isEmpty ? String(localized: "Nothing saved") : String(localized: "\(store.snapshot?.stashes.count ?? 0) saved"), icon: "tray.full") {
@@ -91,7 +91,7 @@ struct StashDetailView: View {
                                 Spacer(minLength: 0)
                             }.font(.system(size: 11))
                         }
-                        .staggeredEntrance(isShowing: detailEntered, index: 0, style: .section)
+                        .staggeredEntrance(isShowing: detailEntered, index: 0, style: .card)
                         ChangedFilesHeader(count: detail.files.count, additions: detail.statistics.values.reduce(0) { $0 + $1.additions }, deletions: detail.statistics.values.reduce(0) { $0 + $1.deletions }, allExpanded: !detail.files.isEmpty && expanded.count == detail.files.count) {
                             expanded = expanded.count == detail.files.count ? [] : Set(detail.files.map(\.path))
                         } trailing: {
@@ -101,10 +101,10 @@ struct StashDetailView: View {
                             }
                         }
                         .background(.bar.opacity(0.6))
-                        .staggeredEntrance(isShowing: detailEntered, index: 1, style: .section)
+                        .staggeredEntrance(isShowing: detailEntered, index: 1, style: .card)
                         ForEach(Array(detail.files.enumerated()), id: \.element.id) { index, file in
                             StashFileDisclosure(store: store, repository: repository, stash: stash, file: file, statistics: detail.statistics[file.path], expanded: Binding(get: { expanded.contains(file.path) }, set: { if $0 { expanded.insert(file.path) } else { expanded.remove(file.path) } }), selected: Binding(get: { selected.contains(file.path) }, set: { if $0 { selected.insert(file.path) } else { selected.remove(file.path) } }))
-                                .staggeredEntrance(isShowing: detailEntered, index: index, style: .row)
+                                .staggeredEntrance(isShowing: detailEntered, index: index, style: .item, delay: 0.06 + Double(min(index, 8)) * 0.025)
                         }
                     }
                 }.pinnedScrollInsets(insets)

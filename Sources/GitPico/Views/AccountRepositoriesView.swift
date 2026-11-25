@@ -53,7 +53,7 @@ struct AccountRepositoriesView: View {
         let indexRequest = indexRequest
         VStack(alignment: .leading, spacing: 18) {
             header
-                .staggeredEntrance(isShowing: headerEntered, index: 0, style: .section)
+                .staggeredEntrance(isShowing: headerEntered, index: 0, style: .card)
             if let loadError {
                 VStack {
                     Spacer()
@@ -65,7 +65,7 @@ struct AccountRepositoriesView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let repositories {
                 repositoryList(count: repositories.count)
-                    .staggeredEntrance(isShowing: listEntered, index: 1, style: .section)
+                    .staggeredEntrance(isShowing: listEntered, index: 1, style: .pane)
             } else {
                 ProgressView("Loading…")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -128,7 +128,7 @@ struct AccountRepositoriesView: View {
         let savedByPath = savedByPath
         return PinnedScrollPane { insets in
             List(selection: $selection) {
-                ForEach(Array(visibleRepositories.enumerated()), id: \.element.id) { index, repository in
+                ForEach(visibleRepositories) { repository in
                     let local = copies(for: repository, in: savedByPath)
                     HStack(spacing: 12) {
                         RepositoryGlyph(name: repository.name, size: 34)
@@ -154,7 +154,6 @@ struct AccountRepositoriesView: View {
                         }
                     }
                     .padding(.vertical, 6)
-                    .staggeredEntrance(isShowing: listEntered, index: index, style: .row)
                     .tag(repository.id)
                     .contextMenu {
                         ForEach(local) { copy in

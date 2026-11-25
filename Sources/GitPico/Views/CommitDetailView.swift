@@ -44,15 +44,15 @@ struct CommitDetailView: View {
                                         }.card(padding: 12).transition(.opacity.combined(with: .move(edge: .top)))
                                     }
                                 }
-                                .staggeredEntrance(isShowing: detailEntered, index: 0, style: .section)
+                                .staggeredEntrance(isShowing: detailEntered, index: 0, style: .card)
                                 ChangedFilesHeader(count: detail.files.count, additions: detail.additions, deletions: detail.deletions, allExpanded: !detail.files.isEmpty && expandedFiles.count == detail.files.count) {
                                     expandedFiles = expandedFiles.count == detail.files.count ? [] : Set(detail.files.map(\.path))
                                 }
-                                .staggeredEntrance(isShowing: detailEntered, index: 1, style: .section)
+                                .staggeredEntrance(isShowing: detailEntered, index: 1, style: .card)
                                 if let repository = store.repository {
                                     ForEach(Array(detail.files.enumerated()), id: \.element.id) { index, file in
                                         CommitFileDisclosure(store: store, repository: repository, commit: commit, file: file, showHistory: { store.navigate(.fileHistory(file.path, commit.hash)) }, stats: detail.statistics[file.path], expanded: Binding(get: { expandedFiles.contains(file.path) }, set: { if $0 { expandedFiles.insert(file.path) } else { expandedFiles.remove(file.path) } }))
-                                            .staggeredEntrance(isShowing: detailEntered, index: index, style: .row)
+                                            .staggeredEntrance(isShowing: detailEntered, index: index, style: .item, delay: 0.06 + Double(min(index, 8)) * 0.025)
                                     }
                                 }
                             }

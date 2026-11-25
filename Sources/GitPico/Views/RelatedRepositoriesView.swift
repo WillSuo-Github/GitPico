@@ -10,9 +10,8 @@ struct WorktreesView: View {
     var body: some View {
         PinnedScrollPane { insets in
             PersistentSplitView(name: "worktrees", width: 340) {
-                List(selection: $store.selectedWorktreePaths) {
-                    ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
-                        HStack(alignment: .top, spacing: 10) {
+                List(entries, selection: $store.selectedWorktreePaths) { entry in
+                    HStack(alignment: .top, spacing: 10) {
                         Image(systemName: entry.locked != nil ? "lock.fill" : entry.prunable != nil ? "exclamationmark.triangle.fill" : "folder.fill")
                             .font(.system(size: 13)).foregroundStyle(entry.prunable != nil ? Pico.warning : Color.accentColor)
                             .frame(width: 28, height: 28).background((entry.prunable != nil ? Pico.warning : Color.accentColor).opacity(0.12), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
@@ -25,11 +24,9 @@ struct WorktreesView: View {
                             Label(store.worktreePresentation.branch(for: entry) ?? (entry.isBare ? String(localized: "Bare repository") : String(localized: "Detached HEAD")), systemImage: "arrow.triangle.branch").font(.system(size: 11)).foregroundStyle(.secondary)
                             Text(store.worktreePresentation.location(for: entry)).font(.system(size: 11)).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle).help(entry.path)
                         }
-                        }.padding(.vertical, 4)
-                        .staggeredEntrance(isShowing: listEntered, index: index, style: .row)
-                        .tag(entry.id).contentShape(Rectangle()).contextMenu { if store.selectedWorktreePaths.count > 1 { Button("Manage Selected Worktrees…") { store.relatedAdministration(.worktrees(store.worktrees.filter { store.selectedWorktreePaths.contains($0.id) })) }; Divider() }; WorktreeContextActions(store: store, entry: entry) }
-                    }
+                    }.padding(.vertical, 4).tag(entry.id).contentShape(Rectangle()).contextMenu { if store.selectedWorktreePaths.count > 1 { Button("Manage Selected Worktrees…") { store.relatedAdministration(.worktrees(store.worktrees.filter { store.selectedWorktreePaths.contains($0.id) })) }; Divider() }; WorktreeContextActions(store: store, entry: entry) }
                 }.listStyle(.plain).pinnedScrollInsets(insets)
+                .staggeredEntrance(isShowing: listEntered, index: 0, style: .pane)
                 .contextMenu(forSelectionType: String.self) { _ in } primaryAction: { ids in
                     if let entry = entries.first(where: { ids.contains($0.id) }), entry.prunable == nil, !entry.isBare {
                         store.openWorktree(entry)
@@ -50,7 +47,7 @@ struct WorktreesView: View {
                                 Menu("Manage") { WorktreeContextActions(store: store, entry: entry) }.fixedSize().controlSize(.small)
                                 Button("Open") { store.openWorktree(entry) }.buttonStyle(.borderedProminent).controlSize(.small).disabled(entry.prunable != nil || entry.isBare || store.snapshot?.root.path == entry.path)
                             }
-                            .staggeredEntrance(isShowing: detailEntered, index: 0, style: .section)
+                            .staggeredEntrance(isShowing: detailEntered, index: 0, style: .card)
                             if let reason = entry.prunable { Label("Unavailable: \(reason)", systemImage: "exclamationmark.triangle.fill").foregroundStyle(Pico.warning) }
                             Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 8) {
                                 MetadataRow(label: "Location", value: entry.path)
@@ -58,9 +55,9 @@ struct WorktreesView: View {
                                 MetadataRow(label: "HEAD", value: entry.head ?? String(localized: "Unborn / bare"), monospaced: true)
                                 if let lock = entry.locked { MetadataRow(label: "Locked", value: lock.isEmpty ? String(localized: "Locked without a reason") : lock) }
                             }.card()
-                            .staggeredEntrance(isShowing: detailEntered, index: 1, style: .section)
+                            .staggeredEntrance(isShowing: detailEntered, index: 1, style: .card)
                             Label("Worktrees share history and branches but keep a separate index and working directory. Removing a clean linked worktree keeps its branch, repository data and a restorable directory backup.", systemImage: "info.circle").font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-                            .staggeredEntrance(isShowing: detailEntered, index: 2, style: .section)
+                            .staggeredEntrance(isShowing: detailEntered, index: 2, style: .card)
                         }.padding(22).frame(maxWidth: .infinity, alignment: .leading)
                         .staggeredEntranceTrigger($detailEntered, id: entry.id)
                     } else { EmptyPane(title: String(localized: "Select a worktree"), subtitle: String(localized: "Worktrees let you check out several branches side by side."), icon: "folder.badge.gearshape").padding(.top, 60) }
@@ -124,9 +121,8 @@ struct SubmodulesView: View {
     var body: some View {
         PinnedScrollPane { insets in
             PersistentSplitView(name: "submodules", width: 340) {
-                List(selection: $selection) {
-                    ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
-                        HStack(alignment: .top, spacing: 10) {
+                List(entries, selection: $selection) { entry in
+                    HStack(alignment: .top, spacing: 10) {
                         Image(systemName: "shippingbox.fill").font(.system(size: 13)).foregroundStyle(needsAttention(entry) ? Pico.warning : Color.accentColor)
                             .frame(width: 28, height: 28).background((needsAttention(entry) ? Pico.warning : Color.accentColor).opacity(0.12), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
                         VStack(alignment: .leading, spacing: 3) {
@@ -134,11 +130,9 @@ struct SubmodulesView: View {
                             Text(entry.status).font(.system(size: 11, weight: .medium)).foregroundStyle(needsAttention(entry) ? Pico.warning : Pico.addition)
                             Text(entry.url).font(.system(size: 11)).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle)
                         }
-                        }.padding(.vertical, 4)
-                        .staggeredEntrance(isShowing: listEntered, index: index, style: .row)
-                        .tag(entry.id).contentShape(Rectangle()).onTapGesture(count: 2) { if entry.initialized { store.openSubmodule(entry) } else { store.manageSubmodule(.manage(entry, .initialize)) } }.contextMenu { if selection.count > 1 { Button("Manage Selected Submodules…") { store.relatedAdministration(.submodules(store.submodules.filter { selection.contains($0.id) })) }; Divider() }; SubmoduleContextActions(store: store, entry: entry) }
-                    }
+                    }.padding(.vertical, 4).tag(entry.id).contentShape(Rectangle()).onTapGesture(count: 2) { if entry.initialized { store.openSubmodule(entry) } else { store.manageSubmodule(.manage(entry, .initialize)) } }.contextMenu { if selection.count > 1 { Button("Manage Selected Submodules…") { store.relatedAdministration(.submodules(store.submodules.filter { selection.contains($0.id) })) }; Divider() }; SubmoduleContextActions(store: store, entry: entry) }
                 }.listStyle(.plain).pinnedScrollInsets(insets)
+                .staggeredEntrance(isShowing: listEntered, index: 0, style: .pane)
                 .staggeredEntranceTrigger($listEntered, id: store.repositoryToken)
             } trailing: {
                 ScrollView {
@@ -154,7 +148,7 @@ struct SubmodulesView: View {
                                 Menu("Manage") { SubmoduleContextActions(store: store, entry: entry) }.fixedSize().controlSize(.small)
                                 Button(entry.initialized ? "Open" : "Initialize…") { if entry.initialized { store.openSubmodule(entry) } else { store.manageSubmodule(.manage(entry, .initialize)) } }.buttonStyle(.borderedProminent).controlSize(.small)
                             }
-                            .staggeredEntrance(isShowing: detailEntered, index: 0, style: .section)
+                            .staggeredEntrance(isShowing: detailEntered, index: 0, style: .card)
                             Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 8) {
                                 MetadataRow(label: "Name", value: entry.name)
                                 MetadataRow(label: "URL", value: entry.url)
@@ -164,9 +158,9 @@ struct SubmodulesView: View {
                                 if let branch = entry.branch { MetadataRow(label: "Tracking", value: branch) }
                                 if let directory = entry.gitDirectory { MetadataRow(label: "Git storage", value: directory) }
                             }.card()
-                            .staggeredEntrance(isShowing: detailEntered, index: 1, style: .section)
+                            .staggeredEntrance(isShowing: detailEntered, index: 1, style: .card)
                             Label("Updates check out the revision recorded by the parent. After choosing another revision, stage the submodule in the parent's Working Copy to record its gitlink. No parent commit is created automatically.", systemImage: "info.circle").font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-                            .staggeredEntrance(isShowing: detailEntered, index: 2, style: .section)
+                            .staggeredEntrance(isShowing: detailEntered, index: 2, style: .card)
                         }.padding(22).frame(maxWidth: .infinity, alignment: .leading)
                         .staggeredEntranceTrigger($detailEntered, id: entry.id)
                     } else { EmptyPane(title: store.submodules.isEmpty ? String(localized: "No submodules") : String(localized: "Select a submodule"), subtitle: String(localized: "Submodules embed another Git repository at a pinned revision."), icon: "shippingbox").padding(.top, 60) }

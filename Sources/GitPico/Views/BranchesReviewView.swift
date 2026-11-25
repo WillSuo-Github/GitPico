@@ -11,7 +11,7 @@ struct BranchesReviewView: View {
     @State private var showingCleanup = false
     @State private var listEntered = false
     @State private var detailEntered = false
-    @State private var detailRowsEntered = false
+    @State private var detailRowsEntered = true
     var branches: [Reference] { (store.snapshot?.references ?? []).filter(\.isLocal) }
     var visible: [BranchComparison] { comparisons.filter { store.search.isEmpty || $0.branch.name.localizedCaseInsensitiveContains(store.search) } }
     var baseName: String { branches.first { $0.fullName == base }?.name ?? base }
@@ -19,7 +19,7 @@ struct BranchesReviewView: View {
         PinnedScrollPane { insets in
             PersistentSplitView(name: "branchesReview", width: 300, minimum: 240) {
                 List(selection: $selected) {
-                    ForEach(Array(visible.enumerated()), id: \.element.branch.id) { index, comparison in
+                    ForEach(visible, id: \.branch.id) { comparison in
                         HStack(spacing: 10) {
                             Image(systemName: comparison.isMerged ? "checkmark.circle.fill" : "arrow.triangle.branch")
                                 .font(.system(size: 14)).foregroundStyle(comparison.isMerged ? Pico.addition : Color.accentColor)
@@ -30,10 +30,10 @@ struct BranchesReviewView: View {
                             Spacer(minLength: 4)
                             AheadBehind(ahead: comparison.ahead, behind: comparison.behind)
                         }.padding(.vertical, 5)
-                        .staggeredEntrance(isShowing: listEntered, index: index, style: .row)
                         .tag(comparison.branch.id)
                     }
                 }.listStyle(.plain).pinnedScrollInsets(insets)
+                .staggeredEntrance(isShowing: listEntered, index: 0, style: .pane)
                 .overlay { if comparisons.isEmpty, failure == nil { EmptyPane(title: branches.count < 2 ? String(localized: "Only one branch") : String(localized: "Comparing…"), subtitle: branches.count < 2 ? String(localized: "Create another local branch to review it against \(baseName).") : "", icon: "arrow.triangle.branch") } }
                 .staggeredEntranceTrigger($listEntered, id: "\(base):\(comparisons.isEmpty)")
             } trailing: {
@@ -48,7 +48,7 @@ struct BranchesReviewView: View {
                                 Button("Show History") { store.navigate(.reference(item.branch.fullName)) }.controlSize(.small)
                                 if !item.branch.isCurrent { Button("Check Out") { store.switchBranch(item.branch) }.controlSize(.small).buttonStyle(.borderedProminent) }
                             }
-                            .staggeredEntrance(isShowing: detailEntered, index: 0, style: .section)
+                            .staggeredEntrance(isShowing: detailEntered, index: 0, style: .card)
                             HStack(spacing: 18) {
                                 stat("\(item.ahead)", String(localized: "ahead"), Color.accentColor)
                                 stat("\(item.behind)", String(localized: "behind"), .secondary)
@@ -57,15 +57,15 @@ struct BranchesReviewView: View {
                                 Label(item.isMerged ? "Fully merged into \(baseName)" : "Has changes not in \(baseName)", systemImage: item.isMerged ? "checkmark.seal.fill" : "exclamationmark.circle")
                                     .font(.system(size: 12, weight: .medium)).foregroundStyle(item.isMerged ? Pico.addition : Pico.warning)
                             }.card(padding: 12)
-                            .staggeredEntrance(isShowing: detailEntered, index: 1, style: .section)
+                            .staggeredEntrance(isShowing: detailEntered, index: 1, style: .card)
                             Picker("Detail", selection: $changeset) { Text("Commits").tag(false); Text("Changed Files").tag(true) }.pickerStyle(.segmented).labelsHidden().fixedSize()
-                            .staggeredEntrance(isShowing: detailEntered, index: 2, style: .section)
+                            .staggeredEntrance(isShowing: detailEntered, index: 2, style: .card)
                         }.padding(18)
                         .staggeredEntranceTrigger($detailEntered, id: item.branch.id)
                         Divider()
                         List {
-                            if changeset { ForEach(Array(item.files.enumerated()), id: \.element.id) { index, file in HStack(spacing: 8) { StatusBadge(status: file.status); FilePathLabel(path: file.path) }.padding(.vertical, 2).staggeredEntrance(isShowing: detailRowsEntered, index: index, style: .row) } }
-                            else { ForEach(Array(item.commits.enumerated()), id: \.element.id) { index, commit in
+                            if changeset { ForEach(item.files) { file in HStack(spacing: 8) { StatusBadge(status: file.status); FilePathLabel(path: file.path) }.padding(.vertical, 2) } }
+                            else { ForEach(item.commits) { commit in
                                 Button { store.navigate(.reference(item.branch.fullName)); store.selectCommit(commit) } label: {
                                     HStack(spacing: 10) {
                                         AuthorAvatar(name: commit.author, size: 24)
@@ -76,12 +76,12 @@ struct BranchesReviewView: View {
                                         Spacer(minLength: 0)
                                     }.padding(.vertical, 3).contentShape(Rectangle())
                                 }.buttonStyle(.plain)
-                                .staggeredEntrance(isShowing: detailRowsEntered, index: index, style: .row)
                             } }
                         }.listStyle(.plain)
                         .pinnedScrollInsets(EdgeInsets(top: 0, leading: 0, bottom: insets.bottom, trailing: 0))
+                        .staggeredEntrance(isShowing: detailEntered && detailRowsEntered, index: 2, style: .pane)
                         .overlay { if (changeset ? item.files.isEmpty : item.commits.isEmpty) { EmptyPane(title: changeset ? String(localized: "No file differences") : String(localized: "No unique commits"), subtitle: String(localized: "Everything on this branch is already in \(baseName)."), icon: "checkmark.seal") } }
-                        .staggeredEntranceTrigger($detailRowsEntered, id: "\(item.branch.id):\(changeset)")
+                        .staggeredEntranceTrigger($detailRowsEntered, id: changeset, playOnAppear: false)
                     } else if let failure { InspectionErrorView(message: failure) }
                     else { EmptyPane(title: String(localized: "Select a branch"), subtitle: String(localized: "See how far it has drifted from \(baseName) and what would be merged."), icon: "arrow.triangle.branch") }
                 }.padding(.top, insets.top).frame(minWidth: 400, maxWidth: .infinity, maxHeight: .infinity)

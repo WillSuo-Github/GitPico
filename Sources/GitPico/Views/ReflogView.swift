@@ -14,7 +14,7 @@ struct ReflogView: View {
         PersistentSplitView(name: "reflog", width: 320) {
             PinnedScrollPane { insets in
                 List(selection: $selected) {
-                    ForEach(Array(filtered.enumerated()), id: \.element.id) { index, entry in
+                    ForEach(filtered) { entry in
                         HStack(alignment: .top, spacing: 10) {
                             Image(systemName: eventIcon(entry.message)).font(.system(size: 12, weight: .semibold)).foregroundStyle(eventColor(entry.message))
                                 .frame(width: 26, height: 26).background(eventColor(entry.message).opacity(0.14), in: Circle())
@@ -29,7 +29,6 @@ struct ReflogView: View {
                                 }.font(.system(size: 11)).foregroundStyle(.secondary)
                             }
                         }.padding(.vertical, 5)
-                            .staggeredEntrance(isShowing: listEntered, index: index, style: .row)
                             .tag(entry.id).help("\(entry.selector) · \(entry.name) <\(entry.email)>")
                             .accessibilityLabel("\(entry.selector), \(entry.hash.prefix(8)), \(entry.message), \(entry.date.formatted(date: .abbreviated, time: .shortened))")
                             .contextMenu {
@@ -39,6 +38,7 @@ struct ReflogView: View {
                     }
                     if entries.count == limit { Button("Load More Events") { limit += 500 } }
                 }.listStyle(.plain).pinnedScrollInsets(insets)
+                    .staggeredEntrance(isShowing: listEntered, index: 0, style: .pane)
                     .overlay { if let error { EmptyPane(title: String(localized: "Unable to load Reflog"), subtitle: error, icon: "exclamationmark.triangle") } else if filtered.isEmpty { EmptyPane(title: store.search.isEmpty ? String(localized: "No reflog events") : String(localized: "No matching events"), subtitle: String(localized: "Git records every local HEAD and branch movement here, so lost commits can be recovered."), icon: "list.bullet.rectangle") } }
                     .staggeredEntranceTrigger($listEntered, id: "\(ref):\(entries.isEmpty)")
             } top: {

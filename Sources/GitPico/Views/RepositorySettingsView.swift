@@ -41,7 +41,7 @@ struct RepositorySettingsView: View {
                     else { ProgressView("Loading…").frame(maxWidth: .infinity, maxHeight: .infinity) }
                 }
             }
-            .staggeredEntrance(isShowing: tabEntered, index: 0, style: .row)
+            .staggeredEntrance(isShowing: tabEntered, index: 0, style: .pane)
             .frame(maxWidth: .infinity, maxHeight: .infinity).disabled(draft.saving)
             .staggeredEntranceTrigger($tabEntered, id: store.settingsTab)
             Divider()

@@ -58,13 +58,13 @@ struct RepositoryCloneProgressView: View {
                     Spacer(minLength: 24)
                     VStack(alignment: .leading, spacing: 18) {
                         header
-                            .staggeredEntrance(isShowing: entered, index: 0, style: .hero)
+                            .staggeredEntrance(isShowing: entered, index: 0, style: .card)
                         progressCard
-                            .staggeredEntrance(isShowing: entered, index: 1, style: .hero)
+                            .staggeredEntrance(isShowing: entered, index: 1, style: .card)
                         outputCard
-                            .staggeredEntrance(isShowing: entered, index: 2, style: .hero)
+                            .staggeredEntrance(isShowing: entered, index: 2, style: .card)
                         footer
-                            .staggeredEntrance(isShowing: entered, index: 3, style: .hero)
+                            .staggeredEntrance(isShowing: entered, index: 3, style: .card)
                     }
                     .frame(maxWidth: 680, alignment: .leading)
                     .frame(maxWidth: .infinity)
