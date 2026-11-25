@@ -1,5 +1,7 @@
+import AppKit
 import Foundation
 import GitCore
+import SwiftUI
 import Testing
 @testable import GitPico
 
@@ -265,4 +267,26 @@ actor RecordingWorkingReader: WorkingDiffReading {
     #expect(f.store.commitSubject.isEmpty && f.store.commitBody.isEmpty && !f.store.canCommit)
     #expect(f.store.undoAvailability == nil && f.store.staged.isEmpty)
     #expect(try await GitProcess.run(["log", "-1", "--format=%s"], at: f.repository.root).text == "Created once\n")
+}
+
+@Test @MainActor func commitComposerCardAlignsAboveStatusBarAndKeepsSingleLineActionsAtMinimumWidth() async throws {
+    let fixture = try await WorkingAppFixture.make(); defer { fixture.clean() }
+    for index in 1...12 {
+        try await fixture.write("file-\(index).txt", "edited \(index)\n")
+    }
+    try await fixture.sync()
+    #expect(RepositoryStatusBar.height + CommitComposer.outerBottomPadding == 34)
+
+    func measureComposerHeight(width: CGFloat) -> CGFloat {
+        let host = NSHostingView(rootView: CommitComposer(store: fixture.store).frame(width: width))
+        host.layoutSubtreeIfNeeded()
+        return host.fittingSize.height
+    }
+
+    fixture.store.stage(fixture.store.changes); await fixture.finish()
+    fixture.store.commitSubject = "Align composer card"
+    let wideStagedHeight = measureComposerHeight(width: 340)
+    let narrowStagedHeight = measureComposerHeight(width: 270)
+    #expect(abs(narrowStagedHeight - wideStagedHeight) <= 1)
+    #expect(!NSApplication.shared.isActive && NSApplication.shared.windows.filter(\.isVisible).isEmpty)
 }

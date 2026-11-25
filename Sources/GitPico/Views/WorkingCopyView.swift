@@ -139,6 +139,12 @@ struct WorkingFileRow: View {
 
 /// Bottom-anchored composer: subject, optional description, identity/options and the primary Commit button.
 struct CommitComposer: View {
+    static let cardCornerRadius: CGFloat = 12
+    static let innerPadding: CGFloat = 8
+    static let outerHorizontalPadding: CGFloat = 8
+    static let outerTopPadding: CGFloat = 6
+    static let outerBottomPadding: CGFloat = 6
+
     @Bindable var store: RepositoryStore
     @State private var workflows: CommitWorkflowLibrary
     @State private var insertion: CommitTemplateInsertion?
@@ -146,6 +152,7 @@ struct CommitComposer: View {
     @State private var ai = AICommitSession()
     @AppStorage("aiCommit.scope") private var aiScope: AICommitScope = .staged
     @FocusState private var subjectFocused: Bool
+    @Environment(\.colorScheme) private var colorScheme
     init(store: RepositoryStore, workflows: CommitWorkflowLibrary = .shared) {
         self.store = store; _workflows = State(initialValue: workflows)
     }
@@ -173,10 +180,10 @@ struct CommitComposer: View {
             }
             .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(subjectFocused ? Color.accentColor.opacity(0.7) : Color(nsColor: .separatorColor), lineWidth: subjectFocused ? 1.5 : 0.5))
-            HStack(spacing: 8) {
-                CommitIdentityMenu(store: store, library: workflows).frame(maxWidth: 140, alignment: .leading)
-                Spacer(minLength: 4)
-                Toggle("Amend", isOn: $store.amend).toggleStyle(.checkbox).font(.system(size: 11)).disabled(store.snapshot?.hasHEAD != true).help("Replace the last commit with the staged changes")
+            HStack(spacing: 6) {
+                CommitIdentityMenu(store: store, library: workflows).frame(minWidth: 0, maxWidth: 140, alignment: .leading)
+                Spacer(minLength: 2)
+                Toggle("Amend", isOn: $store.amend).toggleStyle(.checkbox).font(.system(size: 11)).fixedSize().disabled(store.snapshot?.hasHEAD != true).help("Replace the last commit with the staged changes")
                 Menu {
                     Toggle("Add Signed-off-by Trailer", isOn: $store.signOff)
                     Menu("Insert Template") {
@@ -196,6 +203,7 @@ struct CommitComposer: View {
                 } label: { Image(systemName: store.signOff ? "signature" : "ellipsis.circle") }
                     .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help(store.signOff ? "Signed-off-by will be added" : "Commit options")
                 Button(commitTitle, action: store.commit).buttonStyle(.borderedProminent).disabled(!store.canCommit)
+                    .lineLimit(1).fixedSize().layoutPriority(1)
                     .help(store.commitUnavailableReason ?? String(localized: "Commit staged changes (⌘Return)"))
             }.controlSize(.regular)
             if let error = ai.error {
@@ -216,7 +224,19 @@ struct CommitComposer: View {
                 }.font(.system(size: 11)).foregroundStyle(message.color)
             }
         }
-        .padding(12)
+        .padding(Self.innerPadding)
+        .background {
+            RoundedRectangle(cornerRadius: Self.cardCornerRadius, style: .continuous)
+                .fill(Color(nsColor: .underPageBackgroundColor))
+                .shadow(color: Color.black.opacity(colorScheme == .dark ? 0.24 : 0.05), radius: 4, y: 1)
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: Self.cardCornerRadius, style: .continuous)
+                .strokeBorder(Color(nsColor: .separatorColor).opacity(colorScheme == .dark ? 0.9 : 0.8), lineWidth: 0.5)
+        }
+        .padding(.horizontal, Self.outerHorizontalPadding)
+        .padding(.top, Self.outerTopPadding)
+        .padding(.bottom, Self.outerBottomPadding)
         .disabled(store.isBusy && !store.isFetching).onChange(of: store.amend) { store.updateAmend() }
         .sheet(item: $insertion) { CommitTemplateInsertionView(store: store, insertion: $0) }
         .onDisappear { ai.cancel() }

@@ -64,3 +64,84 @@ import Testing
     }
     #expect(!NSApplication.shared.isActive && NSApplication.shared.windows.filter(\.isVisible).isEmpty)
 }
+
+@Test(.enabled(if: ProcessInfo.processInfo.environment["GITPICO_RENDER_WORKING_COMPONENTS"] == "1", "Explicit windowless working component capture only."))
+@MainActor func renderWorkingCommitComposerCardWithoutWindows() async throws {
+    let output = URL(fileURLWithPath: try #require(ProcessInfo.processInfo.environment["GITPICO_WORKING_COMPONENT_OUTPUT"]))
+    try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
+    let fixture = try await PreviewFixture.make(commits: 1, branches: 1)
+    defer { fixture.clean() }
+    let workspace = RepositoryWorkspace(library: fixture.store.library, draftsFile: fixture.root.appendingPathComponent("drafts.json"))
+    await workspace.open(await fixture.repository.root)
+    defer { workspace.shutdown() }
+    let tab = workspace.activeTab
+    let window = RepositoryNativeWindow(tabID: tab.id, permitsPresentation: false)
+    window.tabbingMode = .disallowed
+    window.setFrame(NSRect(x: -10000, y: -10000, width: 1520, height: 760), display: false)
+    defer { window.contentViewController = nil; window.close() }
+    let rootView = RepositoryWorkspaceView(workspace: workspace, tab: tab, presentsAlerts: false) {}
+    window.contentViewController = NSHostingController(rootView: rootView)
+
+    func capture(_ name: String, dark: Bool) async throws {
+        window.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
+        let host = try #require(window.contentView)
+        for _ in 0..<25 {
+            host.layoutSubtreeIfNeeded()
+            try await Task.sleep(for: .milliseconds(25))
+        }
+        let image = try #require(host.bitmapImageRepForCachingDisplay(in: host.bounds))
+        host.cacheDisplay(in: host.bounds, to: image)
+        guard let cg = image.cgImage else { return }
+        let scale = cg.width / max(1, Int(host.bounds.width))
+        let crop = CGRect(x: 0, y: max(0, cg.height - 260 * scale), width: min(760 * scale, cg.width), height: min(260 * scale, cg.height))
+        if let cropped = cg.cropping(to: crop),
+           let data = NSBitmapImageRep(cgImage: cropped).representation(using: .png, properties: [:]) {
+            try data.write(to: output.appendingPathComponent("\(name)-\(dark ? "dark" : "light").png"))
+        }
+    }
+
+    for dark in [false, true] {
+        try await capture("composer-empty", dark: dark)
+    }
+    for index in 1...25 {
+        let file = await fixture.repository.root.appendingPathComponent(String(format: "Sources/FeatureFile%02d.swift", index))
+        try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try "let value\(index) = \(index)\n".write(to: file, atomically: true, encoding: .utf8)
+    }
+    tab.store.snapshot = try await fixture.repository.snapshot()
+    await tab.store.rebuildWorkingList()
+    for dark in [false, true] {
+        try await capture("composer-populated", dark: dark)
+    }
+    tab.store.stage(tab.store.changes)
+    while tab.store.isBusy { try await Task.sleep(for: .milliseconds(25)) }
+    tab.store.commitSubject = "Refine working copy composer card"
+    tab.store.commitBody = "Align the card bottom with the sidebar filter bar."
+    for width in [340, 270] {
+        for dark in [false, true] {
+            let standalone = CommitComposer(store: tab.store)
+                .frame(width: CGFloat(width))
+                .background(Color(nsColor: .windowBackgroundColor))
+                .environment(\.colorScheme, dark ? .dark : .light)
+                .environment(\.controlActiveState, .key)
+            let host = NSHostingView(rootView: standalone)
+            let size = NSSize(width: CGFloat(width), height: 240)
+            let standaloneWindow = RepositoryNativeWindow(tabID: UUID(), permitsPresentation: false)
+            standaloneWindow.styleMask = [.borderless]
+            standaloneWindow.contentMinSize = .zero
+            standaloneWindow.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
+            standaloneWindow.contentView = host
+            standaloneWindow.setFrame(NSRect(x: -10000, y: -10000, width: size.width, height: size.height), display: false)
+            defer { standaloneWindow.contentView = nil; standaloneWindow.close() }
+            for _ in 0..<10 {
+                host.layoutSubtreeIfNeeded()
+                try await Task.sleep(for: .milliseconds(25))
+            }
+            let rep = try #require(host.bitmapImageRepForCachingDisplay(in: host.bounds))
+            host.cacheDisplay(in: host.bounds, to: rep)
+            let data = try #require(rep.representation(using: .png, properties: [:]))
+            try data.write(to: output.appendingPathComponent("composer-\(width)-\(dark ? "dark" : "light").png"))
+        }
+    }
+    #expect(!NSApplication.shared.isActive && NSApplication.shared.windows.filter(\.isVisible).isEmpty)
+}
