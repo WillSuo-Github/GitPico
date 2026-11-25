@@ -48,7 +48,7 @@ struct NetworkActivityView: View {
                                         let interrupted = record.timedOut == true || networkTransferWasInterrupted(record.output)
                                         store.fetchAfterNetwork = interrupted ? .largeTransfer : .retry
                                         dismiss()
-                                    }.disabled(!store.canUseRepository)
+                                    }.disabled(!store.canFetch)
                                 }
                             }
                             ScrollView([.horizontal, .vertical]) { Text(record.output.isEmpty ? String(localized: "No output was returned.") : record.output).font(.system(size: 11, design: .monospaced)).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .topLeading) }.frame(maxWidth: .infinity, maxHeight: .infinity)

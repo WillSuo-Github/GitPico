@@ -25,6 +25,6 @@ struct RemoteSettingsPane: View {
                 Spacer()
                 Button("Recover Removed Remotes…") { store.manage(.recovery) }
             }
-        }.formStyle(.grouped).disabled(store.isBusy)
+        }.formStyle(.grouped).disabled(store.isBusy || store.isFetching)
     }
 }

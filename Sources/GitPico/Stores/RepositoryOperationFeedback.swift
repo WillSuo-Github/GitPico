@@ -40,28 +40,75 @@ struct RepositoryOperationFeedback: Identifiable {
 }
 
 extension RepositoryStore {
-    var isFetching: Bool {
-        isBackgroundFetching || (operationFeedback?.command == .fetch && operationFeedback?.phase == .running)
+    var isFetching: Bool { isManualFetching || isBackgroundFetching }
+    var isPerformingActivity: Bool { isBusy || isFetching }
+
+    var operationFeedback: RepositoryOperationFeedback? {
+        selectedFeedbackEntry?.feedback
     }
 
-    var feedbackNetworkRecord: NetworkActivityRecord? {
-        guard let feedback = operationFeedback else { return nil }
-        // Bound both ends so an old completion never links to a later background fetch.
-        return networkActivity?.records.first {
-            $0.repositoryPath == feedback.repository && $0.started >= feedback.started && $0.started <= (feedbackFinishedAt ?? .distantFuture)
+    var feedbackFinishedAt: Date? {
+        selectedFeedbackEntry?.finishedAt
+    }
+
+    private var selectedFeedbackEntry: (feedback: RepositoryOperationFeedback, finishedAt: Date?)? {
+        if let exclusive = exclusiveFeedback, exclusive.phase == .running, exclusive.isVisible {
+            return (exclusive, exclusiveFeedbackFinishedAt)
+        }
+        if let fetch = fetchFeedback, fetch.phase == .running {
+            return (fetch, fetchFeedbackFinishedAt)
+        }
+        if let exclusive = exclusiveFeedback, exclusive.phase == .running {
+            return (exclusive, exclusiveFeedbackFinishedAt)
+        }
+        switch (exclusiveFeedback, fetchFeedback) {
+        case (let exclusive?, let fetch?):
+            if exclusive.isVisible != fetch.isVisible {
+                return exclusive.isVisible ? (exclusive, exclusiveFeedbackFinishedAt) : (fetch, fetchFeedbackFinishedAt)
+            }
+            let exclusiveDate = exclusiveFeedbackFinishedAt ?? exclusive.started
+            let fetchDate = fetchFeedbackFinishedAt ?? fetch.started
+            return exclusiveDate >= fetchDate ? (exclusive, exclusiveFeedbackFinishedAt) : (fetch, fetchFeedbackFinishedAt)
+        case (let exclusive?, nil):
+            return (exclusive, exclusiveFeedbackFinishedAt)
+        case (nil, let fetch?):
+            return (fetch, fetchFeedbackFinishedAt)
+        case (nil, nil):
+            return nil
         }
     }
 
-    var activeStatusNetworkRecord: NetworkActivityRecord? {
-        guard isBusy else { return nil }
+    var feedbackNetworkRecord: NetworkActivityRecord? {
+        guard let entry = selectedFeedbackEntry else { return nil }
+        return networkRecord(for: entry.feedback, finishedAt: entry.finishedAt)
+    }
+
+    func networkRecord(for feedback: RepositoryOperationFeedback, finishedAt: Date?) -> NetworkActivityRecord? {
+        return networkActivity?.records.first {
+            $0.repositoryPath == feedback.repository && $0.started >= feedback.started && $0.started <= (finishedAt ?? .distantFuture)
+        }
+    }
+
+    var activeFetchNetworkRecord: NetworkActivityRecord? {
+        if isManualFetching, let feedback = fetchFeedback, feedback.phase == .running, !feedback.isRefreshing {
+            return networkActivity?.records.first {
+                $0.repositoryPath == feedback.repository && $0.command == "fetch" && $0.started >= feedback.started && $0.phase == .running
+            }
+        }
         if isBackgroundFetching, let path = snapshot?.root.path {
             return networkActivity?.records.first {
                 $0.repositoryPath == path && $0.command == "fetch" && $0.started >= lastBackgroundFetch && $0.phase == .running
             }
         }
-        guard operationFeedback?.phase == .running, operationFeedback?.isRefreshing == false,
-              let record = feedbackNetworkRecord, record.phase == .running else { return nil }
-        return record
+        return nil
+    }
+
+    var activeStatusNetworkRecord: NetworkActivityRecord? {
+        if isBusy, let feedback = exclusiveFeedback, feedback.phase == .running, !feedback.isRefreshing,
+           let record = networkRecord(for: feedback, finishedAt: exclusiveFeedbackFinishedAt), record.phase == .running {
+            return record
+        }
+        return activeFetchNetworkRecord
     }
 
     var latestStatusNetworkRecord: NetworkActivityRecord? {
@@ -72,48 +119,83 @@ extension RepositoryStore {
 
     /// Called by the shared busy/activity lifecycle, so custom workflows receive the same feedback.
     func beginCurrentOperationFeedback() {
-        guard isBusy, !isBackgroundFetching, !suppressOperationFeedback, !isOpeningRepository, !isChoosingRepository, let snapshot else { return }
-        if operationFeedback?.phase == .running {
-            operationFeedback?.activity = activity
+        guard isBusy, !suppressOperationFeedback, !isOpeningRepository, !isChoosingRepository, let snapshot else { return }
+        if exclusiveFeedback?.phase == .running {
+            exclusiveFeedback?.activity = activity
             return
         }
-        clearOperationFeedback()
+        clearExclusiveOperationFeedback()
         let feedback = RepositoryOperationFeedback(repository: snapshot.root.path, activity: activity)
-        operationFeedback = feedback
+        exclusiveFeedback = feedback
         // Fast local actions finish without flashing a banner or moving the working copy.
-        operationFeedbackTask = Task { [weak self] in
+        exclusiveFeedbackTask = Task { [weak self] in
             do { try await Task.sleep(for: .milliseconds(200)) } catch { return }
-            guard self?.operationFeedback?.id == feedback.id else { return }
-            self?.operationFeedback?.isVisible = true
+            guard self?.exclusiveFeedback?.id == feedback.id else { return }
+            self?.exclusiveFeedback?.isVisible = true
         }
     }
 
     func configureOperationFeedback(_ command: RepositoryOperationKind) {
-        guard operationFeedback?.phase == .running else { return }
-        operationFeedbackTask?.cancel()
-        operationFeedback?.command = command
-        operationFeedback?.isVisible = true
+        guard exclusiveFeedback?.phase == .running else { return }
+        exclusiveFeedbackTask?.cancel()
+        exclusiveFeedback?.command = command
+        exclusiveFeedback?.isVisible = true
     }
 
     func finishCurrentOperationFeedback() {
-        guard !suppressOperationFeedback, let feedback = operationFeedback, feedback.phase == .running else { return }
-        operationFeedbackTask?.cancel()
-        feedbackFinishedAt = Date()
-        let cancelled = feedbackNetworkRecord?.phase == .cancelled
+        guard !suppressOperationFeedback, let feedback = exclusiveFeedback, feedback.phase == .running else { return }
+        exclusiveFeedbackTask?.cancel()
+        let finishedAt = Date()
+        exclusiveFeedbackFinishedAt = finishedAt
+        let cancelled = networkRecord(for: feedback, finishedAt: finishedAt)?.phase == .cancelled
         let phase: GitNetworkEvent.Phase = cancelled ? .cancelled : feedback.failure == nil ? .succeeded : .failed
-        operationFeedback?.phase = phase
+        exclusiveFeedback?.phase = phase
         if phase == .succeeded, snapshot?.operation != RepositoryOperation.none || changes.contains(where: \.isConflicted) {
-            operationFeedback?.warning = String(localized: "Review the working copy to resolve conflicts or finish the current operation.")
+            exclusiveFeedback?.warning = String(localized: "Review the working copy to resolve conflicts or finish the current operation.")
         }
         // Keep the latest result available on demand, even when a quick action needs no visual acknowledgement.
-        if phase == .succeeded, !feedback.isVisible, operationFeedback?.warning == nil { return }
-        operationFeedback?.isVisible = true
-        guard phase != .failed, operationFeedback?.warning == nil else { return }
-        operationFeedbackTask = Task { [weak self] in
+        if phase == .succeeded, !feedback.isVisible, exclusiveFeedback?.warning == nil { return }
+        exclusiveFeedback?.isVisible = true
+        guard phase != .failed, exclusiveFeedback?.warning == nil else { return }
+        exclusiveFeedbackTask = Task { [weak self] in
             do { try await Task.sleep(for: .seconds(2)) } catch { return }
-            guard self?.operationFeedback?.id == feedback.id else { return }
-            self?.operationFeedback?.isVisible = false
+            guard self?.exclusiveFeedback?.id == feedback.id else { return }
+            self?.exclusiveFeedback?.isVisible = false
         }
+    }
+
+    func beginFetchFeedback(repository: String, activity: String) {
+        clearFetchOperationFeedback()
+        var feedback = RepositoryOperationFeedback(repository: repository, activity: activity)
+        feedback.command = .fetch
+        feedback.isVisible = true
+        fetchFeedback = feedback
+    }
+
+    func finishFetchFeedback() {
+        guard let feedback = fetchFeedback, feedback.phase == .running else { return }
+        fetchFeedbackTask?.cancel()
+        let finishedAt = Date()
+        fetchFeedbackFinishedAt = finishedAt
+        let cancelled = networkRecord(for: feedback, finishedAt: finishedAt)?.phase == .cancelled
+        let phase: GitNetworkEvent.Phase = cancelled ? .cancelled : feedback.failure == nil ? .succeeded : .failed
+        fetchFeedback?.phase = phase
+        fetchFeedback?.isRefreshing = false
+        fetchFeedback?.isVisible = true
+        guard phase != .failed, fetchFeedback?.warning == nil else { return }
+        fetchFeedbackTask = Task { [weak self] in
+            do { try await Task.sleep(for: .seconds(2)) } catch { return }
+            guard self?.fetchFeedback?.id == feedback.id else { return }
+            self?.fetchFeedback?.isVisible = false
+        }
+    }
+
+    func cancelFetch() {
+        if let recordID = activeFetchNetworkRecord?.id { networkActivity?.cancel(recordID) }
+        fetchTask?.cancel(); fetchTask = nil
+        isManualFetching = false
+        isBackgroundFetching = false
+        clearFetchOperationFeedback()
     }
 
     func inspectOperationNetworkActivity() {
@@ -122,12 +204,27 @@ extension RepositoryStore {
     }
 
     func dismissOperationFeedback(_ id: UUID) {
-        guard operationFeedback?.id == id, operationFeedback?.phase != .running else { return }
-        dismissedStatusNetworkRecord = feedbackNetworkRecord?.id
-        clearOperationFeedback()
+        if let feedback = exclusiveFeedback, feedback.id == id, feedback.phase != .running {
+            dismissedStatusNetworkRecord = networkRecord(for: feedback, finishedAt: exclusiveFeedbackFinishedAt)?.id
+            clearExclusiveOperationFeedback()
+            return
+        }
+        if let feedback = fetchFeedback, feedback.id == id, feedback.phase != .running {
+            dismissedStatusNetworkRecord = networkRecord(for: feedback, finishedAt: fetchFeedbackFinishedAt)?.id
+            clearFetchOperationFeedback()
+        }
+    }
+
+    func clearExclusiveOperationFeedback() {
+        exclusiveFeedbackTask?.cancel(); exclusiveFeedbackTask = nil; exclusiveFeedback = nil; exclusiveFeedbackFinishedAt = nil
+    }
+
+    func clearFetchOperationFeedback() {
+        fetchFeedbackTask?.cancel(); fetchFeedbackTask = nil; fetchFeedback = nil; fetchFeedbackFinishedAt = nil
     }
 
     func clearOperationFeedback() {
-        operationFeedbackTask?.cancel(); operationFeedbackTask = nil; operationFeedback = nil; feedbackFinishedAt = nil
+        clearExclusiveOperationFeedback()
+        clearFetchOperationFeedback()
     }
 }

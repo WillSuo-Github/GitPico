@@ -25,7 +25,7 @@ import Testing
     func clean() { store.clearOperationFeedback(); store.disconnectNetworkContext(); store.stopAutomaticRefresh(); base.clean() }
 }
 
-@Test @MainActor func manualFetchImmediatelyShowsFeedbackAndPermitsBrowsingWithoutWrites() async throws {
+@Test @MainActor func manualFetchImmediatelyShowsFeedbackAndPermitsLocalWorkWhileGuardingRemotes() async throws {
     let f = try await FetchFeedbackFixture.make(); defer { f.clean() }
     try await f.base.write("a.txt", "Keep local content\n")
     try await f.base.sync()
@@ -34,13 +34,17 @@ import Testing
     f.store.sync(.fetch)
     let feedback = try #require(f.store.operationFeedback)
     #expect(feedback.command == .fetch && feedback.phase == .running)
-    #expect(f.store.isBusy && f.store.isFetching && f.store.canBrowseHistory)
-    #expect(!f.store.canUseRepository && !f.store.canIntegrate && !f.store.canCommit)
+    #expect(!f.store.isBusy && f.store.isFetching && f.store.isPerformingActivity)
+    #expect(f.store.canUseRepository && f.store.canBrowseHistory)
+    #expect(!f.store.canFetch && !f.store.canRemoteIntegrate && !f.store.canSynchronize)
     f.store.navigate(.history); await f.store.historyTask?.value
     #expect(f.store.destination == .history && !f.store.visibleCommits.isEmpty)
     f.store.stage(f.store.changes)
-    #expect(try await GitProcess.run(["diff", "--cached", "--name-only"], at: f.root).data.isEmpty)
     await f.store.operationTask?.value
+    #expect(try await GitProcess.run(["diff", "--cached", "--name-only"], at: f.root).text.trimmingCharacters(in: .whitespacesAndNewlines) == "a.txt")
+    #expect(f.store.canCommit)
+    #expect(f.store.operationFeedback?.id == feedback.id && f.store.operationFeedback?.phase == .running)
+    await f.store.fetchTask?.value
     #expect(!f.store.isBusy && !f.store.isFetching && f.store.error == nil)
     #expect(f.store.operationFeedback?.id == feedback.id && f.store.operationFeedback?.phase == .succeeded)
     #expect(f.store.feedbackNetworkRecord?.phase == .succeeded)
@@ -53,11 +57,40 @@ import Testing
     #expect(f.store.operationFeedback == nil)
 }
 
+@Test @MainActor func concurrentLocalCommitDuringSlowFetchPreservesCommitAndUpdatesRemoteRefs() async throws {
+    let f = try await FetchFeedbackFixture.make(delay: 0.8); defer { f.clean() }
+    let peer = try await f.trackedPeer()
+    try await f.advance(peer, file: "remote.txt", text: "from peer\n")
+    _ = try await f.git(["push", "origin", "main"], at: peer)
+    try await f.base.write("local-edit.txt", "created while fetching\n")
+    try await f.base.sync()
+    f.store.sync(.fetch)
+    let fetchFeedback = try #require(f.store.operationFeedback)
+    #expect(fetchFeedback.command == .fetch && fetchFeedback.phase == .running)
+    #expect(!f.store.isBusy && f.store.isFetching && !f.store.canFetch && !f.store.canRemoteIntegrate)
+    f.store.reviewPull()
+    #expect(f.store.pullRequest == nil)
+    f.store.stage(f.store.changes)
+    await f.store.operationTask?.value
+    #expect(f.store.staged.map(\.path) == ["local-edit.txt"])
+    f.store.commitSubject = "Commit while fetching"
+    #expect(f.store.canCommit)
+    f.store.commit()
+    await f.store.operationTask?.value
+    #expect(f.store.snapshot?.commits.first?.subject == "Commit while fetching")
+    #expect(f.store.isFetching && f.store.operationFeedback?.id == fetchFeedback.id)
+    await f.store.fetchTask?.value
+    #expect(!f.store.isFetching && !f.store.isBusy && f.store.error == nil)
+    #expect(f.store.operationFeedback?.id == fetchFeedback.id && f.store.operationFeedback?.phase == .succeeded)
+    #expect(f.store.snapshot?.commits.first?.subject == "Commit while fetching")
+    #expect(f.store.snapshot?.ahead == 1 && f.store.snapshot?.behind == 1)
+}
+
 @Test @MainActor func failedFetchStaysVisibleAndRetryReplacesItsFeedback() async throws {
     let f = try await FetchFeedbackFixture.make(delay: 0.1, createRemote: false); defer { f.clean() }
-    f.store.sync(.fetch); await f.store.operationTask?.value
+    f.store.sync(.fetch); await f.store.fetchTask?.value
     let failed = try #require(f.store.operationFeedback)
-    #expect(failed.phase == .failed && f.store.error != nil && !f.store.isBusy)
+    #expect(failed.phase == .failed && f.store.error != nil && !f.store.isBusy && !f.store.isFetching)
     #expect(f.store.feedbackNetworkRecord?.phase == .failed)
     _ = try await GitProcess.run(["clone", "--bare", f.root.path, f.remote.path], at: f.base.root)
     f.store.error = nil
@@ -66,7 +99,7 @@ import Testing
     #expect(retry.id != failed.id && retry.phase == .running)
     f.store.dismissOperationFeedback(failed.id)
     #expect(f.store.operationFeedback?.id == retry.id)
-    await f.store.operationTask?.value
+    await f.store.fetchTask?.value
     #expect(f.store.operationFeedback?.phase == .succeeded && f.store.error == nil)
     f.store.dismissOperationFeedback(retry.id)
     #expect(f.store.operationFeedback == nil)
@@ -79,8 +112,8 @@ import Testing
     while f.store.feedbackNetworkRecord == nil && ContinuousClock.now < deadline { try await Task.sleep(for: .milliseconds(10)) }
     let record = try #require(f.store.feedbackNetworkRecord)
     f.store.networkActivity?.cancel(record.id)
-    await f.store.operationTask?.value
-    #expect(!f.store.isBusy && f.store.operationFeedback?.phase == .cancelled)
+    await f.store.fetchTask?.value
+    #expect(!f.store.isBusy && !f.store.isFetching && f.store.operationFeedback?.phase == .cancelled)
     #expect(f.store.feedbackNetworkRecord?.phase == .cancelled)
 }
 
@@ -150,7 +183,7 @@ extension RepositoryStore {
     let remote = try #require(f.store.managedRemotes.first)
     f.store.runRemoteFetch(remote, prune: true, tags: true)
     #expect(f.store.operationFeedback?.command == .fetch && f.store.operationFeedback?.isVisible == true)
-    await f.store.operationTask?.value
+    await f.store.fetchTask?.value
     #expect(f.store.operationFeedback?.phase == .succeeded)
     f.store.clearOperationFeedback()
     f.store.sync(.push)
@@ -300,7 +333,7 @@ extension RepositoryStore {
 @Test @MainActor func completedOperationRemainsInspectableAfterItsAcknowledgementEnds() async throws {
     let f = try await FetchFeedbackFixture.make(delay: 0.1); defer { f.clean() }
     let head = try await f.base.repository.headPosition()
-    f.store.sync(.fetch); await f.store.operationTask?.value
+    f.store.sync(.fetch); await f.store.fetchTask?.value
     let completed = try #require(f.store.operationFeedback)
     #expect(completed.phase == .succeeded && completed.isVisible)
     try await Task.sleep(for: .milliseconds(2300))
@@ -317,7 +350,7 @@ extension RepositoryStore {
     #expect(f.store.snapshot?.branch == "main" && f.store.snapshot?.changes.isEmpty == true)
     f.store.sync(.fetch)
     #expect(f.store.operationFeedback?.id != completed.id && f.store.operationFeedback?.phase == .running)
-    await f.store.operationTask?.value
+    await f.store.fetchTask?.value
     #expect(f.store.operationFeedback?.isVisible == true && f.store.operationFeedback?.phase == .succeeded)
 }
 

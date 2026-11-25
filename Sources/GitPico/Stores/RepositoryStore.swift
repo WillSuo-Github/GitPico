@@ -144,7 +144,7 @@ final class RepositoryStore {
     var isLoadingWorkingFiles = false
     @ObservationIgnored var workingListGeneration = UUID()
     var commitWarning: String? {
-        didSet { if isBusy, let commitWarning { operationFeedback?.warning = commitWarning } }
+        didSet { if isBusy, let commitWarning { exclusiveFeedback?.warning = commitWarning } }
     }
     var commitFeedback: String?
     var diffError: String?
@@ -176,11 +176,16 @@ final class RepositoryStore {
         }
     }
     var isAutomaticallyRefreshing = false
+    var isManualFetching = false
     var isBackgroundFetching = false
-    var operationFeedback: RepositoryOperationFeedback?
+    var exclusiveFeedback: RepositoryOperationFeedback?
+    var fetchFeedback: RepositoryOperationFeedback?
     var dismissedStatusNetworkRecord: UUID?
-    @ObservationIgnored var feedbackFinishedAt: Date?
-    @ObservationIgnored var operationFeedbackTask: Task<Void, Never>?
+    @ObservationIgnored var exclusiveFeedbackFinishedAt: Date?
+    @ObservationIgnored var fetchFeedbackFinishedAt: Date?
+    @ObservationIgnored var exclusiveFeedbackTask: Task<Void, Never>?
+    @ObservationIgnored var fetchFeedbackTask: Task<Void, Never>?
+    @ObservationIgnored var fetchTask: Task<Void, Never>?
     var automaticRefreshError: String?
     @ObservationIgnored var fileMonitor: RepositoryFileMonitor?
     @ObservationIgnored var automaticMonitorTask: Task<Void, Never>?
@@ -194,7 +199,7 @@ final class RepositoryStore {
         didSet { if !activity.isEmpty { beginCurrentOperationFeedback() } }
     }
     var error: String? {
-        didSet { if isBusy, let error, operationFeedback?.phase == .running { operationFeedback?.failure = error } }
+        didSet { if isBusy, let error, exclusiveFeedback?.phase == .running { exclusiveFeedback?.failure = error } }
     }
     var search = "" { didSet { workspace?.scheduleSessionSave() } }
     var searchFocusRequest: UUID?
@@ -241,7 +246,7 @@ final class RepositoryStore {
     @ObservationIgnored var repositoryToken = UUID()
     @ObservationIgnored var draftBeforeAmend: (String, String)?
     deinit {
-        automaticMonitorTask?.cancel(); automaticRefreshTask?.cancel(); backgroundFetchTask?.cancel(); conflictDraftSaveTask?.cancel(); operationFeedbackTask?.cancel()
+        automaticMonitorTask?.cancel(); automaticRefreshTask?.cancel(); backgroundFetchTask?.cancel(); fetchTask?.cancel(); conflictDraftSaveTask?.cancel(); exclusiveFeedbackTask?.cancel(); fetchFeedbackTask?.cancel()
         if let root = networkRegisteredRoot { GitNetworkContexts.remove(root: root, owner: networkContextOwner) }
     }
 
@@ -293,6 +298,7 @@ final class RepositoryStore {
     func openInPlace(_ url: URL, openedRepository: GitRepository? = nil) async {
         guard !isBusy else { return }
         do { try flushConflictDrafts() } catch { self.error = error.localizedDescription; return }
+        cancelFetch()
         suppressOperationFeedback = true
         isBusy = true; activity = String(localized: "Opening repository…")
         let timing = RepositoryOpenTiming(); var succeeded = false
@@ -387,7 +393,7 @@ final class RepositoryStore {
     }
 
     func navigate(_ value: Destination) {
-        guard !isBusy || isFetching else { return }
+        guard !isBusy else { return }
         if value == .repositorySettings {
             showingRepositorySettings = true
             requestDeferredMetadata(.repositorySettings)
@@ -505,7 +511,7 @@ final class RepositoryStore {
             catch { self.error = error.localizedDescription }
             // A rejected merge or stash application can still change the index and working copy.
             // Refresh once, independently of write success, while preserving the original Git error.
-            operationFeedback?.isRefreshing = true
+            exclusiveFeedback?.isRefreshing = true
             do {
                 switch refresh {
                 case .full: try await reload()
@@ -559,15 +565,19 @@ final class RepositoryStore {
     }
 
     func sync(_ action: GitRepository.SyncAction) {
-        guard canUseRepository, snapshot?.remotes.isEmpty == false, action == .fetch || canIntegrate else { return }
-        if action == .fetch { runRemoteFetch(nil, options: FetchOptions()); return }
+        if action == .fetch {
+            guard canFetch else { return }
+            runRemoteFetch(nil, options: FetchOptions())
+            return
+        }
+        guard canRemoteIntegrate else { return }
         if action == .push, let current = snapshot?.references.first(where: \.isCurrent), current.isLocal, current.upstream.isEmpty {
             manage(.publish(current, nil, nil, false))
         } else { perform("Pushing…", feedback: .push) { try await $0.sync(.push) } }
     }
     /// Pull always goes through the strategy review sheet.
     func reviewPull() {
-        guard canUseRepository, canIntegrate, let snapshot, !snapshot.remotes.isEmpty else { return }
+        guard canRemoteIntegrate, let snapshot else { return }
         pullRequest = PullReviewRequest(head: snapshot.head, upstream: snapshot.references.first(where: \.isCurrent)?.upstream ?? "")
     }
     func switchBranch(_ ref: Reference) {
@@ -575,7 +585,7 @@ final class RepositoryStore {
         protectedPerform("Checking out \(ref.name)…", alwaysOfferStash: true, refresh: .workingTree) { try await $0.switchBranch(ref) }
     }
     func switchRemoteBranch(_ ref: Reference) {
-        guard canUseRepository, let snapshot, snapshot.operation == .none else { return }
+        guard canUseRepository, !isFetching, let snapshot, snapshot.operation == .none else { return }
         do {
             let target = try RemoteBranchCheckoutTarget.resolve(ref, references: snapshot.references, remotes: snapshot.remotes)
             if case .chooseName = target { manage(.createBranch(ref.hash, ref.fullName)); return }

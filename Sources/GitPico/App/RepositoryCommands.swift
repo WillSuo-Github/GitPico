@@ -45,9 +45,9 @@ struct RepositoryCommands: Commands {
                 Button("Refresh", action: store.refresh).keyboardShortcut("r").disabled(!store.canUseRepository)
                 Divider()
                 Group {
-                    Button("Fetch…") { store.reviewFetch() }
-                    Button("Pull…") { store.reviewPull() }.disabled(!store.canIntegrate)
-                    Button("Push") { store.sync(.push) }.disabled(!store.canIntegrate)
+                    Button("Fetch…") { store.reviewFetch() }.disabled(!store.canFetch)
+                    Button("Pull…") { store.reviewPull() }.disabled(!store.canRemoteIntegrate)
+                    Button("Push") { store.sync(.push) }.disabled(!store.canRemoteIntegrate)
                     Button("Synchronize (Fetch, Pull, Push)", action: store.syncAll).disabled(!store.canSynchronize)
                 }.disabled(!store.canUseRepository || store.managedRemotes.isEmpty)
                 Menu("Remote Repositories") {
@@ -58,7 +58,7 @@ struct RepositoryCommands: Commands {
                         Button("Publish / Push To…") { store.manage(.publish(nil, nil, nil, false)) }
                         Button("Delete Remote Reference…") { store.manage(.publish(nil, nil, "refs/heads/main", false)) }
                     }.disabled(store.managedRemotes.isEmpty)
-                }.disabled(!store.canUseRepository)
+                }.disabled(!store.canUseRepository || store.isFetching)
                 Divider()
                 Menu("Worktrees and Submodules") {
                     Button("Add Worktree…") { store.manageWorktree(.create(nil)) }.disabled(!store.canIntegrate)

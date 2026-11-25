@@ -46,7 +46,7 @@ import Testing
     while start.duration(to: .now) < .seconds(12) {
         let elapsed = start.duration(to: .now)
         if elapsed >= .milliseconds(400), !began { began = true; workspace.activeStore.sync(.fetch) }
-        if began, !workspace.activeStore.isBusy, completed == nil { completed = .now }
+        if began, !workspace.activeStore.isPerformingActivity, completed == nil { completed = .now }
         let view = try #require(window.contentView?.superview)
         view.layoutSubtreeIfNeeded()
         let rect = NSRect(x: view.bounds.minX, y: view.isFlipped ? view.bounds.maxY - 60 : view.bounds.minY, width: view.bounds.width, height: 60)
@@ -54,12 +54,12 @@ import Testing
         view.cacheDisplay(in: rect, to: bitmap)
         let name = String(format: "frame-%04d.png", frames.count)
         try #require(bitmap.representation(using: .png, properties: [:])).write(to: folder.appendingPathComponent(name))
-        frames.append(["file": name, "seconds": Double(elapsed.components.seconds) + Double(elapsed.components.attoseconds) / 1e18, "isBusy": workspace.activeStore.isBusy, "percent": workspace.activeStore.activeStatusNetworkRecord?.transferProgress?.percent ?? -1, "reduceMotion": reduced])
+        frames.append(["file": name, "seconds": Double(elapsed.components.seconds) + Double(elapsed.components.attoseconds) / 1e18, "isBusy": workspace.activeStore.isPerformingActivity, "percent": workspace.activeStore.activeStatusNetworkRecord?.transferProgress?.percent ?? -1, "reduceMotion": reduced])
         if let completed, completed.duration(to: .now) > .milliseconds(2600) { break }
         try await Task.sleep(for: .milliseconds(70))
     }
-    await workspace.activeStore.operationTask?.value
-    #expect(workspace.activeStore.error == nil && !workspace.activeStore.isBusy)
+    await workspace.activeStore.fetchTask?.value
+    #expect(workspace.activeStore.error == nil && !workspace.activeStore.isPerformingActivity)
     #expect(frames.contains { $0["percent"] as? Int == 42 })
     #expect(frames.contains { $0["percent"] as? Int == 73 })
     #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)

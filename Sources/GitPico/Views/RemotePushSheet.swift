@@ -33,7 +33,7 @@ struct RemotePushSheet: View {
         return selectedSource?.upstream.isEmpty == true ? "Publish Branch" : "Push"
     }
     private var submitDisabled: Bool {
-        store.isBusy || checking || selectedRemote == nil || pushURL.isEmpty || destinationName.isEmpty || (!deleting && selectedSource == nil)
+        store.isBusy || store.isFetching || checking || selectedRemote == nil || pushURL.isEmpty || destinationName.isEmpty || (!deleting && selectedSource == nil)
     }
     private var actionTitle: LocalizedStringResource {
         deleting || lease ? "Continue" : selectedSource?.isLocal == true && selectedSource?.upstream.isEmpty == true ? "Publish" : "Push"
@@ -42,7 +42,7 @@ struct RemotePushSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let confirmation {
-                RemotePushConfirmation(preview: confirmation, busy: store.isBusy,
+                RemotePushConfirmation(preview: confirmation, busy: store.isBusy || store.isFetching,
                                        back: { self.confirmation = nil },
                                        push: { store.runRemotePush(confirmation); dismiss() })
             } else {
@@ -53,7 +53,7 @@ struct RemotePushSheet: View {
                                 .lineLimit(1).truncationMode(.middle).help(selectedSource.name)
                         }
                     }
-                    fields.disabled(checking || store.isBusy)
+                    fields.disabled(checking || store.isBusy || store.isFetching)
                     if deleting {
                         Text("Deletes only this reference on the selected server. Existing local commits and references are retained.")
                             .font(.callout).foregroundStyle(.secondary)

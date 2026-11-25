@@ -20,22 +20,22 @@ struct SidebarReferenceContextActions: View {
             Button("Checkout Branch in New Worktree…") { store.manageWorktree(.create(ref.name)) }.disabled(store.worktrees.contains { $0.branch == ref.fullName })
             Button(store.organization.pinned.contains(ref.fullName) ? "Unpin Branch" : "Pin Branch") { store.organize(ref, pinned: !store.organization.pinned.contains(ref.fullName)) }
             Button("Track Upstream Branch…") { store.manage(.upstream(ref)) }
-            Button("Publish / Push Branch…") { store.manage(.publish(ref, nil, nil, false)) }.disabled(store.managedRemotes.isEmpty)
-            Button("Force Push with Lease…") { store.manage(.publish(ref, nil, nil, true)) }.disabled(store.managedRemotes.isEmpty)
+            Button("Publish / Push Branch…") { store.manage(.publish(ref, nil, nil, false)) }.disabled(store.managedRemotes.isEmpty || store.isFetching)
+            Button("Force Push with Lease…") { store.manage(.publish(ref, nil, nil, true)) }.disabled(store.managedRemotes.isEmpty || store.isFetching)
             Button(store.organization.archived.contains(ref.fullName) ? "Unarchive Branch" : "Archive Branch") { store.organize(ref, archived: !store.organization.archived.contains(ref.fullName)) }
             Button("Rename Branch…") { store.manage(.renameBranch(ref)) }
             Button("Delete Branch…", role: .destructive) { store.manage(.deleteBranch(ref)) }.disabled(ref.isCurrent)
         }
         if ref.isRemote, let remote = store.remoteFor(ref) {
-            Button("Check Out “\(ref.name)”") { store.switchRemoteBranch(ref) }.disabled(!store.canUseRepository || store.snapshot?.operation != RepositoryOperation.none)
+            Button("Check Out “\(ref.name)”") { store.switchRemoteBranch(ref) }.disabled(!store.canUseRepository || store.isFetching || store.snapshot?.operation != RepositoryOperation.none)
             Button("Check Out as Tracking Branch…") { store.manage(.createBranch(ref.hash, ref.fullName)) }
-            Button("Delete Remote Branch…", role: .destructive) { store.manage(.publish(nil, remote.name, "refs/heads/" + String(ref.name.dropFirst(remote.name.count + 1)), false)) }
+            Button("Delete Remote Branch…", role: .destructive) { store.manage(.publish(nil, remote.name, "refs/heads/" + String(ref.name.dropFirst(remote.name.count + 1)), false)) }.disabled(store.isFetching)
         }
         if ref.isTag {
             Button("Tag Information…") { store.manage(.inspectTag(ref)) }
             Button("Rename Tag…") { store.manage(.renameTag(ref)) }
             Button("Delete Tag…", role: .destructive) { store.manage(.deleteTag(ref)) }
-            Button("Publish Tag…") { store.manage(.publish(ref, nil, nil, false)) }.disabled(store.managedRemotes.isEmpty)
+            Button("Publish Tag…") { store.manage(.publish(ref, nil, nil, false)) }.disabled(store.managedRemotes.isEmpty || store.isFetching)
         }
         Divider()
         Button("Create New Branch from Here…") { store.manage(.createBranch(ref.hash, nil)) }

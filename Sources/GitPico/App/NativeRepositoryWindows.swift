@@ -167,7 +167,7 @@ import SwiftUI
         let label = NSMutableAttributedString(attachment: attachment)
         label.append(NSAttributedString(string: "  " + title))
         window.tab.attributedTitle = label
-        if tab.isBusy {
+        if tab.showsActivitySpinner {
             if window.tab.accessoryView == nil {
                 let progress = NSProgressIndicator(frame: NSRect(x: 0, y: 0, width: 14, height: 14))
                 progress.style = .spinning; progress.controlSize = .small

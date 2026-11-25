@@ -149,14 +149,14 @@ struct PullReviewSheet: View {
             Button(request.pushAfter ? "Synchronize" : "Pull") {
                 if remember && policy != savedPolicy { AppPreferences.shared.pullPolicy = policy }
                 store.runPull(request, policy: policy); dismiss()
-            }.keyboardShortcut(.defaultAction).disabled(request.upstream.isEmpty || !store.canIntegrate)
+            }.keyboardShortcut(.defaultAction).disabled(request.upstream.isEmpty || !store.canRemoteIntegrate)
         }.controlSize(.large)
     }
 }
 
 extension RepositoryStore {
     func runPull(_ request: PullReviewRequest, policy: PullPolicy) {
-        guard canIntegrate else { return }
+        guard canRemoteIntegrate else { return }
         protectedPerform(request.pushAfter ? "Synchronizing…" : "Pull (\(policy.title))…", refresh: .workingTree, feedback: request.pushAfter ? .synchronize : .pull) {
             try await $0.pull(policy: policy, expectedHead: request.head, expectedUpstream: request.upstream)
             if request.pushAfter { try await $0.sync(.push) }
@@ -177,7 +177,7 @@ struct UpstreamRecoveryBanner: View {
     var body: some View {
         if let missing = store.snapshot?.unresolvedUpstream {
             NoticeBanner(icon: "exclamationmark.triangle.fill", title: "Upstream unavailable", message: String(localized: "\(missing) is missing locally. Fetch it or select another tracking branch.")) {
-                Button("Fetch…") { store.reviewFetch() }.disabled(!store.canUseRepository)
+                Button("Fetch…") { store.reviewFetch() }.disabled(!store.canFetch)
                 Button("Tracking Branch…") { store.reviewTrackingBranch() }.disabled(!store.canUseRepository)
             }
         }

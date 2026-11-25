@@ -37,10 +37,14 @@ extension RepositoryStore {
         automaticRefreshPending = false; automaticRefreshEpoch = UUID()
     }
     func fetchInBackground() async {
-        guard !isBusy, !isAutomaticallyRefreshing, let repository, snapshot?.remotes.isEmpty == false, let journal = networkActivity, let reservation = journal.reserveBackgroundFetch() else { return }
+        guard !isBusy, !isFetching, !isAutomaticallyRefreshing, let repository, snapshot?.remotes.isEmpty == false, let journal = networkActivity, let reservation = journal.reserveBackgroundFetch() else { return }
         let token = repositoryToken
-        lastBackgroundFetch = Date(); isBackgroundFetching = true; isBusy = true; activity = String(localized: "Fetching remote updates…")
-        defer { journal.releaseBackgroundFetch(reservation); isBackgroundFetching = false; isBusy = false; activity = ""; requestAutomaticRefresh() }
+        lastBackgroundFetch = Date(); isBackgroundFetching = true
+        defer {
+            journal.releaseBackgroundFetch(reservation)
+            isBackgroundFetching = false
+            if token == repositoryToken { requestAutomaticRefresh() }
+        }
         var startedNetwork = false
         do {
             let custom = try await GitProcess.run(["config", "--get", "core.sshCommand"], at: repository.root, allowed: [0,1]).text.trimmingCharacters(in: .newlines)
@@ -57,6 +61,56 @@ extension RepositoryStore {
             }
             // Started network failures remain in activity history without interrupting editing.
         }
+    }
+    func refreshAfterFetch(expectedToken: UUID) async -> String? {
+        for _ in 0..<3 {
+            while isBusy {
+                guard expectedToken == repositoryToken else { return nil }
+                if let pendingTask = operationTask { await pendingTask.value }
+                else { try? await Task.sleep(for: .milliseconds(20)) }
+            }
+            guard expectedToken == repositoryToken, let repository, let previous = snapshot else { return nil }
+            let epoch = automaticRefreshEpoch
+            do {
+                if let ref = destination.ref, (try? await repository.commit(at: ref)) == nil {
+                    guard expectedToken == repositoryToken else { return nil }
+                    if isBusy || epoch != automaticRefreshEpoch { continue }
+                    destination = .history; selectedCommit = nil; commitDetail = nil
+                }
+                let value = try await repository.observedSnapshot(from: previous)
+                let remotes = try await repository.remoteConfigurations()
+                let refOrganization = try await repository.referenceOrganization()
+                guard expectedToken == repositoryToken else { return nil }
+                if isBusy || epoch != automaticRefreshEpoch { continue }
+                let historyChanged = value.references != previous.references || value.head != previous.head
+                let changesChanged = value.changes != previous.changes
+                let metadataChanged = historyChanged || value.remotes != previous.remotes || value.stashes != previous.stashes || value.operation != previous.operation || value.identity.name != previous.identity.name || value.identity.email != previous.identity.email
+                snapshot = value
+                managedRemotes = remotes
+                organization = refOrganization
+                metadataDirty.subtract([.remotes, .organization])
+                if historyChanged { clearHistoryCache() }
+                if metadataChanged {
+                    metadataEpoch = UUID(); metadataTask?.cancel(); metadataDirty.formUnion([.worktrees, .submodules, .workflow, .stashes])
+                }
+                if changesChanged || historyChanged { await rebuildWorkingList() }
+                guard expectedToken == repositoryToken else { return nil }
+                if isBusy || epoch != automaticRefreshEpoch { continue }
+                if let file = currentChange, !file.isConflicted, changesChanged {
+                    workingDiffRequest = nil
+                    selectChange(file, staged: file.isStaged && (!file.isUnstaged || stagedDiff))
+                }
+                if isHistoryDestination { requestHistory() }
+                requestDeferredMetadata(destination)
+                lastUpdated = Date(); automaticRefreshError = nil
+                return nil
+            } catch {
+                guard expectedToken == repositoryToken else { return nil }
+                if isBusy || epoch != automaticRefreshEpoch { continue }
+                return String(localized: "Repository refresh failed. \(error.localizedDescription)")
+            }
+        }
+        return nil
     }
     func requestAutomaticRefresh() {
         guard repository != nil else { return }

@@ -32,7 +32,7 @@ struct RepositoryToolbar: ToolbarContent {
             // An empty principal view preserves AppKit's trailing action layout.
             // ToolbarSpacer alone is folded away when there is no principal item.
             ToolbarItem(id: "repository.centerSpacing", placement: .principal) {
-                Color.clear.frame(width: 1, height: 1).allowsHitTesting(false).accessibilityHidden(true)
+                RepositoryToolbarActivityView(store: store)
             }.sharedBackgroundVisibility(.hidden)
             ToolbarItemGroup(placement: .primaryAction) {
                 RepositorySyncButton(store: store, action: .fetch)

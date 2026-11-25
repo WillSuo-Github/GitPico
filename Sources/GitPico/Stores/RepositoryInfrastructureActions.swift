@@ -9,11 +9,11 @@ struct RepositoryInfrastructureRequest: Identifiable {
 }
 extension RepositoryStore {
     func infrastructure(_ mode: RepositoryInfrastructureMode) {
-        guard !isBusy else { return }
+        guard !isBusy, !isFetching else { return }
         infrastructureRequest = RepositoryInfrastructureRequest(repositoryToken: repositoryToken, mode: mode)
     }
     func migrateMain(_ plan: MainRepositoryMigrationPlan, request: RepositoryInfrastructureRequest) {
-        guard !isBusy, request.repositoryToken == repositoryToken else { error = String(localized: "The repository changed. Reopen the migration preview."); return }
+        guard !isBusy, !isFetching, request.repositoryToken == repositoryToken else { error = String(localized: "The repository changed. Reopen the migration preview."); return }
         isBusy = true; activity = String(localized: "Moving main repository and reconnecting worktrees…")
         Task {
             do {
@@ -26,7 +26,7 @@ extension RepositoryStore {
         }
     }
     func repairPointers(_ plan: PointerRepairPlan, request: RepositoryInfrastructureRequest) {
-        guard !isBusy, request.repositoryToken == repositoryToken else { error = String(localized: "The repository changed. Reopen the pointer preview."); return }
+        guard !isBusy, !isFetching, request.repositoryToken == repositoryToken else { error = String(localized: "The repository changed. Reopen the pointer preview."); return }
         isBusy = true; activity = String(localized: "Repairing repository pointers…")
         Task {
             do { _ = try await GitRepository(root: plan.mainRoot).applyPointerRepair(plan); isBusy = false; await reopenCurrentRepository(plan.mainRoot) }
@@ -35,7 +35,7 @@ extension RepositoryStore {
         }
     }
     func recoverSavedMain(_ plan: MainRepositoryRecoveryPlan, request: RepositoryInfrastructureRequest) {
-        guard !isBusy, request.repositoryToken == repositoryToken else { error = String(localized: "The repository changed. Reopen this recovery preview."); return }
+        guard !isBusy, !isFetching, request.repositoryToken == repositoryToken else { error = String(localized: "The repository changed. Reopen this recovery preview."); return }
         isBusy = true; activity = String(localized: "Recovering saved repository into a new folder…")
         Task {
             do { let recovered = try await GitRepository(root: URL(fileURLWithPath: plan.backup.destination)).recoverSavedMainRepository(plan); let url = await recovered.root; isBusy = false; await open(url) }
@@ -44,7 +44,7 @@ extension RepositoryStore {
         }
     }
     func restoreMainMigration(_ plan: MainMigrationRestorePlan, request: RepositoryInfrastructureRequest) {
-        guard !isBusy, request.repositoryToken == repositoryToken else { error = String(localized: "The repository changed. Reopen this recovery preview."); return }
+        guard !isBusy, !isFetching, request.repositoryToken == repositoryToken else { error = String(localized: "The repository changed. Reopen this recovery preview."); return }
         isBusy = true; activity = String(localized: "Restoring main repository migration…")
         Task {
             do {
@@ -64,7 +64,7 @@ extension RepositoryStore {
         }
     }
     func resumePointerRepair(_ record: PointerRepairBackup, undo: Bool, request: RepositoryInfrastructureRequest) {
-        guard !isBusy, request.repositoryToken == repositoryToken else { error = String(localized: "The repository changed. Reopen this repair history."); return }
+        guard !isBusy, !isFetching, request.repositoryToken == repositoryToken else { error = String(localized: "The repository changed. Reopen this repair history."); return }
         isBusy = true; activity = undo ? String(localized: "Restoring pointer metadata…") : String(localized: "Resuming pointer repair…")
         Task {
             do { try await GitRepository(root: URL(fileURLWithPath: record.mainPath)).resumePointerRepair(record, undo: undo); isBusy = false; await reopenCurrentRepository(URL(fileURLWithPath: record.mainPath)) }

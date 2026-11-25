@@ -30,7 +30,7 @@ struct RemoteEditSheet: View {
                     }
                 }
             }
-            ManagementFooter(title: action == .edit ? (remote == nil ? "Add Remote" : "Save Remote") : title, disabled: store.isBusy || (action != .remove && name.isEmpty) || (action == .edit && fetch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty), destructive: action == .remove) {
+            ManagementFooter(title: action == .edit ? (remote == nil ? "Add Remote" : "Save Remote") : title, disabled: store.isBusy || store.isFetching || (action != .remove && name.isEmpty) || (action == .edit && fetch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty), destructive: action == .remove) {
                 let name = name, fetch = fetch.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }, push = push.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }, remote = remote, action = action
                 store.perform("\(title)…") { repository in
                     switch action {
@@ -82,7 +82,7 @@ struct RemoteFetchSheet: View {
             Text("Fetch updates remote-tracking references without merging or changing your working files.")
                 .font(.callout).foregroundStyle(.secondary)
 
-            ManagementFooter(title: "Fetch", disabled: !store.canUseRepository || store.managedRemotes.isEmpty || (!allRemotes && selectedRemote == nil)) {
+            ManagementFooter(title: "Fetch", disabled: !store.canFetch || store.managedRemotes.isEmpty || (!allRemotes && selectedRemote == nil)) {
                 store.runRemoteFetch(allRemotes ? nil : selectedRemote, options: options)
                 dismiss()
             }
@@ -92,8 +92,41 @@ struct RemoteFetchSheet: View {
 
 extension RepositoryStore {
     func runRemoteFetch(_ remote: RemoteConfiguration?, options: FetchOptions) {
-        guard canUseRepository else { return }
-        perform("Fetching…", feedback: .fetch) { try await $0.fetch(remote, options: options) }
+        guard canFetch, let repository, let snapshot else { return }
+        let token = repositoryToken
+        let label: String
+        if let remote {
+            label = String(localized: "Fetching…") + " · " + remote.name
+        } else if snapshot.remotes.count == 1, let single = snapshot.remotes.first {
+            label = String(localized: "Fetching…") + " · " + single
+        } else {
+            label = String(localized: "Fetching…")
+        }
+        isManualFetching = true
+        beginFetchFeedback(repository: snapshot.root.path, activity: label)
+        fetchTask = Task {
+            var fetchError: String?
+            do {
+                try await repository.fetch(remote, options: options)
+            } catch {
+                fetchError = error.localizedDescription
+            }
+            guard token == repositoryToken else { return }
+            if let fetchError {
+                fetchFeedback?.failure = fetchError
+                self.error = fetchError
+            }
+            fetchFeedback?.isRefreshing = true
+            if let refreshError = await refreshAfterFetch(expectedToken: token) {
+                guard token == repositoryToken else { return }
+                let combined = [fetchFeedback?.failure, refreshError].compactMap { $0 }.joined(separator: "\n\n")
+                fetchFeedback?.failure = combined
+                self.error = [self.error, refreshError].compactMap { $0 }.joined(separator: "\n\n")
+            }
+            guard token == repositoryToken else { return }
+            isManualFetching = false
+            finishFetchFeedback()
+        }
     }
 
     func runRemoteFetch(_ remote: RemoteConfiguration?, prune: Bool, tags: Bool) {
@@ -104,11 +137,13 @@ extension RepositoryStore {
     }
 
     func runRemotePush(_ preview: RemotePushPreview) {
+        guard !isFetching else { return }
         perform(preview.deletes ? "Deleting remote reference…" : "Pushing…", feedback: .push) { try await $0.executePush(preview) }
     }
 
     /// A normal push checks and writes in one operation; it never enables force or deletion.
     func runRemotePush(remote: RemoteConfiguration, source: Reference, destination: String, setUpstream: Bool, pushURL: String) {
+        guard !isFetching else { return }
         perform("Pushing…", feedback: .push) { repository in
             let checked = try await repository.pushPreview(remote: remote, source: source, destination: destination, setUpstream: setUpstream, pushURL: pushURL)
             try await repository.executePush(checked)

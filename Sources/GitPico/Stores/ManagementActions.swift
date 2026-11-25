@@ -9,6 +9,17 @@ enum ManagementAction: Sendable {
     case deleteReferences([Reference], repositoryToken: UUID)
     case addRemote, editRemote(RemoteConfiguration), renameRemote(RemoteConfiguration), removeRemote(RemoteConfiguration)
     case publish(Reference?, String?, String?, Bool), fetch(RemoteConfiguration?, mode: FetchReviewMode = .standard), recovery
+
+    var requiresIdleFetch: Bool {
+        switch self {
+        case .addRemote, .editRemote, .renameRemote, .removeRemote, .publish, .fetch:
+            return true
+        case .deleteReferences(let references, _):
+            return references.contains { !$0.isLocal }
+        default:
+            return false
+        }
+    }
 }
 struct ManagementRequest: Identifiable { let id = UUID(); let action: ManagementAction }
 
@@ -20,11 +31,17 @@ struct StashRequest: Identifiable { let id = UUID(); let action: StashAction }
 
 extension RepositoryStore {
     func reviewFetch(mode: FetchReviewMode = .standard) {
-        guard canUseRepository, snapshot?.remotes.isEmpty == false else { return }
+        guard canFetch else { return }
         manage(.fetch(nil, mode: mode))
     }
 
-    func manage(_ action: ManagementAction) { guard !isBusy else { return }; withFreshMetadata([.remotes, .organization]) { self.managementRequest = ManagementRequest(action: action) } }
+    func manage(_ action: ManagementAction) {
+        guard !isBusy, !(action.requiresIdleFetch && isFetching) else { return }
+        withFreshMetadata([.remotes, .organization]) {
+            guard !(action.requiresIdleFetch && self.isFetching) else { return }
+            self.managementRequest = ManagementRequest(action: action)
+        }
+    }
     func stashAction(_ action: StashAction) { guard !isBusy else { return }; withFreshMetadata([.stashes]) { self.stashRequest = StashRequest(action: action) } }
     func saveStash(_ options: StashSaveOptions) {
         perform(options.snapshot ? "Creating snapshot…" : "Saving stash…", refresh: .workingTree) { _ = try await $0.saveStash(options) }

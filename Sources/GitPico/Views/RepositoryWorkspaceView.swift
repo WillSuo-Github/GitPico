@@ -50,7 +50,7 @@ struct RepositoryWorkspaceView: View {
             .overlay(alignment: .bottom) {
                 if showsRepository {
                     RepositoryStatusBarBackground(
-                        isRunning: tab.store.isBusy,
+                        isRunning: tab.store.isPerformingActivity,
                         featherHeight: RepositoryStatusBarBackground.featherHeight
                     )
                     .frame(height: statusBarInset + RepositoryStatusBarBackground.featherHeight)
@@ -73,6 +73,7 @@ struct RepositoryWorkspaceView: View {
         }
         .onChange(of: tab.title, initial: true) { descriptorChanged() }
         .onChange(of: tab.isBusy) { descriptorChanged() }
+        .onChange(of: tab.showsActivitySpinner) { descriptorChanged() }
         .onChange(of: tab.store.snapshot == nil) { descriptorChanged() }
         .onChange(of: tab.showsRepositoryPicker) { descriptorChanged() }
         .alert("Repository Tabs", isPresented: Binding(get: { presentsAlerts && workspace.selectedID == tab.id && workspace.error != nil }, set: { if !$0 { workspace.error = nil } })) {

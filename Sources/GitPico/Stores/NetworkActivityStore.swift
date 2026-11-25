@@ -162,14 +162,14 @@ extension RepositoryStore {
         networkRegisteredRoot = nil
     }
     func testRemote(_ name: String) {
-        guard !isBusy, let repository else { return }
+        guard !isBusy, !isFetching, let repository else { return }
         isBusy = true; activity = String(localized: "Testing remote access…"); connectionTestMessage = String(localized: "Testing “\(name)”…")
         operationTask = Task {
             defer { isBusy = false; activity = "" }
             do {
                 _ = try await GitProcess.run(["ls-remote", "--heads", "--", name], at: repository.root, timeout: 30)
                 connectionTestMessage = String(localized: "Read access to “\(name)” verified. Push permissions are checked by the server during Push.")
-            } catch { connectionTestMessage = String(localized: "Remote test failed. \(networkFailureAdvice(error.localizedDescription))"); operationFeedback?.failure = connectionTestMessage }
+            } catch { connectionTestMessage = String(localized: "Remote test failed. \(networkFailureAdvice(error.localizedDescription))"); exclusiveFeedback?.failure = connectionTestMessage }
         }
     }
 }

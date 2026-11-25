@@ -61,7 +61,7 @@ struct RepositoryStatusBar: View {
             Color.clear.contentShape(Rectangle()).onTapGesture {}.accessibilityHidden(true)
         }
         .background {
-            if showsBackground { RepositoryStatusBarBackground(isRunning: store.isBusy) }
+            if showsBackground { RepositoryStatusBarBackground(isRunning: store.isPerformingActivity) }
         }
     }
     private var separator: some View { Divider().frame(height: 12) }

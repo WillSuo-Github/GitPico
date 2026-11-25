@@ -13,7 +13,13 @@ import Testing
     _ = try await GitProcess.run(["clone", "--bare", root.path, remote.path], at: f.root)
     _ = try await GitProcess.run(["remote", "add", "origin", remote.path], at: root)
     let upload = f.root.appendingPathComponent("delayed-upload-pack")
-    try Data("#!/bin/sh\nsleep 2\nexec /usr/bin/git-upload-pack \"$@\"\n".utf8).write(to: upload)
+    try Data("""
+        #!/bin/sh
+        sleep 0.7
+        printf 'Receiving objects:  42%% (42/100)\r' >&2
+        sleep 1.4
+        exec /usr/bin/git-upload-pack "$@"
+        """.utf8).write(to: upload)
     try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: upload.path)
     _ = try await GitProcess.run(["config", "remote.origin.uploadpack", upload.path], at: root)
     let workspace = RepositoryWorkspace(library: f.store.library)
@@ -61,19 +67,27 @@ import Testing
     try captureDetails("01-idle-details", store: workspace.activeStore)
     workspace.activeStore.sync(.fetch)
     try await Task.sleep(for: .milliseconds(150))
-    #expect(workspace.activeStore.isBusy)
+    #expect(workspace.activeStore.isFetching && !workspace.activeStore.isBusy)
     try capture("02-fetching")
+    let progressDeadline = ContinuousClock.now + .seconds(3)
+    while workspace.activeStore.activeStatusNetworkRecord?.transferProgress?.percent != 42 && ContinuousClock.now < progressDeadline {
+        try await Task.sleep(for: .milliseconds(30))
+    }
+    #expect(workspace.activeStore.activeStatusNetworkRecord?.transferProgress?.percent == 42)
+    try capture("02-fetching-progress")
     window.setFrame(NSRect(x: -10000, y: -10000, width: 1080, height: 900), display: false)
     try await Task.sleep(for: .milliseconds(150))
+    let narrowSearch = try #require(window.toolbar?.items.first { $0.itemIdentifier.rawValue.contains("repository.search") }?.view)
+    #expect(narrowSearch.superview != nil && narrowSearch.convert(narrowSearch.bounds, to: nil).maxX > 1020)
     try capture("02-fetching-narrow")
     window.appearance = NSAppearance(named: .darkAqua)
     try await Task.sleep(for: .milliseconds(150))
     try capture("02-fetching-dark")
     window.appearance = NSAppearance(named: .aqua)
     window.setFrame(NSRect(x: -10000, y: -10000, width: 1440, height: 900), display: false)
-    await workspace.activeStore.operationTask?.value
+    await workspace.activeStore.fetchTask?.value
     try await Task.sleep(for: .milliseconds(100))
-    #expect(workspace.activeStore.error == nil && !workspace.activeStore.isBusy)
+    #expect(workspace.activeStore.error == nil && !workspace.activeStore.isFetching && !workspace.activeStore.isBusy)
     try capture("03-completed")
     try captureDetails("03-completed-details", store: workspace.activeStore)
     let completedID = workspace.activeStore.operationFeedback?.id
@@ -133,7 +147,7 @@ import Testing
     let failedRoot = await failed.repository.root
     _ = try await GitProcess.run(["remote", "add", "origin", failed.root.appendingPathComponent("Missing.git").path], at: failedRoot)
     await failed.store.openInPlace(failedRoot)
-    failed.store.sync(.fetch); await failed.store.operationTask?.value
+    failed.store.sync(.fetch); await failed.store.fetchTask?.value
     #expect(failed.store.operationFeedback?.phase == .failed && failed.store.operationFeedback?.isVisible == true)
     try captureDetails("08-failed-details", store: failed.store)
 

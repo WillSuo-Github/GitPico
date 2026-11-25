@@ -23,7 +23,7 @@ import Testing
     }
     func write(_ name: String, _ text: String) async throws { try Data(text.utf8).write(to: await repository.root.appendingPathComponent(name)) }
     func sync() async throws { store.snapshot = try await repository.snapshot(); await store.rebuildWorkingList() }
-    func finish() async { await store.operationTask?.value; await store.detailTask?.value }
+    func finish() async { await store.operationTask?.value; await store.fetchTask?.value; await store.detailTask?.value }
     func clean() { store.cancelPreviewWork(); try? FileManager.default.removeItem(at: root) }
 }
 

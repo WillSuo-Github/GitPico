@@ -79,7 +79,7 @@ import Testing
     let job = Task { await f.store.fetchInBackground() }
     try await waitUntil { f.store.isBackgroundFetching }
     f.store.navigate(.history); f.store.commitSubject = "Keep typing while fetching"
-    #expect(f.store.destination == .history && !f.store.canCommit)
+    #expect(f.store.destination == .history && !f.store.isBusy && f.store.canUseRepository && !f.store.canFetch && !f.store.canRemoteIntegrate && !f.store.canCommit)
     await job.value
     #expect(!f.store.isBusy && !f.store.isBackgroundFetching)
     #expect(try await f.repository.headPosition() == before)

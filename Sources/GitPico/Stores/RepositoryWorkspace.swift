@@ -45,6 +45,7 @@ extension RepositoryWindowRouting {
         return root.map { store.library.displayName(for: $0.path) } ?? String(localized: "Repositories")
     }
     var isBusy: Bool { isOpening || store.isBusy }
+    var showsActivitySpinner: Bool { isOpening || store.isBusy || store.isManualFetching }
 }
 
 @MainActor @Observable final class RepositoryWorkspace {
@@ -150,7 +151,7 @@ extension RepositoryWindowRouting {
         guard let index = tabs.firstIndex(where: { $0.id == id }) else { return false }
         let tab = tabs[index]
         guard prepareToClose(tab) else { return false }
-        tab.store.disconnectNetworkContext(); tab.store.stopAutomaticRefresh(); tab.store.cancelPreviewWork(); tab.store.metadataTask?.cancel()
+        tab.store.cancelFetch(); tab.store.disconnectNetworkContext(); tab.store.stopAutomaticRefresh(); tab.store.cancelPreviewWork(); tab.store.metadataTask?.cancel()
         tabs.remove(at: index)
         if tabs.isEmpty { newTab() }
         else if selectedID == id { select(tabs[min(index, tabs.count - 1)].id) }
