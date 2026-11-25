@@ -21,6 +21,7 @@ struct SidebarView: View {
         }
     }
     @AppStorage("sidebar.branchesExpanded") private var branchesExpanded = true
+    @AppStorage("sidebar.archivedExpanded") private var archivedExpanded = true
     @AppStorage("sidebar.tagsExpanded") private var tagsExpanded = true
     @AppStorage("sidebar.remotesExpanded") private var remotesExpanded = true
     @AppStorage("sidebar.relatedExpanded") private var relatedExpanded = true
@@ -33,97 +34,125 @@ struct SidebarView: View {
                 if values.count == 1, let value = values.first { store.navigate(value) }
             })) {
                 Section {
-                    Label {
-                        HStack {
-                            Text("Working Copy").bold(!store.changes.isEmpty)
-                            Spacer(minLength: 0)
-                            if !store.changes.isEmpty {
-                                Text(store.changes.count, format: .number)
-                                    .font(.system(size: 10)).bold()
-                                    .foregroundStyle(.secondary)
-                                    .padding(.trailing, 4)
-                            }
+                    SidebarRowLabel(
+                        "Working Copy",
+                        systemImage: "square.and.pencil",
+                        bold: !store.changes.isEmpty
+                    ) {
+                        if !store.changes.isEmpty {
+                            Text(store.changes.count, format: .number)
+                                .font(.system(size: 10)).bold()
+                                .foregroundStyle(.secondary)
+                                .padding(.trailing, 4)
                         }
-                    } icon: {
-                        Image(systemName: "square.and.pencil")
                     }
                     .tag(Destination.workingCopy).picoDrop(store, .workingCopy)
-                    Label("History", systemImage: "clock.arrow.circlepath").tag(Destination.history)
-                    Label("Stashes", systemImage: "tray.full").badge(store.snapshot?.stashes.count ?? 0).tag(Destination.stashes).picoDrop(store, .stashes)
+                    SidebarRowLabel("History", systemImage: "clock.arrow.circlepath").tag(Destination.history)
+                    SidebarRowLabel("Stashes", systemImage: "tray.full").badge(store.snapshot?.stashes.count ?? 0).tag(Destination.stashes).picoDrop(store, .stashes)
                 } header: { Text("Workspace") }
-                Section(isExpanded: $branchesExpanded) {
-                    ForEach(outline.pinned) { ref in
-                        referenceRow(ref, title: ref.name, icon: "pin")
+                Section {
+                    if branchesExpanded {
+                        ForEach(outline.pinned) { ref in
+                            referenceRow(ref, title: ref.name, icon: "pin")
+                        }
+                        OutlineGroup(outline.branches, children: \.children) { node in
+                            if let ref = node.reference { referenceRow(ref, title: node.name, icon: "arrow.triangle.branch") }
+                            else { SidebarRowLabel(verbatim: node.name, systemImage: "folder") }
+                        }
                     }
-                    OutlineGroup(outline.branches, children: \.children) { node in
-                        if let ref = node.reference { referenceRow(ref, title: node.name, icon: "arrow.triangle.branch") }
-                        else { Label(node.name, systemImage: "folder") }
-                    }
-                } header: { Text("Branches").frame(maxWidth: .infinity, alignment: .leading).picoDrop(store, .branches) }
+                } header: {
+                    SidebarSectionHeader(title: "Branches", isExpanded: $branchesExpanded)
+                        .picoDrop(store, .branches)
+                }
                 if !outline.archived.isEmpty {
                     Section {
-                        OutlineGroup(outline.archived, children: \.children) { node in
-                            if let ref = node.reference { referenceRow(ref, title: node.name, icon: "archivebox") }
-                            else { Label(node.name, systemImage: "folder") }
+                        if archivedExpanded {
+                            OutlineGroup(outline.archived, children: \.children) { node in
+                                if let ref = node.reference { referenceRow(ref, title: node.name, icon: "archivebox") }
+                                else { SidebarRowLabel(verbatim: node.name, systemImage: "folder") }
+                            }
                         }
-                    } header: { Text("Archived Branches") }
+                    } header: {
+                        SidebarSectionHeader(title: "Archived Branches", isExpanded: $archivedExpanded)
+                    }
                 }
-                Section(isExpanded: $remotesExpanded) {
-                    ForEach(store.snapshot?.remotes ?? [], id: \.self) { remote in
-                        DisclosureGroup {
-                            OutlineGroup(outline.remotes[remote] ?? [], children: \.children) { node in
-                                if let ref = node.reference { referenceRow(ref, title: node.name, icon: "arrow.triangle.branch") }
-                                else { Label(node.name, systemImage: "folder") }
+                Section {
+                    if remotesExpanded {
+                        ForEach(store.snapshot?.remotes ?? [], id: \.self) { remote in
+                            DisclosureGroup {
+                                OutlineGroup(outline.remotes[remote] ?? [], children: \.children) { node in
+                                    if let ref = node.reference { referenceRow(ref, title: node.name, icon: "arrow.triangle.branch") }
+                                    else { SidebarRowLabel(verbatim: node.name, systemImage: "folder") }
+                                }
+                            } label: {
+                                SidebarRowLabel(verbatim: remote, systemImage: "cloud")
+                                    .picoDrop(store, .remote(remote))
+                                    .contextMenu {
+                                        if let value = store.managedRemotes.first(where: { $0.name == remote }) {
+                                            Button("Fetch…") { store.manage(.fetch(value)) }
+                                            Button("Edit Remote…") { store.manage(.editRemote(value)) }
+                                            Button("Rename Remote…") { store.manage(.renameRemote(value)) }
+                                            Button("Remove Remote…", role: .destructive) { store.manage(.removeRemote(value)) }
+                                        }
+                                    }
                             }
-                        } label: { Label(remote, systemImage: "cloud").picoDrop(store, .remote(remote)).contextMenu {
-                            if let value = store.managedRemotes.first(where: { $0.name == remote }) {
-                                Button("Fetch…") { store.manage(.fetch(value)) }
-                                Button("Edit Remote…") { store.manage(.editRemote(value)) }
-                                Button("Rename Remote…") { store.manage(.renameRemote(value)) }
-                                Button("Remove Remote…", role: .destructive) { store.manage(.removeRemote(value)) }
-                            }
-                        } }
-                    }
-                    if store.snapshot?.remotes.isEmpty != false {
-                        Button { store.manage(.addRemote) } label: { Label("Add Remote…", systemImage: "plus.circle") }.buttonStyle(.plain).foregroundStyle(.secondary)
-                    }
-                } header: { Text("Remotes") }
-                Section(isExpanded: $tagsExpanded) {
-                    OutlineGroup(outline.tags, children: \.children) { node in
-                        if let ref = node.reference { referenceRow(ref, title: node.name, icon: "tag") }
-                        else { Label(node.name, systemImage: "folder") }
-                    }
-                    if outline.tags.isEmpty {
-                        if filter.isEmpty {
-                            Button { store.manage(.createTag("HEAD")) } label: { Label("New Tag…", systemImage: "plus.circle") }.buttonStyle(.plain).foregroundStyle(.secondary).disabled(store.snapshot?.hasHEAD != true)
-                        } else { Text("No matching tags").foregroundStyle(.tertiary) }
-                    }
-                } header: { Text("Tags").frame(maxWidth: .infinity, alignment: .leading).picoDrop(store, .tags) }
-                Section(isExpanded: $relatedExpanded) {
-                    Label("Worktrees", systemImage: "folder.badge.gearshape").badge(store.worktrees.filter { !$0.isMain && !$0.isBare }.count).tag(Destination.worktrees)
-                    if store.worktrees.count > 1 {
-                        ForEach(store.worktrees.filter { !$0.isBare }) { entry in
-                            SidebarWorktreeRow(store: store, entry: entry)
-                                .tag(Destination.worktree(entry.path))
+                        }
+                        if store.snapshot?.remotes.isEmpty != false {
+                            Button { store.manage(.addRemote) } label: { SidebarRowLabel("Add Remote…", systemImage: "plus.circle") }.buttonStyle(.plain).foregroundStyle(.secondary)
                         }
                     }
-                    Label("Submodules", systemImage: "shippingbox").badge(store.submodules.count).tag(Destination.submodules)
-                    ForEach(store.submodules) { entry in
-                        Button { if entry.initialized { store.openSubmodule(entry) } else { store.manageSubmodule(.manage(entry, .initialize)) } } label: { Label(entry.path, systemImage: "shippingbox") }.buttonStyle(.plain).padding(.leading, 12).contextMenu { SubmoduleContextActions(store: store, entry: entry) }
+                } header: {
+                    SidebarSectionHeader(title: "Remotes", isExpanded: $remotesExpanded)
+                }
+                Section {
+                    if tagsExpanded {
+                        OutlineGroup(outline.tags, children: \.children) { node in
+                            if let ref = node.reference { referenceRow(ref, title: node.name, icon: "tag") }
+                            else { SidebarRowLabel(verbatim: node.name, systemImage: "folder") }
+                        }
+                        if outline.tags.isEmpty {
+                            if filter.isEmpty {
+                                Button { store.manage(.createTag("HEAD")) } label: { SidebarRowLabel("New Tag…", systemImage: "plus.circle") }.buttonStyle(.plain).foregroundStyle(.secondary).disabled(store.snapshot?.hasHEAD != true)
+                            } else { Text("No matching tags").foregroundStyle(.tertiary) }
+                        }
                     }
-                } header: { Text("Related Repositories") }
-                Section(isExpanded: $toolsExpanded) {
-                    HostedReviewWebMenu(store: store)
-                    Label("Branches Review", systemImage: "arrow.left.arrow.right").tag(Destination.branchesReview)
-                    Label("Reflog", systemImage: "list.bullet.rectangle").tag(Destination.reflog)
-                } header: { Text("Tools") }
+                } header: {
+                    SidebarSectionHeader(title: "Tags", isExpanded: $tagsExpanded)
+                        .picoDrop(store, .tags)
+                }
+                Section {
+                    if relatedExpanded {
+                        SidebarRowLabel("Worktrees", systemImage: "folder.badge.gearshape").badge(store.worktrees.filter { !$0.isMain && !$0.isBare }.count).tag(Destination.worktrees)
+                        if store.worktrees.count > 1 {
+                            ForEach(store.worktrees.filter { !$0.isBare }) { entry in
+                                SidebarWorktreeRow(store: store, entry: entry)
+                                    .tag(Destination.worktree(entry.path))
+                            }
+                        }
+                        SidebarRowLabel("Submodules", systemImage: "shippingbox").badge(store.submodules.count).tag(Destination.submodules)
+                        ForEach(store.submodules) { entry in
+                            Button { if entry.initialized { store.openSubmodule(entry) } else { store.manageSubmodule(.manage(entry, .initialize)) } } label: { SidebarRowLabel(verbatim: entry.path, systemImage: "shippingbox") }.buttonStyle(.plain).padding(.leading, 12).contextMenu { SubmoduleContextActions(store: store, entry: entry) }
+                        }
+                    }
+                } header: {
+                    SidebarSectionHeader(title: "Related Repositories", isExpanded: $relatedExpanded)
+                }
+                Section {
+                    if toolsExpanded {
+                        HostedReviewWebMenu(store: store, usesSidebarRow: true)
+                        SidebarRowLabel("Branches Review", systemImage: "arrow.left.arrow.right").tag(Destination.branchesReview)
+                        SidebarRowLabel("Reflog", systemImage: "list.bullet.rectangle").tag(Destination.reflog)
+                    }
+                } header: {
+                    SidebarSectionHeader(title: "Tools", isExpanded: $toolsExpanded)
+                }
             }.listStyle(.sidebar)
             .contextMenu(forSelectionType: Destination.self) { destinations in
                 SidebarSelectionContextActions(store: store, selection: SidebarContextSelection(destinations, references: store.snapshot?.references ?? []), repositoryToken: store.repositoryToken)
             } primaryAction: { selection in
                 store.activateSidebarSelection(selection)
             }
-            .disabled(store.isBusy && !store.isFetching)
+            .disabled(store.isBusy)
             .scrollEdgeEffectHidden(true, for: .vertical)
             .safeAreaInset(edge: .top, spacing: 0) {
                 SidebarRepositoryHeader(store: store)
@@ -171,21 +200,109 @@ struct SidebarView: View {
     }
 
     func referenceRow(_ ref: Reference, title: String, icon: String) -> some View {
-        Label {
-            HStack(spacing: 4) {
-                Text(title).lineLimit(1).truncationMode(.middle)
-                Spacer(minLength: 0)
-                if let status = BranchSyncStatus.current(ref, snapshot: store.snapshot) {
-                    CurrentBranchBadge(status: status, isSelected: selectedDestinations.contains(.reference(ref.fullName)))
-                }
+        let isSelected = selectedDestinations.contains(.reference(ref.fullName))
+        return SidebarRowLabel(
+            verbatim: title,
+            systemImage: icon,
+            iconColor: ref.isCurrent && !isSelected ? Color.accentColor : .secondary
+        ) {
+            if let status = BranchSyncStatus.current(ref, snapshot: store.snapshot) {
+                CurrentBranchBadge(status: status, isSelected: isSelected)
             }
-        } icon: { Image(systemName: icon) }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        }
         .contentShape(Rectangle())
         .tag(Destination.reference(ref.fullName))
         .itemProvider { store.isBusy ? nil : store.dragProvider(.reference(ref)) }
         .picoDrop(store, .reference(ref))
         .help(ref.name + (ref.isCurrent ? String(localized: " · Current branch") : String(localized: " · Click to preview history")))
+    }
+}
+
+struct SidebarRowLabel<Trailing: View>: View {
+    private let title: Text
+    private let icon: String
+    private let iconColor: Color
+    private let bold: Bool
+    @ViewBuilder private var trailing: Trailing
+
+    init(
+        _ title: LocalizedStringKey,
+        systemImage icon: String,
+        iconColor: Color = .secondary,
+        bold: Bool = false,
+        @ViewBuilder trailing: () -> Trailing = { EmptyView() }
+    ) {
+        self.title = Text(title)
+        self.icon = icon
+        self.iconColor = iconColor
+        self.bold = bold
+        self.trailing = trailing()
+    }
+
+    init(
+        verbatim title: String,
+        systemImage icon: String,
+        iconColor: Color = .secondary,
+        bold: Bool = false,
+        @ViewBuilder trailing: () -> Trailing = { EmptyView() }
+    ) {
+        self.title = Text(verbatim: title)
+        self.icon = icon
+        self.iconColor = iconColor
+        self.bold = bold
+        self.trailing = trailing()
+    }
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 12.5, weight: .regular))
+                .foregroundStyle(iconColor)
+                .frame(width: 15, alignment: .center)
+                .accessibilityHidden(true)
+            title
+                .bold(bold)
+                .lineLimit(1)
+                .truncationMode(.middle)
+            Spacer(minLength: 0)
+            trailing
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.leading, 2)
+    }
+}
+
+private struct SidebarSectionHeader: View {
+    let title: LocalizedStringKey
+    @Binding var isExpanded: Bool
+    @State private var hovering = false
+
+    var body: some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.16)) {
+                isExpanded.toggle()
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Text(title)
+                    .foregroundStyle(hovering ? .primary : .secondary)
+                Spacer(minLength: 4)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 9, weight: .semibold))
+                    .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                    .foregroundStyle(hovering ? .primary : .secondary)
+                    .opacity(hovering ? 1 : 0.85)
+                    .frame(width: 14, height: 14)
+                    .padding(.trailing, 2)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering = $0 }
+        .accessibilityLabel(title)
+        .accessibilityValue(isExpanded ? String(localized: "Expanded") : String(localized: "Collapsed"))
+        .accessibilityAddTraits(.isHeader)
     }
 }
 

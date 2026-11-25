@@ -3,6 +3,7 @@ import SwiftUI
 
 @MainActor struct HostedReviewWebMenu: View {
     let store: RepositoryStore
+    var usesSidebarRow = false
     private var destinations: [(name: String, repository: HostedRepository)] {
         store.managedRemotes.compactMap { remote in
             guard let parsed = try? HostedRepository(remote: remote.fetchURL, provider: .gitlab) else { return nil }
@@ -22,14 +23,24 @@ import SwiftUI
         let links = destinations
         if links.count == 1, let link = links.first {
             Link(destination: link.repository.reviewsWebURL) {
-                Label(link.repository.provider == .github ? "Pull Requests on GitHub" : "Merge Requests on GitLab", systemImage: "arrow.up.right.square")
+                if usesSidebarRow {
+                    SidebarRowLabel(link.repository.provider == .github ? "Pull Requests on GitHub" : "Merge Requests on GitLab", systemImage: "arrow.up.right.square")
+                } else {
+                    Label(link.repository.provider == .github ? "Pull Requests on GitHub" : "Merge Requests on GitLab", systemImage: "arrow.up.right.square")
+                }
             }.help("Open in your browser")
         } else if !links.isEmpty {
             Menu {
                 ForEach(links, id: \.name) { link in
                     Link("\(link.name) · \(link.repository.project)", destination: link.repository.reviewsWebURL)
                 }
-            } label: { Label("Pull / Merge Requests on Web", systemImage: "arrow.up.right.square") }
+            } label: {
+                if usesSidebarRow {
+                    SidebarRowLabel("Pull / Merge Requests on Web", systemImage: "arrow.up.right.square")
+                } else {
+                    Label("Pull / Merge Requests on Web", systemImage: "arrow.up.right.square")
+                }
+            }
         }
     }
 }

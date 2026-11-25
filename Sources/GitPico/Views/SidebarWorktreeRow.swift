@@ -6,7 +6,12 @@ struct SidebarWorktreeRow: View {
     let entry: ManagedWorktree
     var isCurrent: Bool { entry.path == store.snapshot?.root.path }
     var body: some View {
-        Label {
+        HStack(alignment: .top, spacing: 6) {
+            Image(systemName: entry.locked != nil ? "lock" : "folder.badge.gearshape")
+                .font(.system(size: 12.5, weight: .regular))
+                .foregroundStyle(.secondary)
+                .frame(width: 15, height: 16, alignment: .center)
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 5) {
                     Text(store.worktreeTitle(entry)).lineLimit(1).truncationMode(.middle)
@@ -17,8 +22,6 @@ struct SidebarWorktreeRow: View {
                 Text(store.worktreePresentation.location(for: entry)).font(.system(size: 10))
                     .foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
             }
-        } icon: {
-            Image(systemName: entry.locked != nil ? "lock" : "folder.badge.gearshape")
         }
         .padding(.leading, 12).padding(.vertical, 2).contentShape(Rectangle())
         .disabled(entry.prunable != nil)
