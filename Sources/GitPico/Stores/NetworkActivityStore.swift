@@ -26,7 +26,7 @@ struct GitTransferProgress: Equatable {
 
     static func latest(in output: String) -> Self? {
         // Ref names, paths and warnings can contain percentages without describing a transfer.
-        let progressLine = /^(?:remote: )?(Counting objects|Compressing objects|Receiving objects|Writing objects|Resolving deltas|Unpacking objects|Updating files|Checking out files|Uploading LFS objects|Downloading LFS objects):\s*([0-9]{1,3})%\s+\(/
+        let progressLine = /^(?:remote: )?(Counting objects|Compressing objects|Receiving objects|Writing objects|Resolving deltas|Unpacking objects|Updating files|Checking out files|Filtering content|Uploading LFS objects|Downloading LFS objects):\s*([0-9]{1,3})%\s+\(/
         for line in output.split(whereSeparator: \.isNewline).reversed() {
             if let match = line.firstMatch(of: progressLine), let percent = Int(match.2), percent <= 100 {
                 return Self(stage: String(match.1), percent: percent)
@@ -134,7 +134,7 @@ private final class NetworkHistoryWriter: @unchecked Sendable {
 }
 
 extension RepositoryStore {
-    func networkContext(cloneAccountID: UUID? = nil) -> GitNetworkContext {
+    func networkContext(cloneAccountID: UUID? = nil, onEvent: (@MainActor @Sendable (GitNetworkEvent) -> Void)? = nil) -> GitNetworkContext {
         let profile = cloneAccountID.flatMap { id in authentication.profiles.first { $0.id == id } }
         let executable = Bundle.main.executablePath ?? CommandLine.arguments[0]
         let reference = profile.map { GitCredentialReference(id: $0.id, host: $0.host, executable: executable) }
@@ -149,7 +149,10 @@ extension RepositoryStore {
         }
         let activity = networkActivity
         return GitNetworkContext(credential: reference, matchingCredentials: matches) { [weak activity] event in
-            Task { @MainActor in activity?.receive(event) }
+            Task { @MainActor in
+                activity?.receive(event)
+                onEvent?(event)
+            }
         }
     }
     func configureNetworkContext() {

@@ -42,6 +42,8 @@ struct RepositoryOperationFeedback: Identifiable {
 extension RepositoryStore {
     var isFetching: Bool { isManualFetching || isBackgroundFetching }
     var isPerformingActivity: Bool { isBusy || isFetching }
+    var showsRepositoryStatus: Bool { snapshot != nil && !isChoosingRepository }
+    var isPerformingStatusActivity: Bool { isBusy || (showsRepositoryStatus && isFetching) }
 
     var operationFeedback: RepositoryOperationFeedback? {
         selectedFeedbackEntry?.feedback
@@ -52,6 +54,7 @@ extension RepositoryStore {
     }
 
     private var selectedFeedbackEntry: (feedback: RepositoryOperationFeedback, finishedAt: Date?)? {
+        guard showsRepositoryStatus else { return nil }
         if let exclusive = exclusiveFeedback, exclusive.phase == .running, exclusive.isVisible {
             return (exclusive, exclusiveFeedbackFinishedAt)
         }
@@ -104,6 +107,10 @@ extension RepositoryStore {
     }
 
     var activeStatusNetworkRecord: NetworkActivityRecord? {
+        if let clone = cloneSession, clone.isRunning, let recordID = clone.networkRecordID {
+            return networkActivity?.records.first { $0.id == recordID && $0.phase == .running }
+        }
+        guard showsRepositoryStatus else { return nil }
         if isBusy, let feedback = exclusiveFeedback, feedback.phase == .running, !feedback.isRefreshing,
            let record = networkRecord(for: feedback, finishedAt: exclusiveFeedbackFinishedAt), record.phase == .running {
             return record
@@ -112,7 +119,7 @@ extension RepositoryStore {
     }
 
     var latestStatusNetworkRecord: NetworkActivityRecord? {
-        guard !isChoosingRepository, let path = snapshot?.root.path else { return nil }
+        guard showsRepositoryStatus, let path = snapshot?.root.path else { return nil }
         let record = networkActivity?.records.first { $0.repositoryPath == path && $0.phase != .running }
         return record?.id == dismissedStatusNetworkRecord ? nil : record
     }
@@ -199,7 +206,7 @@ extension RepositoryStore {
     }
 
     func inspectOperationNetworkActivity() {
-        networkActivitySelection = (activeStatusNetworkRecord ?? feedbackNetworkRecord ?? latestStatusNetworkRecord)?.id
+        networkActivitySelection = (activeStatusNetworkRecord ?? feedbackNetworkRecord ?? latestStatusNetworkRecord)?.id ?? cloneSession?.networkRecordID
         showingNetworkActivity = true
     }
 

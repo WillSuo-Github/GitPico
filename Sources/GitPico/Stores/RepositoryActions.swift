@@ -12,17 +12,114 @@ struct IntegrationRequest: Identifiable {
 extension RepositoryStore {
     func createRepository(at url: URL, source: String?, recursive: Bool = false, allowLocalTransport: Bool = false, lfs: LFSCloneMode = .inherit, profileID: UUID? = nil) {
         guard !isBusy else { return }
+        let presentInlineClone = source != nil && !showsRepositoryStatus
+        let session = source.map {
+            RepositoryCloneSession(
+                destination: url,
+                source: $0,
+                recursive: recursive,
+                lfs: lfs,
+                allowLocalTransport: allowLocalTransport,
+                profileID: profileID
+            )
+        }
+        if presentInlineClone {
+            cloneSession = session
+        } else {
+            cloneSession = nil
+        }
+        cloneCancellation = nil
         isBusy = true; activity = source == nil ? String(localized: "Creating repository…") : String(localized: "Cloning repository…")
-        Task {
+        let context = networkContext(cloneAccountID: profileID) { [weak self] event in
+            guard let session else { return }
+            self?.handleCloneNetworkEvent(event, sessionID: session.id)
+        }
+        cloneTask = Task {
+            defer { cloneTask = nil }
             do {
-                let context = networkContext(cloneAccountID: profileID)
                 _ = try await GitNetworkContexts.$current.withValue(context) {
                     try await GitRepository.create(at: url, source: source, recursive: recursive, allowLocalTransport: allowLocalTransport, lfs: lfs)
                 }
+                if let session, cloneSession?.id == session.id {
+                    cloneSession?.phase = .opening
+                    cloneSession?.reachedStep = .open
+                    cloneSession?.isCancelling = false
+                }
+                cloneCancellation = nil
                 isBusy = false; activity = ""
                 await open(url)
-            } catch { self.error = error.localizedDescription; isBusy = false; activity = "" }
+                if let session, cloneSession?.id == session.id {
+                    let openedDestination = snapshot?.root.resolvingSymlinksInPath().standardizedFileURL == url.resolvingSymlinksInPath().standardizedFileURL
+                    if openedDestination && !isChoosingRepository {
+                        cloneSession = nil
+                    } else if let openError = self.error {
+                        cloneSession?.phase = .failed(openError)
+                        cloneSession?.finished = Date()
+                        self.error = nil
+                    } else {
+                        cloneSession = nil
+                    }
+                }
+            } catch {
+                cloneCancellation = nil
+                if let session, cloneSession?.id == session.id {
+                    let cancelledRecord = cloneSession?.networkRecordID.flatMap { id in
+                        networkActivity?.records.first { $0.id == id }?.phase == .cancelled
+                    } ?? false
+                    let wasCancelled = cloneSession?.isCancelling == true || cloneSession?.phase == .cancelled || cancelledRecord
+                    cloneSession?.isCancelling = false
+                    cloneSession?.finished = Date()
+                    cloneSession?.phase = wasCancelled ? .cancelled : .failed(error.localizedDescription)
+                    isBusy = false; activity = ""
+                } else {
+                    self.error = error.localizedDescription; isBusy = false; activity = ""
+                }
+            }
         }
+    }
+
+    func handleCloneNetworkEvent(_ event: GitNetworkEvent, sessionID: UUID) {
+        guard var session = cloneSession, session.id == sessionID else { return }
+        if event.phase == .running {
+            cloneCancellation = event.cancellation
+            if session.isCancelling { event.cancellation.cancel() }
+        } else if session.networkRecordID == event.id {
+            cloneCancellation = nil
+        }
+        session.apply(event)
+        cloneSession = session
+    }
+
+    func cancelActiveClone() {
+        guard var session = cloneSession, session.canCancel else { return }
+        session.isCancelling = true
+        cloneSession = session
+        cloneCancellation?.cancel()
+        if let recordID = session.networkRecordID {
+            networkActivity?.cancel(recordID)
+        }
+    }
+
+    func dismissCloneSession() {
+        guard let session = cloneSession, !session.isRunning else { return }
+        cloneSession = nil
+    }
+
+    func retryCloneSession() {
+        guard let session = cloneSession, !session.isRunning, !isBusy else { return }
+        createRepository(
+            at: session.destination,
+            source: session.source,
+            recursive: session.recursive,
+            allowLocalTransport: session.allowLocalTransport,
+            lfs: session.lfs,
+            profileID: session.profileID
+        )
+    }
+
+    func editCloneSession() {
+        guard let session = cloneSession, !session.isRunning, !isBusy else { return }
+        creationRequest = session.retryRequest
     }
 
     func syncAll() {

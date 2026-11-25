@@ -10,7 +10,7 @@ struct RepositoryActivityButton: View {
     @Environment(\.repositoryStatusMotionEnabled) private var motionEnabled
     @Environment(\.colorScheme) private var colorScheme
     private var reduceMotion: Bool { systemReduceMotion || !motionEnabled }
-    private var isRunning: Bool { store.isPerformingActivity }
+    var isRunning: Bool { store.isPerformingStatusActivity }
 
     private var stateAnimation: Animation? { RepositoryStatusBarBackground.transition(isRunning: isRunning, reduceMotion: reduceMotion) }
 
@@ -25,7 +25,7 @@ struct RepositoryActivityButton: View {
         if needsReview { return emphasis.opacity(0.1) }
         return Color.primary.opacity(hovering || showingDetails ? 0.06 : 0)
     }
-    private var title: String {
+    var title: String {
         if isRunning {
             if let feedback, feedback.phase == .running {
                 if feedback.isRefreshing { return String(localized: "Refreshing…") }
@@ -37,12 +37,12 @@ struct RepositoryActivityButton: View {
                 case .local: return feedback.title
                 }
             }
-            if store.isBackgroundFetching { return String(localized: "Fetching remote updates…") }
+            if store.showsRepositoryStatus && store.isBackgroundFetching { return String(localized: "Fetching remote updates…") }
             return store.activity
         }
         return resultTitle ?? String(localized: "Activity")
     }
-    private var symbol: String {
+    var symbol: String {
         feedback?.activitySymbol ?? latestRecord?.phase.activitySymbol ?? "clock.arrow.circlepath"
     }
     private var color: Color {
@@ -64,6 +64,7 @@ struct RepositoryActivityButton: View {
             .accessibilityLabel("Activity")
             .accessibilityValue(Text(accessibility))
             .onChange(of: store.snapshot?.root) { showingDetails = false }
+            .onChange(of: store.isChoosingRepository) { showingDetails = false }
             .popover(isPresented: $showingDetails, arrowEdge: .bottom) {
                 RepositoryActivityDetailsView(store: store, close: { showingDetails = false })
             }
@@ -122,14 +123,14 @@ struct RepositoryActivityDetailsView: View {
     var close: () -> Void = {}
     @State private var pendingCancelID: UUID?
 
-    private var isRunning: Bool { store.isPerformingActivity }
+    private var isRunning: Bool { store.isPerformingStatusActivity }
     private var feedback: RepositoryOperationFeedback? {
         if isRunning, store.operationFeedback?.phase != .running { return nil }
         return store.operationFeedback
     }
     private var runningLabel: String {
         if !store.activity.isEmpty { return store.activity }
-        if store.isBackgroundFetching { return String(localized: "Fetching remote updates…") }
+        if store.showsRepositoryStatus && store.isBackgroundFetching { return String(localized: "Fetching remote updates…") }
         return String(localized: "Fetching…")
     }
     var body: some View {
@@ -183,7 +184,9 @@ struct RepositoryActivityDetailsView: View {
                 Spacer(minLength: 0)
                 if let record = store.activeStatusNetworkRecord {
                     Button("Cancel") {
-                        if record.command == "fetch" {
+                        if record.command == "clone" && store.cloneSession?.networkRecordID == record.id {
+                            store.cancelActiveClone()
+                        } else if record.command == "fetch" {
                             store.networkActivity?.cancel(record.id)
                         } else {
                             pendingCancelID = record.id

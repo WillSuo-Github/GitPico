@@ -1,17 +1,29 @@
 import SwiftUI
 
 private struct RepositoryOpeningProgressView: View {
+    var title: String = String(localized: "Opening repository…")
+    var delayed = true
     @State private var visible = false
 
     var body: some View {
         Group {
             if visible {
-                ProgressView("Opening repository…")
-                    .padding(24)
-                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
+                HStack(spacing: 10) {
+                    ProgressView()
+                        .controlSize(.small)
+                    Text(title)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(.primary)
+                }
+                .padding(.horizontal, 18)
+                .padding(.vertical, 14)
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color(nsColor: .separatorColor).opacity(0.6), lineWidth: 0.5))
+                .shadow(color: .black.opacity(0.08), radius: 12, y: 4)
             }
         }
         .task {
+            guard delayed else { visible = true; return }
             do { try await Task.sleep(for: .milliseconds(200)) }
             catch { return }
             visible = true
@@ -38,7 +50,6 @@ struct RepositoryPickerView: View {
                 } detail: { pickerContent }
             } else { pickerContent }
         }
-        .disabled(tab.isBusy)
         .monitoringRepositoryFolders(in: workspace.library)
         .safeAreaInset(edge: .top, spacing: 0) {
             if let warning = tab.pickerDropWarning {
@@ -48,10 +59,12 @@ struct RepositoryPickerView: View {
             }
         }
         .overlay {
-            if tab.isOpening {
-                RepositoryOpeningProgressView()
-            } else if store.isBusy {
-                ProgressView(store.activity).padding(24).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
+            if store.cloneSession == nil {
+                if tab.isOpening {
+                    RepositoryOpeningProgressView()
+                } else if store.isBusy {
+                    RepositoryOpeningProgressView(title: store.activity, delayed: false)
+                }
             }
         }
         .task {
@@ -60,7 +73,8 @@ struct RepositoryPickerView: View {
             searchFocused = true
         }
         .onChange(of: entries.map(\.id)) { if !entries.contains(where: { $0.id == tab.pickerSelection }) { tab.pickerSelection = entries.first?.id } }
-        .onKeyPress(.return) { guard !searchFocused, selection != nil else { return .ignored }; openSelected(); return .handled }
+        .onChange(of: tab.pickerFilter) { store.dismissCloneSession() }
+        .onKeyPress(.return) { guard store.cloneSession == nil, !searchFocused, selection != nil else { return .ignored }; openSelected(); return .handled }
         .onChange(of: workspace.authentication.profiles) { resetRemovedAccount() }
     }
     private func resetRemovedAccount() {
@@ -71,11 +85,15 @@ struct RepositoryPickerView: View {
         return workspace.authentication.profiles.first { $0.id == id && $0.repositoryProvider != nil }
     }
     @ViewBuilder private var pickerContent: some View {
-        if let account, let provider = account.repositoryProvider {
+        if let cloneSession = store.cloneSession {
+            RepositoryCloneProgressView(store: store, session: cloneSession)
+        } else if let account, let provider = account.repositoryProvider {
             AccountRepositoriesView(workspace: workspace, store: store, account: account, provider: provider)
                 .id(account.id)
+                .disabled(tab.isBusy)
         } else {
             content
+                .disabled(tab.isBusy)
         }
     }
     var filterTitle: String {

@@ -50,7 +50,7 @@ struct RepositoryWorkspaceView: View {
             .overlay(alignment: .bottom) {
                 if showsRepository {
                     RepositoryStatusBarBackground(
-                        isRunning: tab.store.isPerformingActivity,
+                        isRunning: tab.store.isPerformingStatusActivity,
                         featherHeight: RepositoryStatusBarBackground.featherHeight
                     )
                     .frame(height: statusBarInset + RepositoryStatusBarBackground.featherHeight)

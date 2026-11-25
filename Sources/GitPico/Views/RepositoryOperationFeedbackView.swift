@@ -455,6 +455,7 @@ struct RepositoryProgressSweepBar: View {
             }
         }
         .frame(height: height)
+        .clipShape(Capsule())
         .allowsHitTesting(false)
         .accessibilityHidden(true)
     }

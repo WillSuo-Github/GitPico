@@ -8,6 +8,11 @@ struct RepositoryCreationRequest: Identifiable {
     var source: String = ""
     var name: String = ""
     var profileID: UUID? = nil
+    var parent: URL? = nil
+    var recursive: Bool = false
+    var enableLFS: Bool = false
+    var downloadLFS: Bool = true
+    var allowLocalTransport: Bool = false
 
     func suggestedName(for source: String) -> String {
         guard clone else { return name }
@@ -53,37 +58,183 @@ struct RepositoryCreationSheet: View {
         self.store = store
         self.request = request
         _source = State(initialValue: request.source)
+        _recursive = State(initialValue: request.recursive)
+        _enableLFS = State(initialValue: request.enableLFS)
+        _downloadLFS = State(initialValue: request.downloadLFS)
+        _allowLocalTransport = State(initialValue: request.allowLocalTransport)
+        _parent = State(initialValue: request.parent ?? FileManager.default.homeDirectoryForCurrentUser)
     }
     private var name: String { customName ?? request.suggestedName(for: source) }
+    private var destinationURL: URL? {
+        guard RepositoryCreationRequest.isValidFolderName(name) else { return nil }
+        return parent.appendingPathComponent(name, isDirectory: true)
+    }
+    private var destinationExists: Bool {
+        destinationURL.map { FileManager.default.fileExists(atPath: $0.path) } ?? false
+    }
     var valid: Bool {
-        RepositoryCreationRequest.isValidFolderName(name) && (!request.clone || !source.isEmpty)
+        RepositoryCreationRequest.isValidFolderName(name) &&
+            !destinationExists &&
+            (!request.clone || !source.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
     }
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            SheetTitle(request.clone ? "Clone Git Repository" : "Create Git Repository")
-            if request.clone { TextField("Repository URL or local path", text: $source).textFieldStyle(.roundedBorder) }
-            if request.clone {
-                Text("Manage HTTPS accounts in Settings → Authentication. SSH uses your existing agent and host verification.").font(.caption).foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: 16) {
+                header
+                if request.clone { sourceCard }
+                destinationCard
+                if request.clone { optionsCard }
             }
-            if request.clone {
-                Toggle("Initialize submodules recursively", isOn: $recursive).toggleStyle(.checkbox)
-                Toggle("Enable Git LFS for this clone", isOn: $enableLFS).toggleStyle(.checkbox)
-                if enableLFS { Toggle("Download LFS objects now", isOn: $downloadLFS).toggleStyle(.checkbox); Text("Requires git-lfs. Turn off to clone pointer files and download objects later from Git LFS settings.").font(.caption).foregroundStyle(.secondary) }
-                if recursive { Toggle("Allow local file transport for this clone and its submodules", isOn: $allowLocalTransport).toggleStyle(.checkbox).font(.caption) }
+            .padding(22)
+            Divider()
+            footer
+                .padding(.horizontal, 22)
+                .padding(.vertical, 14)
+        }
+        .frame(width: 540)
+    }
+
+    private var header: some View {
+        HStack(alignment: .center, spacing: 12) {
+            Image(systemName: request.clone ? "arrow.down.circle" : "plus.square.dashed")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(.tint)
+                .frame(width: 36, height: 36)
+                .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(request.clone ? "Clone Git Repository" : "Create Git Repository")
+                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                Text(request.clone
+                    ? String(localized: "Download a repository to this Mac and open it in GitPico.")
+                    : String(localized: "Initialize an empty Git repository in a new local folder."))
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
             }
-            TextField("Local folder name", text: Binding(get: { name }, set: { customName = $0 })).textFieldStyle(.roundedBorder)
-            HStack {
-                LabeledContent("Parent", value: parent.path).lineLimit(1).truncationMode(.middle)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
+    }
+
+    private var sourceCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SectionCaption("Source")
+            TextField("Repository URL or local path", text: $source)
+                .textFieldStyle(.roundedBorder)
+            Text("Manage HTTPS accounts in Settings → Authentication. SSH uses your existing agent and host verification.")
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .card(padding: 14)
+    }
+
+    private var destinationCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionCaption("Destination")
+            HStack(spacing: 12) {
+                RepositoryGlyph(name: name.isEmpty ? "Git" : name, size: 34)
+                    .opacity(name.isEmpty ? 0.45 : 1)
+                TextField("Local folder name", text: Binding(get: { name }, set: { customName = $0 }))
+                    .textFieldStyle(.roundedBorder)
+            }
+            HStack(spacing: 8) {
+                Image(systemName: "folder")
+                    .font(.system(size: 11.5))
+                    .foregroundStyle(.secondary)
+                Text(Pico.abbreviated(parent.path))
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                    .help(parent.path)
+                Spacer(minLength: 8)
                 Button("Choose…") {
-                    let panel = NSOpenPanel(); panel.canChooseFiles = false; panel.canChooseDirectories = true; panel.directoryURL = parent
+                    let panel = NSOpenPanel()
+                    panel.canChooseFiles = false
+                    panel.canChooseDirectories = true
+                    panel.directoryURL = parent
                     panel.begin { if $0 == .OK, let url = panel.url { parent = url } }
                 }
+                .controlSize(.small)
             }
-            if !name.isEmpty { Text(parent.appendingPathComponent(name).path).font(.caption).foregroundStyle(.secondary).textSelection(.enabled) }
-            HStack { Spacer(); Button("Cancel") { dismiss() }.keyboardShortcut(.cancelAction)
-                Button(request.clone ? "Clone" : "Create") { store.createRepository(at: parent.appendingPathComponent(name, isDirectory: true), source: request.clone ? source : nil, recursive: recursive, allowLocalTransport: allowLocalTransport, lfs: enableLFS ? (downloadLFS ? .download : .pointersOnly) : .inherit, profileID: source == request.source ? request.profileID : nil); dismiss() }
-                    .keyboardShortcut(.defaultAction).disabled(!valid || store.isBusy)
+            if let destinationURL {
+                HStack(spacing: 6) {
+                    if destinationExists {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 11))
+                            .foregroundStyle(Pico.warning)
+                        Text("A folder already exists at \(Pico.abbreviated(destinationURL.path)). Choose a new folder name.")
+                            .font(.system(size: 11))
+                            .foregroundStyle(Pico.warning)
+                            .fixedSize(horizontal: false, vertical: true)
+                    } else {
+                        Text(Pico.abbreviated(destinationURL.path))
+                            .font(.system(size: 11, design: .monospaced))
+                            .foregroundStyle(.tertiary)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                            .textSelection(.enabled)
+                    }
+                }
             }
-        }.padding(24).frame(width: 510)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .card(padding: 14)
+    }
+
+    private var optionsCard: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            SectionCaption("Options")
+            Toggle("Initialize submodules recursively", isOn: $recursive)
+                .toggleStyle(.checkbox)
+            if recursive {
+                Toggle(isOn: $allowLocalTransport) {
+                    Text("Allow local file transport for this clone and its submodules")
+                        .font(.system(size: 11.5))
+                        .foregroundStyle(.secondary)
+                }
+                .toggleStyle(.checkbox)
+                .padding(.leading, 20)
+            }
+            Toggle("Enable Git LFS for this clone", isOn: $enableLFS)
+                .toggleStyle(.checkbox)
+            if enableLFS {
+                VStack(alignment: .leading, spacing: 4) {
+                    Toggle("Download LFS objects now", isOn: $downloadLFS)
+                        .toggleStyle(.checkbox)
+                    Text("Requires git-lfs. Turn off to clone pointer files and download objects later from Git LFS settings.")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(.leading, 20)
+            }
+        }
+        .font(.system(size: 12.5))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .card(padding: 14)
+    }
+
+    private var footer: some View {
+        HStack {
+            Spacer()
+            Button("Cancel") { dismiss() }
+                .keyboardShortcut(.cancelAction)
+            Button(request.clone ? "Clone" : "Create") {
+                store.createRepository(
+                    at: parent.appendingPathComponent(name, isDirectory: true),
+                    source: request.clone ? source.trimmingCharacters(in: .whitespacesAndNewlines) : nil,
+                    recursive: recursive,
+                    allowLocalTransport: allowLocalTransport,
+                    lfs: enableLFS ? (downloadLFS ? .download : .pointersOnly) : .inherit,
+                    profileID: source == request.source ? request.profileID : nil
+                )
+                dismiss()
+            }
+            .buttonStyle(.borderedProminent)
+            .keyboardShortcut(.defaultAction)
+            .disabled(!valid || store.isBusy)
+        }
     }
 }

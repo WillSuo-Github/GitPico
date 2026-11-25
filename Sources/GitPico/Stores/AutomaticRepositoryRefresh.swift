@@ -37,7 +37,7 @@ extension RepositoryStore {
         automaticRefreshPending = false; automaticRefreshEpoch = UUID()
     }
     func fetchInBackground() async {
-        guard !isBusy, !isFetching, !isAutomaticallyRefreshing, let repository, snapshot?.remotes.isEmpty == false, let journal = networkActivity, let reservation = journal.reserveBackgroundFetch() else { return }
+        guard !isBusy, !isFetching, !isAutomaticallyRefreshing, !isChoosingRepository, let repository, snapshot?.remotes.isEmpty == false, let journal = networkActivity, let reservation = journal.reserveBackgroundFetch() else { return }
         let token = repositoryToken
         lastBackgroundFetch = Date(); isBackgroundFetching = true
         defer {

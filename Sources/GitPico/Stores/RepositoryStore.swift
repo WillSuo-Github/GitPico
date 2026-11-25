@@ -229,6 +229,9 @@ final class RepositoryStore {
     var showingBranchSheet = false
     var showingStashSheet = false
     var creationRequest: RepositoryCreationRequest?
+    var cloneSession: RepositoryCloneSession?
+    @ObservationIgnored var cloneCancellation: GitNetworkCancellation?
+    @ObservationIgnored var cloneTask: Task<Void, Never>?
     var library: RepositoryLibrary
     var recentPaths: [String] { library.recentPaths }
     var showingRepositoryLibrary = false
@@ -246,7 +249,7 @@ final class RepositoryStore {
     @ObservationIgnored var repositoryToken = UUID()
     @ObservationIgnored var draftBeforeAmend: (String, String)?
     deinit {
-        automaticMonitorTask?.cancel(); automaticRefreshTask?.cancel(); backgroundFetchTask?.cancel(); fetchTask?.cancel(); conflictDraftSaveTask?.cancel(); exclusiveFeedbackTask?.cancel(); fetchFeedbackTask?.cancel()
+        automaticMonitorTask?.cancel(); automaticRefreshTask?.cancel(); backgroundFetchTask?.cancel(); fetchTask?.cancel(); cloneTask?.cancel(); conflictDraftSaveTask?.cancel(); exclusiveFeedbackTask?.cancel(); fetchFeedbackTask?.cancel()
         if let root = networkRegisteredRoot { GitNetworkContexts.remove(root: root, owner: networkContextOwner) }
     }
 

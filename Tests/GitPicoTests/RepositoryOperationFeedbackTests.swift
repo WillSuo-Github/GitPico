@@ -1,5 +1,7 @@
+import AppKit
 import Foundation
 import GitCore
+import SwiftUI
 import Testing
 @testable import GitPico
 
@@ -362,4 +364,88 @@ extension RepositoryStore {
     #expect(f.store.feedbackFinishedAt != nil && !f.store.isBusy && f.store.error == nil)
     #expect(f.store.snapshot?.branch == "main" && f.store.staged.map(\.path) == ["a.txt"])
     #expect(try await f.git(["show", ":a.txt"]) == "Inspect this staged result")
+}
+
+@Test @MainActor func repositoryPickerHidesParkedRepositoryStatusAndRestoresItOnReturn() async throws {
+    let f = try await FetchFeedbackFixture.make(delay: 0.4); defer { f.clean() }
+    let workspace = RepositoryWorkspace(library: f.store.library)
+    defer { workspace.shutdown() }
+    await workspace.open(f.root)
+    let tab = workspace.activeTab
+    let store = tab.store
+
+    store.sync(.fetch)
+    let deadline = ContinuousClock.now + .seconds(5)
+    while store.activeStatusNetworkRecord == nil && store.isFetching && ContinuousClock.now < deadline {
+        try await Task.sleep(for: .milliseconds(10))
+    }
+    #expect(store.showsRepositoryStatus && store.isPerformingStatusActivity && tab.showsActivitySpinner)
+    #expect(store.operationFeedback?.command == .fetch && store.operationFeedback?.phase == .running)
+    #expect(store.activeStatusNetworkRecord?.command == "fetch")
+    let runningButton = RepositoryActivityButton(store: store)
+    #expect(runningButton.isRunning && runningButton.title == String(localized: "Fetching…"))
+
+    workspace.showRepositories(from: store)
+    #expect(tab.showsRepositoryPicker && !store.showsRepositoryStatus)
+    #expect(store.operationFeedback == nil && store.feedbackFinishedAt == nil && store.feedbackNetworkRecord == nil)
+    #expect(store.activeStatusNetworkRecord == nil && store.latestStatusNetworkRecord == nil)
+    #expect(!store.isPerformingStatusActivity && !tab.showsActivitySpinner)
+    #expect(store.activeFetchNetworkRecord?.command == "fetch")
+    let pickerWhileFetching = RepositoryActivityButton(store: store)
+    #expect(!pickerWhileFetching.isRunning && pickerWhileFetching.title == String(localized: "Activity") && pickerWhileFetching.symbol == "clock.arrow.circlepath")
+
+    await store.fetchTask?.value
+    #expect(tab.showsRepositoryPicker && !store.showsRepositoryStatus)
+    #expect(store.operationFeedback == nil && store.feedbackFinishedAt == nil && store.feedbackNetworkRecord == nil)
+    #expect(store.activeStatusNetworkRecord == nil && store.latestStatusNetworkRecord == nil)
+    #expect(!store.isPerformingStatusActivity && !tab.showsActivitySpinner)
+    let pickerAfterFetch = RepositoryActivityButton(store: store)
+    #expect(!pickerAfterFetch.isRunning && pickerAfterFetch.title == String(localized: "Activity") && pickerAfterFetch.symbol == "clock.arrow.circlepath")
+
+    store.inspectOperationNetworkActivity()
+    #expect(store.showingNetworkActivity && store.networkActivitySelection == nil)
+    store.showingNetworkActivity = false
+
+    let recordsBeforeBackgroundFetch = store.networkActivity?.records.count ?? 0
+    await store.fetchInBackground()
+    #expect((store.networkActivity?.records.count ?? 0) == recordsBeforeBackgroundFetch)
+
+    store.conflictDraftSaveError = "Draft could not be saved"
+    store.automaticRefreshError = "File monitoring paused"
+    let pickerStatusBar = RepositoryStatusBar(store: store)
+    #expect(!pickerStatusBar.showsConflictDrafts && !pickerStatusBar.showsAutomaticRefreshError)
+
+    store.isBusy = true
+    store.activity = String(localized: "Cloning repository…")
+    let pickerCloning = RepositoryActivityButton(store: store)
+    #expect(pickerCloning.isRunning && pickerCloning.title == String(localized: "Cloning repository…") && tab.showsActivitySpinner)
+    store.isBusy = false
+    store.activity = ""
+
+    if let path = ProcessInfo.processInfo.environment["GITPICO_PICKER_STATUS_CAPTURE"] {
+        let host = NSHostingView(rootView: RepositoryWorkspaceView(workspace: workspace, tab: tab, presentsAlerts: false).frame(width: 1200, height: 760))
+        let panel = NSWindow(contentRect: NSRect(x: -10000, y: -10000, width: 1200, height: 760), styleMask: [.borderless], backing: .buffered, defer: false)
+        panel.isReleasedWhenClosed = false
+        panel.appearance = NSAppearance(named: .aqua)
+        panel.contentView = host
+        defer { panel.contentView = nil; panel.close() }
+        host.layoutSubtreeIfNeeded()
+        try await Task.sleep(for: .milliseconds(250))
+        host.layoutSubtreeIfNeeded()
+        let image = try #require(host.bitmapImageRepForCachingDisplay(in: host.bounds))
+        host.cacheDisplay(in: host.bounds, to: image)
+        let url = URL(fileURLWithPath: path)
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try #require(image.representation(using: .png, properties: [:])).write(to: url)
+    }
+    #expect(NSApp?.isActive != true && (NSApp?.windows.filter(\.isVisible).isEmpty ?? true))
+
+    workspace.returnToRepository(from: store)
+    #expect(!tab.showsRepositoryPicker && store.showsRepositoryStatus)
+    #expect(store.operationFeedback?.command == .fetch && store.operationFeedback?.phase == .succeeded)
+    #expect(store.feedbackNetworkRecord?.phase == .succeeded)
+    let returnedStatusBar = RepositoryStatusBar(store: store)
+    let returnedButton = RepositoryActivityButton(store: store)
+    #expect(returnedStatusBar.showsConflictDrafts && returnedStatusBar.showsAutomaticRefreshError)
+    #expect(!returnedButton.isRunning && returnedButton.title == "Fetch · Completed" && returnedButton.symbol == "checkmark.circle.fill")
 }

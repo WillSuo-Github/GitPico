@@ -45,7 +45,7 @@ extension RepositoryWindowRouting {
         return root.map { store.library.displayName(for: $0.path) } ?? String(localized: "Repositories")
     }
     var isBusy: Bool { isOpening || store.isBusy }
-    var showsActivitySpinner: Bool { isOpening || store.isBusy || store.isManualFetching }
+    var showsActivitySpinner: Bool { isOpening || store.isBusy || (!showsRepositoryPicker && store.isManualFetching) }
 }
 
 @MainActor @Observable final class RepositoryWorkspace {
@@ -132,6 +132,7 @@ extension RepositoryWindowRouting {
     }
     func returnToRepository(from store: RepositoryStore) {
         guard let tab = tab(for: store), tab.root != nil, !tab.isBusy else { return }
+        store.dismissCloneSession()
         tab.isChoosingRepository = false
         select(tab.id)
     }
@@ -181,6 +182,7 @@ extension RepositoryWindowRouting {
         guard let origin = originTab(from: source) else { return }
         if origin.isOpening { return }
         guard !origin.isBusy else { error = String(localized: "Wait for this tab's repository operation before opening another repository."); return }
+        origin.store.dismissCloneSession()
         let target = origin
         rememberRepositoryState(target)
         target.isOpening = true
