@@ -19,6 +19,8 @@ struct AccountRepositoriesView: View {
     @State private var locating: AccountRepository?
     @State private var showsFolderPicker = false
     @State private var checkingFolder = false
+    @State private var headerEntered = false
+    @State private var listEntered = false
 
     private struct IndexRequest: Equatable {
         let paths: Set<String>
@@ -51,6 +53,7 @@ struct AccountRepositoriesView: View {
         let indexRequest = indexRequest
         VStack(alignment: .leading, spacing: 18) {
             header
+                .staggeredEntrance(isShowing: headerEntered, index: 0, style: .section)
             if let loadError {
                 VStack {
                     Spacer()
@@ -62,6 +65,7 @@ struct AccountRepositoriesView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let repositories {
                 repositoryList(count: repositories.count)
+                    .staggeredEntrance(isShowing: listEntered, index: 1, style: .section)
             } else {
                 ProgressView("Loading…")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -75,6 +79,8 @@ struct AccountRepositoriesView: View {
                 .ignoresSafeArea(.container, edges: .top).allowsHitTesting(false)
         }
         .safeAreaPadding(.bottom)
+        .staggeredEntranceTrigger($headerEntered, id: account.id)
+        .staggeredEntranceTrigger($listEntered, id: "\(account.id.uuidString):\(refreshID.uuidString):\(repositories != nil)")
         .task(id: loadRequest) { await load() }
         .task(id: indexRequest) {
             let index = await LocalHostedRepositoryIndex.load(paths: indexRequest.paths, provider: provider)
@@ -122,7 +128,7 @@ struct AccountRepositoriesView: View {
         let savedByPath = savedByPath
         return PinnedScrollPane { insets in
             List(selection: $selection) {
-                ForEach(visibleRepositories) { repository in
+                ForEach(Array(visibleRepositories.enumerated()), id: \.element.id) { index, repository in
                     let local = copies(for: repository, in: savedByPath)
                     HStack(spacing: 12) {
                         RepositoryGlyph(name: repository.name, size: 34)
@@ -148,6 +154,7 @@ struct AccountRepositoriesView: View {
                         }
                     }
                     .padding(.vertical, 6)
+                    .staggeredEntrance(isShowing: listEntered, index: index, style: .row)
                     .tag(repository.id)
                     .contextMenu {
                         ForEach(local) { copy in

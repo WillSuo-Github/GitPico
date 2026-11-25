@@ -7,6 +7,7 @@ struct RepositoryCloneProgressView: View {
     let session: RepositoryCloneSession
     @State private var showingOutput = false
     @State private var copiedOutput = false
+    @State private var entered = false
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.repositoryStatusMotionEnabled) private var motionEnabled
@@ -57,9 +58,13 @@ struct RepositoryCloneProgressView: View {
                     Spacer(minLength: 24)
                     VStack(alignment: .leading, spacing: 18) {
                         header
+                            .staggeredEntrance(isShowing: entered, index: 0, style: .hero)
                         progressCard
+                            .staggeredEntrance(isShowing: entered, index: 1, style: .hero)
                         outputCard
+                            .staggeredEntrance(isShowing: entered, index: 2, style: .hero)
                         footer
+                            .staggeredEntrance(isShowing: entered, index: 3, style: .hero)
                     }
                     .frame(maxWidth: 680, alignment: .leading)
                     .frame(maxWidth: .infinity)
@@ -82,6 +87,7 @@ struct RepositoryCloneProgressView: View {
             .allowsHitTesting(false)
         }
         .safeAreaPadding(.bottom)
+        .staggeredEntranceTrigger($entered, id: session.id)
         .onAppear {
             if isFailed { showingOutput = true }
         }

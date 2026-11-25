@@ -7,6 +7,7 @@ struct RepositorySettingsView: View {
     let identityLibrary: CommitWorkflowLibrary
     @State private var draft: RepositorySettingsDraft
     @State private var confirmsClose = false
+    @State private var tabEntered = false
     @Environment(\.dismiss) private var dismiss
     init(store: RepositoryStore, draft: RepositorySettingsDraft = RepositorySettingsDraft(), identityLibrary: CommitWorkflowLibrary = .shared) {
         self.store = store; _draft = State(initialValue: draft)
@@ -39,7 +40,10 @@ struct RepositorySettingsView: View {
                     if let values = Binding($draft.general) { general(values) }
                     else { ProgressView("Loading…").frame(maxWidth: .infinity, maxHeight: .infinity) }
                 }
-            }.frame(maxWidth: .infinity, maxHeight: .infinity).disabled(draft.saving)
+            }
+            .staggeredEntrance(isShowing: tabEntered, index: 0, style: .row)
+            .frame(maxWidth: .infinity, maxHeight: .infinity).disabled(draft.saving)
+            .staggeredEntranceTrigger($tabEntered, id: store.settingsTab)
             Divider()
             HStack {
                 if draft.hasChanges { Text("Unsaved changes").font(.caption).foregroundStyle(.secondary) }

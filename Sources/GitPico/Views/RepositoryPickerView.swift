@@ -36,6 +36,8 @@ struct RepositoryPickerView: View {
     @Bindable var tab: RepositoryTab
     var showsSidebar = true
     @State private var searchFocused = false
+    @State private var pageEntered = false
+    @State private var rowsEntered = false
     @FocusState private var listFocused: Bool
     var store: RepositoryStore { tab.store }
     var entries: [SavedRepository] { workspace.library.matches(query: tab.pickerQuery, filter: tab.pickerFilter) }
@@ -119,18 +121,23 @@ struct RepositoryPickerView: View {
                 }
                 Spacer()
             }
+            .staggeredEntrance(isShowing: pageEntered, index: 0, style: .hero)
             HStack(spacing: 12) {
                 ActionCard(title: String(localized: "Open Local"), subtitle: String(localized: "A folder on this Mac"), icon: "folder", action: store.chooseRepository)
+                    .staggeredEntrance(isShowing: pageEntered, index: 1, style: .hero)
                 ActionCard(title: String(localized: "Clone"), subtitle: String(localized: "From a remote URL"), icon: "arrow.down.circle") { workspace.prepareCreation(clone: true, from: store) }
+                    .staggeredEntrance(isShowing: pageEntered, index: 2, style: .hero)
                 ActionCard(title: String(localized: "New"), subtitle: String(localized: "Start an empty repository"), icon: "plus.square.dashed") { workspace.prepareCreation(clone: false, from: store) }
+                    .staggeredEntrance(isShowing: pageEntered, index: 3, style: .hero)
             }
             PinnedScrollPane { insets in
                 ScrollViewReader { scroll in
                     List(selection: $tab.pickerSelection) {
-                        ForEach(entries) { entry in
+                        ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
                             RepositoryPickerRow(entry: entry, isOpen: workspace.isRepositoryOpen(at: entry.path),
                                                 isSelected: tab.pickerSelection == entry.id, isEmphasized: listFocused,
                                                 folderState: workspace.library.folderState(for: entry)) { open(entry) }
+                                .staggeredEntrance(isShowing: rowsEntered, index: index, style: .row)
                                 .id(entry.id).tag(entry.id).contentShape(Rectangle())
                                 .contextMenu {
                                     Button("Open") { open(entry) }
@@ -182,6 +189,7 @@ struct RepositoryPickerView: View {
             .background(Color(nsColor: .controlBackgroundColor).opacity(0.6), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color(nsColor: .separatorColor).opacity(0.6), lineWidth: 0.5))
+            .staggeredEntrance(isShowing: pageEntered, index: 4, style: .section)
             if let error = workspace.library.error { Label(error, systemImage: "exclamationmark.triangle.fill").font(.caption).foregroundStyle(Pico.deletion) }
         }.frame(maxWidth: 920, maxHeight: .infinity)
             .padding(.horizontal, 36).padding(.top, 28).padding(.bottom, 20)
@@ -192,6 +200,8 @@ struct RepositoryPickerView: View {
                     .ignoresSafeArea(.container, edges: .top).allowsHitTesting(false)
             }
             .safeAreaPadding(.bottom)
+            .staggeredEntranceTrigger($pageEntered)
+            .staggeredEntranceTrigger($rowsEntered, id: tab.pickerFilter)
     }
     var summary: String {
         let all = workspace.library.matches(filter: .all).count

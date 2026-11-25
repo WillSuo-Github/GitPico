@@ -3,12 +3,13 @@ import SwiftUI
 
 struct StashesView: View {
     @Bindable var store: RepositoryStore
+    @State private var listEntered = false
     var stashes: [Stash] { (store.snapshot?.stashes ?? []).filter { store.search.isEmpty || $0.subject.localizedCaseInsensitiveContains(store.search) } }
     var body: some View {
         PersistentSplitView(name: "stashes", width: 320) {
             PinnedScrollPane { insets in
                 List(selection: Binding(get: { store.selectedStash?.id }, set: { id in if let stash = stashes.first(where: { $0.id == id }) { store.selectStash(stash) } })) {
-                    ForEach(stashes) { stash in
+                    ForEach(Array(stashes.enumerated()), id: \.element.id) { index, stash in
                         HStack(alignment: .top, spacing: 10) {
                             Image(systemName: "tray.full").font(.system(size: 13)).foregroundStyle(.tint).frame(width: 28, height: 28)
                                 .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
@@ -21,7 +22,9 @@ struct StashesView: View {
                                     Text(stash.name).font(.system(size: 10, design: .monospaced))
                                 }.font(.system(size: 11)).foregroundStyle(.secondary)
                             }
-                        }.padding(.vertical, 6).contentShape(Rectangle()).onTapGesture { store.selectStash(stash) }.tag(stash.id).picoDrag(store, .stash(stash))
+                        }.padding(.vertical, 6).contentShape(Rectangle()).onTapGesture { store.selectStash(stash) }
+                        .staggeredEntrance(isShowing: listEntered, index: index, style: .row)
+                        .tag(stash.id).picoDrag(store, .stash(stash))
                         .contextMenu {
                             Button("Apply Stash…") { store.stashAction(.apply(stash)) }
                             Button("Rename Stash…") { store.stashAction(.rename(stash)) }
@@ -50,6 +53,7 @@ struct StashesView: View {
         }
         .onAppear { selectFirst() }
         .onChange(of: store.snapshot?.stashes) { selectFirst() }
+        .staggeredEntranceTrigger($listEntered, id: store.repositoryToken)
         .disabled(store.isBusy)
     }
     private func selectFirst() { if store.selectedStash == nil, let first = stashes.first { store.selectStash(first) } }
@@ -73,6 +77,7 @@ struct StashDetailView: View {
     @State private var failure: String?
     @State private var expanded: Set<String> = []
     @State private var selected: Set<String> = []
+    @State private var detailEntered = false
     var body: some View {
         PinnedScrollPane { insets in
             if let failure { InspectionErrorView(message: failure).padding(insets) }
@@ -86,6 +91,7 @@ struct StashDetailView: View {
                                 Spacer(minLength: 0)
                             }.font(.system(size: 11))
                         }
+                        .staggeredEntrance(isShowing: detailEntered, index: 0, style: .section)
                         ChangedFilesHeader(count: detail.files.count, additions: detail.statistics.values.reduce(0) { $0 + $1.additions }, deletions: detail.statistics.values.reduce(0) { $0 + $1.deletions }, allExpanded: !detail.files.isEmpty && expanded.count == detail.files.count) {
                             expanded = expanded.count == detail.files.count ? [] : Set(detail.files.map(\.path))
                         } trailing: {
@@ -95,11 +101,14 @@ struct StashDetailView: View {
                             }
                         }
                         .background(.bar.opacity(0.6))
-                        ForEach(detail.files) { file in
+                        .staggeredEntrance(isShowing: detailEntered, index: 1, style: .section)
+                        ForEach(Array(detail.files.enumerated()), id: \.element.id) { index, file in
                             StashFileDisclosure(store: store, repository: repository, stash: stash, file: file, statistics: detail.statistics[file.path], expanded: Binding(get: { expanded.contains(file.path) }, set: { if $0 { expanded.insert(file.path) } else { expanded.remove(file.path) } }), selected: Binding(get: { selected.contains(file.path) }, set: { if $0 { selected.insert(file.path) } else { selected.remove(file.path) } }))
+                                .staggeredEntrance(isShowing: detailEntered, index: index, style: .row)
                         }
                     }
                 }.pinnedScrollInsets(insets)
+                .staggeredEntranceTrigger($detailEntered, id: stash.id)
             } else { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity).padding(insets) }
         } top: {
             HStack(spacing: 8) {

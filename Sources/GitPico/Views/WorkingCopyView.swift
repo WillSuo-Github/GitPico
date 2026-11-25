@@ -4,17 +4,20 @@ import SwiftUI
 
 struct WorkingCopyView: View {
     @Bindable var store: RepositoryStore
+    @State private var entered = false
     var files: [WorkingFileEntry] { store.workingList.files }
     var isFiltered: Bool { !store.search.isEmpty || store.workingOnlyConflicts || store.showAllFiles || store.showIgnoredFiles }
     var body: some View {
         PersistentSplitView(name: "working", width: 340) {
             PinnedScrollPane { insets in
                 List(selection: Binding<Set<String>>(get: { store.selectedWorkingFiles }, set: { store.setWorkingSelection($0) })) {
-                    ForEach(files) { file in
+                    ForEach(Array(files.enumerated()), id: \.element.id) { index, file in
                         Group {
                             if let change = file.change { WorkingFileRow(store: store, file: change).picoDrag(store, .workingFiles(store.selectedWorkingFiles.contains(file.path) ? store.selectedWorkingFiles.sorted().filter { path in store.changes.contains { $0.path == path } } : [file.path])) }
                             else { BrowserFileRow(store: store, file: file) }
-                        }.tag(file.path).listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
+                        }
+                        .staggeredEntrance(isShowing: entered, index: index, style: .row)
+                        .tag(file.path).listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
                     }
                 }.listStyle(.plain).pinnedScrollInsets(insets).disabled(store.isBusy && !store.isFetching)
                 .overlay {
@@ -37,12 +40,14 @@ struct WorkingCopyView: View {
             } bottom: {
                 if store.snapshot?.operation == RepositoryOperation.none {
                     CommitComposer(store: store)
+                        .staggeredEntrance(isShowing: entered, index: 1, style: .section)
                 }
             }
         } trailing: {
             WorkingDiffView(store: store)
         }.task(id: "\(store.repositoryToken):\(store.showAllFiles):\(store.showIgnoredFiles):\(store.showAssumeUnchanged)") { if store.showAllFiles || store.showIgnoredFiles || store.showAssumeUnchanged { await store.refreshFileBrowser() } }
         .task(id: store.workingFilesInput) { await store.rebuildWorkingList() }
+        .staggeredEntranceTrigger($entered, id: store.repositoryToken)
 
     }
 }
