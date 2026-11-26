@@ -178,6 +178,7 @@ final class RepositoryStore {
     var isAutomaticallyRefreshing = false
     var isManualFetching = false
     var isBackgroundFetching = false
+    var isOpeningInPlace = false
     var exclusiveFeedback: RepositoryOperationFeedback?
     var fetchFeedback: RepositoryOperationFeedback?
     var dismissedStatusNetworkRecord: UUID?
@@ -302,9 +303,10 @@ final class RepositoryStore {
         do { try flushConflictDrafts() } catch { self.error = error.localizedDescription; return }
         cancelFetch()
         suppressOperationFeedback = true
+        isOpeningInPlace = true
         isBusy = true; activity = String(localized: "Opening repository…")
         let timing = RepositoryOpenTiming(); var succeeded = false
-        defer { isBusy = false; activity = ""; suppressOperationFeedback = false; lastOpenReport = timing.finish(succeeded: succeeded) }
+        defer { isBusy = false; isOpeningInPlace = false; activity = ""; suppressOperationFeedback = false; lastOpenReport = timing.finish(succeeded: succeeded) }
         do {
             let repo: GitRepository
             if let openedRepository { repo = openedRepository } else { repo = try await timing.measure("validate") { try await GitRepository.open(url) } }
@@ -395,7 +397,7 @@ final class RepositoryStore {
     }
 
     func navigate(_ value: Destination) {
-        guard !isBusy else { return }
+        guard !isOpeningInPlace else { return }
         if value == .repositorySettings {
             showingRepositorySettings = true
             requestDeferredMetadata(.repositorySettings)
@@ -544,7 +546,9 @@ final class RepositoryStore {
     func unstage(_ files: [FileChange]) { guard !files.isEmpty else { return }; perform("Unstaging changes…", refresh: .index) { try await $0.unstage(files) } }
     func commit() {
         guard canCommit, let repository else { return }
-        let message = commitSubject + (commitBody.isEmpty ? "" : "\n\n" + commitBody)
+        let submittedSubject = commitSubject
+        let submittedBody = commitBody
+        let message = submittedSubject + (submittedBody.isEmpty ? "" : "\n\n" + submittedBody)
         let shouldAmend = amend; let shouldSignOff = signOff
         commitFeedback = nil; commitWarning = nil; cancelPreviewWork()
         isBusy = true; activity = String(localized: "Creating commit…")
@@ -553,7 +557,11 @@ final class RepositoryStore {
             let outcome: CommitOutcome
             do { outcome = try await repository.commit(message: message, amend: shouldAmend, signOff: shouldSignOff) }
             catch { self.error = error.localizedDescription; try? await reloadIncrementally(history: false); return }
-            draftBeforeAmend = nil; commitSubject = ""; commitBody = ""; amend = false; diff = ""; workingPreparedDiff = nil; workingDiffRequest = nil
+            draftBeforeAmend = nil
+            if commitSubject == submittedSubject && commitBody == submittedBody {
+                commitSubject = ""; commitBody = ""
+            }
+            amend = false; diff = ""; workingPreparedDiff = nil; workingDiffRequest = nil
             commitFeedback = shouldAmend ? String(localized: "Commit amended.") : String(localized: "Commit created.")
             commitWarning = outcome.undoWarning
             do { try await reloadIncrementally(history: true) }

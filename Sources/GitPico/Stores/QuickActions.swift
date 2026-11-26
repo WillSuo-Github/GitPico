@@ -3,6 +3,18 @@ import GitCore
 
 enum QuickActionTarget: Sendable {
     case worktree(ManagedWorktree), submodule(ManagedSubmodule), remote(RemoteConfiguration), destination(Destination), file(String), history(String), checkout(Reference), reference(Reference), stash(Stash), commit(Commit), command(QuickCommand)
+
+    var isReadOnly: Bool {
+        switch self {
+        case .destination, .file, .history, .reference, .commit: true
+        case .command(let command):
+            switch command {
+            case .compare, .lfs, .gitFlow: true
+            default: false
+            }
+        case .worktree, .submodule, .remote, .checkout, .stash: false
+        }
+    }
 }
 enum QuickCommand: String, CaseIterable, Sendable {
     case lfs = "Git LFS", gitFlow = "Git Flow", flowFeature = "Start Git Flow Feature", flowRelease = "Start Git Flow Release", flowHotfix = "Start Git Flow Hotfix"
@@ -75,7 +87,11 @@ extension RepositoryStore {
         return result
     }
     func runQuickAction(_ item: QuickActionItem, repositoryToken expected: UUID) {
-        guard !isBusy, expected == repositoryToken else { if !isBusy { error = String(localized: "The repository changed. Reopen Quick Actions.") }; return }
+        let allowed = item.target.isReadOnly ? !isOpeningRepository : !isBusy
+        guard allowed, expected == repositoryToken else {
+            if allowed { error = String(localized: "The repository changed. Reopen Quick Actions.") }
+            return
+        }
         switch item.target {
         case .worktree(let entry): openWorktree(entry)
         case .submodule(let entry): if entry.initialized { openSubmodule(entry) } else { manageSubmodule(.manage(entry, .initialize)) }

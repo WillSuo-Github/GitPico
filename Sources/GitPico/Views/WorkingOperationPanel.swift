@@ -36,10 +36,10 @@ struct WorkingOperationPanel: View {
                 }
                 Spacer()
                 Button("Continue", action: store.continueOperation).buttonStyle(.borderedProminent).disabled(count > 0)
-            }.controlSize(.small)
+            }.controlSize(.small).disabled(store.isBusy)
         }.padding(12).frame(maxWidth: .infinity, alignment: .leading)
             .background(Pico.warning.opacity(0.07), in: RoundedRectangle(cornerRadius: Pico.corner, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Pico.corner, style: .continuous).strokeBorder(Pico.warning.opacity(0.25), lineWidth: 0.5)).padding(10).disabled(store.isBusy)
+            .overlay(RoundedRectangle(cornerRadius: Pico.corner, style: .continuous).strokeBorder(Pico.warning.opacity(0.25), lineWidth: 0.5)).padding(10)
             .confirmationDialog("Abort this operation?", isPresented: $confirmAbort, titleVisibility: .visible) {
                 Button("Abort Operation", role: .destructive, action: store.abortOperation)
             } message: { Text("Git will restore the pre-operation state. Edits made while resolving conflicts may be lost.") }

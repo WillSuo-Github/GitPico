@@ -58,26 +58,26 @@ struct ToolbarSearchPresentation {
     }
     var hasContext: Bool { !actionsOnly && store.destination.searchPlaceholder != nil }
     var presentation: ToolbarSearchPresentation {
-        ToolbarSearchPresentation(visible: visible && store.canUseRepository, contextTitle: hasContext ? (query.isEmpty ? String(localized: "Search in \(store.destination.title)") : String(localized: "Filter \(store.destination.title) for “\(query)”")) : nil, results: results, selection: selection, loading: loading || searching, failure: failure, executing: submitted)
+        ToolbarSearchPresentation(visible: visible && store.canInspectRepository, contextTitle: hasContext ? (query.isEmpty ? String(localized: "Search in \(store.destination.title)") : String(localized: "Filter \(store.destination.title) for “\(query)”")) : nil, results: results, selection: selection, loading: loading || searching, failure: failure, executing: submitted)
     }
     func beginEditing() {
-        guard store.canUseRepository, !submitted else { return }
+        guard store.canInspectRepository, !submitted else { return }
         if !focused { originalQuery = store.search; selection = nil }
         focused = true; visible = true; submitted = false
         refreshItems()
     }
     func beginActions() {
-        guard store.canUseRepository, !submitted else { return }
+        guard store.canInspectRepository, !submitted else { return }
         originalQuery = store.search; text = "> "; focused = true; visible = true; submitted = false; selection = nil
         refreshItems()
     }
     func beginContextSearch() { text = store.search; selection = nil; beginEditing() }
     func updateText(_ value: String) {
-        guard store.canUseRepository, resultsToken == store.repositoryToken else { contextChanged(); return }
+        guard store.canInspectRepository, resultsToken == store.repositoryToken else { contextChanged(); return }
         if !focused { originalQuery = store.search; focused = true }
         text = value; selection = nil; results = []
         if !actionsOnly, store.destination.searchPlaceholder != nil { store.search = value }
-        visible = store.canUseRepository; submitted = false
+        visible = store.canInspectRepository; submitted = false
         scheduleResults()
     }
     func endEditing() {
@@ -95,7 +95,7 @@ struct ToolbarSearchPresentation {
     func invalidate() {
         indexTask?.cancel(); indexGeneration = UUID(); loadedKey = nil; loadingKey = nil; fileItems = []; loading = false
         if resultsToken != store.repositoryToken { endEditing(); text = store.search; results = []; selection = nil; resultsToken = store.repositoryToken }
-        if focused, store.canUseRepository { refreshItems() }
+        if focused, store.canInspectRepository { refreshItems() }
     }
     func stop() { endEditing(); indexTask?.cancel(); executionTask?.cancel(); indexGeneration = UUID(); loadingKey = nil; loading = false }
     func retry() { loadedKey = nil; loadingKey = nil; refreshItems() }
@@ -107,16 +107,18 @@ struct ToolbarSearchPresentation {
         selection = QuickActionSearch.move(selection, in: results, offset: offset)
     }
     @discardableResult func submit(_ item: QuickActionItem? = nil) -> Bool {
-        guard !submitted, store.canUseRepository, resultsToken == store.repositoryToken else { return false }
+        guard !submitted, store.canInspectRepository, resultsToken == store.repositoryToken else { return false }
         let chosen = results.first { $0.id == (item?.id ?? selection) }
         guard let chosen else { if item == nil, selection == nil, hasContext { dismiss(); return true }; return false }
         guard visible else { return false }
+        if !chosen.target.isReadOnly, !store.canUseRepository { return false }
         submitted = true; dismiss()
         store.search = originalQuery; text = originalQuery
         let token = resultsToken, targetStore = store
         executionTask = Task { [weak self] in
             do { try await Task.sleep(for: .milliseconds(120)) } catch { return }
-            guard !Task.isCancelled, targetStore.canUseRepository, token == targetStore.repositoryToken else { self?.submitted = false; return }
+            let canExecute = chosen.target.isReadOnly ? targetStore.canInspectRepository : targetStore.canUseRepository
+            guard !Task.isCancelled, canExecute, token == targetStore.repositoryToken else { self?.submitted = false; return }
             targetStore.runQuickAction(chosen, repositoryToken: token)
             self?.submitted = false
         }
@@ -124,7 +126,7 @@ struct ToolbarSearchPresentation {
     }
 
     private func refreshItems() {
-        guard store.canUseRepository, let repository = store.repository else { dismiss(); return }
+        guard store.canInspectRepository, let repository = store.repository else { dismiss(); return }
         let key = IndexKey(token: store.repositoryToken, updated: store.lastUpdated, ignored: store.showIgnoredFiles)
         if loadedKey != key, loadingKey != key { fileItems = [] }
         baseItems = store.quickActionItems(files: []); resultsToken = store.repositoryToken

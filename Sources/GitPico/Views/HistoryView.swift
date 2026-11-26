@@ -44,7 +44,7 @@ struct HistoryView: View {
                         Picker("Sort By", selection: $store.historyOptions.sortByDate) { Text("Topo Order").tag(false); Text("Date").tag(true) }
                         Toggle("Group by Month", isOn: $preferences.historyGroups)
                         Picker("Commit View Size", selection: $preferences.historyCompact) { Text("Medium").tag(false); Text("Small").tag(true) }
-                    } label: { Image(systemName: "line.3.horizontal.decrease.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Change viewing options").disabled(store.isBusy)
+                    } label: { Image(systemName: "line.3.horizontal.decrease.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Change viewing options")
                 }
                 if !store.search.isEmpty {
                     SearchScopeBar(title: String(localized: "Commit history · all reachable matches"), query: store.search) { store.search = "" }
@@ -69,7 +69,7 @@ struct HistoryView: View {
                             .buttonStyle(.bordered)
                             .background(.windowBackground, in: RoundedRectangle(cornerRadius: 7))
                             .padding(8)
-                            .disabled(store.isLoadingHistory || store.isBusy)
+                            .disabled(store.isLoadingHistory)
                     } else {
                         Text("Showing the first 20,000 matches. Narrow the search to find older commits.").font(.caption).foregroundStyle(.secondary).padding(8)
                     }
@@ -99,17 +99,19 @@ struct HistoryCommitActions: View {
         Section {
             Button("Cherry-Pick Commit…") { store.integrationRequest = IntegrationRequest(action: .cherryPick, revision: commit.hash) }
             Button("Revert Commit…") { store.integrationRequest = IntegrationRequest(action: .revert, revision: commit.hash) }
-            Button("Compare with Revision…") { store.navigate(.comparison(commit.hash)) }
             Button("Prepare Fixup for This Commit") { store.prepareFixup(commit) }
             Button("Interactively Rebase from Here…") { store.rebaseRequest = RebaseRequest(base: commit.parents.first ?? "--root") }
             Button("Restore HEAD Here…") { store.recoveryRequest = RecoveryRequest(action: .restore(commit.hash)) }
             Button("Create Branch Here…") { store.recoveryRequest = RecoveryRequest(action: .branch(commit.hash)) }
         }.disabled(!canModifyHistory)
         Section {
+            Button("Compare with Revision…") { store.navigate(.comparison(commit.hash)) }
+        }
+        Section {
             Button("Export Files at Revision…") { store.historical(.export, revision: commit.hash) }
             Button("Archive Files as ZIP…") { store.historical(.archive, revision: commit.hash) }
             Button("Save Patch as File…") { store.localChange(.export(.commit(commit.hash), [])) }
-        }
+        }.disabled(store.isBusy)
         Section {
             Button("Copy Commit Hash") { Pico.copy(commit.hash) }
             Button("Copy Commit Subject") { Pico.copy(commit.subject) }

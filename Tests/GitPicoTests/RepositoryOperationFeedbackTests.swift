@@ -212,7 +212,7 @@ extension RepositoryStore {
         let request = try #require(f.store.pullRequest)
         f.store.pullRequest = nil; f.store.runPull(request, policy: policy)
         #expect(f.store.operationFeedback?.command == .pull && f.store.operationFeedback?.isVisible == true)
-        #expect(f.store.isBusy && !f.store.isFetching && !f.store.canBrowseHistory && !f.store.canIntegrate)
+        #expect(f.store.isBusy && !f.store.isFetching && f.store.canInspectRepository && f.store.canBrowseHistory && !f.store.canUseRepository && !f.store.canIntegrate)
         await f.store.operationTask?.value
         #expect(f.store.operationFeedback?.phase == .succeeded && f.store.error == nil)
         #expect(f.store.snapshot?.behind == 0)

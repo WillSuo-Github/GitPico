@@ -129,7 +129,8 @@ import UniformTypeIdentifiers
     #expect(table.rect(ofRow: 4).height == 32)
     #expect(f.store.selectedCommit?.hash == selection && table.selectedRow == 4)
     f.store.isBusy = true
-    #expect(!coordinator.tableView(table, shouldSelectRow: 6))
+    #expect(coordinator.tableView(table, shouldSelectRow: 6))
+    #expect(coordinator.tableView(table, pasteboardWriterForRow: 6) == nil)
     f.store.isBusy = false
     f.store.navigate(.reference("refs/heads/preview/branch-5"))
     await f.store.historyTask?.value

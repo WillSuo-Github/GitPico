@@ -60,7 +60,7 @@ struct StashToolbarMenu: View {
             if !stashes.isEmpty {
                 Section("Apply Stash") {
                     ForEach(stashes.prefix(20)) { stash in Button(stash.subject) { store.applyStash(stash) } }
-                }
+                }.disabled(store.isBusy)
             }
             Divider()
             Button("Show All Stashes") { store.navigate(.stashes) }
@@ -69,7 +69,7 @@ struct StashToolbarMenu: View {
         } primaryAction: {
             if canSave { store.showingStashSheet = true } else { store.navigate(.stashes) }
         }
-        .disabled(!store.canUseRepository)
+        .disabled(!store.canInspectRepository)
         .help(canSave ? "Stash local changes (⌘⇧S). Open the menu to apply a saved stash." : "Show stashes. Open the menu to apply a saved stash.")
     }
 }

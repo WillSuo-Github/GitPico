@@ -134,7 +134,7 @@ extension RepositoryStore {
     }
 
     func loadMoreHistory() {
-        guard !isBusy, !isLoadingHistory, historyOptions.limit < 20_000 else { return }
+        guard !isOpeningInPlace, !isLoadingHistory, historyOptions.limit < 20_000 else { return }
         historyOptions.limit = min(20_000, historyOptions.limit + 500)
         requestHistory()
     }

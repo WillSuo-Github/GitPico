@@ -25,11 +25,13 @@ struct StashesView: View {
                         }.padding(.vertical, 6).contentShape(Rectangle()).onTapGesture { store.selectStash(stash) }
                         .tag(stash.id).picoDrag(store, .stash(stash))
                         .contextMenu {
-                            Button("Apply Stash…") { store.stashAction(.apply(stash)) }
-                            Button("Rename Stash…") { store.stashAction(.rename(stash)) }
-                            Button("Create Branch from Stash…") { store.stashAction(.branch(stash)) }
-                            Divider()
-                            Button("Delete Stash…", role: .destructive) { store.stashAction(.delete(stash)) }
+                            Group {
+                                Button("Apply Stash…") { store.stashAction(.apply(stash)) }
+                                Button("Rename Stash…") { store.stashAction(.rename(stash)) }
+                                Button("Create Branch from Stash…") { store.stashAction(.branch(stash)) }
+                                Divider()
+                                Button("Delete Stash…", role: .destructive) { store.stashAction(.delete(stash)) }
+                            }.disabled(store.isBusy)
                         }
                     }
                 }.listStyle(.plain).pinnedScrollInsets(insets)
@@ -37,14 +39,14 @@ struct StashesView: View {
                 .overlay { if stashes.isEmpty { EmptyPane(title: store.search.isEmpty ? String(localized: "No stashes") : String(localized: "No matching stashes"), subtitle: store.search.isEmpty ? String(localized: "Stash shelves local changes so you can switch tasks and bring them back later.") : String(localized: "No stash message matches this search."), icon: "tray") } }
             } top: {
                 PaneBar(title: "Stashes", subtitle: stashes.isEmpty ? String(localized: "Nothing saved") : String(localized: "\(store.snapshot?.stashes.count ?? 0) saved"), icon: "tray.full") {
-                    Button { store.stashAction(.save([], false)) } label: { Label("Save Stash", systemImage: "plus") }.labelStyle(.iconOnly).buttonStyle(.borderless).disabled(store.changes.isEmpty).help("Save local changes to a new stash")
+                    Button { store.stashAction(.save([], false)) } label: { Label("Save Stash", systemImage: "plus") }.labelStyle(.iconOnly).buttonStyle(.borderless).disabled(store.isBusy || store.changes.isEmpty).help("Save local changes to a new stash")
                     Menu {
                         Button("Save Stash…") { store.stashAction(.save([], false)) }.disabled(store.changes.isEmpty)
                         Button("Create Snapshot…") { store.stashAction(.save([], true)) }.disabled(store.changes.isEmpty)
                         Divider()
                         Button("Recover Deleted Items…") { store.manage(.recovery) }
                         Button("Delete All Stashes…", role: .destructive) { store.stashAction(.clear(store.snapshot?.stashes ?? [])) }.disabled(store.snapshot?.stashes.isEmpty != false)
-                    } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+                    } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().disabled(store.isBusy)
                 }
             }
         } trailing: {
@@ -54,7 +56,6 @@ struct StashesView: View {
         .onAppear { selectFirst() }
         .onChange(of: store.snapshot?.stashes) { selectFirst() }
         .staggeredEntranceTrigger($listEntered, id: store.repositoryToken)
-        .disabled(store.isBusy)
     }
     private func selectFirst() { if store.selectedStash == nil, let first = stashes.first { store.selectStash(first) } }
     private func stashBranch(_ stash: Stash) -> String? {
@@ -97,7 +98,7 @@ struct StashDetailView: View {
                         } trailing: {
                             if !selected.isEmpty {
                                 Label("Drag \(selected.count) to Working Copy", systemImage: "hand.draw").foregroundStyle(.secondary).font(.system(size: 11)).picoDrag(store, .stashFiles(stash, selected.sorted())).help("Drag to Working Copy to apply selected files")
-                                Button("Apply \(selected.count) Selected…") { store.stashAction(.files(stash, selected.sorted())) }.controlSize(.small)
+                                Button("Apply \(selected.count) Selected…") { store.stashAction(.files(stash, selected.sorted())) }.controlSize(.small).disabled(store.isBusy)
                             }
                         }
                         .background(.bar.opacity(0.6))
@@ -122,8 +123,8 @@ struct StashDetailView: View {
                     Divider()
                     Button("Recover Deleted Items…") { store.manage(.recovery) }
                     Button("Delete Stash…", role: .destructive) { store.stashAction(.delete(stash)) }
-                } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("More stash actions")
-                Button("Apply…") { store.stashAction(.apply(stash)) }.buttonStyle(.borderedProminent).controlSize(.small).help("Apply this stash to the working copy")
+                } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().disabled(store.isBusy).help("More stash actions")
+                Button("Apply…") { store.stashAction(.apply(stash)) }.buttonStyle(.borderedProminent).controlSize(.small).disabled(store.isBusy).help("Apply this stash to the working copy")
             }.padding(.horizontal, 14).frame(height: Pico.headerHeight)
         }.task { do { detail = try await repository.stashDetail(stash) } catch { failure = error.localizedDescription } }
     }

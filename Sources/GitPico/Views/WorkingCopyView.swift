@@ -18,7 +18,7 @@ struct WorkingCopyView: View {
                         }
                         .tag(file.path).listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
                     }
-                }.listStyle(.plain).pinnedScrollInsets(insets).disabled(store.isBusy && !store.isFetching)
+                }.listStyle(.plain).pinnedScrollInsets(insets)
                 .staggeredEntrance(isShowing: entered, index: 0, style: .pane)
                 .overlay {
                     if files.isEmpty && store.isLoadingWorkingFiles { ProgressView("Loading files…") }
@@ -217,7 +217,7 @@ struct CommitComposer: View {
             HStack(spacing: 6) {
                 CommitIdentityMenu(store: store, library: workflows).frame(minWidth: 0, maxWidth: 140, alignment: .leading)
                 Spacer(minLength: 2)
-                Toggle("Amend", isOn: $store.amend).toggleStyle(.checkbox).font(.system(size: 11)).fixedSize().disabled(store.snapshot?.hasHEAD != true).help("Replace the last commit with the staged changes")
+                Toggle("Amend", isOn: $store.amend).toggleStyle(.checkbox).font(.system(size: 11)).fixedSize().disabled(store.isBusy || store.snapshot?.hasHEAD != true).help("Replace the last commit with the staged changes")
                 Menu {
                     Toggle("Add Signed-off-by Trailer", isOn: $store.signOff)
                     Menu("Insert Template") {
@@ -272,7 +272,7 @@ struct CommitComposer: View {
         .padding(.top, Self.outerTopPadding)
         .padding(.bottom, Self.outerBottomPadding)
         .animation(Self.bodyAnimation(reduceMotion: reduceMotion), value: isBodyVisible)
-        .disabled(store.isBusy && !store.isFetching).onChange(of: store.amend) { store.updateAmend() }
+        .onChange(of: store.amend) { store.updateAmend() }
         .sheet(item: $insertion) { CommitTemplateInsertionView(store: store, insertion: $0) }
         .onDisappear { ai.cancel() }
         .onChange(of: store.snapshot?.root) { ai.cancel(); ai.error = nil }

@@ -100,7 +100,7 @@ extension RepositoryWorkspace {
 }
 
 extension RepositoryStore {
-    var canGoBack: Bool { showingRepositorySettings ? !isBusy : workspace?.canNavigateRepositories(.back, from: self) == true }
+    var canGoBack: Bool { showingRepositorySettings ? true : workspace?.canNavigateRepositories(.back, from: self) == true }
     var canGoForward: Bool { !showingRepositorySettings && workspace?.canNavigateRepositories(.forward, from: self) == true }
     func goBack() {
         if showingRepositorySettings { settingsNavigationRequest = destination; return }

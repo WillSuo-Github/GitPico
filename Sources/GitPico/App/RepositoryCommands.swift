@@ -37,7 +37,7 @@ struct RepositoryCommands: Commands {
                 Button("Export Diagnostics…") { DiagnosticExporter.export(store: store) { store.connectionTestMessage = $0 } }
             }
             CommandMenu("Repository") {
-                HostedReviewWebMenu(store: store).disabled(!store.canUseRepository)
+                HostedReviewWebMenu(store: store).disabled(!store.canInspectRepository)
                 Button("Network Activity…") { store.showingNetworkActivity = true }.keyboardShortcut("n", modifiers: [.command, .option])
                 Button("Authentication…") { store.showingAuthentication = true }
                 Button("Saved Conflict Drafts…") { store.showingConflictDrafts = true }.disabled(store.conflictDrafts.isEmpty && store.conflictDraftSaveError == nil)
@@ -82,8 +82,8 @@ struct RepositoryCommands: Commands {
                     Button("External Tool Sessions…") { store.externalTool(.sessions) }
                 }.disabled(!store.canUseRepository)
                 Divider()
-                Button("Repository Settings") { store.navigate(.repositorySettings) }.disabled(!store.canUseRepository)
-                Button("Reveal in Finder") { if let root = store.snapshot?.root { NSWorkspace.shared.activateFileViewerSelecting([root]) } }.disabled(!store.canUseRepository)
+                Button("Repository Settings") { store.navigate(.repositorySettings) }.disabled(!store.canInspectRepository)
+                Button("Reveal in Finder") { if let root = store.snapshot?.root { NSWorkspace.shared.activateFileViewerSelecting([root]) } }.disabled(!store.canInspectRepository)
             }
             CommandMenu("Branch") {
                 Button("New Branch…") { store.showingBranchSheet = true }.keyboardShortcut("b", modifiers: [.command, .shift]).disabled(!store.canIntegrate)
@@ -161,7 +161,7 @@ struct RepositoryCommands: Commands {
                     Button("Previous Tab") { workspace.cycle(-1) }.keyboardShortcut(.tab, modifiers: [.control, .shift])
                     Divider()
                 }
-                Button("Quick Actions…") { store.searchActionsRequest = UUID() }.keyboardShortcut("a", modifiers: [.command, .shift]).disabled(!store.canUseRepository)
+                Button("Quick Actions…") { store.searchActionsRequest = UUID() }.keyboardShortcut("a", modifiers: [.command, .shift]).disabled(!store.canInspectRepository)
                 Button("External Tool Settings…") { store.showingExternalToolSettings = true }
                 Button("External Tool Sessions…") { store.externalTool(.sessions) }.disabled(!store.canUseRepository)
                 Divider()
@@ -180,7 +180,7 @@ struct RepositoryCommands: Commands {
                 Button("Stashes") { store.navigate(.stashes) }.keyboardShortcut("3")
                 Button("Branches Review") { store.navigate(.branchesReview) }.keyboardShortcut("4")
                 Button("Repository Settings") { store.navigate(.repositorySettings) }.keyboardShortcut("5")
-                }.disabled(!store.canUseRepository)
+                }.disabled(!store.canInspectRepository)
             }
 
     }

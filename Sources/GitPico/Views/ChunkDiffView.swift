@@ -110,11 +110,10 @@ struct ChunkDiffView: View {
                                 .keyboardShortcut(.return, modifiers: [.command, .shift])
                         }
                     }
-                }.font(.system(size: 11)).controlSize(.small).padding(.horizontal, 14).frame(height: 34).disabled(disabled)
+                }.font(.system(size: 11)).controlSize(.small).padding(.horizontal, 14).frame(height: 34).disabled(disabled || isLoading)
             }
         }
         }
-        .disabled(disabled || isLoading)
         .onChange(of: prepared?.id) {
             selectedLines.clear()
         }

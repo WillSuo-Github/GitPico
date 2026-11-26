@@ -15,15 +15,15 @@ struct BrowserFileRow: View {
         }.frame(height: 24).contentShape(Rectangle()).help(file.status)
         .contextMenu {
             LFSFileContextMenu(store: store, path: file.path)
-            if file.isIgnored { Button("Force Add Ignored Files…") { let paths = store.selectedWorkingFiles.contains(file.path) ? store.selectedWorkingFiles.filter { path in store.workingFileEntries.contains { $0.path == path && $0.isIgnored } }.sorted() : [file.path]; store.localChange(.forceAdd(paths)) } }
+            if file.isIgnored { Button("Force Add Ignored Files…") { let paths = store.selectedWorkingFiles.contains(file.path) ? store.selectedWorkingFiles.filter { path in store.workingFileEntries.contains { $0.path == path && $0.isIgnored } }.sorted() : [file.path]; store.localChange(.forceAdd(paths)) }.disabled(store.isBusy) }
             if file.isTracked {
                 Button("Show File History…") { store.navigate(.fileHistory(file.path, "HEAD")) }.disabled(store.snapshot?.hasHEAD != true)
-                Button("Compare in External Tool…") { store.externalTool(.working(file.path, false)) }
+                Button("Compare in External Tool…") { store.externalTool(.working(file.path, false)) }.disabled(store.isBusy)
             }
             Button("Open in Default Editor") { if let root = store.snapshot?.root { NSWorkspace.shared.open(root.appendingPathComponent(file.path)) } }
             Button("Reveal in Finder") { if let root = store.snapshot?.root { NSWorkspace.shared.activateFileViewerSelecting([root.appendingPathComponent(file.path)]) } }
             Button("Copy Path") { NSPasteboard.general.clearContents(); NSPasteboard.general.setString(file.path, forType: .string) }
-        }.disabled(store.isBusy)
+        }
     }
 }
 struct WorkingFilePreview: View {

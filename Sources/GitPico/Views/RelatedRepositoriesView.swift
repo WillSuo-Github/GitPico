@@ -24,7 +24,7 @@ struct WorktreesView: View {
                             Label(store.worktreePresentation.branch(for: entry) ?? (entry.isBare ? String(localized: "Bare repository") : String(localized: "Detached HEAD")), systemImage: "arrow.triangle.branch").font(.system(size: 11)).foregroundStyle(.secondary)
                             Text(store.worktreePresentation.location(for: entry)).font(.system(size: 11)).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle).help(entry.path)
                         }
-                    }.padding(.vertical, 4).tag(entry.id).contentShape(Rectangle()).contextMenu { if store.selectedWorktreePaths.count > 1 { Button("Manage Selected Worktrees…") { store.relatedAdministration(.worktrees(store.worktrees.filter { store.selectedWorktreePaths.contains($0.id) })) }; Divider() }; WorktreeContextActions(store: store, entry: entry) }
+                    }.padding(.vertical, 4).tag(entry.id).contentShape(Rectangle()).contextMenu { if store.selectedWorktreePaths.count > 1 { Button("Manage Selected Worktrees…") { store.relatedAdministration(.worktrees(store.worktrees.filter { store.selectedWorktreePaths.contains($0.id) })) }.disabled(store.isBusy); Divider() }; WorktreeContextActions(store: store, entry: entry) }
                 }.listStyle(.plain).pinnedScrollInsets(insets)
                 .staggeredEntrance(isShowing: listEntered, index: 0, style: .pane)
                 .contextMenu(forSelectionType: String.self) { _ in } primaryAction: { ids in
@@ -44,8 +44,8 @@ struct WorktreesView: View {
                                     Text(store.snapshot?.root.path == entry.path ? "This is the current working tree" : entry.isMain ? "Main working tree" : "Linked worktree").font(.system(size: 12)).foregroundStyle(.secondary)
                                 }
                                 Spacer()
-                                Menu("Manage") { WorktreeContextActions(store: store, entry: entry) }.fixedSize().controlSize(.small)
-                                Button("Open") { store.openWorktree(entry) }.buttonStyle(.borderedProminent).controlSize(.small).disabled(entry.prunable != nil || entry.isBare || store.snapshot?.root.path == entry.path)
+                                Menu("Manage") { WorktreeContextActions(store: store, entry: entry) }.fixedSize().controlSize(.small).disabled(store.isBusy)
+                                Button("Open") { store.openWorktree(entry) }.buttonStyle(.borderedProminent).controlSize(.small).disabled(store.isBusy || entry.prunable != nil || entry.isBare || store.snapshot?.root.path == entry.path)
                             }
                             .staggeredEntrance(isShowing: detailEntered, index: 0, style: .card)
                             if let reason = entry.prunable { Label("Unavailable: \(reason)", systemImage: "exclamationmark.triangle.fill").foregroundStyle(Pico.warning) }
@@ -67,7 +67,7 @@ struct WorktreesView: View {
             PaneBar(title: "Worktrees", subtitle: String(localized: "\(store.worktrees.count) checked-out directories sharing this repository"), icon: "folder.badge.gearshape") {
                 Menu {
                     Section("Selection") {
-                        Button("Manage Selected Worktrees…") { store.relatedAdministration(.worktrees(store.worktrees.filter { store.selectedWorktreePaths.contains($0.id) })) }.disabled(store.selectedWorktreePaths.isEmpty)
+                        Button("Manage Selected Worktrees…") { store.relatedAdministration(.worktrees(store.worktrees.filter { store.selectedWorktreePaths.contains($0.id) })) }.disabled(store.isBusy || store.selectedWorktreePaths.isEmpty)
                         Button("Select All") { store.selectedWorktreePaths = Set(entries.map(\.id)) }
                     }
                     Section("Maintenance") {
@@ -75,13 +75,13 @@ struct WorktreesView: View {
                         Button("Move Main Repository…") { store.infrastructure(.move) }
                         Button("Repair Pointers…") { store.infrastructure(.repair) }
                         Button("Migration / Repair History…") { store.infrastructure(.history) }
-                    }
+                    }.disabled(store.isBusy)
                 } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Selection and maintenance")
                 Button { store.manageWorktree(.create(nil)) } label: { Label("Add Worktree", systemImage: "plus") }.buttonStyle(.borderedProminent).controlSize(.small).disabled(store.snapshot?.hasHEAD != true || store.isBusy)
             }
         } bottom: {
             if let error = store.worktreeError { Label(error, systemImage: "exclamationmark.triangle.fill").foregroundStyle(Pico.deletion).font(.caption).frame(maxWidth: .infinity, alignment: .leading).padding(12) }
-        }.disabled(store.isBusy)
+        }
         .onChange(of: entries.map(\.id), initial: true) { updateSelection() }
     }
     private func updateSelection() {
@@ -94,18 +94,18 @@ struct WorktreeContextActions: View {
     var store: RepositoryStore
     let entry: ManagedWorktree
     var body: some View {
-        Button("Open Worktree") { store.openWorktree(entry) }.disabled(entry.prunable != nil || entry.isBare)
+        Button("Open Worktree") { store.openWorktree(entry) }.disabled(store.isBusy || entry.prunable != nil || entry.isBare)
         if store.workspace != nil {
             Button(String(localized: "Open Worktree") + " · " + String(localized: "New Tab")) { store.openWorktree(entry, inNewTab: true) }
-                .disabled(entry.prunable != nil || entry.isBare)
+                .disabled(store.isBusy || entry.prunable != nil || entry.isBare)
         }
         if !entry.isMain {
-            Button(entry.locked == nil ? "Lock Worktree…" : "Unlock Worktree…") { store.manageWorktree(entry.locked == nil ? .lock(entry) : .unlock(entry)) }
-            Button("Move Worktree…") { store.manageWorktree(.move(entry)) }.disabled(entry.locked != nil || entry.prunable != nil || store.snapshot?.root.path == entry.path)
-            Button("Repair Relocated Worktree…") { store.manageWorktree(.repair(entry)) }
+            Button(entry.locked == nil ? "Lock Worktree…" : "Unlock Worktree…") { store.manageWorktree(entry.locked == nil ? .lock(entry) : .unlock(entry)) }.disabled(store.isBusy)
+            Button("Move Worktree…") { store.manageWorktree(.move(entry)) }.disabled(store.isBusy || entry.locked != nil || entry.prunable != nil || store.snapshot?.root.path == entry.path)
+            Button("Repair Relocated Worktree…") { store.manageWorktree(.repair(entry)) }.disabled(store.isBusy)
             Divider()
-            Button("Force Remove (Back Up First)…", role: .destructive) { store.relatedAdministration(.worktrees([entry]), initialWorktreeOperation: entry.locked == nil ? .forceRemove : .forceUnlockRemove) }.disabled(store.snapshot?.root.path == entry.path)
-            Button("Remove Worktree…", role: .destructive) { store.manageWorktree(.remove(entry)) }.disabled(entry.locked != nil || store.snapshot?.root.path == entry.path)
+            Button("Force Remove (Back Up First)…", role: .destructive) { store.relatedAdministration(.worktrees([entry]), initialWorktreeOperation: entry.locked == nil ? .forceRemove : .forceUnlockRemove) }.disabled(store.isBusy || store.snapshot?.root.path == entry.path)
+            Button("Remove Worktree…", role: .destructive) { store.manageWorktree(.remove(entry)) }.disabled(store.isBusy || entry.locked != nil || store.snapshot?.root.path == entry.path)
         }
     }
 }
@@ -130,7 +130,7 @@ struct SubmodulesView: View {
                             Text(entry.status).font(.system(size: 11, weight: .medium)).foregroundStyle(needsAttention(entry) ? Pico.warning : Pico.addition)
                             Text(entry.url).font(.system(size: 11)).foregroundStyle(.tertiary).lineLimit(1).truncationMode(.middle)
                         }
-                    }.padding(.vertical, 4).tag(entry.id).contentShape(Rectangle()).onTapGesture(count: 2) { if entry.initialized { store.openSubmodule(entry) } else { store.manageSubmodule(.manage(entry, .initialize)) } }.contextMenu { if selection.count > 1 { Button("Manage Selected Submodules…") { store.relatedAdministration(.submodules(store.submodules.filter { selection.contains($0.id) })) }; Divider() }; SubmoduleContextActions(store: store, entry: entry) }
+                    }.padding(.vertical, 4).tag(entry.id).contentShape(Rectangle()).onTapGesture(count: 2) { if entry.initialized { store.openSubmodule(entry) } else { store.manageSubmodule(.manage(entry, .initialize)) } }.contextMenu { if selection.count > 1 { Button("Manage Selected Submodules…") { store.relatedAdministration(.submodules(store.submodules.filter { selection.contains($0.id) })) }.disabled(store.isBusy); Divider() }; SubmoduleContextActions(store: store, entry: entry) }
                 }.listStyle(.plain).pinnedScrollInsets(insets)
                 .staggeredEntrance(isShowing: listEntered, index: 0, style: .pane)
                 .staggeredEntranceTrigger($listEntered, id: store.repositoryToken)
@@ -145,8 +145,8 @@ struct SubmodulesView: View {
                                     Text(entry.status).font(.system(size: 12, weight: .medium)).foregroundStyle(needsAttention(entry) ? Pico.warning : Pico.addition)
                                 }
                                 Spacer()
-                                Menu("Manage") { SubmoduleContextActions(store: store, entry: entry) }.fixedSize().controlSize(.small)
-                                Button(entry.initialized ? "Open" : "Initialize…") { if entry.initialized { store.openSubmodule(entry) } else { store.manageSubmodule(.manage(entry, .initialize)) } }.buttonStyle(.borderedProminent).controlSize(.small)
+                                Menu("Manage") { SubmoduleContextActions(store: store, entry: entry) }.fixedSize().controlSize(.small).disabled(store.isBusy)
+                                Button(entry.initialized ? "Open" : "Initialize…") { if entry.initialized { store.openSubmodule(entry) } else { store.manageSubmodule(.manage(entry, .initialize)) } }.buttonStyle(.borderedProminent).controlSize(.small).disabled(store.isBusy)
                             }
                             .staggeredEntrance(isShowing: detailEntered, index: 0, style: .card)
                             Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 8) {
@@ -169,29 +169,29 @@ struct SubmodulesView: View {
         } top: {
             PaneBar(title: "Submodules", subtitle: store.submodules.isEmpty ? String(localized: "No nested repositories") : String(localized: "\(store.submodules.count) nested repositories"), icon: "shippingbox") {
                 Menu {
-                    Button("Manage Selected Submodules…") { store.relatedAdministration(.submodules(store.submodules.filter { selection.contains($0.id) })) }.disabled(selection.isEmpty)
+                    Button("Manage Selected Submodules…") { store.relatedAdministration(.submodules(store.submodules.filter { selection.contains($0.id) })) }.disabled(store.isBusy || selection.isEmpty)
                     Button("Select All") { selection = Set(entries.map(\.id)) }
                     Divider()
-                    Button("Management Backups…") { store.relatedAdministration(.backups) }
+                    Button("Management Backups…") { store.relatedAdministration(.backups) }.disabled(store.isBusy)
                 } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Selection and maintenance")
                 Button { store.manageSubmodule(.add) } label: { Label("Add Submodule", systemImage: "plus") }.buttonStyle(.borderedProminent).controlSize(.small).disabled(store.isBusy)
             }
         } bottom: {
             if let error = store.submoduleError { Label(error, systemImage: "exclamationmark.triangle.fill").foregroundStyle(Pico.deletion).font(.caption).frame(maxWidth: .infinity, alignment: .leading).padding(12) }
-        }.disabled(store.isBusy).onChange(of: entries.map(\.id), initial: true) { selection.formIntersection(entries.map(\.id)); if selection.isEmpty { selection = Set(entries.prefix(1).map(\.id)) } }
+        }.onChange(of: entries.map(\.id), initial: true) { selection.formIntersection(entries.map(\.id)); if selection.isEmpty { selection = Set(entries.prefix(1).map(\.id)) } }
     }
 }
 struct SubmoduleContextActions: View {
     var store: RepositoryStore
     let entry: ManagedSubmodule
     var body: some View {
-        Button("Open Submodule") { store.openSubmodule(entry) }.disabled(!entry.initialized || entry.diagnostic != nil)
+        Button("Open Submodule") { store.openSubmodule(entry) }.disabled(store.isBusy || !entry.initialized || entry.diagnostic != nil)
         ForEach(SubmoduleOperation.allCases.filter { $0 != .remove && $0 != .deinitialize }, id: \.self) { operation in
-            Button(operation.actionTitle) { store.manageSubmodule(.manage(entry, operation)) }.disabled((operation == .fetch || operation == .checkout) && !entry.initialized)
+            Button(operation.actionTitle) { store.manageSubmodule(.manage(entry, operation)) }.disabled(store.isBusy || ((operation == .fetch || operation == .checkout) && !entry.initialized))
         }
         Divider()
-        Button("Deinitialize…") { store.manageSubmodule(.manage(entry, .deinitialize)) }.disabled(!entry.initialized)
-        Button("Remove Submodule…", role: .destructive) { store.manageSubmodule(.manage(entry, .remove)) }
+        Button("Deinitialize…") { store.manageSubmodule(.manage(entry, .deinitialize)) }.disabled(store.isBusy || !entry.initialized)
+        Button("Remove Submodule…", role: .destructive) { store.manageSubmodule(.manage(entry, .remove)) }.disabled(store.isBusy)
     }
 }
 

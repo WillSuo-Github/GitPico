@@ -16,7 +16,7 @@ struct RemoteSettingsPane: View {
                         Button("Rename…") { store.manage(.renameRemote(remote)) }
                         Spacer()
                         Button("Remove…", role: .destructive) { store.manage(.removeRemote(remote)) }
-                    }.controlSize(.small)
+                    }.controlSize(.small).disabled(store.isBusy || store.isFetching)
                 }
             }
             if store.managedRemotes.isEmpty { Text("No remotes configured.").foregroundStyle(.secondary) }
@@ -24,7 +24,7 @@ struct RemoteSettingsPane: View {
                 Button("Add Remote…") { store.manage(.addRemote) }
                 Spacer()
                 Button("Recover Removed Remotes…") { store.manage(.recovery) }
-            }
-        }.formStyle(.grouped).disabled(store.isBusy || store.isFetching)
+            }.disabled(store.isBusy || store.isFetching)
+        }.formStyle(.grouped)
     }
 }

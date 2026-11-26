@@ -152,7 +152,6 @@ struct SidebarView: View {
             } primaryAction: { selection in
                 store.activateSidebarSelection(selection)
             }
-            .disabled(store.isBusy)
             .scrollEdgeEffectHidden(true, for: .vertical)
             .safeAreaInset(edge: .top, spacing: 0) {
                 SidebarRepositoryHeader(store: store)
@@ -177,7 +176,7 @@ struct SidebarView: View {
                         Button("Add Submodule…") { store.manageSubmodule(.add) }
                         Divider()
                         Button("Recover Deleted Items…") { store.manage(.recovery) }
-                    } label: { Image(systemName: "plus") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Add branch, tag, remote, worktree or submodule")
+                    } label: { Image(systemName: "plus") }.menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().disabled(store.isBusy).help("Add branch, tag, remote, worktree or submodule")
                     Button { store.navigate(.repositorySettings) } label: { Image(systemName: "gearshape") }.buttonStyle(.borderless).help("Repository settings (⌘5)")
                 }.font(.system(size: 11)).padding(.horizontal, 10).frame(height: Self.filterBarHeight)
                     // Reserve room for the status labels while the list scrolls behind them.
@@ -340,14 +339,14 @@ struct SidebarRepositoryHeader: View {
             .help("Switch repository\n\(snapshot.root.path)")
             .accessibilityLabel(Text("Repository \(name), branch \(snapshot.branch). Switch repository"))
             .accessibilityValue(accessibilityContext)
+            .padding(.horizontal, 10).padding(.bottom, 4)
             .contextMenu {
-                Button("Switch Repository…", action: store.showRepositories)
+                Button("Switch Repository…", action: store.showRepositories).disabled(store.isBusy || store.isOpeningRepository)
                 Button("Repository Settings") { store.navigate(.repositorySettings) }
                 Divider()
                 Button("Reveal in Finder") { NSWorkspace.shared.activateFileViewerSelecting([snapshot.root]) }
                 Button("Copy Path") { Pico.copy(snapshot.root.path) }
             }
-            .padding(.horizontal, 10).padding(.bottom, 4)
         }
     }
 }

@@ -22,9 +22,9 @@ struct SidebarSelectionContextActions: View {
             case .worktree(let path):
                 if let entry = store.worktrees.first(where: { $0.path == path }) { WorktreeContextActions(store: store, entry: entry) }
             case .worktrees:
-                Button("Add Worktree…") { store.manageWorktree(.create(nil)) }
+                Button("Add Worktree…") { store.manageWorktree(.create(nil)) }.disabled(store.isBusy || store.snapshot?.hasHEAD != true)
             case .submodules:
-                Button("Add Submodule…") { store.manageSubmodule(.add) }
+                Button("Add Submodule…") { store.manageSubmodule(.add) }.disabled(store.isBusy)
             default: EmptyView()
             }
         }

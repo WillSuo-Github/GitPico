@@ -165,7 +165,7 @@ struct HistoryCommitTable: NSViewRepresentable {
             switch rows[row] { case .month: 26; case .commit: input?.compact == true ? 32 : 50 }
         }
         func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
-            guard let store = input?.store, !store.isBusy || store.isFetching else { return false }
+            guard input != nil else { return false }
             if case .commit = rows[row] { return true }
             return false
         }
@@ -174,7 +174,7 @@ struct HistoryCommitTable: NSViewRepresentable {
             return false
         }
         func tableViewSelectionDidChange(_ notification: Notification) {
-            guard !updating, let input, (!input.store.isBusy || input.store.isFetching) else { return }
+            guard !updating, let input else { return }
             input.store.selectedHistoryHashes = Set(table.selectedRowIndexes.compactMap { index in
                 if rows.indices.contains(index), case .commit(let item) = rows[index] { return item.hash }; return nil
             })

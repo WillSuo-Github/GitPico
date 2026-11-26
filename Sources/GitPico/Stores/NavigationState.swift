@@ -43,10 +43,11 @@ extension RepositoryStore {
         historyNeedsReveal = false; pendingHistorySelection = nil
     }
     var isChoosingRepository: Bool { workspace?.tab(for: self)?.showsRepositoryPicker == true }
-    var isOpeningRepository: Bool { workspace?.tab(for: self)?.isOpening == true }
-    var canUseRepository: Bool { snapshot != nil && !isBusy && !isChoosingRepository && !isOpeningRepository }
+    var isOpeningRepository: Bool { isOpeningInPlace || workspace?.tab(for: self)?.isOpening == true }
+    var canInspectRepository: Bool { snapshot != nil && !isChoosingRepository && !isOpeningRepository }
+    var canUseRepository: Bool { canInspectRepository && !isBusy }
     var canFetch: Bool { canUseRepository && !isFetching && snapshot?.remotes.isEmpty == false }
-    var canBrowseHistory: Bool { canUseRepository && snapshot?.hasHEAD == true }
+    var canBrowseHistory: Bool { canInspectRepository && snapshot?.hasHEAD == true }
     var canIntegrate: Bool { canUseRepository && snapshot?.hasHEAD == true && snapshot?.operation == RepositoryOperation.none }
     var canRemoteIntegrate: Bool { canIntegrate && !isFetching && snapshot?.remotes.isEmpty == false }
     var canSynchronize: Bool { canRemoteIntegrate && snapshot?.references.contains { $0.isCurrent && !$0.upstream.isEmpty } == true }

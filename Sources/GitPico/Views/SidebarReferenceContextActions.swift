@@ -17,32 +17,32 @@ struct SidebarReferenceContextActions: View {
         Divider()
         if ref.isLocal {
             if let kind = store.flowConfiguration?.kind(of: ref.name), kind != .support { Button("Git Flow: \(kind.finishTitle)…") { store.manageFlow(.finish(ref.name)) }.disabled(store.isBusy || store.activeFlow != nil) }
-            Button("Checkout Branch in New Worktree…") { store.manageWorktree(.create(ref.name)) }.disabled(store.worktrees.contains { $0.branch == ref.fullName })
-            Button(store.organization.pinned.contains(ref.fullName) ? "Unpin Branch" : "Pin Branch") { store.organize(ref, pinned: !store.organization.pinned.contains(ref.fullName)) }
-            Button("Track Upstream Branch…") { store.manage(.upstream(ref)) }
-            Button("Publish / Push Branch…") { store.manage(.publish(ref, nil, nil, false)) }.disabled(store.managedRemotes.isEmpty || store.isFetching)
-            Button("Force Push with Lease…") { store.manage(.publish(ref, nil, nil, true)) }.disabled(store.managedRemotes.isEmpty || store.isFetching)
-            Button(store.organization.archived.contains(ref.fullName) ? "Unarchive Branch" : "Archive Branch") { store.organize(ref, archived: !store.organization.archived.contains(ref.fullName)) }
-            Button("Rename Branch…") { store.manage(.renameBranch(ref)) }
-            Button("Delete Branch…", role: .destructive) { store.manage(.deleteBranch(ref)) }.disabled(ref.isCurrent)
+            Button("Checkout Branch in New Worktree…") { store.manageWorktree(.create(ref.name)) }.disabled(store.isBusy || store.worktrees.contains { $0.branch == ref.fullName })
+            Button(store.organization.pinned.contains(ref.fullName) ? "Unpin Branch" : "Pin Branch") { store.organize(ref, pinned: !store.organization.pinned.contains(ref.fullName)) }.disabled(store.isBusy)
+            Button("Track Upstream Branch…") { store.manage(.upstream(ref)) }.disabled(store.isBusy)
+            Button("Publish / Push Branch…") { store.manage(.publish(ref, nil, nil, false)) }.disabled(store.isBusy || store.managedRemotes.isEmpty || store.isFetching)
+            Button("Force Push with Lease…") { store.manage(.publish(ref, nil, nil, true)) }.disabled(store.isBusy || store.managedRemotes.isEmpty || store.isFetching)
+            Button(store.organization.archived.contains(ref.fullName) ? "Unarchive Branch" : "Archive Branch") { store.organize(ref, archived: !store.organization.archived.contains(ref.fullName)) }.disabled(store.isBusy)
+            Button("Rename Branch…") { store.manage(.renameBranch(ref)) }.disabled(store.isBusy)
+            Button("Delete Branch…", role: .destructive) { store.manage(.deleteBranch(ref)) }.disabled(store.isBusy || ref.isCurrent)
         }
         if ref.isRemote, let remote = store.remoteFor(ref) {
             Button("Check Out “\(ref.name)”") { store.switchRemoteBranch(ref) }.disabled(!store.canUseRepository || store.isFetching || store.snapshot?.operation != RepositoryOperation.none)
-            Button("Check Out as Tracking Branch…") { store.manage(.createBranch(ref.hash, ref.fullName)) }
-            Button("Delete Remote Branch…", role: .destructive) { store.manage(.publish(nil, remote.name, "refs/heads/" + String(ref.name.dropFirst(remote.name.count + 1)), false)) }.disabled(store.isFetching)
+            Button("Check Out as Tracking Branch…") { store.manage(.createBranch(ref.hash, ref.fullName)) }.disabled(store.isBusy)
+            Button("Delete Remote Branch…", role: .destructive) { store.manage(.publish(nil, remote.name, "refs/heads/" + String(ref.name.dropFirst(remote.name.count + 1)), false)) }.disabled(store.isBusy || store.isFetching)
         }
         if ref.isTag {
-            Button("Tag Information…") { store.manage(.inspectTag(ref)) }
-            Button("Rename Tag…") { store.manage(.renameTag(ref)) }
-            Button("Delete Tag…", role: .destructive) { store.manage(.deleteTag(ref)) }
-            Button("Publish Tag…") { store.manage(.publish(ref, nil, nil, false)) }.disabled(store.managedRemotes.isEmpty || store.isFetching)
+            Button("Tag Information…") { store.manage(.inspectTag(ref)) }.disabled(store.isBusy)
+            Button("Rename Tag…") { store.manage(.renameTag(ref)) }.disabled(store.isBusy)
+            Button("Delete Tag…", role: .destructive) { store.manage(.deleteTag(ref)) }.disabled(store.isBusy)
+            Button("Publish Tag…") { store.manage(.publish(ref, nil, nil, false)) }.disabled(store.isBusy || store.managedRemotes.isEmpty || store.isFetching)
         }
         Divider()
-        Button("Create New Branch from Here…") { store.manage(.createBranch(ref.hash, nil)) }
-        Button("Create New Tag from Here…") { store.manage(.createTag(ref.hash)) }
+        Button("Create New Branch from Here…") { store.manage(.createBranch(ref.hash, nil)) }.disabled(store.isBusy)
+        Button("Create New Tag from Here…") { store.manage(.createTag(ref.hash)) }.disabled(store.isBusy)
         if !ref.isCurrent {
-            Button("Merge into HEAD…") { store.integrationRequest = IntegrationRequest(action: .merge, revision: ref.fullName) }
-            Button("Rebase HEAD onto This Branch…") { store.integrationRequest = IntegrationRequest(action: .rebase, revision: ref.fullName) }
+            Button("Merge into HEAD…") { store.integrationRequest = IntegrationRequest(action: .merge, revision: ref.fullName) }.disabled(!store.canIntegrate)
+            Button("Rebase HEAD onto This Branch…") { store.integrationRequest = IntegrationRequest(action: .rebase, revision: ref.fullName) }.disabled(!store.canIntegrate)
         }
         Button("Compare with Revision…") { store.navigate(.comparison(ref.fullName)) }
         Button("Copy Name") { NSPasteboard.general.clearContents(); NSPasteboard.general.setString(ref.name, forType: .string) }

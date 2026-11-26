@@ -22,7 +22,7 @@ struct RepositorySettingsView: View {
                     Text(store.repositoryDisplayName).font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
-                Button("Done", action: requestClose).keyboardShortcut(.cancelAction).disabled(draft.saving || (store.isBusy && !store.isFetching))
+                Button("Done", action: requestClose).keyboardShortcut(.cancelAction).disabled(draft.saving)
             }.padding(20)
             Picker("Settings", selection: $store.settingsTab) {
                 Text("General").tag("General"); Text("Remotes").tag("Remotes"); Text("Ignores").tag("Ignores")
