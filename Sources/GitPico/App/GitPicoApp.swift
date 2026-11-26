@@ -15,6 +15,7 @@ struct GitPicoApp: App {
 @MainActor final class AppDelegate: NSObject, NSApplicationDelegate {
     let workspace: RepositoryWorkspace
     lazy var repositoryWindows = NativeRepositoryWindows(workspace: workspace, permitsPresentation: !NativeStartupVerification.enabled)
+    private var isCompletingTermination = false
     override init() {
         workspace = NativeStartupVerification.enabled ? NativeStartupVerification.makeWorkspace() : RepositoryWorkspace()
         super.init()
@@ -58,9 +59,30 @@ struct GitPicoApp: App {
     }
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         if NativeStartupVerification.enabled { return .terminateNow }
-        if workspace.tabs.contains(where: \.isBusy) || workspace.networkActivity.runningCount > 0 {
+        if isCompletingTermination { return .terminateLater }
+        if workspace.tabs.contains(where: \.isBusy) || workspace.networkActivity.foregroundRunningCount > 0 {
             workspace.error = "Wait for repository operations to finish before quitting GitPico."
             return .terminateCancel
+        }
+        if workspace.hasActiveBackgroundFetch || workspace.networkActivity.runningCount > 0 {
+            isCompletingTermination = true
+            Task { @MainActor [weak self] in
+                guard let self else {
+                    NSApp.reply(toApplicationShouldTerminate: true)
+                    return
+                }
+                defer { self.isCompletingTermination = false }
+                await self.workspace.waitForBackgroundFetchToStop()
+                let ok = self.workspace.shutdown()
+                if !ok {
+                    if self.workspace.draftSaveWarning != nil {
+                        self.workspace.error = String(localized: "Drafts could not be saved. Resolve the draft storage error before quitting.")
+                    }
+                    self.workspace.startBackgroundFetchScheduler()
+                }
+                NSApp.reply(toApplicationShouldTerminate: ok)
+            }
+            return .terminateLater
         }
         if !workspace.shutdown() {
             if workspace.draftSaveWarning != nil {
@@ -101,8 +123,10 @@ struct SettingsView: View {
                 }
                 Text(preferences.pullPolicy.explanation).font(.caption).foregroundStyle(.secondary)
                 Toggle("Always offer to stash local changes", isOn: $preferences.offerAutomaticStash)
-                Toggle("Fetch remote updates in the background", isOn: $preferences.backgroundFetch)
-                Text("Every five minutes while an open repository is idle. Uses connected HTTPS accounts or unlocked SSH keys, never Pulls or Pushes, and reports failures in Network Activity without prompting.").font(.caption).foregroundStyle(.secondary)
+                Picker("Fetch all repositories in the background", selection: $preferences.backgroundFetchInterval) {
+                    ForEach(BackgroundFetchInterval.allCases) { Text($0.title).tag($0) }
+                }
+                Text("Fetches all saved and open repositories on the selected schedule while idle. Uses connected HTTPS accounts or unlocked SSH keys, never Pulls or Pushes, and reports failures in Network Activity without prompting.").font(.caption).foregroundStyle(.secondary)
             }
             Section("Diffs") {
                 LabeledContent("Font size") {

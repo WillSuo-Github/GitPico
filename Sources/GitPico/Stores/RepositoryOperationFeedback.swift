@@ -40,7 +40,12 @@ struct RepositoryOperationFeedback: Identifiable {
 }
 
 extension RepositoryStore {
-    var isFetching: Bool { isManualFetching || isBackgroundFetching }
+    var isWorkspaceBackgroundFetchingCurrentRepository: Bool {
+        guard let path = snapshot?.root.path else { return false }
+        return workspace?.backgroundFetchingRepositoryPath == path
+    }
+    var isActiveBackgroundFetching: Bool { isBackgroundFetching || isWorkspaceBackgroundFetchingCurrentRepository }
+    var isFetching: Bool { isManualFetching || isActiveBackgroundFetching }
     var isPerformingActivity: Bool { isBusy || isFetching }
     var showsRepositoryStatus: Bool { snapshot != nil && !isChoosingRepository }
     var isPerformingStatusActivity: Bool { isBusy || (showsRepositoryStatus && isFetching) }
@@ -98,9 +103,10 @@ extension RepositoryStore {
                 $0.repositoryPath == feedback.repository && $0.command == "fetch" && $0.started >= feedback.started && $0.phase == .running
             }
         }
-        if isBackgroundFetching, let path = snapshot?.root.path {
+        if isActiveBackgroundFetching, let path = snapshot?.root.path {
+            let earliest = isBackgroundFetching ? lastBackgroundFetch : (workspace?.backgroundFetchStartedAt ?? .distantPast)
             return networkActivity?.records.first {
-                $0.repositoryPath == path && $0.command == "fetch" && $0.started >= lastBackgroundFetch && $0.phase == .running
+                $0.repositoryPath == path && $0.command == "fetch" && $0.started >= earliest && $0.phase == .running
             }
         }
         return nil

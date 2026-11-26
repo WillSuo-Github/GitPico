@@ -192,7 +192,6 @@ final class RepositoryStore {
     @ObservationIgnored var automaticRefreshTask: Task<Void, Never>?
     @ObservationIgnored var automaticRefreshPending = false
     @ObservationIgnored var automaticRefreshEpoch = UUID()
-    @ObservationIgnored var backgroundFetchTask: Task<Void, Never>?
     @ObservationIgnored var lastBackgroundFetch = Date.distantPast
     @ObservationIgnored var suppressOperationFeedback = false
     var activity = "" {
@@ -249,7 +248,7 @@ final class RepositoryStore {
     @ObservationIgnored var repositoryToken = UUID()
     @ObservationIgnored var draftBeforeAmend: (String, String)?
     deinit {
-        automaticMonitorTask?.cancel(); automaticRefreshTask?.cancel(); backgroundFetchTask?.cancel(); fetchTask?.cancel(); cloneTask?.cancel(); conflictDraftSaveTask?.cancel(); exclusiveFeedbackTask?.cancel(); fetchFeedbackTask?.cancel()
+        automaticMonitorTask?.cancel(); automaticRefreshTask?.cancel(); fetchTask?.cancel(); cloneTask?.cancel(); conflictDraftSaveTask?.cancel(); exclusiveFeedbackTask?.cancel(); fetchFeedbackTask?.cancel()
         if let root = networkRegisteredRoot { GitNetworkContexts.remove(root: root, owner: networkContextOwner) }
     }
 

@@ -6,15 +6,6 @@ extension RepositoryStore {
         stopAutomaticRefresh()
         guard let repository else { return }
         let token = repositoryToken
-        backgroundFetchTask = Task { [weak self] in
-            while !Task.isCancelled {
-                do { try await Task.sleep(for: .seconds(30)) } catch { return }
-                guard let self, self.repositoryToken == token else { return }
-                if AppPreferences.shared.backgroundFetch, Date().timeIntervalSince(self.lastBackgroundFetch) >= 300 {
-                    await self.fetchInBackground()
-                }
-            }
-        }
         automaticMonitorTask = Task { [weak self] in
             do {
                 let paths = try await repository.observationPaths()
@@ -31,15 +22,18 @@ extension RepositoryStore {
         }
     }
     func stopAutomaticRefresh() {
-        backgroundFetchTask?.cancel(); backgroundFetchTask = nil
         automaticMonitorTask?.cancel(); automaticMonitorTask = nil; fileMonitor = nil
         automaticRefreshTask?.cancel(); automaticRefreshTask = nil
         automaticRefreshPending = false; automaticRefreshEpoch = UUID()
     }
     func fetchInBackground() async {
-        guard !isBusy, !isFetching, !isAutomaticallyRefreshing, !isChoosingRepository, let repository, snapshot?.remotes.isEmpty == false, let journal = networkActivity, let reservation = journal.reserveBackgroundFetch() else { return }
+        _ = await performBackgroundFetch()
+    }
+    func performBackgroundFetch(allowWhileChoosingRepository: Bool = false) async -> Bool {
+        guard !isBusy, !isFetching, !isAutomaticallyRefreshing, (allowWhileChoosingRepository || !isChoosingRepository), let repository, snapshot?.remotes.isEmpty == false, let journal = networkActivity, let reservation = journal.reserveBackgroundFetch() else { return false }
         let token = repositoryToken
-        lastBackgroundFetch = Date(); isBackgroundFetching = true
+        let started = Date()
+        lastBackgroundFetch = started; isBackgroundFetching = true
         defer {
             journal.releaseBackgroundFetch(reservation)
             isBackgroundFetching = false
@@ -48,19 +42,23 @@ extension RepositoryStore {
         var startedNetwork = false
         do {
             let custom = try await GitProcess.run(["config", "--get", "core.sshCommand"], at: repository.root, allowed: [0,1]).text.trimmingCharacters(in: .newlines)
-            guard token == repositoryToken else { return }
-            let base = networkContext()
+            guard token == repositoryToken else { return false }
             let ssh = ProcessInfo.processInfo.environment["GIT_SSH_COMMAND"] ?? (custom.isEmpty ? "/usr/bin/ssh" : custom)
-            let context = GitNetworkContext(credential: base.credential, matchingCredentials: base.matchingCredentials, nonInteractive: true, sshCommand: ssh, observer: base.observer)
+            let context = authentication.networkContext(
+                activity: journal,
+                nonInteractive: true,
+                sshCommand: ssh,
+                backgroundReservation: reservation
+            )
             startedNetwork = true
             try await GitNetworkContexts.$current.withValue(context) { try await repository.sync(.fetch, timeout: 120) }
         } catch {
             if !startedNetwork {
                 let root = await repository.root
-                journal.receive(GitNetworkEvent(id: UUID(), command: "fetch", repository: root.lastPathComponent, repositoryPath: root.path, started: lastBackgroundFetch, phase: .failed, output: String(localized: "Background Fetch could not start. \(GitLogRedaction.clean(error.localizedDescription))"), cancellation: GitNetworkCancellation()))
+                journal.receive(GitNetworkEvent(id: UUID(), command: "fetch", repository: root.lastPathComponent, repositoryPath: root.path, started: started, phase: .failed, output: String(localized: "Background Fetch could not start. \(GitLogRedaction.clean(error.localizedDescription))"), cancellation: GitNetworkCancellation()))
             }
-            // Started network failures remain in activity history without interrupting editing.
         }
+        return true
     }
     func refreshAfterFetch(expectedToken: UUID) async -> String? {
         for _ in 0..<3 {

@@ -54,11 +54,22 @@ extension RepositoryWindowRouting {
     let library: RepositoryLibrary
     let authentication: AuthenticationStore
     let networkActivity: NetworkActivityStore
+    let preferences: AppPreferences
+    var backgroundFetchingRepositoryPath: String?
     var error: String?
     var draftSaveWarning: String?
     var sessionSaveWarning: String?
     @ObservationIgnored let session: WorkspaceSessionStore
     @ObservationIgnored private var sessionTask: Task<Void, Never>?
+    @ObservationIgnored var backgroundFetchStartedAt = Date.distantPast
+    @ObservationIgnored var backgroundFetchSchedulerTask: Task<Void, Never>?
+    @ObservationIgnored var activeBackgroundFetchTask: Task<Void, Never>?
+    @ObservationIgnored var lastBackgroundFetchByPath: [String: Date] = [:]
+    @ObservationIgnored var lastBackgroundFetchByCommonDir: [String: Date] = [:]
+    @ObservationIgnored private var backgroundFetchObserver: NSObjectProtocol?
+    @ObservationIgnored var isSystemAsleep = false
+    @ObservationIgnored var backgroundFetchPollInterval: Duration = .seconds(30)
+    @ObservationIgnored var backgroundFetchNow: () -> Date = { Date() }
     @ObservationIgnored var restoringSession = false
     var repositoryVisits = RepositoryVisitHistory()
     var isNavigatingRepositories = false
@@ -75,10 +86,12 @@ extension RepositoryWindowRouting {
     var activeTab: RepositoryTab { tabs.first { $0.id == selectedID } ?? tabs[0] }
     var activeStore: RepositoryStore { activeTab.store }
     var canCloseActiveTab: Bool { !activeTab.isBusy }
+    var hasActiveBackgroundFetch: Bool { activeBackgroundFetchTask != nil || backgroundFetchingRepositoryPath != nil || networkActivity.hasBackgroundReservation }
 
-    init(library: RepositoryLibrary? = nil, draftsFile: URL? = nil, storeFactory: ((RepositoryLibrary) -> RepositoryStore)? = nil) {
+    init(library: RepositoryLibrary? = nil, draftsFile: URL? = nil, preferences: AppPreferences = .shared, storeFactory: ((RepositoryLibrary) -> RepositoryStore)? = nil) {
         let library = library ?? RepositoryLibrary()
         self.library = library
+        self.preferences = preferences
         let authentication = AuthenticationStore(file: library.file.deletingLastPathComponent().appendingPathComponent("authentication.json"))
         self.authentication = authentication
         let networkActivity = NetworkActivityStore(directory: library.file.deletingLastPathComponent())
@@ -92,6 +105,21 @@ extension RepositoryWindowRouting {
         tabs = [first]; selectedID = first.id; first.store.workspace = self
         draftSaveWarning = drafts.error
         sessionSaveWarning = session.error
+        backgroundFetchObserver = NotificationCenter.default.addObserver(
+            forName: AppPreferences.backgroundFetchIntervalDidChangeNotification,
+            object: preferences,
+            queue: nil
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in self?.handleBackgroundFetchPreferenceChange() }
+        }
+    }
+
+    isolated deinit {
+        if let backgroundFetchObserver { NotificationCenter.default.removeObserver(backgroundFetchObserver) }
+        backgroundFetchSchedulerTask?.cancel()
+        activeBackgroundFetchTask?.cancel()
+        sessionTask?.cancel()
+        draftTask?.cancel()
     }
     func tab(for store: RepositoryStore) -> RepositoryTab? { tabs.first { $0.store === store } }
     func isRepositoryOpen(at path: String) -> Bool { tabs.contains { $0.displayedRepositoryPath == path } }
@@ -278,6 +306,7 @@ extension RepositoryWindowRouting {
         guard saveForRestart() else { return false }
         // Later window-close/KVO callbacks must never replace this final snapshot.
         isShuttingDown = true
+        stopBackgroundFetch()
         for tab in tabs { tab.store.disconnectNetworkContext(); tab.store.stopAutomaticRefresh() }
         return true
     }
@@ -333,11 +362,14 @@ extension RepositoryWindowRouting {
     func startMonitoring() {
         monitoringEnabled = true
         for tab in tabs where tab.root != nil { tab.store.startAutomaticRefresh() }
+        startBackgroundFetchScheduler()
     }
     func refreshExternalChanges() {
         for tab in tabs where tab.root != nil { tab.store.requestAutomaticRefresh() }
     }
     func prepareForSleep() {
+        isSystemAsleep = true
+        stopBackgroundFetch()
         var conflictErrors: [String] = []
         for tab in tabs where tab.root != nil {
             recordDraft(tab.store)
@@ -348,9 +380,11 @@ extension RepositoryWindowRouting {
         if !conflictErrors.isEmpty { draftSaveWarning = ([draftSaveWarning].compactMap { $0 } + conflictErrors).joined(separator: "\n") }
     }
     func resumeAfterWake() {
+        isSystemAsleep = false
         for tab in tabs where tab.root != nil {
             if monitoringEnabled { tab.store.startAutomaticRefresh() }
             tab.store.requestAutomaticRefresh()
         }
+        if monitoringEnabled { startBackgroundFetchScheduler() }
     }
 }

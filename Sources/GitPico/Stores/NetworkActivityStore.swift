@@ -68,7 +68,11 @@ private final class NetworkHistoryWriter: @unchecked Sendable {
     @ObservationIgnored private let writer: NetworkHistoryWriter
     @ObservationIgnored private var revision: UInt64 = 0
     @ObservationIgnored private var backgroundReservation: UUID?
+    @ObservationIgnored private var backgroundRecordID: UUID?
+    @ObservationIgnored private var backgroundCancelled = false
     var runningCount: Int { records.filter { $0.phase == .running }.count }
+    var foregroundRunningCount: Int { records.filter { $0.phase == .running && $0.id != backgroundRecordID }.count }
+    var hasBackgroundReservation: Bool { backgroundReservation != nil }
     deinit { saveTask?.cancel() }
     init(directory: URL) {
         file = directory.appendingPathComponent("network-activity.json")
@@ -102,16 +106,41 @@ private final class NetworkHistoryWriter: @unchecked Sendable {
             records.insert(NetworkActivityRecord(id: event.id, command: event.command, repository: event.repository, repositoryPath: event.repositoryPath, started: event.started, finished: event.phase == .running ? nil : Date(), phase: event.phase, output: output, timedOut: event.timedOut ? true : nil), at: 0)
         }
         if event.phase == .running { cancellations[event.id] = event.cancellation }
-        else { cancellations.removeValue(forKey: event.id) }
+        else {
+            cancellations.removeValue(forKey: event.id)
+            if backgroundRecordID == event.id { backgroundRecordID = nil }
+        }
+        if event.phase == .running, backgroundRecordID == event.id, backgroundCancelled {
+            event.cancellation.cancel()
+        }
         if records.count > 100, let oldest = records.lastIndex(where: { $0.phase != .running }) { records.remove(at: oldest) }
         if isNew || event.phase != .running { save() }
     }
     func cancel(_ id: UUID) { cancellations[id]?.cancel() }
     func reserveBackgroundFetch() -> UUID? {
         guard backgroundReservation == nil, runningCount == 0 else { return nil }
-        let token = UUID(); backgroundReservation = token; return token
+        let token = UUID()
+        backgroundReservation = token
+        backgroundRecordID = nil
+        backgroundCancelled = false
+        return token
     }
-    func releaseBackgroundFetch(_ token: UUID) { if backgroundReservation == token { backgroundReservation = nil } }
+    func markBackgroundRecord(_ id: UUID, token: UUID) {
+        guard backgroundReservation == token else { return }
+        backgroundRecordID = id
+    }
+    func cancelBackgroundFetch() {
+        guard backgroundReservation != nil else { return }
+        backgroundCancelled = true
+        if let backgroundRecordID { cancel(backgroundRecordID) }
+    }
+    func releaseBackgroundFetch(_ token: UUID) {
+        if backgroundReservation == token {
+            backgroundReservation = nil
+            backgroundRecordID = nil
+            backgroundCancelled = false
+        }
+    }
     func flush() {
         saveTask?.cancel(); revision += 1
         do { try writer.save(records, revision: revision); storageError = nil }
@@ -133,27 +162,40 @@ private final class NetworkHistoryWriter: @unchecked Sendable {
     }
 }
 
-extension RepositoryStore {
-    func networkContext(cloneAccountID: UUID? = nil, onEvent: (@MainActor @Sendable (GitNetworkEvent) -> Void)? = nil) -> GitNetworkContext {
-        let profile = cloneAccountID.flatMap { id in authentication.profiles.first { $0.id == id } }
+extension AuthenticationStore {
+    func networkContext(
+        activity: NetworkActivityStore?,
+        cloneAccountID: UUID? = nil,
+        nonInteractive: Bool = false,
+        sshCommand: String? = nil,
+        backgroundReservation: UUID? = nil,
+        onEvent: (@MainActor @Sendable (GitNetworkEvent) -> Void)? = nil
+    ) -> GitNetworkContext {
+        let profile = cloneAccountID.flatMap { id in profiles.first { $0.id == id } }
         let executable = Bundle.main.executablePath ?? CommandLine.arguments[0]
         let reference = profile.map { GitCredentialReference(id: $0.id, host: $0.host, executable: executable) }
-        // If an identity has multiple credentials, use the most recently
-        // connected one, except when cloning directly from an account's list.
-        let candidates = (profile.map { [$0] } ?? []) + authentication.profiles.reversed()
+        let candidates = (profile.map { [$0] } ?? []) + profiles.reversed()
         var usernamesByHost: [String: Set<String>] = [:]
         let matches: [GitCredentialReference] = candidates.compactMap { account in
             let host = account.host.lowercased()
             guard !account.username.isEmpty, usernamesByHost[host, default: []].insert(account.username).inserted else { return nil }
             return GitCredentialReference(id: account.id, host: host, executable: executable, username: account.username)
         }
-        let activity = networkActivity
-        return GitNetworkContext(credential: reference, matchingCredentials: matches) { [weak activity] event in
+        return GitNetworkContext(credential: reference, matchingCredentials: matches, nonInteractive: nonInteractive, sshCommand: sshCommand) { [weak activity] event in
             Task { @MainActor in
+                if let backgroundReservation {
+                    activity?.markBackgroundRecord(event.id, token: backgroundReservation)
+                }
                 activity?.receive(event)
                 onEvent?(event)
             }
         }
+    }
+}
+
+extension RepositoryStore {
+    func networkContext(cloneAccountID: UUID? = nil, onEvent: (@MainActor @Sendable (GitNetworkEvent) -> Void)? = nil) -> GitNetworkContext {
+        authentication.networkContext(activity: networkActivity, cloneAccountID: cloneAccountID, onEvent: onEvent)
     }
     func configureNetworkContext() {
         guard let snapshot else { return }

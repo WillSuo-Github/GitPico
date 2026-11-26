@@ -37,7 +37,7 @@ struct RepositoryActivityButton: View {
                 case .local: return feedback.title
                 }
             }
-            if store.showsRepositoryStatus && store.isBackgroundFetching { return String(localized: "Fetching remote updates…") }
+            if store.showsRepositoryStatus && store.isActiveBackgroundFetching { return String(localized: "Fetching remote updates…") }
             return store.activity
         }
         return resultTitle ?? String(localized: "Activity")
@@ -130,7 +130,7 @@ struct RepositoryActivityDetailsView: View {
     }
     private var runningLabel: String {
         if !store.activity.isEmpty { return store.activity }
-        if store.showsRepositoryStatus && store.isBackgroundFetching { return String(localized: "Fetching remote updates…") }
+        if store.showsRepositoryStatus && store.isActiveBackgroundFetching { return String(localized: "Fetching remote updates…") }
         return String(localized: "Fetching…")
     }
     var body: some View {

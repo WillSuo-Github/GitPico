@@ -115,6 +115,10 @@ extension RepositoryStore {
             if let fetchError {
                 fetchFeedback?.failure = fetchError
                 self.error = fetchError
+            } else if remote == nil {
+                let commonDirectory = try? await repository.commonDirectory().path
+                guard token == repositoryToken else { return }
+                workspace?.recordBackgroundFetch(for: snapshot.root.path, commonDirectory: commonDirectory)
             }
             fetchFeedback?.isRefreshing = true
             if let refreshError = await refreshAfterFetch(expectedToken: token) {
