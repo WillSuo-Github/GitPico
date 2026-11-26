@@ -83,6 +83,8 @@ struct RepositoryCommands: Commands {
                 }.disabled(!store.canUseRepository)
                 Divider()
                 Button("Repository Settings") { store.navigate(.repositorySettings) }.disabled(!store.canInspectRepository)
+                Button("Open in Terminal") { store.openInTerminal() }.keyboardShortcut("t", modifiers: [.command, .control]).disabled(!store.canInspectRepository)
+                Button("Open in Editor") { store.openInEditor() }.keyboardShortcut("e", modifiers: [.command, .control]).disabled(!store.canInspectRepository)
                 Button("Reveal in Finder") { if let root = store.snapshot?.root { NSWorkspace.shared.activateFileViewerSelecting([root]) } }.disabled(!store.canInspectRepository)
             }
             CommandMenu("Branch") {

@@ -14,6 +14,37 @@ struct RepositoryWorkspaceView: View {
         self.descriptorChanged = descriptorChanged
     }
     var body: some View {
+        Group {
+            if showsRepository {
+                splitView
+                    .toolbar(id: RepositoryToolbar.customizationIdentifier) {
+                        RepositoryToolbar(store: tab.store)
+                    }
+            } else {
+                splitView
+                    .toolbar(id: RepositoryPickerToolbar.toolbarIdentifier) {
+                        RepositoryPickerToolbar(store: tab.store)
+                    }
+            }
+        }
+        .toolbar(removing: .title)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !showsRepository { RepositoryStatusBar(store: tab.store) }
+        }
+        .overlay(alignment: .bottom) {
+            if showsRepository { RepositoryStatusBar(store: tab.store, showsBackground: false) }
+        }
+        .onChange(of: tab.title, initial: true) { descriptorChanged() }
+        .onChange(of: tab.isBusy) { descriptorChanged() }
+        .onChange(of: tab.showsActivitySpinner) { descriptorChanged() }
+        .onChange(of: tab.store.snapshot == nil) { descriptorChanged() }
+        .onChange(of: tab.showsRepositoryPicker) { descriptorChanged() }
+        .alert("Repository Tabs", isPresented: Binding(get: { presentsAlerts && workspace.selectedID == tab.id && workspace.error != nil }, set: { if !$0 { workspace.error = nil } })) {
+            Button("OK") { workspace.error = nil }
+        } message: { Text(workspace.error ?? "") }
+    }
+
+    private var splitView: some View {
         NavigationSplitView {
             VStack(spacing: 0) {
                 Group {
@@ -28,9 +59,10 @@ struct RepositoryWorkspaceView: View {
             }
             .navigationSplitViewColumnWidth(min: 240, ideal: 280, max: 400)
             .toolbar {
-                ToolbarItemGroup {
+                ToolbarItem(id: "repository.menu") {
                     RepositoryMenu(store: tab.store)
                 }
+                .customizationBehavior(.disabled)
             }
         } detail: {
             VStack(spacing: 0) {
@@ -63,21 +95,5 @@ struct RepositoryWorkspaceView: View {
         }
         .frame(minWidth: 1080, minHeight: 680)
         .disabled(tab.isOpening)
-        .toolbar { RepositoryToolbar(store: tab.store) }
-        .toolbar(removing: .title)
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            if !showsRepository { RepositoryStatusBar(store: tab.store) }
-        }
-        .overlay(alignment: .bottom) {
-            if showsRepository { RepositoryStatusBar(store: tab.store, showsBackground: false) }
-        }
-        .onChange(of: tab.title, initial: true) { descriptorChanged() }
-        .onChange(of: tab.isBusy) { descriptorChanged() }
-        .onChange(of: tab.showsActivitySpinner) { descriptorChanged() }
-        .onChange(of: tab.store.snapshot == nil) { descriptorChanged() }
-        .onChange(of: tab.showsRepositoryPicker) { descriptorChanged() }
-        .alert("Repository Tabs", isPresented: Binding(get: { presentsAlerts && workspace.selectedID == tab.id && workspace.error != nil }, set: { if !$0 { workspace.error = nil } })) {
-            Button("OK") { workspace.error = nil }
-        } message: { Text(workspace.error ?? "") }
     }
 }

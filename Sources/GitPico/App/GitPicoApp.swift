@@ -8,7 +8,10 @@ struct GitPicoApp: App {
 
     var body: some Scene {
         Settings { SettingsView(tools: workspace.activeStore.toolPreferences, store: workspace.activeStore).environment(\.layoutDirection, AppLocalization.layoutDirection) }
-            .commands { RepositoryCommands(store: workspace.activeStore) }
+            .commands {
+                ToolbarCommands()
+                RepositoryCommands(store: workspace.activeStore)
+            }
     }
 }
 

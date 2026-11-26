@@ -1,26 +1,35 @@
 import GitCore
 import SwiftUI
 
-@MainActor struct HostedReviewWebMenu: View {
-    let store: RepositoryStore
-    var usesSidebarRow = false
-    private var destinations: [(name: String, repository: HostedRepository)] {
-        store.managedRemotes.compactMap { remote in
+struct HostedRemoteLink: Identifiable, Equatable, Sendable {
+    let name: String
+    let repository: HostedRepository
+    var id: String { name }
+}
+
+extension RepositoryStore {
+    var hostedRemoteLinks: [HostedRemoteLink] {
+        managedRemotes.compactMap { remote in
             guard let parsed = try? HostedRepository(remote: remote.fetchURL, provider: .gitlab) else { return nil }
             let provider: OAuthProvider
             switch parsed.host {
             case "github.com", "github.com:443": provider = .github
             case "gitlab.com", "gitlab.com:443": provider = .gitlab
             default:
-                guard let account = store.authentication.profiles.first(where: { $0.host == parsed.host && $0.provider != .generic }) else { return nil }
+                guard let account = authentication.profiles.first(where: { $0.host == parsed.host && $0.provider != .generic }) else { return nil }
                 provider = account.provider == .github ? .github : .gitlab
             }
             guard let repository = try? HostedRepository(remote: remote.fetchURL, provider: provider) else { return nil }
-            return (remote.name, repository)
+            return HostedRemoteLink(name: remote.name, repository: repository)
         }
     }
+}
+
+@MainActor struct HostedReviewWebMenu: View {
+    let store: RepositoryStore
+    var usesSidebarRow = false
     var body: some View {
-        let links = destinations
+        let links = store.hostedRemoteLinks
         if links.count == 1, let link = links.first {
             Link(destination: link.repository.reviewsWebURL) {
                 if usesSidebarRow {

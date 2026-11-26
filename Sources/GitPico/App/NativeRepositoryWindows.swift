@@ -15,6 +15,7 @@ import SwiftUI
     private var membershipUpdateScheduled = false
     private var lastSelectedID: UUID?
     private var preparedAnchorID: UUID?
+    private var configuredToolbars: Set<ObjectIdentifier> = []
     /// While a saved session is restored at launch, windows are built and arranged hidden, then shown once in their final state.
     private(set) var presentationHeld = false
     private var heldSelections: [UUID] = []
@@ -32,6 +33,7 @@ import SwiftUI
         workspace.windowRouting = nil
         observers.removeAll()
         membershipObservers.removeAll()
+        configuredToolbars.removeAll()
         let windows = controllers.values.compactMap(\.window)
         controllers.removeAll()
         for window in windows { window.delegate = nil; window.close() }
@@ -177,11 +179,35 @@ import SwiftUI
                 progress.heightAnchor.constraint(equalToConstant: 14).isActive = true
             }
         } else { window.tab.accessoryView = nil }
-        window.toolbar?.displayMode = .iconOnly
+        if let toolbar = window.toolbar {
+            configureToolbar(toolbar)
+        }
+        DispatchQueue.main.async { [weak self] in
+            guard let self, let toolbar = self.window(for: id)?.toolbar else { return }
+            self.configureToolbar(toolbar)
+        }
         // Let the workspace paint one surface through the titlebar and its pinned headers.
         window.titlebarAppearsTransparent = true
         window.setRepositoryDropEnabled(tab.acceptsRepositoryDrops)
         if let content = window.contentViewController { configureContentLayout(content) }
+    }
+    private func configureToolbar(_ toolbar: NSToolbar) {
+        if toolbar.identifier == RepositoryPickerToolbar.toolbarIdentifier {
+            toolbar.allowsUserCustomization = false
+            toolbar.autosavesConfiguration = false
+            toolbar.displayMode = .iconOnly
+        } else if configuredToolbars.insert(ObjectIdentifier(toolbar)).inserted {
+            let key = "NSToolbar Configuration \(toolbar.identifier)"
+            let saved = UserDefaults.standard.dictionary(forKey: key)
+            if saved?["TB Display Mode"] == nil {
+                toolbar.displayMode = .iconOnly
+            }
+        }
+        if let searchItem = toolbar.items.first(where: { $0.itemIdentifier.rawValue == "repository.search" }), searchItem.label.isEmpty {
+            let title = String(localized: "Search")
+            searchItem.label = title
+            searchItem.paletteLabel = title
+        }
     }
     private func configureContentLayout(_ controller: NSViewController) {
         if let split = controller as? NSSplitViewController {

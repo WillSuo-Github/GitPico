@@ -16,7 +16,10 @@ struct ContentView: View {
                 NavigationSplitView {
                     SidebarView(store: store)
                         .navigationSplitViewColumnWidth(min: 220, ideal: 359, max: 450)
-                        .toolbar { ToolbarItem { RepositoryMenu(store: store) } }
+                        .toolbar {
+                            ToolbarItem(id: "repository.menu") { RepositoryMenu(store: store) }
+                                .customizationBehavior(.disabled)
+                        }
                 } detail: { RepositoryDetailView(store: store) }
             } else {
                 RepositoryDetailView(store: store)
@@ -26,7 +29,7 @@ struct ContentView: View {
         .frame(minWidth: showsSidebar ? 1080 : 0, minHeight: showsSidebar ? 680 : 0)
         .navigationTitle(store.isChoosingRepository ? String(localized: "Repositories") : store.title)
         .navigationSubtitle(store.isChoosingRepository ? String(localized: "Choose a repository") : store.navigationSubtitle)
-        .toolbar { if store.workspace == nil { RepositoryToolbar(store: store) } }
+        .modifier(StandaloneRepositoryToolbarModifier(store: store))
         .safeAreaInset(edge: .bottom, spacing: 0) { if showsSidebar { RepositoryStatusBar(store: store) } }
         .safeAreaInset(edge: .top, spacing: 0) { if !store.isChoosingRepository { VStack(spacing: 0) { UpstreamRecoveryBanner(store: store); AutomaticStashBanner(store: store); GitFlowOperationBanner(store: store); if store.destination != .workingCopy { OperationBanner(store: store) } } } }
         .task(id: store.search) { await store.searchHistory() }
@@ -34,6 +37,25 @@ struct ContentView: View {
     }
 
 
+}
+
+private struct StandaloneRepositoryToolbarModifier: ViewModifier {
+    @Bindable var store: RepositoryStore
+    func body(content: Content) -> some View {
+        if store.workspace == nil {
+            if store.snapshot != nil && !store.isChoosingRepository {
+                content.toolbar(id: RepositoryToolbar.customizationIdentifier) {
+                    RepositoryToolbar(store: store, showsWorkspaceNavigation: false)
+                }
+            } else {
+                content.toolbar {
+                    ToolbarItem(placement: .navigation) { RepositoryMenu(store: store) }
+                }
+            }
+        } else {
+            content
+        }
+    }
 }
 
 struct InputSheet: View {

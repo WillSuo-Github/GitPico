@@ -37,7 +37,16 @@ struct RepositoryPresentations: ViewModifier {
         .sheet(isPresented: flag($store.showingLFSLocks)) { LFSLocksView(store: store) }
         .sheet(item: item($store.managementRequest), onDismiss: store.presentPendingAutomaticStash) { ManagementSheet(store: store, request: $0) }
         .sheet(item: item($store.externalToolRequest)) { ExternalToolSheet(store: store, request: $0) }
-        .sheet(isPresented: flag($store.showingExternalToolSettings)) { VStack { ExternalToolSettingsView(preferences: store.toolPreferences); Button("Close") { store.showingExternalToolSettings = false }.padding(.bottom) } }
+        .sheet(isPresented: flag($store.showingExternalToolSettings)) {
+            VStack(spacing: 0) {
+                ExternalToolSettingsView(preferences: store.toolPreferences)
+                Divider()
+                HStack {
+                    Spacer()
+                    Button("Close") { store.showingExternalToolSettings = false }.keyboardShortcut(.cancelAction)
+                }.padding(14)
+            }.frame(width: 680, height: 560)
+        }
         .sheet(isPresented: flag($store.showingRepositoryLibrary)) { RepositoryLibraryView(store: store) }
         .sheet(isPresented: flag($store.showingQuickOpen)) { QuickOpenSheet(store: store) }
         .sheet(isPresented: flag($store.showingConflictDrafts)) { ConflictDraftsSheet(store: store) }

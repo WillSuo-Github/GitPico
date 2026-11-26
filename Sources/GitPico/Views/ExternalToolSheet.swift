@@ -69,7 +69,16 @@ struct ExternalToolSheet: View {
         .confirmationDialog("Delete these tool copies and the saved result?", isPresented: $confirmingDelete) {
             Button("Delete Session Files", role: .destructive) { if let session { Task { await remove(session) } } }
         } message: { Text("This removes only the external tool session. Your working copy and index stay unchanged.") }
-        .sheet(isPresented: $showingSettings) { VStack { ExternalToolSettingsView(preferences: store.toolPreferences); Button("Close") { showingSettings = false }.padding(.bottom) } }
+        .sheet(isPresented: $showingSettings) {
+            VStack(spacing: 0) {
+                ExternalToolSettingsView(preferences: store.toolPreferences)
+                Divider()
+                HStack {
+                    Spacer()
+                    Button("Close") { showingSettings = false }.keyboardShortcut(.cancelAction)
+                }.padding(14)
+            }.frame(width: 680, height: 560)
+        }
     }
     func prepare() async {
         guard let repository = store.repository, request.repositoryToken == store.repositoryToken else { failure = String(localized: "The repository changed."); loading = false; return }
