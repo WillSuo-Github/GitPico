@@ -2,11 +2,14 @@ import AppKit
 
 /// AppKit owns tab chrome and responder actions; Git state remains in RepositoryWorkspace.
 final class RepositoryNativeWindow: NSWindow {
+    private static let transparentTitlebarDoubleClickSetter = NSSelectorFromString("setTitlebarHandlesDoubleClickWhenTransparent:")
     let tabID: UUID
     let permitsPresentation: Bool
     weak var repositoryWindows: NativeRepositoryWindows?
     weak var pickerSearchField: RepositoryPickerSearchControl?
     private var repositoryDropEnabled = false
+    private(set) var usesNativeTransparentTitlebarDoubleClick = false
+    private var pendingFallbackTitlebarDoubleClick: (location: NSPoint, windowOrigin: NSPoint)?
     init(tabID: UUID, permitsPresentation: Bool) {
         self.tabID = tabID
         self.permitsPresentation = permitsPresentation
@@ -20,6 +23,7 @@ final class RepositoryNativeWindow: NSWindow {
         toolbarStyle = .unified
         titleVisibility = .hidden
         contentMinSize = NSSize(width: 1080, height: 680)
+        configureTransparentTitlebarDoubleClick()
     }
     override var canBecomeKey: Bool { permitsPresentation && super.canBecomeKey }
     override var canBecomeMain: Bool { permitsPresentation && super.canBecomeMain }
@@ -33,6 +37,9 @@ final class RepositoryNativeWindow: NSWindow {
     override func newWindowForTab(_ sender: Any?) { repositoryWindows?.newTab(from: tabID) }
     override func sendEvent(_ event: NSEvent) {
         if event.type == .keyDown, pickerSearchField?.beginSearching(with: event) == true { return }
+        if !usesNativeTransparentTitlebarDoubleClick, titlebarAppearsTransparent, handleFallbackTitlebarDoubleClick(event) {
+            return
+        }
         super.sendEvent(event)
     }
 
@@ -41,6 +48,74 @@ final class RepositoryNativeWindow: NSWindow {
         repositoryDropEnabled = enabled
         if enabled { registerForDraggedTypes([.fileURL]) }
         else { unregisterDraggedTypes() }
+    }
+
+    private func configureTransparentTitlebarDoubleClick() {
+        guard responds(to: Self.transparentTitlebarDoubleClickSetter) else { return }
+        setValue(true, forKey: "titlebarHandlesDoubleClickWhenTransparent")
+        usesNativeTransparentTitlebarDoubleClick = true
+    }
+
+    private func handleFallbackTitlebarDoubleClick(_ event: NSEvent) -> Bool {
+        switch event.type {
+        case .leftMouseDown:
+            if event.clickCount == 2,
+               canHandleFallbackTitlebarDoubleClick(at: event.locationInWindow, modifiers: event.modifierFlags) {
+                pendingFallbackTitlebarDoubleClick = (event.locationInWindow, frame.origin)
+            } else {
+                pendingFallbackTitlebarDoubleClick = nil
+            }
+            return false
+        case .leftMouseUp:
+            guard let pending = pendingFallbackTitlebarDoubleClick else { return false }
+            pendingFallbackTitlebarDoubleClick = nil
+            let deltaX = event.locationInWindow.x - pending.location.x
+            let deltaY = event.locationInWindow.y - pending.location.y
+            guard frame.origin == pending.windowOrigin,
+                  hypot(deltaX, deltaY) <= 6,
+                  canHandleFallbackTitlebarDoubleClick(at: event.locationInWindow, modifiers: event.modifierFlags) else {
+                return false
+            }
+            performFallbackTitlebarDoubleClickAction()
+            return true
+        case .leftMouseDragged, .rightMouseDown, .otherMouseDown, .keyDown:
+            pendingFallbackTitlebarDoubleClick = nil
+            return false
+        default:
+            return false
+        }
+    }
+
+    func canHandleFallbackTitlebarDoubleClick(at point: NSPoint, modifiers: NSEvent.ModifierFlags = []) -> Bool {
+        guard attachedSheet == nil,
+              !styleMask.contains(.fullScreen),
+              modifiers.intersection([.command, .control, .shift]).isEmpty,
+              point.y >= contentLayoutRect.maxY,
+              point.y <= frame.height - 4,
+              let contentView,
+              let themeFrame = contentView.superview,
+              let hitView = themeFrame.hitTest(point),
+              hitView.isDescendant(of: contentView) else {
+            return false
+        }
+        var currentView: NSView? = hitView
+        while let view = currentView {
+            if !view.mouseDownCanMoveWindow || view is NSControl || view is NSText { return false }
+            if view === contentView { break }
+            currentView = view.superview
+        }
+        return true
+    }
+
+    func performFallbackTitlebarDoubleClickAction(preference: String? = UserDefaults.standard.string(forKey: "AppleActionOnDoubleClick")) {
+        switch preference ?? "Fill" {
+        case "None":
+            return
+        case "Minimize":
+            performMiniaturize(nil)
+        default:
+            performZoom(nil)
+        }
     }
 }
 
