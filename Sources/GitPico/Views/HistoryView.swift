@@ -1,16 +1,57 @@
 import GitCore
 import SwiftUI
 
+private struct HistoryEntranceTrigger: Equatable {
+    let repositoryToken: UUID
+    let destination: Destination
+    let hasCommits: Bool
+}
+
 struct HistoryView: View {
     @Bindable var store: RepositoryStore
     @State private var preferences = AppPreferences.shared
     @State private var showingSearchFilters = false
+    @State private var listEntered = false
+    @State private var enteredTrigger: HistoryEntranceTrigger?
     var commits: [Commit] { store.visibleCommits }
+    private var entranceTrigger: HistoryEntranceTrigger {
+        HistoryEntranceTrigger(
+            repositoryToken: store.repositoryToken,
+            destination: store.destination,
+            hasCommits: !commits.isEmpty
+        )
+    }
+    private var isListVisible: Bool {
+        !commits.isEmpty && listEntered && enteredTrigger == entranceTrigger
+    }
     var body: some View {
         PersistentSplitView(name: "history", width: 320) {
             PinnedScrollPane(bottomIsFloating: true) { insets in
                 HistoryCommitTable(store: store, presentation: store.historyPresentation, grouped: preferences.historyGroups, compact: preferences.historyCompact, showGraph: preferences.historyShowGraph && store.search.isEmpty, canModifyHistory: store.canIntegrate, selection: store.selectedCommit?.hash, reveal: store.historyReveal, insets: insets)
+                    .staggeredEntrance(isShowing: isListVisible, index: 0, style: .pane)
                     .overlay { if commits.isEmpty { if store.isLoadingHistory { ProgressView("Loading history…") } else { EmptyPane(title: store.historyError ?? (store.search.isEmpty ? String(localized: "No commits yet") : String(localized: "No matching commits")), subtitle: store.search.isEmpty ? "" : String(localized: "Try a different message, author or hash."), icon: store.search.isEmpty ? "clock" : "magnifyingglass") } } }
+                    .task(id: entranceTrigger) {
+                        let current = entranceTrigger
+                        var reset = Transaction()
+                        reset.disablesAnimations = true
+                        guard current.hasCommits else {
+                            withTransaction(reset) {
+                                listEntered = false
+                                enteredTrigger = nil
+                            }
+                            return
+                        }
+                        withTransaction(reset) {
+                            listEntered = false
+                            enteredTrigger = current
+                        }
+                        do {
+                            try await Task.sleep(for: .milliseconds(16))
+                        } catch {
+                            return
+                        }
+                        listEntered = true
+                    }
             } top: {
                 PaneBar(title: store.destination.ref == nil ? "All Branches" : "\(store.destination.title)",
                         subtitle: store.destination.ref == nil ? String(localized: "Branches, remotes and tags · \(commits.count)\(store.historyPresentation.page.hasMore ? "+" : "") commits") : String(localized: "\(commits.count)\(store.historyPresentation.page.hasMore ? "+" : "") commits"),

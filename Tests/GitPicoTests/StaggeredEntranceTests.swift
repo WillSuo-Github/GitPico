@@ -1,4 +1,6 @@
 import AppKit
+import GitCore
+import QuartzCore
 import SwiftUI
 import Testing
 @testable import GitPico
@@ -66,5 +68,90 @@ import Testing
         try await Task.sleep(for: .milliseconds(10))
     }
     #expect(enteredWithoutMotion)
+    #expect(!NSApplication.shared.isActive && NSApplication.shared.windows.filter(\.isVisible).isEmpty)
+}
+
+@MainActor private func findScrollView(in view: NSView) -> NSScrollView? {
+    if let scroll = view as? NSScrollView, scroll.documentView is HistoryTableView { return scroll }
+    for subview in view.subviews {
+        if let found = findScrollView(in: subview) { return found }
+    }
+    return nil
+}
+
+@MainActor private func graphicsHostLayer(for view: NSView) -> CALayer? {
+    var layer: CALayer? = view.layer
+    var current: NSView? = view
+    var depth = 0
+    while let node = current, depth < 6 {
+        if String(describing: type(of: node)).contains("GraphicsView"), let backing = node.layer {
+            return backing
+        }
+        current = node.superview
+        depth += 1
+    }
+    while let candidate = layer {
+        if candidate.opacity < 1 || candidate.bounds.origin.y != 0 { return candidate }
+        layer = candidate.superlayer
+    }
+    return view.superview?.superview?.layer
+}
+
+@Test @MainActor func historyViewCommitTableAnimatesEntranceAndSettlesCleanly() async throws {
+    let fixture = try await WorkingAppFixture.make()
+    defer { fixture.clean() }
+    let root = await fixture.repository.root
+    _ = try await GitProcess.run(["branch", "entrance-branch"], at: root)
+    try await fixture.sync()
+    fixture.store.navigate(.history)
+    let loadDeadline = ContinuousClock.now + .seconds(5)
+    while fixture.store.visibleCommits.isEmpty && ContinuousClock.now < loadDeadline {
+        try await Task.sleep(for: .milliseconds(20))
+    }
+    #expect(!fixture.store.visibleCommits.isEmpty)
+
+    let window = NSWindow(contentRect: NSRect(x: -10000, y: -10000, width: 720, height: 600), styleMask: [.borderless], backing: .buffered, defer: false)
+    window.isReleasedWhenClosed = false
+    let host = NSHostingView(rootView: HistoryView(store: fixture.store))
+    window.contentView = host
+    defer { window.contentView = nil; window.close() }
+    host.layoutSubtreeIfNeeded()
+    let scroll = try #require(findScrollView(in: host))
+    let initialLayer = try #require(graphicsHostLayer(for: scroll))
+    #expect(initialLayer.opacity < 1)
+
+    var observedRise = false
+    let settleDeadline = ContinuousClock.now + .seconds(2)
+    while ContinuousClock.now < settleDeadline {
+        host.layoutSubtreeIfNeeded()
+        if let layer = graphicsHostLayer(for: scroll) {
+            if layer.bounds.origin.y < -0.1 && layer.opacity > 0 && layer.opacity < 1 {
+                observedRise = true
+            }
+            if layer.opacity >= 0.999 && abs(layer.bounds.origin.y) < 0.01 {
+                break
+            }
+        }
+        try await Task.sleep(for: .milliseconds(16))
+    }
+    let settledLayer = try #require(graphicsHostLayer(for: scroll))
+    #expect(observedRise)
+    #expect(settledLayer.opacity >= 0.999 && abs(settledLayer.bounds.origin.y) < 0.01)
+
+    fixture.store.navigate(.reference("refs/heads/entrance-branch"))
+    let branchDeadline = ContinuousClock.now + .seconds(5)
+    while (fixture.store.visibleCommits.isEmpty || (graphicsHostLayer(for: scroll)?.opacity ?? 0) < 0.999) && ContinuousClock.now < branchDeadline {
+        host.layoutSubtreeIfNeeded()
+        try await Task.sleep(for: .milliseconds(20))
+    }
+    let branchLayer = try #require(graphicsHostLayer(for: scroll))
+    #expect(branchLayer.opacity >= 0.999 && abs(branchLayer.bounds.origin.y) < 0.01)
+
+    let reducedHost = NSHostingView(rootView: HistoryView(store: fixture.store).environment(\.repositoryStatusMotionEnabled, false))
+    window.contentView = reducedHost
+    reducedHost.layoutSubtreeIfNeeded()
+    let reducedScroll = try #require(findScrollView(in: reducedHost))
+    let reducedLayer = try #require(graphicsHostLayer(for: reducedScroll))
+    #expect(reducedLayer.opacity >= 0.999 && abs(reducedLayer.bounds.origin.y) < 0.01)
     #expect(!NSApplication.shared.isActive && NSApplication.shared.windows.filter(\.isVisible).isEmpty)
 }

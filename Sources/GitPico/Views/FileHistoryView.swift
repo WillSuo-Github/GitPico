@@ -21,6 +21,7 @@ struct FileHistoryView: View {
     @State private var loadingPreview = false
     @State private var ignoreWhitespace = false
     @State private var inspectedCommit: Commit?
+    @State private var listEntered = false
     var current: FileRevision? { history?.revisions.first { $0.id == selected } }
     var filtered: [FileRevision] {
         (history?.revisions ?? []).filter { store.search.isEmpty || $0.commit.subject.localizedCaseInsensitiveContains(store.search) || $0.commit.author.localizedCaseInsensitiveContains(store.search) || $0.commit.hash.hasPrefix(store.search) }
@@ -44,6 +45,7 @@ struct FileHistoryView: View {
                                 Button(limit < 10_000 ? "Load 500 More Commits" : "10,000 revision limit reached") { limit = min(10_000, limit + 500) }.controlSize(.small).padding(14).disabled(isLoading || limit >= 10_000)
                             }
                     }.listStyle(.plain).pinnedScrollInsets(insets).accessibilityLabel("File history commits")
+                    .staggeredEntrance(isShowing: listEntered, index: 0, style: .pane)
                     .onKeyPress(.return) {
                         guard let entry = filtered.first(where: { $0.id == selected }) else { return .ignored }
                         showCommit(entry.commit); return .handled
@@ -51,6 +53,7 @@ struct FileHistoryView: View {
                     .overlay {
                         if filtered.isEmpty { Text(history?.hasMore == true ? "No matches in loaded revisions. Search older revisions to continue." : "No matching file revisions.").font(.caption).foregroundStyle(.secondary).padding() }
                     }
+                    .staggeredEntranceTrigger($listEntered, id: "\(path):\(allReferences):\(history?.revisions.isEmpty ?? true)")
                 }
             } top: {
                 VStack(alignment: .leading, spacing: 8) {
