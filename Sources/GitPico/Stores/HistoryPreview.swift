@@ -84,7 +84,7 @@ extension RepositoryStore {
         if let desired = value.page.commits.first(where: { $0.hash == pendingHistorySelection }) { selectCommit(desired) }
         else if let first = value.page.commits.first { selectCommit(first) }
         else { selectedCommit = nil; commitDetail = nil; selectedCommitPath = nil; diff = ""; isLoadingDiff = false }
-        if !historyNeedsReveal, previousSelection != selectedCommit?.hash { historyNeedsReveal = true; pendingHistorySelection = nil }
+        if !historyNeedsReveal, previousSelection != selectedCommit?.hash { historyNeedsReveal = true; pendingHistorySelection = nil; pendingHistoryScrollOffset = nil }
         revealHistorySelection()
     }
     func requestHistory(preservingSelection: Bool = true, debounce: Duration = .zero) {

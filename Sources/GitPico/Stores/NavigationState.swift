@@ -5,11 +5,26 @@ struct NavigationBookmark: Codable, Equatable {
     let search: String
     let options: HistoryOptions
     let commitHash: String?
+    let scrollOffset: Double?
+
+    init(search: String, options: HistoryOptions, commitHash: String?, scrollOffset: Double? = nil) {
+        self.search = search
+        self.options = options
+        self.commitHash = commitHash
+        self.scrollOffset = scrollOffset.flatMap { $0.isFinite ? max(0, $0) : nil }
+    }
 }
 struct HistoryReveal: Equatable {
     let id = UUID()
     let hash: String
     let atTop: Bool
+    let scrollOffset: CGFloat?
+
+    init(hash: String, atTop: Bool, scrollOffset: CGFloat? = nil) {
+        self.hash = hash
+        self.atTop = atTop
+        self.scrollOffset = scrollOffset.flatMap { $0.isFinite ? max(0, $0) : nil }
+    }
 }
 
 extension RepositoryStore {
@@ -20,10 +35,28 @@ extension RepositoryStore {
             navigate(destination)
         }
     }
+    func currentHistoryScrollOffset() -> Double? {
+        guard isHistoryDestination else { return nil }
+        if let live = historyScrollOffsetProvider?.read(historyPresentation.id, historyReveal?.id) {
+            return live.isFinite ? max(0, Double(live)) : nil
+        }
+        if let revealOffset = historyReveal?.scrollOffset {
+            return revealOffset.isFinite ? max(0, Double(revealOffset)) : nil
+        }
+        if let pending = pendingHistoryScrollOffset {
+            return pending.isFinite ? max(0, pending) : nil
+        }
+        return nil
+    }
     func rememberNavigation() {
         var options = historyOptions
         if isHistoryDestination, options.query != search { options.query = search; options.limit = 500 }
-        navigationBookmarks[destination] = NavigationBookmark(search: search, options: options, commitHash: selectedCommit?.hash)
+        navigationBookmarks[destination] = NavigationBookmark(
+            search: search,
+            options: options,
+            commitHash: selectedCommit?.hash,
+            scrollOffset: currentHistoryScrollOffset()
+        )
         navigationBookmarkOrder.removeAll { $0 == destination }
         navigationBookmarkOrder.append(destination)
         while navigationBookmarkOrder.count > 32 { navigationBookmarks.removeValue(forKey: navigationBookmarkOrder.removeFirst()) }
@@ -34,13 +67,16 @@ extension RepositoryStore {
         if let bookmark { historyOptions = bookmark.options }
         else { historyOptions.query = ""; historyOptions.limit = 500 }
         pendingHistorySelection = bookmark?.commitHash
+        pendingHistoryScrollOffset = bookmark?.scrollOffset.flatMap { $0.isFinite ? max(0, $0) : nil }
         historyNeedsReveal = true
         historyReveal = nil
     }
     func revealHistorySelection() {
         guard historyNeedsReveal, let selectedCommit else { return }
-        historyReveal = HistoryReveal(hash: selectedCommit.hash, atTop: pendingHistorySelection == nil || pendingHistorySelection != selectedCommit.hash)
-        historyNeedsReveal = false; pendingHistorySelection = nil
+        let matchedBookmark = pendingHistorySelection != nil && pendingHistorySelection == selectedCommit.hash
+        let scrollOffset = matchedBookmark ? pendingHistoryScrollOffset.map { CGFloat($0) } : nil
+        historyReveal = HistoryReveal(hash: selectedCommit.hash, atTop: !matchedBookmark, scrollOffset: scrollOffset)
+        historyNeedsReveal = false; pendingHistorySelection = nil; pendingHistoryScrollOffset = nil
     }
     var isChoosingRepository: Bool { workspace?.tab(for: self)?.showsRepositoryPicker == true }
     var isOpeningRepository: Bool { isOpeningInPlace || workspace?.tab(for: self)?.isOpening == true }

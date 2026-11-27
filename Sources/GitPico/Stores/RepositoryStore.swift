@@ -63,6 +63,8 @@ final class RepositoryStore {
     @ObservationIgnored var navigationBookmarks: [Destination:NavigationBookmark] = [:]
     @ObservationIgnored var navigationBookmarkOrder: [Destination] = []
     @ObservationIgnored var pendingHistorySelection: String?
+    @ObservationIgnored var pendingHistoryScrollOffset: Double?
+    @ObservationIgnored var historyScrollOffsetProvider: (id: UUID, read: (UUID, UUID?) -> CGFloat?)?
     @ObservationIgnored var historyNeedsReveal = false
     var historyReveal: HistoryReveal?
     var historyOptions = HistoryOptions() { didSet { workspace?.scheduleSessionSave() } }
@@ -332,7 +334,7 @@ final class RepositoryStore {
             organization = references
             undoAvailability = undo
             rebaseProgress = rebase
-            navigationBookmarks = [:]; navigationBookmarkOrder = []; pendingHistorySelection = nil; historyNeedsReveal = false; historyReveal = nil; draftBeforeAmend = nil
+            navigationBookmarks = [:]; navigationBookmarkOrder = []; pendingHistorySelection = nil; pendingHistoryScrollOffset = nil; historyNeedsReveal = false; historyReveal = nil; draftBeforeAmend = nil
             destination = .workingCopy; search = ""; historyOptions = HistoryOptions(); amend = false; signOff = false; configuration = nil
             showingRepositorySettings = false; settingsNavigationRequest = nil
             selectedChange = nil; selectedCommit = nil; selectedHistoryHashes = []; batchIntegrationRequest = nil; selectedStash = nil

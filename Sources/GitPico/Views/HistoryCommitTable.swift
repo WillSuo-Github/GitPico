@@ -21,10 +21,15 @@ struct HistoryCommitTable: NSViewRepresentable {
     func updateNSView(_ view: NSScrollView, context: Context) {
         context.coordinator.update(self)
     }
+    static func dismantleNSView(_ nsView: NSScrollView, coordinator: Coordinator) {
+        coordinator.detach()
+    }
 
     @MainActor final class Coordinator: NSObject, NSTableViewDataSource, NSTableViewDelegate {
         let table = HistoryTableView()
         private var input: HistoryCommitTable?
+        private weak var registeredStore: RepositoryStore?
+        private let providerToken = UUID()
         private var rows: [Row] = []
         private var commitRows: [String: Int] = [:]
         private var updating = false
@@ -38,11 +43,13 @@ struct HistoryCommitTable: NSViewRepresentable {
         }
 
         func makeView() -> NSScrollView {
-            let scroll = NSScrollView()
+            let scroll = HistoryCommitScrollView()
+            scroll.automaticallyAdjustsContentInsets = false
             scroll.hasVerticalScroller = true
             scroll.autohidesScrollers = true
             // The SwiftUI history pane supplies the window surface behind the table.
             scroll.drawsBackground = false
+            scroll.onLayout = { [weak self] in self?.applyPendingRevealIfNeeded() }
             let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("history"))
             table.addTableColumn(column)
             table.headerView = nil
@@ -71,17 +78,49 @@ struct HistoryCommitTable: NSViewRepresentable {
             return scroll
         }
 
+        private func attach(to store: RepositoryStore) {
+            guard registeredStore !== store else { return }
+            detach()
+            registeredStore = store
+            store.historyScrollOffsetProvider = (providerToken, { [weak self] presentationID, revealID in
+                self?.currentScrollOffset(for: presentationID, revealID: revealID)
+            })
+        }
+
+        func detach() {
+            if registeredStore?.historyScrollOffsetProvider?.id == providerToken {
+                registeredStore?.historyScrollOffsetProvider = nil
+            }
+            registeredStore = nil
+        }
+
+        func currentScrollOffset(for presentationID: UUID, revealID: UUID?) -> CGFloat? {
+            guard let input,
+                  input.presentation.id == presentationID,
+                  !rows.isEmpty,
+                  let scroll = table.enclosingScrollView,
+                  scroll.contentView.bounds.height > 0 else { return nil }
+            if let revealID, lastReveal != revealID { return nil }
+            let offset = scroll.contentView.bounds.minY + scroll.contentView.contentInsets.top
+            return offset.isFinite ? max(0, offset) : nil
+        }
+
         func update(_ value: HistoryCommitTable) {
             let old = input
             input = value
+            attach(to: value.store)
             updating = true
             defer { updating = false }
             let replaced = old?.presentation.id != value.presentation.id || old?.grouped != value.grouped || old?.store !== value.store
             let restyled = old?.compact != value.compact || old?.showGraph != value.showGraph || old?.canModifyHistory != value.canModifyHistory
             let previousIDs = replaced ? rows.map(\.id) : []
             let scroll = table.enclosingScrollView
-            let wasAtTop = scroll.map { $0.contentView.bounds.minY + $0.contentView.contentInsets.top <= 1 } ?? true
-            if let scroll, old?.insets != value.insets {
+            let previousTopInset = scroll?.contentView.contentInsets.top ?? 0
+            let previousOffsetFromTop = scroll.map { $0.contentView.bounds.minY + previousTopInset } ?? 0
+            let wasAtTop = previousOffsetFromTop <= 1
+            let insetsChanged = old?.insets != value.insets
+            let topInsetChanged = old != nil && old?.insets.top != value.insets.top
+            if let scroll, insetsChanged {
                 scroll.automaticallyAdjustsContentInsets = false
                 let insets = NSEdgeInsets(top: value.insets.top, left: 0, bottom: value.insets.bottom, right: 0)
                 scroll.contentInsets = insets
@@ -115,10 +154,6 @@ struct HistoryCommitTable: NSViewRepresentable {
                     table.insertRows(at: inserted, withAnimation: [])
                     table.endUpdates()
                 }
-                let visible = table.rows(in: table.visibleRect)
-                if visible.location != NSNotFound, visible.length > 0, visible.location < rows.count {
-                    table.reloadData(forRowIndexes: IndexSet(integersIn: visible.location..<min(rows.count, NSMaxRange(visible))), columnIndexes: IndexSet(integer: 0))
-                }
             }
             let selectedRow = value.selection.flatMap { commitRows[$0] } ?? -1
             let previousRow = table.selectedRow
@@ -130,19 +165,56 @@ struct HistoryCommitTable: NSViewRepresentable {
                 let changed = IndexSet([previousRow, selectedRow].filter { rows.indices.contains($0) })
                 if !changed.isEmpty { table.reloadData(forRowIndexes: changed, columnIndexes: IndexSet(integer: 0)) }
             }
+            if old == nil || restyled || replaced {
+                table.tile()
+            }
             // AppKit can anchor an inserted block to the old top row. At the
             // top of the list, keep the new tips visible without changing selection.
-            if wasAtTop, replaced || old?.insets != value.insets, let scroll {
-                scrollDocument(scroll, to: -scroll.contentView.contentInsets.top)
+            if let scroll {
+                let revealed = applyRevealIfNeeded(in: scroll)
+                if !revealed {
+                    if wasAtTop, replaced || insetsChanged {
+                        scrollDocument(scroll, to: -scroll.contentView.contentInsets.top)
+                    } else if topInsetChanged {
+                        scrollDocument(scroll, to: previousOffsetFromTop - scroll.contentView.contentInsets.top)
+                    }
+                }
             }
-            if let reveal = value.reveal, reveal.id != lastReveal, let row = commitRows[reveal.hash], let scroll = table.enclosingScrollView {
-                lastReveal = reveal.id
+            if replaced && old != nil && !restyled {
+                let visible = table.rows(in: table.visibleRect)
+                if visible.location != NSNotFound, visible.length > 0, visible.location < rows.count {
+                    table.reloadData(forRowIndexes: IndexSet(integersIn: visible.location..<min(rows.count, NSMaxRange(visible))), columnIndexes: IndexSet(integer: 0))
+                }
+            }
+        }
+
+        private func applyPendingRevealIfNeeded() {
+            guard !updating, let scroll = table.enclosingScrollView else { return }
+            updating = true
+            defer { updating = false }
+            _ = applyRevealIfNeeded(in: scroll)
+        }
+
+        @discardableResult
+        private func applyRevealIfNeeded(in scroll: NSScrollView) -> Bool {
+            guard let value = input,
+                  let reveal = value.reveal,
+                  reveal.id != lastReveal,
+                  let row = commitRows[reveal.hash],
+                  scroll.contentView.bounds.height > 0 else { return false }
+            lastReveal = reveal.id
+            let insets = scroll.contentView.contentInsets
+            let targetY: CGFloat
+            if let scrollOffset = reveal.scrollOffset {
+                targetY = scrollOffset - insets.top
+            } else {
                 let rect = table.rect(ofRow: row)
-                let insets = scroll.contentView.contentInsets
                 let height = max(0, scroll.contentView.bounds.height - insets.top - insets.bottom)
-                let y = (reveal.atTop ? rect.minY : rect.midY - height / 2) - insets.top
-                scrollDocument(scroll, to: y)
+                let topY: CGFloat = if row == 1, rows.indices.contains(0), case .month = rows[0] { 0 } else { rect.minY }
+                targetY = (reveal.atTop ? topY : rect.midY - height / 2) - insets.top
             }
+            scrollDocument(scroll, to: targetY)
+            return true
         }
 
         private func scrollDocument(_ scroll: NSScrollView, to y: CGFloat) {
@@ -226,6 +298,14 @@ final class HistoryTableView: NSTableView {
     var rowMenu: ((Int) -> NSMenu?)?
     override func menu(for event: NSEvent) -> NSMenu? {
         rowMenu?(row(at: convert(event.locationInWindow, from: nil)))
+    }
+}
+
+private final class HistoryCommitScrollView: NSScrollView {
+    var onLayout: (() -> Void)?
+    override func layout() {
+        super.layout()
+        onLayout?()
     }
 }
 

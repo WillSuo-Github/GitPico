@@ -111,6 +111,7 @@ extension RepositoryStore {
         showAllFiles = state.showAll; showIgnoredFiles = state.showIgnored
         if isHistoryDestination {
             pendingHistorySelection = state.commitHash
+            pendingHistoryScrollOffset = nil
             historyNeedsReveal = true
             requestHistory(preservingSelection: false); await historyTask?.value; await detailTask?.value
             if let path = state.commitPath, commitDetail?.files.contains(where: { $0.path == path }) == true { selectCommitFile(path) }

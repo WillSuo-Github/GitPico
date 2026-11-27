@@ -155,3 +155,121 @@ import UniformTypeIdentifiers
     #expect(coordinator.tableView(coordinator.table, pasteboardWriterForRow: 3) == nil)
     f.store.isBusy = false
 }
+
+@MainActor private func findHistoryScrollView(in view: NSView) -> NSScrollView? {
+    if let scroll = view as? NSScrollView, scroll.documentView is HistoryTableView { return scroll }
+    for subview in view.subviews {
+        if let found = findHistoryScrollView(in: subview) { return found }
+    }
+    return nil
+}
+
+@Test @MainActor func branchSwitchesPreserveTopAndScrolledHistoryPositionsAndShowFirstMonthHeader() async throws {
+    let fixture = try await PreviewFixture.make(commits: 60, branches: 12); defer { fixture.clean() }
+    let previousGroups = AppPreferences.shared.historyGroups
+    AppPreferences.shared.historyGroups = true
+    defer { AppPreferences.shared.historyGroups = previousGroups }
+
+    let window = NSWindow(contentRect: NSRect(x: -10000, y: -10000, width: 720, height: 420), styleMask: [.borderless], backing: .buffered, defer: false)
+    window.isReleasedWhenClosed = false
+    let host = NSHostingView(rootView: RepositoryDetailView(store: fixture.store))
+    window.contentView = host
+    defer { window.contentView = nil; window.close() }
+
+    func settleHistory() async throws -> (NSScrollView, HistoryTableView) {
+        await fixture.store.historyTask?.value
+        await fixture.store.detailTask?.value
+        for _ in 0..<16 {
+            host.layoutSubtreeIfNeeded()
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        let scroll = try #require(findHistoryScrollView(in: host))
+        let table = try #require(scroll.documentView as? HistoryTableView)
+        return (scroll, table)
+    }
+
+    func offsetFromTop(_ scroll: NSScrollView) -> CGFloat {
+        scroll.contentView.bounds.minY + scroll.contentView.contentInsets.top
+    }
+
+    func scroll(toOffset offset: CGFloat, in scroll: NSScrollView) async throws {
+        let clip = scroll.contentView
+        var bounds = clip.bounds
+        bounds.origin.y = offset - clip.contentInsets.top
+        clip.scroll(to: clip.constrainBoundsRect(bounds).origin)
+        scroll.reflectScrolledClipView(clip)
+        for _ in 0..<4 {
+            host.layoutSubtreeIfNeeded()
+            try await Task.sleep(for: .milliseconds(15))
+        }
+    }
+
+    // First visit to Branch 1 starts at exact top (offset 0, showing the first month header).
+    fixture.store.navigate(.reference("refs/heads/preview/branch-1"))
+    let (scroll1, table1) = try await settleHistory()
+    #expect(abs(offsetFromTop(scroll1)) < 1)
+    #expect(table1.selectedRow == 1)
+
+    // Select a much lower commit on Branch 1, then scroll back to the very top.
+    table1.selectRowIndexes(IndexSet(integer: 25), byExtendingSelection: false)
+    _ = try await settleHistory()
+    let selectedOnBranch1 = try #require(fixture.store.selectedCommit?.hash)
+    try await scroll(toOffset: 0, in: scroll1)
+    #expect(abs(offsetFromTop(scroll1)) < 1)
+
+    // Visit Branch 9 (first visit defaults to exact top), then return to Branch 1:
+    // Branch 1 must stay at the very top while keeping its selected commit.
+    fixture.store.navigate(.reference("refs/heads/preview/branch-9"))
+    let (scroll9, _) = try await settleHistory()
+    #expect(abs(offsetFromTop(scroll9)) < 1)
+
+    fixture.store.navigate(.reference("refs/heads/preview/branch-1"))
+    let (scroll1Back, table1Back) = try await settleHistory()
+    #expect(fixture.store.selectedCommit?.hash == selectedOnBranch1)
+    #expect(table1Back.selectedRow == 25)
+    #expect(abs(offsetFromTop(scroll1Back)) < 1)
+
+    // Scroll Branch 9 down without changing selection, switch away, then return to Branch 9.
+    fixture.store.navigate(.reference("refs/heads/preview/branch-9"))
+    let (scroll9Again, _) = try await settleHistory()
+    try await scroll(toOffset: 520, in: scroll9Again)
+    #expect(abs(offsetFromTop(scroll9Again) - 520) < 1)
+
+    // Rapidly switch Branch 9 (520) -> Branch 1 (cached at 0) -> Branch 5 before SwiftUI renders Branch 1.
+    fixture.store.navigate(.reference("refs/heads/preview/branch-1"))
+    fixture.store.navigate(.reference("refs/heads/preview/branch-5"))
+    let (scroll5, _) = try await settleHistory()
+    #expect(abs(offsetFromTop(scroll5)) < 1)
+
+    // Returning to Branch 1 must not inherit Branch 9's 520 offset.
+    fixture.store.navigate(.reference("refs/heads/preview/branch-1"))
+    let (scroll1AfterRapid, _) = try await settleHistory()
+    #expect(abs(offsetFromTop(scroll1AfterRapid)) < 1)
+
+    // Returning to Branch 9 restores its scrolled offset, including across Working Copy view teardown.
+    fixture.store.navigate(.reference("refs/heads/preview/branch-9"))
+    let (scroll9Restored, _) = try await settleHistory()
+    #expect(abs(offsetFromTop(scroll9Restored) - 520) < 1)
+
+    fixture.store.navigate(.workingCopy)
+    for _ in 0..<8 {
+        host.layoutSubtreeIfNeeded()
+        try await Task.sleep(for: .milliseconds(15))
+    }
+    fixture.store.navigate(.reference("refs/heads/preview/branch-1"))
+    let (scroll1AfterWorkingCopy, _) = try await settleHistory()
+    #expect(abs(offsetFromTop(scroll1AfterWorkingCopy)) < 1)
+
+    fixture.store.navigate(.reference("refs/heads/preview/branch-9"))
+    let (scroll9AfterWorkingCopy, _) = try await settleHistory()
+    #expect(abs(offsetFromTop(scroll9AfterWorkingCopy) - 520) < 1)
+    #expect(!NSApp.isActive && NSApp.windows.filter(\.isVisible).isEmpty)
+}
+
+@Test func legacyNavigationBookmarkDecodesWithoutScrollOffset() throws {
+    let legacyJSON = #"{"search":"fix","options":{"limit":500,"query":"fix","firstParent":false,"sortByDate":false},"commitHash":"abc123"}"#
+    let decoded = try JSONDecoder().decode(NavigationBookmark.self, from: Data(legacyJSON.utf8))
+    #expect(decoded.search == "fix")
+    #expect(decoded.commitHash == "abc123")
+    #expect(decoded.scrollOffset == nil)
+}
