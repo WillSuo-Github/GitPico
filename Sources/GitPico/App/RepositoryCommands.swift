@@ -5,6 +5,7 @@ import SwiftUI
 struct RepositoryCommands: Commands {
     @Bindable var store: RepositoryStore
     @Bindable private var updater = UpdateController.shared
+    @Bindable private var preferences = AppPreferences.shared
     var body: some Commands {
             CommandGroup(replacing: .newItem) {
                 if let workspace = store.workspace {
@@ -123,6 +124,12 @@ struct RepositoryCommands: Commands {
                 Button("Unstage Selected Files") { store.unstageSelectedFiles() }.disabled(!store.workingTargets().contains { $0.isStaged && !$0.isConflicted })
                 Button("Stage Visible Files", action: store.stageVisibleFiles).disabled(store.visibleStageTargets.isEmpty)
                 Button("Unstage Visible Files", action: store.unstageVisibleFiles).disabled(store.visibleUnstageTargets.isEmpty)
+                Divider()
+                Toggle("Show Files as Tree", isOn: $preferences.workingTreeView)
+                if preferences.workingTreeView && store.hasWorkingTreeFolders {
+                    Button("Expand All") { store.expandAllWorkingFolders() }.disabled(!store.canExpandAllWorkingFolders)
+                    Button("Collapse All") { store.collapseAllWorkingFolders() }.disabled(!store.canCollapseAllWorkingFolders)
+                }
                 Divider()
                 Toggle("Show All Files", isOn: $store.showAllFiles).keyboardShortcut("m", modifiers: [.command, .control])
                 Toggle("Show Ignored Files", isOn: $store.showIgnoredFiles).keyboardShortcut("i", modifiers: [.command, .control])

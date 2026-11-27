@@ -141,8 +141,10 @@ final class RepositoryStore {
     var showAssumeUnchanged = false
     var workingFileEntries: [WorkingFileEntry] = []
     var workingList = WorkingFilesPresentation.empty
+    var collapsedWorkingFolders: Set<String> = []
+    var searchCollapsedWorkingFolders: Set<String> = []
     var workingOrderByStatus = false
-    var workingOnlyConflicts = false
+    var workingOnlyConflicts = false { didSet { if oldValue != workingOnlyConflicts { searchCollapsedWorkingFolders = [] } } }
     var isLoadingWorkingFiles = false
     @ObservationIgnored var workingListGeneration = UUID()
     var commitWarning: String? {
@@ -203,7 +205,12 @@ final class RepositoryStore {
     var error: String? {
         didSet { if isBusy, let error, exclusiveFeedback?.phase == .running { exclusiveFeedback?.failure = error } }
     }
-    var search = "" { didSet { workspace?.scheduleSessionSave() } }
+    var search = "" {
+        didSet {
+            if oldValue != search { searchCollapsedWorkingFolders = [] }
+            workspace?.scheduleSessionSave()
+        }
+    }
     var searchFocusRequest: UUID?
     var searchActionsRequest: UUID?
     var commitSubject = "" { didSet { if !commitSubject.isEmpty { commitFeedback = nil; commitWarning = nil }; if oldValue != commitSubject { workspace?.recordDraft(self) } } }
@@ -322,7 +329,7 @@ final class RepositoryStore {
             let (data, stash, remotes, references, undo, rebase) = try await (initialSnapshot, stashRecord, remoteConfigurations, referenceOrganization, undoState, rebaseState)
             clearOperationFeedback()
             cancelPreviewWork(); clearHistoryCache(); commitDetailCache = [:]; historyPresentation = .empty; historyError = nil
-            searchFocusRequest = nil; searchActionsRequest = nil; metadataEpoch = UUID(); metadataTask?.cancel(); metadataTask = nil; metadataDirty = []; repositoryToken = UUID(); detailToken = UUID(); workingFileEntries = []; workingList = .empty; workingOnlyConflicts = false; commitFeedback = nil; commitWarning = nil; diffError = nil; workingDiffRequest = nil; showAllFiles = false; showIgnoredFiles = false; dragActions = [:]; selectedWorkingFiles = []
+            searchFocusRequest = nil; searchActionsRequest = nil; metadataEpoch = UUID(); metadataTask?.cancel(); metadataTask = nil; metadataDirty = []; repositoryToken = UUID(); detailToken = UUID(); workingFileEntries = []; workingList = .empty; collapsedWorkingFolders = []; searchCollapsedWorkingFolders = []; workingOnlyConflicts = false; commitFeedback = nil; commitWarning = nil; diffError = nil; workingDiffRequest = nil; showAllFiles = false; showIgnoredFiles = false; dragActions = [:]; selectedWorkingFiles = []
             lfsRequest = nil; flowRequest = nil; lfsState = nil; lfsChanges = []; lfsTransfers = []; lfsProgress = ""; lfsError = nil; flowConfiguration = nil; activeFlow = nil; flowHistory = []; workflowError = nil
             managementRequest = nil; stashRequest = nil; localChangeRequest = nil; historicalRequest = nil; worktreeRequest = nil; submoduleRequest = nil; relatedAdministrationRequest = nil; infrastructureRequest = nil; relatedBatchProgress = nil; worktrees = []; selectedWorktreePaths = []; submodules = []; externalToolRequest = nil; showingBranchSheet = false; showingStashSheet = false
             automaticStashRequest = nil; pendingAutomaticStashRequest = nil
@@ -539,6 +546,7 @@ final class RepositoryStore {
             }
             if let file = changes.first(where: \.isConflicted) {
                 if !workingList.paths.contains(file.path) { search = ""; await rebuildWorkingList() }
+                expandWorkingFolderAncestors(of: file.path)
                 setWorkingSelection([file.path]); selectChange(file, staged: false)
             }
         }

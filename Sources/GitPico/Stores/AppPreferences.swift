@@ -45,6 +45,7 @@ final class AppPreferences {
     var historyShowGraph = true { didSet { save() } }
     var historyCompact = false { didSet { save() } }
     var historyGroups = true { didSet { save() } }
+    var workingTreeView = false { didSet { save() } }
     var lastSaveError: String?
     private var widths: [String: Double] = [:]
     @ObservationIgnored private var isLoading = true
@@ -68,6 +69,7 @@ final class AppPreferences {
             historyShowGraph = values["graph"] != 0
             historyCompact = values["compact"] == 1
             historyGroups = values["groups"] != 0
+            workingTreeView = values["workingTreeView"] == 1
             widths = values.filter { $0.key.hasPrefix("split.") }
         }
     }
@@ -92,6 +94,7 @@ final class AppPreferences {
         values["graph"] = historyShowGraph ? 1 : 0
         values["compact"] = historyCompact ? 1 : 0
         values["groups"] = historyGroups ? 1 : 0
+        values["workingTreeView"] = workingTreeView ? 1 : 0
         do {
             try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
             try JSONEncoder().encode(values).write(to: file, options: .atomic)

@@ -4,19 +4,48 @@ import SwiftUI
 
 struct WorkingCopyView: View {
     @Bindable var store: RepositoryStore
+    @State private var preferences = AppPreferences.shared
     @State private var entered = false
     var files: [WorkingFileEntry] { store.workingList.files }
     var isFiltered: Bool { !store.search.isEmpty || store.workingOnlyConflicts || store.showAllFiles || store.showIgnoredFiles }
     var body: some View {
+        let treeRows = preferences.workingTreeView ? store.visibleWorkingTreeRows : []
+        let hasFolders = store.hasWorkingTreeFolders
+        let showFolderCheckboxes = !store.changes.isEmpty
         PersistentSplitView(name: "working", width: 340) {
             PinnedScrollPane { insets in
                 List(selection: Binding<Set<String>>(get: { store.selectedWorkingFiles }, set: { store.setWorkingSelection($0) })) {
-                    ForEach(files) { file in
-                        Group {
-                            if let change = file.change { WorkingFileRow(store: store, file: change).picoDrag(store, .workingFiles(store.selectedWorkingFiles.contains(file.path) ? store.selectedWorkingFiles.sorted().filter { path in store.changes.contains { $0.path == path } } : [file.path])) }
-                            else { BrowserFileRow(store: store, file: file) }
+                    if preferences.workingTreeView {
+                        ForEach(treeRows) { row in
+                            switch row.kind {
+                            case .folder(let folder, let isExpanded):
+                                WorkingFolderRow(
+                                    store: store,
+                                    folder: folder,
+                                    depth: row.depth,
+                                    isExpanded: isExpanded,
+                                    showsCheckboxColumn: showFolderCheckboxes
+                                )
+                                .listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
+                            case .file(let file):
+                                workingFileItem(file, showsParentFolder: false)
+                                    .padding(.leading, WorkingTreeLayout.fileLeadingInset(depth: row.depth, hasFolders: hasFolders))
+                                    .background(alignment: .leading) {
+                                        WorkingTreeIndentGuides(
+                                            depth: row.depth,
+                                            isSelected: store.selectedWorkingFiles.contains(file.path)
+                                        )
+                                    }
+                                    .tag(file.path)
+                                    .listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
+                            }
                         }
-                        .tag(file.path).listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
+                    } else {
+                        ForEach(files) { file in
+                            workingFileItem(file, showsParentFolder: true)
+                                .tag(file.path)
+                                .listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
+                        }
                     }
                 }.listStyle(.plain).pinnedScrollInsets(insets)
                 .staggeredEntrance(isShowing: entered, index: 0, style: .pane)
@@ -50,11 +79,22 @@ struct WorkingCopyView: View {
         .staggeredEntranceTrigger($entered, id: store.repositoryToken)
 
     }
+
+    @ViewBuilder
+    private func workingFileItem(_ file: WorkingFileEntry, showsParentFolder: Bool) -> some View {
+        if let change = file.change {
+            WorkingFileRow(store: store, file: change, showsParentFolder: showsParentFolder)
+                .picoDrag(store, .workingFiles(store.selectedWorkingFiles.contains(file.path) ? store.selectedWorkingFiles.sorted().filter { path in store.changes.contains { $0.path == path } } : [file.path]))
+        } else {
+            BrowserFileRow(store: store, file: file, showsParentFolder: showsParentFolder)
+        }
+    }
 }
 
 /// Branch → upstream, change counts, sorting/visibility options and bulk staging.
 struct WorkingListHeader: View {
     @Bindable var store: RepositoryStore
+    @State private var preferences = AppPreferences.shared
     var upstream: String? { store.snapshot?.references.first(where: \.isCurrent)?.upstream.nilIfEmpty }
     var body: some View {
         let unstagedCount = store.unstaged.count, stagedCount = store.staged.count
@@ -64,13 +104,30 @@ struct WorkingListHeader: View {
                 Text("Changes").font(.system(size: 13, weight: .semibold))
                 if !store.changes.isEmpty { Chip(text: "\(store.changes.count)", tint: .accentColor) }
                 Spacer(minLength: 4)
+                Picker("View", selection: $preferences.workingTreeView) {
+                    Image(systemName: "list.bullet").accessibilityLabel("Flat List").tag(false)
+                    Image(systemName: "list.bullet.indent").accessibilityLabel("File Tree").tag(true)
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .controlSize(.small)
+                .fixedSize()
+                .help("Switch between flat list and folder tree")
                 Menu {
                     Picker("Sort By", selection: $store.workingOrderByStatus) { Text("Status").tag(true); Text("File Name").tag(false) }
+                    Divider()
+                    Picker("View", selection: $preferences.workingTreeView) {
+                        Text("Flat List").tag(false)
+                        Text("File Tree").tag(true)
+                    }
+                    if preferences.workingTreeView && store.hasWorkingTreeFolders {
+                        Button("Expand All") { store.expandAllWorkingFolders() }.disabled(!store.canExpandAllWorkingFolders)
+                        Button("Collapse All") { store.collapseAllWorkingFolders() }.disabled(!store.canCollapseAllWorkingFolders)
+                    }
                     Divider()
                     Toggle("Show All Files", isOn: $store.showAllFiles)
                     Toggle("Show Ignored Files", isOn: $store.showIgnoredFiles)
                     Toggle("Show Assume-Unchanged Files", isOn: $store.showAssumeUnchanged)
-                    Divider()
                 } label: { Image(systemName: "line.3.horizontal.decrease.circle") }
                     .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().help("Sort and file visibility")
             }
@@ -106,16 +163,18 @@ struct WorkingFileRow: View {
     var selectedText: Color { Color(nsColor: activeState == .key ? .alternateSelectedControlTextColor : .unemphasizedSelectedTextColor) }
     @Bindable var store: RepositoryStore
     let file: FileChange
+    var showsParentFolder: Bool = true
     var body: some View {
         HStack(spacing: 8) {
             Button { store.toggleWorkingFile(file) } label: {
                 Image(systemName: file.isStaged ? (file.isUnstaged ? "minus.square.fill" : "checkmark.square.fill") : "square")
                     .foregroundStyle(isSelected ? selectedText : file.isStaged ? Color.accentColor : Color.secondary)
+                    .frame(width: 14)
             }.buttonStyle(.plain).disabled(store.isBusy).help(file.isConflicted ? "Resolve conflict" : file.isStaged && !file.isUnstaged ? "Unstage selected files" : "Stage selected files, including remaining changes")
             .accessibilityLabel(file.isConflicted ? String(localized: "Resolve conflict in \(file.path)") : (file.isStaged && !file.isUnstaged ? String(localized: "Unstage \(file.path)") : String(localized: "Stage \(file.path)")))
             .accessibilityValue(file.isStaged && file.isUnstaged ? "Partially staged" : file.isStaged ? "Staged" : "Unstaged")
             StatusBadge(status: file.displayStatus, selected: isSelected)
-            FilePathLabel(path: file.path, selectedText: isSelected ? selectedText : nil)
+            FilePathLabel(path: file.path, selectedText: isSelected ? selectedText : nil, showsParentFolder: showsParentFolder)
             Spacer(minLength: 0)
         }.frame(height: 24).contentShape(Rectangle()).help(file.path + " · " + (file.isStaged && file.isUnstaged ? String(localized: "Staged and unstaged changes") : file.isStaged ? String(localized: "Staged") : localizedFileStatus(file.displayStatus)))
         .contextMenu {
@@ -138,6 +197,218 @@ struct WorkingFileRow: View {
             Button("Open in Default Editor") { if let root = store.snapshot?.root { NSWorkspace.shared.open(root.appendingPathComponent(file.path)) } }
             Button("Reveal in Finder") { if let root = store.snapshot?.root { NSWorkspace.shared.activateFileViewerSelecting([root.appendingPathComponent(file.path)]) } }
             Button("Copy Path") { NSPasteboard.general.clearContents(); NSPasteboard.general.setString(file.path, forType: .string) }
+        }
+    }
+}
+
+/// Geometry constants shared by tree folder rows and indented file rows.
+enum WorkingTreeLayout {
+    static let indentStep: CGFloat = 14
+    static let chevronWidth: CGFloat = 14
+    static let chevronSpacing: CGFloat = 4
+    static let chevronGutter: CGFloat = chevronWidth + chevronSpacing
+
+    static func folderLeadingInset(depth: Int) -> CGFloat {
+        CGFloat(max(0, depth)) * indentStep
+    }
+
+    static func fileLeadingInset(depth: Int, hasFolders: Bool) -> CGFloat {
+        CGFloat(max(0, depth)) * indentStep + (hasFolders ? chevronGutter : 0)
+    }
+}
+
+struct WorkingTreeIndentGuides: View {
+    @Environment(\.controlActiveState) private var activeState
+    let depth: Int
+    var isSelected: Bool = false
+
+    private var guideColor: Color {
+        if isSelected {
+            return activeState == .key
+                ? Color(nsColor: .alternateSelectedControlTextColor).opacity(0.18)
+                : Color(nsColor: .separatorColor).opacity(0.45)
+        }
+        return Color(nsColor: .separatorColor).opacity(0.45)
+    }
+
+    var body: some View {
+        if depth > 0 {
+            ZStack(alignment: .leading) {
+                ForEach(0..<depth, id: \.self) { level in
+                    Rectangle()
+                        .fill(guideColor)
+                        .frame(width: 0.5)
+                        .padding(.leading, CGFloat(level) * WorkingTreeLayout.indentStep + WorkingTreeLayout.chevronWidth / 2)
+                }
+            }
+            .frame(maxHeight: .infinity, alignment: .leading)
+            .padding(.vertical, -2)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+        }
+    }
+}
+
+struct WorkingFolderRow: View {
+    @Bindable var store: RepositoryStore
+    let folder: WorkingFileTreeFolder
+    let depth: Int
+    let isExpanded: Bool
+    let showsCheckboxColumn: Bool
+
+    private var revealURL: URL? {
+        guard let root = store.snapshot?.root else { return nil }
+        let candidate = root.appendingPathComponent(folder.path)
+        return FileManager.default.fileExists(atPath: candidate.path) ? candidate : nil
+    }
+
+    private var stageSymbol: String {
+        switch folder.stageState {
+        case .staged: "checkmark.square.fill"
+        case .mixed: "minus.square.fill"
+        case .conflicted: "exclamationmark.square.fill"
+        case .unstaged, .none: "square"
+        }
+    }
+
+    private var stageColor: Color {
+        switch folder.stageState {
+        case .staged, .mixed: .accentColor
+        case .conflicted: Pico.deletion
+        case .unstaged, .none: .secondary
+        }
+    }
+
+    private var stageHelp: String {
+        switch folder.stageState {
+        case .staged: String(localized: "Unstage all changes in this folder")
+        case .conflicted: String(localized: "Resolve conflict")
+        case .mixed, .unstaged, .none: String(localized: "Stage all changes in this folder")
+        }
+    }
+
+    private var stageAccessibilityLabel: String {
+        switch folder.stageState {
+        case .staged: String(localized: "Unstage \(folder.path)")
+        case .conflicted: String(localized: "Resolve conflict in \(folder.path)")
+        case .mixed, .unstaged, .none: String(localized: "Stage \(folder.path)")
+        }
+    }
+
+    private var stageAccessibilityValue: String {
+        switch folder.stageState {
+        case .staged: String(localized: "Staged")
+        case .mixed: String(localized: "Partially staged")
+        case .conflicted: localizedFileStatus("Conflict")
+        case .unstaged, .none: String(localized: "Unstaged")
+        }
+    }
+
+    private func toggleExpansion() {
+        let recursive = NSEvent.modifierFlags.contains(.option)
+        store.toggleWorkingFolderExpansion(folder.path, recursive: recursive)
+    }
+
+    var body: some View {
+        HStack(spacing: 0) {
+            if depth > 0 {
+                Color.clear.frame(width: WorkingTreeLayout.folderLeadingInset(depth: depth), height: 1)
+            }
+            Button(action: toggleExpansion) {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 9, weight: .semibold))
+                    .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                    .foregroundStyle(.secondary)
+                    .frame(width: WorkingTreeLayout.chevronWidth, height: 24)
+                    .padding(.trailing, WorkingTreeLayout.chevronSpacing)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(folder.name)
+            .accessibilityValue(isExpanded ? String(localized: "Expanded") : String(localized: "Collapsed"))
+
+            if showsCheckboxColumn {
+                if folder.hasChanges {
+                    Button { store.toggleWorkingFolder(folder.path) } label: {
+                        Image(systemName: stageSymbol)
+                            .foregroundStyle(stageColor)
+                            .frame(width: 14, height: 24)
+                            .padding(.trailing, 8)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(store.isBusy)
+                    .help(stageHelp)
+                    .accessibilityLabel(stageAccessibilityLabel)
+                    .accessibilityValue(stageAccessibilityValue)
+                } else {
+                    Color.clear.frame(width: 22, height: 24)
+                }
+            }
+
+            Button(action: toggleExpansion) {
+                HStack(spacing: 8) {
+                    Image(systemName: isExpanded ? "folder.fill" : "folder")
+                        .font(.system(size: 12.5, weight: .regular))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 17, height: 17)
+                    Text(folder.name)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                    Spacer(minLength: 4)
+                    if folder.changedCount > 0 && folder.changedCount < folder.fileCount {
+                        HStack(spacing: 0) {
+                            Text("\(folder.changedCount)").foregroundStyle(.tint)
+                            Text("/\(folder.fileCount)").foregroundStyle(.tertiary)
+                        }
+                        .font(.system(size: 10.5, weight: .medium).monospacedDigit())
+                    } else {
+                        Text("\(folder.fileCount)")
+                            .font(.system(size: 10.5, weight: .medium).monospacedDigit())
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .frame(maxWidth: .infinity, minHeight: 24, maxHeight: 24, alignment: .leading)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
+        .frame(height: 24)
+        .background(alignment: .leading) {
+            WorkingTreeIndentGuides(depth: depth)
+        }
+        .help(folder.path)
+        .itemProvider {
+            guard !store.isBusy, folder.nonConflictedChangedCount > 0 else { return nil }
+            let paths = store.visibleWorkingChanges(inFolder: folder.path).filter { !$0.isConflicted }.map(\.path).sorted()
+            guard !paths.isEmpty else { return nil }
+            return store.dragProvider(.workingFiles(paths))
+        }
+        .contextMenu {
+            if folder.hasChanges {
+                Button("Stage Folder") { store.stageWorkingFolder(folder.path) }
+                    .disabled(store.isBusy || folder.stageableCount == 0)
+                Button("Unstage Folder") { store.unstageWorkingFolder(folder.path) }
+                    .disabled(store.isBusy || folder.unstageableCount == 0)
+                Divider()
+                Button("Discard Folder Changes…") { store.discardWorkingFolder(folder.path) }
+                    .disabled(store.isBusy || folder.nonConflictedChangedCount == 0)
+                Button("Stash Folder Changes…") { store.stashWorkingFolder(folder.path) }
+                    .disabled(store.isBusy || folder.nonConflictedChangedCount == 0 || store.snapshot?.hasHEAD != true)
+                Divider()
+            }
+            Button("Expand All") { store.expandAllWorkingFolders() }.disabled(!store.canExpandAllWorkingFolders)
+            Button("Collapse All") { store.collapseAllWorkingFolders() }.disabled(!store.canCollapseAllWorkingFolders)
+            Divider()
+            Button("Reveal in Finder") {
+                if let url = revealURL { NSWorkspace.shared.activateFileViewerSelecting([url]) }
+            }.disabled(revealURL == nil)
+            Button("Copy Path") {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(folder.path, forType: .string)
+            }
         }
     }
 }
@@ -335,8 +606,9 @@ struct AnimatedVerticalDisclosure<Content: View>: View, Animatable {
 struct FilePathLabel: View {
     let path: String
     var selectedText: Color? = nil
+    var showsParentFolder: Bool = true
     var body: some View {
-        let folder = (path as NSString).deletingLastPathComponent
+        let folder = showsParentFolder ? (path as NSString).deletingLastPathComponent : ""
         HStack(spacing: 5) {
             Text((path as NSString).lastPathComponent).foregroundStyle(selectedText ?? .primary).layoutPriority(1)
             if !folder.isEmpty { Text(folder).foregroundStyle(selectedText.map { AnyShapeStyle($0.opacity(0.75)) } ?? AnyShapeStyle(.secondary)).truncationMode(.head) }

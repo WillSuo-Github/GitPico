@@ -1,5 +1,6 @@
 import GitCore
 import SwiftUI
+import AppKit
 
 private struct MergeParentComparison: Identifiable {
     let id = UUID()
@@ -14,12 +15,28 @@ struct CommitDetailView: View {
     @State private var expandedFiles: Set<String> = []
     @State private var parentComparison: MergeParentComparison?
     @State private var detailEntered = false
+
+    init(store: RepositoryStore, initialTree: Bool = false) {
+        self.store = store
+        _tree = State(initialValue: initialTree)
+    }
     var body: some View {
         Group {
             if let commit = store.selectedCommit {
                 PinnedScrollPane { insets in
-                    if tree, let repository = store.repository { HistoricTreeView(store: store, repository: repository, commit: commit, showHistory: { store.navigate(.fileHistory($0, commit.hash)) }, scrollInsets: insets).id(commit.hash) }
-                    else if let detail = store.commitDetail {
+                    if let detail = store.commitDetail {
+                        if tree, let repository = store.repository {
+                            CommitFilesTreeView(
+                                store: store,
+                                repository: repository,
+                                commit: commit,
+                                detail: detail,
+                                showHistory: { store.navigate(.fileHistory($0, commit.hash)) },
+                                topInset: insets.top,
+                                bottomInset: insets.bottom
+                            )
+                            .id(commit.hash)
+                        } else {
                         ScrollView {
                             LazyVStack(alignment: .leading, spacing: 0) {
                                 CommitSummaryHeader(message: detail.message, author: detail.metadata.author, email: detail.metadata.authorEmail, date: detail.metadata.authorDate, decorations: commit.decorations) {
@@ -58,6 +75,7 @@ struct CommitDetailView: View {
                             }
                         }.pinnedScrollInsets(insets)
                         .staggeredEntranceTrigger($detailEntered, id: commit.hash)
+                        }
                     } else { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity).padding(insets) }
                 } top: {
                     HStack(spacing: 8) {
@@ -77,9 +95,10 @@ struct CommitDetailView: View {
                                 Button("Restore HEAD Here…") { store.recoveryRequest = RecoveryRequest(action: .restore(commit.hash)) }
                             }.fixedSize().controlSize(.small)
                         }
-                        if !tree { DiffLayoutPicker() }
+                        DiffLayoutPicker()
                         Picker("View", selection: $tree) { Text("Changes").tag(false); Text("Files").tag(true) }.pickerStyle(.segmented).labelsHidden().fixedSize()
                     }.padding(.horizontal, 14).frame(height: Pico.headerHeight)
+                    .overlay(alignment: .bottom) { if tree { Divider() } }
                 }
             } else {
                 EmptyPane(title: String(localized: "Select a commit"), subtitle: String(localized: "Pick a commit to read its message and review every changed file."), icon: "clock.arrow.circlepath")
@@ -253,60 +272,503 @@ private struct CommitFileDisclosureStyle: DisclosureGroupStyle {
     }
 }
 
-struct HistoricTreeView: View {
+struct CommitFilesTreeView: View {
     @Bindable var store: RepositoryStore
     let repository: GitRepository
     let commit: Commit
+    let detail: CommitDetail
     var showHistory: ((String) -> Void)? = nil
-    var scrollInsets = EdgeInsets()
-    @State private var files: [String] = []
+    var topInset: CGFloat = 0
+    var bottomInset: CGFloat = 0
+
+    @State private var showAllFiles = false
+    @State private var allPaths: [String]?
+    @State private var isLoadingAllFiles = false
+    @State private var allFilesError: String?
+    @State private var tree = CommitFileTree.empty
+    @State private var collapsedFolders: Set<String> = []
+    @State private var allFilesCollapsedFolders: Set<String> = []
     @State private var selection: Set<String> = []
-    var selected: String? { selection.sorted().first }
-    @State private var text = ""
+    @State private var activePath: String?
+    @State private var preparedCache: [String: PreparedPatch] = [:]
+    @State private var preparedDiff: PreparedPatch?
+    @State private var isLoadingDiff = false
+    @State private var diffError: String?
+    @State private var historicText = ""
+    @State private var isLoadingFile = false
+    @State private var fileError: String?
+
+    private var activeCollapsed: Set<String> { showAllFiles ? allFilesCollapsedFolders : collapsedFolders }
+    private var rows: [CommitTreeRow] { tree.flattenedRows(collapsed: activeCollapsed) }
+    private var activeEntry: CommitFileTreeEntry? { activePath.flatMap { tree.entriesByPath[$0] } }
+    private var canExpandAll: Bool { !activeCollapsed.intersection(tree.folderPaths).isEmpty }
+    private var canCollapseAll: Bool { !tree.folderPaths.subtracting(activeCollapsed).isEmpty }
+
+    private var rebuildKey: String {
+        "\(commit.hash):\(detail.files.count):\(showAllFiles):\(allPaths?.count ?? -1)"
+    }
+
+    private var previewKey: String {
+        let changedFlag = activeEntry?.isChanged == true ? "1" : "0"
+        return "\(commit.hash):\(activePath ?? ""):\(changedFlag)"
+    }
+
     var body: some View {
-        VStack(spacing: 0) {
-            List(selection: $selection) {
-                OutlineGroup(HistoricFileNode.build(files), children: \.children) { node in
-                    Label(node.name, systemImage: node.children == nil ? "doc" : "folder").font(.system(size: 11)).tag(node.path).contextMenu {
-                        if node.children == nil, let showHistory { Button("Show File History…") { showHistory(node.path) } }
-                        HistoricalFileMenu(store: store, revision: commit.hash, paths: selection.contains(node.path) ? selection.sorted() : [node.path])
+        PersistentSplitView(name: "commit-files", width: 280, minimum: 200) {
+            VStack(spacing: 0) {
+                treeHeader
+                List(selection: Binding<Set<String>>(get: { selection }, set: { updateSelection($0) })) {
+                    ForEach(rows) { row in
+                        switch row.kind {
+                        case .folder(let folder, let isExpanded):
+                            CommitFileTreeFolderRow(
+                                store: store,
+                                commit: commit,
+                                folder: folder,
+                                depth: row.depth,
+                                isExpanded: isExpanded,
+                                showAllFiles: showAllFiles,
+                                canExpandAll: canExpandAll,
+                                canCollapseAll: canCollapseAll,
+                                folderPaths: tree.existingFilePaths(inFolder: folder.path),
+                                onToggle: { toggleFolder(folder.path, recursive: $0) },
+                                onExpandAll: expandAll,
+                                onCollapseAll: collapseAll
+                            )
+                            .listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
+                        case .file(let entry):
+                            CommitFileTreeFileRow(
+                                store: store,
+                                commit: commit,
+                                entry: entry,
+                                depth: row.depth,
+                                hasFolders: tree.hasFolders,
+                                isSelected: selection.contains(entry.path),
+                                selectedPaths: (selection.contains(entry.path) ? selection.sorted() : [entry.path]).filter { tree.entriesByPath[$0]?.change?.status != "D" },
+                                showHistory: showHistory
+                            )
+                            .tag(entry.path)
+                            .listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
+                        }
                     }
                 }
-            }.listStyle(.plain)
-                .scrollContentBackground(.hidden)
-                .pinnedScrollInsets(EdgeInsets(top: scrollInsets.top, leading: 0, bottom: 0, trailing: 0))
-                .frame(height: 180 + scrollInsets.top)
-            Divider()
-            GeometryReader { geometry in
-                ScrollView([.horizontal, .vertical]) {
-                    Text(text).font(.system(size: 11, design: .monospaced)).textSelection(.enabled).padding(14)
-                        .frame(minWidth: geometry.size.width, minHeight: max(0, geometry.size.height - scrollInsets.bottom), alignment: .topLeading)
+                .listStyle(.plain)
+                .pinnedScrollInsets(EdgeInsets(top: 0, leading: 0, bottom: bottomInset, trailing: 0))
+                .overlay {
+                    if isLoadingAllFiles && rows.isEmpty {
+                        ProgressView("Loading files…")
+                    } else if let allFilesError, showAllFiles && rows.isEmpty {
+                        InspectionErrorView(message: allFilesError)
+                    } else if rows.isEmpty {
+                        EmptyPane(
+                            title: String(localized: "No changed files"),
+                            subtitle: String(localized: "This commit does not change any files."),
+                            icon: "folder"
+                        )
+                    }
                 }
-                .defaultScrollAnchor(.topLeading)
-                .pinnedScrollInsets(EdgeInsets(top: 0, leading: 0, bottom: scrollInsets.bottom, trailing: 0))
+            }
+        } trailing: {
+            VStack(spacing: 0) {
+                if let entry = activeEntry {
+                    if let change = entry.change {
+                        FileTitleBar(
+                            path: entry.path,
+                            subtitle: "\(String(localized: "Parent")) → \(commit.shortHash)",
+                            status: change.status
+                        ) {
+                            if let stats = entry.stats {
+                                if stats.isBinary {
+                                    Chip(text: String(localized: "Binary"), tint: .secondary)
+                                } else {
+                                    DiffStat(additions: stats.additions, deletions: stats.deletions, showsBar: false)
+                                }
+                            }
+                        }
+                        if entry.stats?.isBinary == true || BinaryComparisonView.isImageCandidate(entry.path) {
+                            BinaryComparisonView(
+                                repository: repository,
+                                path: entry.path,
+                                left: commit.parents.first.map { .revision($0) } ?? .empty,
+                                right: .revision(commit.hash)
+                            )
+                            .id(commit.hash + entry.path)
+                            .environment(\.repositoryStatusBarInset, bottomInset)
+                        } else if let diffError {
+                            InspectionErrorView(message: diffError)
+                        } else {
+                            ChunkDiffView(
+                                prepared: preparedDiff,
+                                isLoading: isLoadingDiff,
+                                leftTitle: String(localized: "Parent"),
+                                rightTitle: commit.shortHash
+                            )
+                            .id(commit.hash + entry.path)
+                            .environment(\.repositoryStatusBarInset, bottomInset)
+                        }
+                    } else {
+                        FileTitleBar(path: entry.path, subtitle: commit.shortHash) { EmptyView() }
+                        if isLoadingFile {
+                            ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+                        } else if let fileError {
+                            InspectionErrorView(message: fileError)
+                        } else {
+                            InspectionTextView(
+                                text: historicText,
+                                scrollInsets: EdgeInsets(top: 0, leading: 0, bottom: bottomInset, trailing: 0)
+                            )
+                        }
+                    }
+                } else {
+                    EmptyPane(
+                        title: detail.files.isEmpty && !showAllFiles ? String(localized: "No changed files") : String(localized: "Select a file"),
+                        subtitle: detail.files.isEmpty && !showAllFiles
+                            ? String(localized: "This commit does not change any files.")
+                            : String(localized: "Pick a file from the tree to review its diff."),
+                        icon: "doc.text.magnifyingglass"
+                    )
+                }
             }
         }
-        .task { do { files = try await repository.fileTree(at: commit.hash) } catch { text = error.localizedDescription } }
-        .task(id: selected) {
-            guard let selected else { text = ""; return }
-            text = ""
-            do { let value = try await repository.historicFile(at: commit.hash, path: selected); guard !Task.isCancelled else { return }; text = value } catch { if !Task.isCancelled { text = error.localizedDescription } }
+        .padding(.top, topInset)
+        .task(id: showAllFiles) {
+            guard showAllFiles, allPaths == nil else { return }
+            isLoadingAllFiles = true
+            allFilesError = nil
+            do {
+                let fetched = try await repository.fileTree(at: commit.hash)
+                guard !Task.isCancelled else { return }
+                allPaths = fetched
+                isLoadingAllFiles = false
+            } catch is CancellationError {
+                isLoadingAllFiles = false
+            } catch {
+                allFilesError = error.localizedDescription
+                isLoadingAllFiles = false
+            }
+        }
+        .task(id: rebuildKey) {
+            let changes = detail.files
+            let stats = detail.statistics
+            let paths = showAllFiles ? allPaths : nil
+            let built = await Task.detached(priority: .userInitiated) {
+                CommitFileTree.build(changes: changes, statistics: stats, allPaths: paths)
+            }.value
+            guard !Task.isCancelled else { return }
+            tree = built
+            if showAllFiles && allFilesCollapsedFolders.isEmpty && !built.unmodifiedFolderPaths.isEmpty {
+                allFilesCollapsedFolders = built.unmodifiedFolderPaths
+            }
+            reconcileSelection()
+        }
+        .task(id: previewKey) {
+            await loadSelectedPreview()
+        }
+    }
+
+    private var treeHeader: some View {
+        HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("\(detail.files.count) files changed")
+                    .font(.system(size: 12, weight: .semibold))
+                    .lineLimit(1)
+                DiffStat(additions: detail.additions, deletions: detail.deletions, showsBar: false)
+            }
+            Spacer(minLength: 4)
+            if isLoadingAllFiles {
+                ProgressView().controlSize(.mini)
+            }
+            Menu {
+                if tree.hasFolders {
+                    Button("Expand All", action: expandAll).disabled(!canExpandAll)
+                    Button("Collapse All", action: collapseAll).disabled(!canCollapseAll)
+                    Divider()
+                }
+                Toggle("Show All Files", isOn: $showAllFiles)
+            } label: {
+                Image(systemName: showAllFiles ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .help("File tree options")
+        }
+        .padding(.horizontal, 12)
+        .frame(height: Pico.headerHeight)
+        .background(.bar)
+        .overlay(alignment: .bottom) { Divider() }
+    }
+
+    private func updateSelection(_ paths: Set<String>) {
+        let valid = paths.intersection(tree.filePaths)
+        let added = valid.subtracting(selection)
+        selection = valid
+        if let firstAdded = rows.compactMap({ row -> String? in
+            if case .file(let entry) = row.kind, added.contains(entry.path) { return entry.path }
+            return nil
+        }).first {
+            activePath = firstAdded
+        } else if let current = activePath, valid.contains(current) {
+            return
+        } else {
+            activePath = rows.compactMap({ row -> String? in
+                if case .file(let entry) = row.kind, valid.contains(entry.path) { return entry.path }
+                return nil
+            }).first ?? valid.sorted().first
+        }
+    }
+
+    private func reconcileSelection() {
+        selection.formIntersection(tree.filePaths)
+        if let current = activePath, tree.entriesByPath[current] != nil {
+            if !selection.contains(current) { selection = [current] }
+            return
+        }
+        if let initial = tree.firstChangedFilePath ?? tree.firstFilePath {
+            activePath = initial
+            selection = [initial]
+            let ancestors = tree.ancestorFolders(of: initial)
+            collapsedFolders.subtract(ancestors)
+            allFilesCollapsedFolders.subtract(ancestors)
+        } else {
+            activePath = nil
+            selection = []
+        }
+    }
+
+    private func toggleFolder(_ path: String, recursive: Bool) {
+        var target = activeCollapsed
+        let descendants = tree.descendantFolders[path] ?? []
+        if target.contains(path) {
+            target.remove(path)
+            if recursive { target.subtract(descendants) }
+        } else {
+            target.insert(path)
+            if recursive { target.formUnion(descendants) }
+        }
+        if showAllFiles { allFilesCollapsedFolders = target }
+        else { collapsedFolders = target }
+    }
+
+    private func expandAll() {
+        if showAllFiles { allFilesCollapsedFolders = [] }
+        else { collapsedFolders = [] }
+    }
+
+    private func collapseAll() {
+        if showAllFiles { allFilesCollapsedFolders = tree.folderPaths }
+        else { collapsedFolders = tree.folderPaths }
+    }
+
+    private func loadSelectedPreview() async {
+        guard let entry = activeEntry else {
+            preparedDiff = nil; diffError = nil; isLoadingDiff = false
+            historicText = ""; fileError = nil; isLoadingFile = false
+            return
+        }
+        if entry.isChanged {
+            historicText = ""; fileError = nil; isLoadingFile = false
+            if entry.stats?.isBinary == true || BinaryComparisonView.isImageCandidate(entry.path) {
+                preparedDiff = nil; diffError = nil; isLoadingDiff = false
+                return
+            }
+            if let cached = preparedCache[entry.path] {
+                preparedDiff = cached; diffError = nil; isLoadingDiff = false
+                return
+            }
+            preparedDiff = nil; diffError = nil; isLoadingDiff = true
+            do {
+                let raw = try await repository.commitDiff(commit, path: entry.path)
+                let path = entry.path
+                let built = await Task.detached(priority: .userInitiated) {
+                    PreparedPatch.make(raw, path: path)
+                }.value
+                guard !Task.isCancelled else { return }
+                preparedCache[entry.path] = built
+                preparedDiff = built
+                isLoadingDiff = false
+            } catch is CancellationError {
+                isLoadingDiff = false
+            } catch {
+                guard !Task.isCancelled else { return }
+                diffError = error.localizedDescription
+                isLoadingDiff = false
+            }
+        } else {
+            preparedDiff = nil; diffError = nil; isLoadingDiff = false
+            historicText = ""; fileError = nil; isLoadingFile = true
+            do {
+                let value = try await repository.historicFile(at: commit.hash, path: entry.path)
+                guard !Task.isCancelled else { return }
+                historicText = value
+                isLoadingFile = false
+            } catch is CancellationError {
+                isLoadingFile = false
+            } catch {
+                guard !Task.isCancelled else { return }
+                fileError = error.localizedDescription
+                isLoadingFile = false
+            }
         }
     }
 }
 
-private struct HistoricFileNode: Identifiable {
-    var id: String { path }
-    let path: String
-    let name: String
-    let children: [HistoricFileNode]?
-    static func build(_ paths: [String], prefix: String = "") -> [HistoricFileNode] {
-        let groups = Dictionary(grouping: paths) { String($0.dropFirst(prefix.count).split(separator: "/").first ?? "") }
-        return groups.keys.sorted().map { name in
-            let path = prefix + name
-            let values = groups[name] ?? []
-            let isFile = values.contains(path)
-            return HistoricFileNode(path: path, name: name, children: isFile ? nil : build(values, prefix: path + "/"))
+private struct CommitFileTreeFolderRow: View {
+    @Bindable var store: RepositoryStore
+    let commit: Commit
+    let folder: CommitFileTreeFolder
+    let depth: Int
+    let isExpanded: Bool
+    let showAllFiles: Bool
+    let canExpandAll: Bool
+    let canCollapseAll: Bool
+    let folderPaths: [String]
+    let onToggle: (Bool) -> Void
+    let onExpandAll: () -> Void
+    let onCollapseAll: () -> Void
+
+    private func toggle() {
+        onToggle(NSEvent.modifierFlags.contains(.option))
+    }
+
+    var body: some View {
+        HStack(spacing: 0) {
+            if depth > 0 {
+                Color.clear.frame(width: WorkingTreeLayout.folderLeadingInset(depth: depth), height: 1)
+            }
+            Button(action: toggle) {
+                HStack(spacing: 0) {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 9, weight: .semibold))
+                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                        .foregroundStyle(.secondary)
+                        .frame(width: WorkingTreeLayout.chevronWidth, height: 24)
+                        .padding(.trailing, WorkingTreeLayout.chevronSpacing)
+                    HStack(spacing: 8) {
+                        Image(systemName: isExpanded ? "folder.fill" : "folder")
+                            .font(.system(size: 12.5, weight: .regular))
+                            .foregroundStyle(.secondary)
+                            .frame(width: 17, height: 17)
+                        Text(folder.name)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                        Spacer(minLength: 4)
+                        if showAllFiles && folder.changedCount > 0 && folder.changedCount < folder.fileCount {
+                            HStack(spacing: 0) {
+                                Text("\(folder.changedCount)").foregroundStyle(.tint)
+                                Text("/\(folder.fileCount)").foregroundStyle(.tertiary)
+                            }
+                            .font(.system(size: 10.5, weight: .medium).monospacedDigit())
+                        } else {
+                            Text("\(folder.fileCount)")
+                                .font(.system(size: 10.5, weight: .medium).monospacedDigit())
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, minHeight: 24, maxHeight: 24, alignment: .leading)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(folder.name)
+            .accessibilityValue(isExpanded ? String(localized: "Expanded") : String(localized: "Collapsed"))
+        }
+        .frame(height: 24)
+        .background(alignment: .leading) {
+            WorkingTreeIndentGuides(depth: depth)
+        }
+        .help(folder.path)
+        .contextMenu {
+            Button("Expand All", action: onExpandAll).disabled(!canExpandAll)
+            Button("Collapse All", action: onCollapseAll).disabled(!canCollapseAll)
+            if !folderPaths.isEmpty {
+                Divider()
+                HistoricalFileMenu(store: store, revision: commit.hash, paths: folderPaths)
+            }
+            Divider()
+            Button("Copy Path") {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(folder.path, forType: .string)
+            }
+        }
+    }
+}
+
+private struct CommitFileTreeFileRow: View {
+    @Environment(\.controlActiveState) private var activeState
+    @Bindable var store: RepositoryStore
+    let commit: Commit
+    let entry: CommitFileTreeEntry
+    let depth: Int
+    let hasFolders: Bool
+    let isSelected: Bool
+    let selectedPaths: [String]
+    var showHistory: ((String) -> Void)? = nil
+
+    private var selectedText: Color {
+        Color(nsColor: activeState == .key ? .alternateSelectedControlTextColor : .unemphasizedSelectedTextColor)
+    }
+
+    var body: some View {
+        HStack(spacing: 8) {
+            if let change = entry.change {
+                StatusBadge(status: change.status, selected: isSelected)
+            } else {
+                Image(systemName: "doc")
+                    .font(.system(size: 12))
+                    .foregroundStyle(isSelected ? selectedText.opacity(0.85) : .secondary)
+                    .frame(width: 17, height: 17)
+            }
+            FilePathLabel(
+                path: entry.path,
+                selectedText: isSelected ? selectedText : nil,
+                showsParentFolder: false
+            )
+            Spacer(minLength: 4)
+            if let stats = entry.stats {
+                if stats.isBinary {
+                    Text("Binary")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(isSelected ? selectedText.opacity(0.8) : .secondary)
+                } else {
+                    DiffStat(
+                        additions: stats.additions,
+                        deletions: stats.deletions,
+                        showsBar: false,
+                        selectedText: isSelected ? selectedText.opacity(0.9) : nil
+                    )
+                }
+            }
+        }
+        .frame(height: 24)
+        .padding(.leading, WorkingTreeLayout.fileLeadingInset(depth: depth, hasFolders: hasFolders))
+        .background(alignment: .leading) {
+            WorkingTreeIndentGuides(depth: depth, isSelected: isSelected)
+        }
+        .contentShape(Rectangle())
+        .help(entry.path)
+        .contextMenu {
+            if let change = entry.change {
+                Button("Compare in External Tool…") {
+                    store.externalTool(.comparison(commit.parents.first, commit.hash, change.path, nil))
+                }
+            }
+            if let showHistory {
+                Button("Show File History…") { showHistory(entry.path) }
+            }
+            if let change = entry.change, change.status == "D", let parent = commit.parents.first {
+                Text("Version before deletion · \(String(parent.prefix(8)))")
+                HistoricalFileMenu(store: store, revision: parent, paths: [entry.path])
+            } else if !selectedPaths.isEmpty {
+                HistoricalFileMenu(store: store, revision: commit.hash, paths: selectedPaths)
+            }
+            Divider()
+            Button("Copy Path") {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(entry.path, forType: .string)
+            }
         }
     }
 }

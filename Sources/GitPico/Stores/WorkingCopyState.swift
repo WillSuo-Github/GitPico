@@ -24,6 +24,7 @@ struct WorkingFilesInput: Equatable, Sendable {
 struct WorkingFilesPresentation: Sendable {
     var files: [WorkingFileEntry] = []
     var paths: Set<String> = []
+    var tree: WorkingFileTree = .empty
     static let empty = Self()
     nonisolated static func visible(_ input: WorkingFilesInput) -> [WorkingFileEntry] {
         let changes = Dictionary(input.changes.map { ($0.path, $0) }, uniquingKeysWith: { first, _ in first })
@@ -41,7 +42,8 @@ struct WorkingFilesPresentation: Sendable {
             if input.orderByStatus, $0.status != $1.status { return $0.status.localizedStandardCompare($1.status) == .orderedAscending }
             return $0.path.localizedStandardCompare($1.path) == .orderedAscending
         }
-        return Self(files: files, paths: Set(files.map(\.path)))
+        let tree = WorkingFileTree.build(files: files, orderByStatus: input.orderByStatus)
+        return Self(files: files, paths: Set(files.map(\.path)), tree: tree)
     }
 }
 
@@ -100,6 +102,72 @@ extension RepositoryStore {
     var visibleUnstageTargets: [FileChange] { visibleWorkingChanges.filter { $0.isStaged && !$0.isConflicted } }
     func stageVisibleFiles() { stage(visibleStageTargets) }
     func unstageVisibleFiles() { unstage(visibleUnstageTargets) }
+    var usesWorkingTreeFilterExpansion: Bool { (destination == .workingCopy && !search.isEmpty) || workingOnlyConflicts }
+    var activeCollapsedWorkingFolders: Set<String> { usesWorkingTreeFilterExpansion ? searchCollapsedWorkingFolders : collapsedWorkingFolders }
+    var visibleWorkingTreeRows: [WorkingTreeRow] { workingList.tree.flattenedRows(collapsed: activeCollapsedWorkingFolders) }
+    var hasWorkingTreeFolders: Bool { workingList.tree.hasFolders }
+    var canExpandAllWorkingFolders: Bool { !activeCollapsedWorkingFolders.intersection(workingList.tree.folderPaths).isEmpty }
+    var canCollapseAllWorkingFolders: Bool { !workingList.tree.folderPaths.subtracting(activeCollapsedWorkingFolders).isEmpty }
+    func toggleWorkingFolderExpansion(_ folderPath: String, recursive: Bool = false) {
+        var target = activeCollapsedWorkingFolders
+        let descendants = workingList.tree.descendantFolders[folderPath] ?? []
+        if target.contains(folderPath) {
+            target.remove(folderPath)
+            if recursive { target.subtract(descendants) }
+        } else {
+            target.insert(folderPath)
+            if recursive { target.formUnion(descendants) }
+        }
+        if usesWorkingTreeFilterExpansion { searchCollapsedWorkingFolders = target }
+        else { collapsedWorkingFolders = target }
+    }
+    func expandAllWorkingFolders() {
+        if usesWorkingTreeFilterExpansion { searchCollapsedWorkingFolders = [] }
+        else { collapsedWorkingFolders = [] }
+    }
+    func collapseAllWorkingFolders() {
+        let folders = workingList.tree.folderPaths
+        if usesWorkingTreeFilterExpansion { searchCollapsedWorkingFolders = folders }
+        else { collapsedWorkingFolders = folders }
+    }
+    func expandWorkingFolderAncestors(of filePath: String) {
+        let ancestors = workingList.tree.ancestorFolders(of: filePath)
+        guard !ancestors.isEmpty else { return }
+        collapsedWorkingFolders.subtract(ancestors)
+        searchCollapsedWorkingFolders.subtract(ancestors)
+    }
+    func visibleWorkingChanges(inFolder folderPath: String) -> [FileChange] {
+        let prefix = folderPath + "/"
+        return visibleWorkingChanges.filter { $0.path.hasPrefix(prefix) }
+    }
+    func stageWorkingFolder(_ folderPath: String) {
+        stage(visibleWorkingChanges(inFolder: folderPath).filter { !$0.isConflicted && $0.isUnstaged })
+    }
+    func unstageWorkingFolder(_ folderPath: String) {
+        unstage(visibleWorkingChanges(inFolder: folderPath).filter { !$0.isConflicted && $0.isStaged })
+    }
+    func toggleWorkingFolder(_ folderPath: String) {
+        let folderChanges = visibleWorkingChanges(inFolder: folderPath)
+        let stageable = folderChanges.filter { !$0.isConflicted && $0.isUnstaged }
+        let unstageable = folderChanges.filter { !$0.isConflicted && $0.isStaged }
+        if !stageable.isEmpty {
+            stage(stageable)
+        } else if !unstageable.isEmpty {
+            unstage(unstageable)
+        } else if let conflict = folderChanges.first(where: \.isConflicted) {
+            expandWorkingFolderAncestors(of: conflict.path)
+            setWorkingSelection([conflict.path])
+            selectChange(conflict, staged: false)
+        }
+    }
+    func discardWorkingFolder(_ folderPath: String) {
+        let paths = visibleWorkingChanges(inFolder: folderPath).filter { !$0.isConflicted }.map(\.path).sorted()
+        if !paths.isEmpty { localChange(.discard(paths)) }
+    }
+    func stashWorkingFolder(_ folderPath: String) {
+        let paths = visibleWorkingChanges(inFolder: folderPath).filter { !$0.isConflicted }.map(\.path).sorted()
+        if !paths.isEmpty { stashAction(.save(paths, false)) }
+    }
     var commitUnavailableReason: String? {
         guard snapshot != nil, !isChoosingRepository else { return String(localized: "Open a repository to commit.") }
         if isBusy || isOpeningRepository { return String(localized: "Wait for the current operation.") }

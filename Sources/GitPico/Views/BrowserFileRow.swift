@@ -5,12 +5,13 @@ import SwiftUI
 struct BrowserFileRow: View {
     @Bindable var store: RepositoryStore
     let file: WorkingFileEntry
+    var showsParentFolder: Bool = true
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: file.isIgnored ? "eye.slash" : "doc").foregroundStyle(.tertiary).frame(width: 14)
             Text(file.isIgnored ? "I" : file.assumeUnchanged ? "A" : file.skipWorktree ? "S" : "·").font(.system(size: 9.5, weight: .heavy, design: .rounded)).foregroundStyle(.secondary).frame(width: 17, height: 17)
                 .background(Color.secondary.opacity(0.1), in: RoundedRectangle(cornerRadius: 4.5, style: .continuous))
-            FilePathLabel(path: file.path).opacity(file.isIgnored ? 0.6 : 1)
+            FilePathLabel(path: file.path, showsParentFolder: showsParentFolder).opacity(file.isIgnored ? 0.6 : 1)
             Spacer(minLength: 0)
         }.frame(height: 24).contentShape(Rectangle()).help(file.status)
         .contextMenu {

@@ -126,10 +126,11 @@ struct DiffStat: View {
     let additions: Int
     let deletions: Int
     var showsBar = true
+    var selectedText: Color? = nil
     var body: some View {
         HStack(spacing: 6) {
-            if additions > 0 || deletions == 0 { Text("+\(additions)").foregroundStyle(Pico.addition) }
-            if deletions > 0 { Text("−\(deletions)").foregroundStyle(Pico.deletion) }
+            if additions > 0 || deletions == 0 { Text("+\(additions)").foregroundStyle(selectedText ?? Pico.addition) }
+            if deletions > 0 { Text("−\(deletions)").foregroundStyle(selectedText ?? Pico.deletion) }
             if showsBar {
                 let total = max(additions + deletions, 1)
                 let green = Int((Double(additions) / Double(total) * 5).rounded())
